@@ -2,7 +2,7 @@
  * 
  */
 /**
- * @author bob
+ * @author Warren Rexroad
  *
  */
-package edu.ucsc.barrel.level_generator;
+package edu.ucsc.barrel.cdf_gen;
