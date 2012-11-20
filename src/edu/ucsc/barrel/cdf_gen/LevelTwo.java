@@ -423,7 +423,6 @@ public class LevelTwo implements CDFConstants{
          realSpectraEdges = SpectrumExtract.getBinEdges(2.44 * 1.01); //FIX THIS
    
          //Slow Spectrum
-         System.out.println((mod32 * 12));
          System.arraycopy(
             data.sspc_raw[frm_i], 0, 
             sspc_raw, (mod32 * 8), 

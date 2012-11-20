@@ -349,9 +349,6 @@ public class LevelOne{
                fspc_cdf, "Epoch", fspc_rec, 
                Long.valueOf(data.epoch[frm_i] + (50000000 * set_i)), 0L);
             CDF_Gen.putData(
-               fspc_cdf, "ms_of_week", fspc_rec, 
-               Long.valueOf(ms_of_week + (50 * set_i)), 0L);
-            CDF_Gen.putData(
                fspc_cdf, "LC1", fspc_rec, 
                data.lc1_raw[frm_i][set_i], 0L);
             CDF_Gen.putData(
