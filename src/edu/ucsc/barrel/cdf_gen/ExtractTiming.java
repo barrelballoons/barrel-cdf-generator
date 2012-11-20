@@ -12,13 +12,13 @@ import java.io.IOException;
 import java.util.Arrays;
 
 /*
-ExactTiming.java v12.10.15
+ExactTiming.java v12.10.20
 
 Description:
    Uses a block of gps time info to create a more exact time variable.
    Ported from MPM's C code.
 
-v12.11.15
+v12.11.20
    -Changed references to Level_Generator to CDF_Gen
 v12.10.15
    -First Version

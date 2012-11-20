@@ -3,12 +3,12 @@ package edu.ucsc.barrel.cdf_gen;
 import java.math.BigInteger;
 
 /*
-DataHolder.java 12.11.15
+DataHolder.java 12.11.20
 
 Description:
    Stores the data frames that are being processed
 
-v12.11.15
+v12.11.20
    -Changed references to Level_Generator to CDF_Gen
    -Changed many of the objects to primitave types
    -Changed raw_* to *_raw

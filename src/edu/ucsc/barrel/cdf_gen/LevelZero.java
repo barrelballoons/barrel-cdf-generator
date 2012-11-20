@@ -1,13 +1,13 @@
 package edu.ucsc.barrel.cdf_gen;
 
 /*
-LevelZero.java v12.11.15
+LevelZero.java v12.11.20
 
 Description:
    Copies each data file, byte by byte, to a day-long data file.
    Rejects short frames, long frames, and frames with bad checksums.
 
-v12.11.15
+v12.11.20
    -Changed references to Level_Generator to CDF_Gen
    -changed text of output filename to lowercase
 

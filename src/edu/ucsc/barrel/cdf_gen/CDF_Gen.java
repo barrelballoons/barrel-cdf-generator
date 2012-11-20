@@ -1,14 +1,14 @@
 package edu.ucsc.barrel.cdf_gen;
 
 /*
-CDF_Gen.java v12.11.15
+CDF_Gen.java v12.11.20
 
 Description:
    Entry point for .jar file.
    Reads ini file.
    Creates all objects needed for operation. 
 
-v12.11.15
+v12.11.20
    -Changed name to CDF_Gen.java
    
 v12.11.05

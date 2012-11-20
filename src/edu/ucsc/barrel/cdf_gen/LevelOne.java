@@ -9,12 +9,12 @@ import java.io.IOException;
 import java.util.Calendar;
 
 /*
-LevelOne.java v12.11.05
+LevelOne.java v12.11.20
 
 Description:
    Creates level one CDF files
 
-v12.11.15
+v12.11.20
    -Changed references to Level_Generator to CDF_Gen
    -Moved the declaration of frameGrp and mod variables outside the main loop.   
    -Moved time calculation code to top of loop

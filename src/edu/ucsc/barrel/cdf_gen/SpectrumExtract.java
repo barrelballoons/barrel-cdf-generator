@@ -1,5 +1,17 @@
 package edu.ucsc.barrel.cdf_gen;
 
+/*
+SpectrumExtract.java v12.11.20
+
+Description:
+   Creates energy bin edges and rebins spectra.
+
+v12.11.20
+   -Added this documentation
+   
+*/
+
+
 public class SpectrumExtract {
    public static double[][] getBinEdges(double scale){
       //edge array index reference

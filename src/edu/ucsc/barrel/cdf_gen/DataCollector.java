@@ -1,12 +1,13 @@
 package edu.ucsc.barrel.cdf_gen;
 
 /*
-dataCollector.java v12.10.11
+dataCollector.java v12.10.20
 
 Description:
    Downloads files from each server listed in ini file.
    Saves all files to a directory tree as ./DATAROOT/payloadX/DATE
-v12.11.15
+
+v12.11.20
    -Changed references to Level_Generator to CDF_Gen
    
 v12.10.11

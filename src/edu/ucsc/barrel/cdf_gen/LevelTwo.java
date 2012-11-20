@@ -11,12 +11,12 @@ import java.io.FileReader;
 import java.io.IOException;
 
 /*
-LevelTwo.java v12.11.15
+LevelTwo.java v12.11.20
 
 Description:
    Creates Level Two CDF files
 
-v12.11.15
+v12.11.20
    -Changed references to Level_Generator to CDF_Gen
    -Moved file reading process for calibration data 
       out of the main loop so it only happens once 
