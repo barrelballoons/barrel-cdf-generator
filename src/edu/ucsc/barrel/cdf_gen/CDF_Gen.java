@@ -8,6 +8,9 @@ Description:
    Reads ini file.
    Creates all objects needed for operation. 
 
+v12.11.21
+   -Only produces the requested data levels as indicated by command line
+
 v12.11.20
    -Changed name to CDF_Gen.java
    
@@ -105,7 +108,7 @@ public class CDF_Gen implements CDFConstants{
    
    public static void main(String[] args){
       
-      //ensure there is an ini file set
+      //ensure there is some user input
       if(args.length == 0){
          System.out.println(
             "Usage: java -jar cdf_gen.jar ini=<ini file> [date=<date>]"
@@ -148,7 +151,7 @@ public class CDF_Gen implements CDFConstants{
                tlm_Dir, 
                L0_Dir,
                settings.get("currentPayload"), 
-               Integer.parseInt(settings.get("date"))
+               Integer.parseInt(getSetting("date"))
             );
             L0.processRawFiles();
             L0.finish();
@@ -156,18 +159,21 @@ public class CDF_Gen implements CDFConstants{
                "Completed Level 0 for payload " + getSetting("currentPayload")
             );
             
-            //create Level One 
-            LevelOne L1 = new LevelOne(
-               settings.get("date"), 
-               settings.get("currentPayload")
-            );
+            if(getSetting("L").indexOf("1") > -1){
+               //create Level One 
+               LevelOne L1 = new LevelOne(
+                  getSetting("date"), 
+                  getSetting("currentPayload")
+               );
+			}
             
-            //create Level Two
-            LevelTwo L2 = new LevelTwo(
-               settings.get("date"), 
-               settings.get("currentPayload")
-            );
-               
+            if(getSetting("L").indexOf("2") > -1){
+               //create Level Two
+               LevelTwo L2 = new LevelTwo(
+                  getSetting("date"), 
+                  getSetting("currentPayload")
+               );
+            }
          }catch(IOException ex){
             System.out.println(
                ex.getMessage()
@@ -236,7 +242,8 @@ public class CDF_Gen implements CDFConstants{
    }
    
    public static String getSetting(String key){
-      return settings.get(key);
+      if(settings.get(key) != null) return settings.get(key);
+      else return "";
    }
    
    public static void copyFile(File sourceFile, File destFile){

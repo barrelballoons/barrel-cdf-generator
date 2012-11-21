@@ -1,12 +1,16 @@
 package edu.ucsc.barrel.cdf_gen;
 
 /*
-dataCollector.java v12.10.20
+dataCollector.java v12.10.21
 
 Description:
    Downloads files from each server listed in ini file.
-   Saves all files to a directory tree as ./DATAROOT/payloadX/DATE
+   Saves all files to a directory tree as ./DATAROOT/payloadX/out/tlm/DATE
 
+
+v12.11.21
+   -Downloads files from the soc-nas now
+   
 v12.11.20
    -Changed references to Level_Generator to CDF_Gen
    
@@ -121,8 +125,8 @@ public class DataCollector{
             String fileName;
             while((fileName = manifest.readLine()) != null){
                urls.add(
-                  server_i + "/moc-nas/barrel/payload" + 
-                  currentPayload + "/" + currentDate + "/dat/" + fileName
+                  server_i + "/soc-nas/payload" + currentPayload 
+                  + "/raw/" + currentDate + "/" + fileName
                );
             }
             manifest.close();

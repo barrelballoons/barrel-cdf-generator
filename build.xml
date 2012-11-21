@@ -27,6 +27,12 @@
             </manifest>
         </jar>
     </target>
+    
+    <target name="copy">
+        <copy todir="build/jar">
+            <fileset dir="runtime_files"/>
+        </copy>
+    </target>
 
-    <target name="clean-build" depends="clean,jar"/>
+    <target name="clean-build" depends="clean,jar,copy"/>
 </project>
