@@ -1,7 +1,7 @@
 package edu.ucsc.barrel.cdf_gen;
 
 /*
-CDF_Gen.java v12.11.20
+CDF_Gen.java v12.11.21
 
 Description:
    Entry point for .jar file.
@@ -10,6 +10,8 @@ Description:
 
 v12.11.21
    -Only produces the requested data levels as indicated by command line
+   -Changed names of multiple variables all named "data" but in different scopes
+   -Calculates and prints throughput after creating Level 0 files.
 
 v12.11.20
    -Changed name to CDF_Gen.java
@@ -159,6 +161,18 @@ public class CDF_Gen implements CDFConstants{
                "Completed Level 0 for payload " + getSetting("currentPayload")
             );
             
+            //calculate throughput value
+            if(data.getSize() > 0){
+			   System.out.println(
+                  "Payload " + getSetting("currentPayload") + 
+                  " Throughput: " + (100 * data.getSize() - 1) /
+			      (data.frameNum[data.getSize() - 1] - 
+			      (data.frameNum[0]))
+			      + " %"
+			   );
+		   }
+            
+            
             if(getSetting("L").indexOf("1") > -1){
                //create Level One 
                LevelOne L1 = new LevelOne(
@@ -184,12 +198,12 @@ public class CDF_Gen implements CDFConstants{
    
    public static byte[] hexToByte(String s) {
       int len = s.length();
-      byte[] data = new byte[len / 2];
+      byte[] bytes = new byte[len / 2];
       for (int i = 0; i < len; i += 2) {
-          data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+          bytes[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
                                + Character.digit(s.charAt(i+1), 16));
       }
-      return data;
+      return bytes;
   }
    
    private static void loadConfig(String[] args){
@@ -302,7 +316,7 @@ public class CDF_Gen implements CDFConstants{
       return cdf;
    }
    public static void putData(
-      CDF cdf, String targetVar, long record, Object data, long index
+      CDF cdf, String targetVar, long record, Object value, long index
    ){
       //make sure we have a valid record number
       if(record == -1L){return;}
@@ -311,7 +325,7 @@ public class CDF_Gen implements CDFConstants{
       try{
          Variable var = cdf.getVariable(targetVar);
          
-         var.putSingleData(record, new long[] {index}, data);
+         var.putSingleData(record, new long[] {index}, value);
          
          long status = cdf.getStatus();
          if (status != CDF_OK){
@@ -326,7 +340,7 @@ public class CDF_Gen implements CDFConstants{
       }catch(CDFException ex){
          System.out.println(
             "Error saving CDF data!\n" +
-            "Cant save \"" + targetVar + " = " + data.toString() + 
+            "Cant save \"" + targetVar + " = " + value.toString() + 
             "\" in record \"" + record + " of " + cdf.getName() + "\": " + 
             ex.getMessage() +
             "\n"
