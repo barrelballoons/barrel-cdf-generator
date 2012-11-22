@@ -9,6 +9,9 @@ Description:
    Creates all objects needed for operation. 
 
 v12.11.21
+   -Output directoy is set in ini file.
+   
+v12.11.21
    -Only produces the requested data levels as indicated by command line
    -Changed names of multiple variables all named "data" but in different scopes
    -Calculates and prints throughput after creating Level 0 files.
@@ -97,10 +100,10 @@ public class CDF_Gen implements CDFConstants{
    
    //Directory settings
    private static String output_Dir = "out";
-   public static String tlm_Dir = output_Dir + "/tlm";
-   public static String L0_Dir = output_Dir + "/l0";
-   public static String L1_Dir = output_Dir + "/l1";
-   public static String L2_Dir = output_Dir + "/l2";
+   public static String tlm_Dir;
+   public static String L0_Dir;
+   public static String L1_Dir;
+   public static String L2_Dir;
    
    //List of types of CDF files
    public static String[] fileTypes = 
@@ -120,6 +123,14 @@ public class CDF_Gen implements CDFConstants{
       
       //read the ini file and command line arguments
       loadConfig(args);
+      
+      //set output paths
+      if(getSetting("outDir") != ""){output_Dir = getSetting("outDir");}
+      tlm_Dir = output_Dir + "/tlm";
+      L0_Dir = output_Dir + "/l0";
+      L1_Dir = output_Dir + "/l1";
+      L2_Dir = output_Dir + "/l2";
+   
       
       //for each payload, create an object to download the files,
       // read the list of data files on each server, then download the files
