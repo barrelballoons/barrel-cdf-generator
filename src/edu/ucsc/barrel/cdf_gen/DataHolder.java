@@ -3,11 +3,13 @@ package edu.ucsc.barrel.cdf_gen;
 import java.math.BigInteger;
 
 /*
-DataHolder.java 12.11.20
+DataHolder.java 12.11.22
 
 Description:
    Stores the data frames that are being processed
 
+v12.11.22
+   -Saves ms_of_week variable when reading it when processing a gps time frame
 v12.11.20
    -Changed references to Level_Generator to CDF_Gen
    -Changed many of the objects to primitave types
@@ -128,6 +130,7 @@ public class DataHolder{
             break;
          case 1: // time
             gps[frame_i] = gps_raw[frame_i] + 0.0;
+            ms_of_week[frame_i] = gps_raw[frame_i];
             break;
          default: // coord
             if(gps_raw[frame_i] > 2147483648L){

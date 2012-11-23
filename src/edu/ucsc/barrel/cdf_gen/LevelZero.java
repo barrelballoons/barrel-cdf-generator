@@ -67,20 +67,20 @@ import java.util.Arrays;
 public class LevelZero{
    
 	//declare members
-	private String syncWord;
-	private int frameLength;
-	private String inputPath;
+   private String syncWord;
+   private int frameLength;
+   private String inputPath;
    private String outputPath;
    private String outName;
-	private String[] fileList;
-	private String currentPayload;
-	private int currentDate;
-	
-	private OutputStream outFile;
-	
-	public LevelZero(
+   private String[] fileList;
+   private String currentPayload;
+   private int currentDate;
+   
+   private OutputStream outFile;
+   
+   public LevelZero(
       DataHolder data,
-	   final int length, 
+      final int length, 
       final String sync, 
       final String inputDir, 
       final String outputDir,
@@ -157,7 +157,7 @@ public class LevelZero{
                }
             }
             
-            //Process the hex frame
+            //Process the hex frames
             splitFrames(hexBuffer.toString(), file_i);
             
             if (readFile != null) {

@@ -12,14 +12,18 @@ import java.io.IOException;
 import java.util.Arrays;
 
 /*
-ExactTiming.java v12.10.20
+ExactTiming.java v12.10.22
 
 Description:
    Uses a block of gps time info to create a more exact time variable.
    Ported from MPM's C code.
 
+v12.11.22
+   -Added an extra iterating variable to correctTime() so timeRecs indexed correctly
+   
 v12.11.20
    -Changed references to Level_Generator to CDF_Gen
+   
 v12.10.15
    -First Version
 
@@ -48,11 +52,6 @@ public class ExtractTiming {
    private static final short MINWEEK = 1200;
    private static final short MAXWEEK = 1880;
 
-   
-   
-   
-   //Define "struct" type objects
-   
    //model parameters for a linear fit
    //Example: ms = rate * (fc + offset);
    public class Model{
@@ -70,6 +69,7 @@ public class ExtractTiming {
       public double getRate(){return rate;}
       public double getOffset(){return offset;}
    }
+   
    private class TimePair{
       private double ms;// frame time; ms after GPS 00:00:00 1 Jan 2010
       private long fc;//frame counter
@@ -80,14 +80,15 @@ public class ExtractTiming {
       public double getTime(){return ms;}
       public long getFrame(){return fc;}
    }
+   
    private class BarrelTime{
-      private double ms;//frame time; ms after GPS 00:00:00 1 Jan 2010
-      private long fc;//frame counter
-      private double ms_of_week;// ms since 00:00 on Sunday
-      private long week;//weeks since 6-Jan-1980
-      private long pps;//ms into frame when GPS pps comes
+      private double ms = -1.0;//frame time; ms after GPS 00:00:00 1 Jan 2010
+      private long fc = -1;//frame counter
+      private double ms_of_week = -1.0;// ms since 00:00 on Sunday
+      private long week = -1;//weeks since 6-Jan-1980
+      private long pps = -1;//ms into frame when GPS pps comes
       private short quality = 0;//quality of recovered time
-      private long flag;//unused for now
+      private long flag = -1;//unused for now
      
       public void setMS(double t){ms = t;}
       public void setFrame(long f){fc = f;}
@@ -106,28 +107,28 @@ public class ExtractTiming {
       public long getFlag(){return flag;}
    }
    
-   
    //set initial time model
    private Model time_model = new Model(1.0, 0.0);
    //set an array of time pairs
    private TimePair[] time_pairs = new TimePair[MAX_RECS];
    
-   public void fillTime(BarrelTime[] recs){
+   public void fillTime(BarrelTime[] recs, int last_rec){
       double temp;
       Model q;
       int pair_cnt, good_cnt, goodfit, 
          remaining_recs, rec_end_i, rec_start_i;
 
-      if (!check(recs)) return;
+      if (!check(recs, last_rec)) return;
 
       rec_start_i = 0;
-      remaining_recs = recs.length;
+      remaining_recs = last_rec;
       while (remaining_recs > 0) {
          //find the end of the array for this pass 
+         System.out.println(remaining_recs + " remaining...");
          rec_end_i = Math.min(MAX_RECS, remaining_recs); 
          
          pair_cnt = makePairs(recs, rec_start_i, rec_end_i);
-      
+      System.out.println(pair_cnt + " pairs...");
          if (pair_cnt < 2) {
             if (evaluateModel(time_model, pair_cnt)){
                updateData(recs, rec_start_i, rec_end_i);
@@ -139,7 +140,7 @@ public class ExtractTiming {
             }
          }else{
             good_cnt = selectPairs(pair_cnt);
-
+System.out.println("good_cnt = " + good_cnt);
             if (good_cnt > 2) {
                //Improve condition
                q = genModel(good_cnt);
@@ -168,11 +169,11 @@ public class ExtractTiming {
       cnt = end - start;
       if (cnt <= 0 || cnt > MAX_RECS){return 0;}
 
-      for(int rec_i = start; rec_i <= end; rec_i++) {
-         
+      for(int rec_i = start; rec_i < end; rec_i++) {
          if(recs[rec_i].getMS_of_week() != MSFILL 
             && recs[rec_i].getWeek() != WKFILL
          ) {
+			 System.out.println(rec_i);
             if (recs[rec_i].getPPS() < 241) {
                time_pairs[goodcnt].setTime( 
                   1000 * (SPERWEEK * recs[rec_i].getWeek() - OFFSET) +
@@ -191,42 +192,38 @@ public class ExtractTiming {
       return goodcnt;
    }
    
-   public boolean check(BarrelTime[] recs){
+   public boolean check(BarrelTime[] recs, int last){
       boolean status = true; //false means the list of times was rejected
       
-      if (recs.length < 1){
+      if (last < 1){
          //reject the list of times if it is empty 
          return false;
       }
 
-      for(BarrelTime rec_i : recs) {
-
-         if (rec_i.getFrame() < 0) {
-            rec_i.setQuality(BADFC);
+      for(int rec_i = 0; rec_i < last; rec_i++) {
+         if (recs[rec_i].getFrame() < 0) {
+            recs[rec_i].setQuality(BADFC);
             status = false;
          }
-         
-         if (rec_i.getWeek() != WKFILL && 
-            (rec_i.getWeek() < MINWEEK || rec_i.getWeek() > MAXWEEK)
+         if (recs[rec_i].getWeek() != WKFILL && 
+            (recs[rec_i].getWeek() < MINWEEK || recs[rec_i].getWeek() > MAXWEEK)
          ) {
-            rec_i.setQuality(BADWK);
-            rec_i.setWeek(WKFILL);
+            recs[rec_i].setQuality(BADWK);
+            recs[rec_i].setWeek(WKFILL);
          }
-      
          if (
-            rec_i.getMS_of_week() != MSFILL &&
+            recs[rec_i].getMS_of_week() != MSFILL &&
             (
-               rec_i.getMS_of_week() < 0 || 
-               rec_i.getMS_of_week() > (SPERWEEK * 1000)
+               recs[rec_i].getMS_of_week() < 0 || 
+               recs[rec_i].getMS_of_week() > (SPERWEEK * 1000)
             )
          ) {
-            rec_i.setQuality(BADMS);
-            rec_i.setMS_of_week(MSFILL);
+            recs[rec_i].setQuality(BADMS);
+            recs[rec_i].setMS_of_week(MSFILL);
          }
+         if (recs[rec_i].getPPS() == 0xFFFF){recs[rec_i].setPPS(0);}
          
-         if (rec_i.getPPS() == 0xFFFF){rec_i.setPPS(0);}
-         
-         if (rec_i.getPPS() > 1000){rec_i.setQuality(BADPPS);}
+         if (recs[rec_i].getPPS() > 1000){recs[rec_i].setQuality(BADPPS);}
       }
       
       return status;
@@ -366,32 +363,43 @@ public class ExtractTiming {
       
       //data set index reference
       int FC = 0, DAY = 1, WEEK = 2, MS = 3, PPS = 4;
+      int rec_i = 0; //keep track of current record in BarrelTime object array
       
-      for(int rec_i = 0; rec_i <= data.getSize(); rec_i++){
-         //fill a BarrelTime object array with data values
-         timeRecs[rec_i].setFrame(data.frameNum[rec_i]);
-         timeRecs[rec_i].setWeek(data.weeks[rec_i]);
-         if(data.ms_of_week[rec_i] == -1){ 
+      for(int data_i = 0; data_i < data.getSize(); rec_i++, data_i++){
+         //check if the BarrelTimes array is full
+         if(rec_i == MAX_RECS ){
+            //generate a model and refill the array with adjusted time
+            fillTime(timeRecs, rec_i);
+            timeRecs = new BarrelTime[MAX_RECS];
+            System.out.println("Using model time(ms) = " + time_model.rate +
+               "(fc + " + time_model.offset + ")\n");
+         
+		    rec_i = 0;
+         }
+         
+         //initialize the BarrelTime object
+         timeRecs[rec_i] = new BarrelTime();
+         
+		 //fill a BarrelTime object with data values
+         timeRecs[rec_i].setFrame(data.frameNum[data_i]);
+         timeRecs[rec_i].setWeek(data.weeks[data_i]);
+         
+         if(data.ms_of_week[data_i] == 0){ 
             timeRecs[rec_i].setMS_of_week(MSFILL);
          }else{
-            timeRecs[rec_i].setMS_of_week(data.ms_of_week[rec_i]);
+            timeRecs[rec_i].setMS_of_week(data.ms_of_week[data_i]);
          }
-         timeRecs[rec_i].setPPS(data.pps[rec_i]);
-         
-         //check if the BarrelTimes array is full
-         if(rec_i == MAX_RECS){
-            //generate a model and refill the array with adjusted time
-            fillTime(timeRecs);
-            timeRecs = new BarrelTime[MAX_RECS];
-         }
+         timeRecs[rec_i].setPPS(data.pps[data_i]);
       }
 
       //process any remaining records
-      fillTime(timeRecs);
-      timeRecs = new BarrelTime[MAX_RECS];
+      fillTime(timeRecs, rec_i);
+      
+      //null out the BarrelTime array
+      timeRecs = null;
 
-      System.out.printf("Using model time(ms) = %17.13lf(fc + %19.9lf)\n",
-         time_model.rate, time_model.offset);
+      System.out.println("Using model time(ms) = " + time_model.rate +
+         "(fc + " + time_model.offset + ")\n");
       System.out.println("Time extracted.\n");
       
       return timeRecs;

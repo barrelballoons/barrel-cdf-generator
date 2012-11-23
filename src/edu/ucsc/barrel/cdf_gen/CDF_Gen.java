@@ -1,15 +1,17 @@
 package edu.ucsc.barrel.cdf_gen;
 
 /*
-CDF_Gen.java v12.11.21
+CDF_Gen.java v12.11.22
 
 Description:
    Entry point for .jar file.
    Reads ini file.
    Creates all objects needed for operation. 
 
-v12.11.21
+v12.11.22
    -Output directoy is set in ini file.
+   -Calls time extraction code after level zero is created. 
+   -Nulls out L1 and L2 objects after use.
    
 v12.11.21
    -Only produces the requested data levels as indicated by command line
@@ -181,8 +183,12 @@ public class CDF_Gen implements CDFConstants{
 			      (data.frameNum[0]))
 			      + " %"
 			   );
-		   }
+            }
             
+            //Fill the time variable
+            ExtractTiming barrel_time = new ExtractTiming();
+            barrel_time.correctTime(data);
+            barrel_time = null;
             
             if(getSetting("L").indexOf("1") > -1){
                //create Level One 
@@ -190,6 +196,7 @@ public class CDF_Gen implements CDFConstants{
                   getSetting("date"), 
                   getSetting("currentPayload")
                );
+               L1 = null;
 			}
             
             if(getSetting("L").indexOf("2") > -1){
@@ -198,6 +205,8 @@ public class CDF_Gen implements CDFConstants{
                   getSetting("date"), 
                   getSetting("currentPayload")
                );
+               
+               L2 = null;
             }
          }catch(IOException ex){
             System.out.println(
