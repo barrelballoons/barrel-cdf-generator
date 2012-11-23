@@ -279,61 +279,49 @@ public class LevelOne{
                Integer.valueOf(frameGrp40), 0L
             );
          }
-         if(mod40 < 36){
-            CDF_Gen.putData(
-               hkpg_cdf, DataHolder.hkpg_label[mod40], hkpg_rec, 
-               Long.valueOf(data.hkpg_raw[frm_i]), 0L
-            );
-         }
-         else if(mod40 == 36){
-            data.sats[frm_i] = (short)(data.hkpg_raw[frm_i] >> 8);
-            data.offset[frm_i] = (short)(data.hkpg_raw[frm_i] & 255);
-            
-            CDF_Gen.putData(
-               hkpg_cdf, "numOfSats", hkpg_rec, 
-               Short.valueOf(data.sats[frm_i]), 0L
-            );
-            CDF_Gen.putData(
-               hkpg_cdf, "timeOffset", hkpg_rec, 
-               Short.valueOf(data.offset[frm_i]), 0L
-            );
-         }
-         else if(mod40 == 37){
-            weeks = (int) data.hkpg_raw[frm_i];
-            data.weeks[frm_i] = weeks;
-            
-            CDF_Gen.putData(hkpg_cdf, "weeks", hkpg_rec, 
-               Integer.valueOf(data.weeks[frm_i]), 0L);
-         }
-         else if(mod40 == 38){
-            data.termStat[frm_i] = 
-                  (short)(data.hkpg_raw[frm_i] >> 15);
-            data.cmdCnt[frm_i] = 
-                  (int)(data.hkpg_raw[frm_i] & 32768);
-            
-            CDF_Gen.putData(
-               hkpg_cdf, "termStatus", hkpg_rec, 
-               Short.valueOf(data.termStat[frm_i]), 0L
-            );
-            CDF_Gen.putData(
-               hkpg_cdf, "cmdCounter", hkpg_rec, 
-               Integer.valueOf(data.cmdCnt[frm_i]), 0L
-            );
-            
-         }else if(mod40 == 39){
-            data.dcdCnt[frm_i] = 
-               (short)(data.hkpg_raw[frm_i] >> 8);
-            data.modemCnt[frm_i] = 
-               (short)(data.hkpg_raw[frm_i] & 255);
-            
-            CDF_Gen.putData(
-               hkpg_cdf, "dcdCounter", hkpg_rec, 
-               Short.valueOf(data.dcdCnt[frm_i]), 0L
-            );
-            CDF_Gen.putData(
-               hkpg_cdf, "modemCounter", hkpg_rec, 
-               Short.valueOf(data.modemCnt[frm_i]), 0L
-            );
+         switch(mod40){
+            case 36:
+               CDF_Gen.putData(
+                  hkpg_cdf, "numOfSats", hkpg_rec, 
+                  Short.valueOf(data.sats[frm_i]), 0L
+               );
+               CDF_Gen.putData(
+                  hkpg_cdf, "timeOffset", hkpg_rec, 
+                  Short.valueOf(data.offset[frm_i]), 0L
+               );
+               break;
+            case 37:
+               weeks = data.weeks[frm_i];
+               
+               CDF_Gen.putData(hkpg_cdf, "weeks", hkpg_rec, 
+                  Integer.valueOf(data.weeks[frm_i]), 0L);
+               break;
+            case 38:
+               CDF_Gen.putData(
+                  hkpg_cdf, "termStatus", hkpg_rec, 
+                  Short.valueOf(data.termStat[frm_i]), 0L
+               );
+               CDF_Gen.putData(
+                  hkpg_cdf, "cmdCounter", hkpg_rec, 
+                  Integer.valueOf(data.cmdCnt[frm_i]), 0L
+               );
+               break;
+            case 39:
+               CDF_Gen.putData(
+                  hkpg_cdf, "dcdCounter", hkpg_rec, 
+                  Short.valueOf(data.dcdCnt[frm_i]), 0L
+               );
+               CDF_Gen.putData(
+                  hkpg_cdf, "modemCounter", hkpg_rec, 
+                  Short.valueOf(data.modemCnt[frm_i]), 0L
+               );
+               break;
+            default:
+               CDF_Gen.putData(
+                  hkpg_cdf, DataHolder.hkpg_label[mod40], hkpg_rec, 
+                  Long.valueOf(data.hkpg_raw[frm_i]), 0L
+               );
+               break;
          }
          
          //FSPC

@@ -189,6 +189,7 @@ public class CDF_Gen implements CDFConstants{
             ExtractTiming barrel_time = new ExtractTiming();
             barrel_time.correctTime(data);
             barrel_time = null;
+            System.exit(1);
             
             if(getSetting("L").indexOf("1") > -1){
                //create Level One 

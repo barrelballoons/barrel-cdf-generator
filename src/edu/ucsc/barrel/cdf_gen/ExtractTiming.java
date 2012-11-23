@@ -1,14 +1,5 @@
 package edu.ucsc.barrel.cdf_gen;
 
-import gsfc.nssdc.cdf.CDF;
-import gsfc.nssdc.cdf.CDFConstants;
-import gsfc.nssdc.cdf.CDFException;
-import gsfc.nssdc.cdf.Variable;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.Arrays;
 
 /*
@@ -173,9 +164,9 @@ System.out.println("good_cnt = " + good_cnt);
          if(recs[rec_i].getMS_of_week() != MSFILL 
             && recs[rec_i].getWeek() != WKFILL
          ) {
-			 System.out.println(rec_i);
+            time_pairs[goodcnt] = new TimePair();
             if (recs[rec_i].getPPS() < 241) {
-               time_pairs[goodcnt].setTime( 
+			      time_pairs[goodcnt].setTime( 
                   1000 * (SPERWEEK * recs[rec_i].getWeek() - OFFSET) +
                   recs[rec_i].getMS_of_week() - recs[rec_i].getPPS()
                );
@@ -380,7 +371,7 @@ System.out.println("good_cnt = " + good_cnt);
          //initialize the BarrelTime object
          timeRecs[rec_i] = new BarrelTime();
          
-		 //fill a BarrelTime object with data values
+         //fill a BarrelTime object with data values
          timeRecs[rec_i].setFrame(data.frameNum[data_i]);
          timeRecs[rec_i].setWeek(data.weeks[data_i]);
          
