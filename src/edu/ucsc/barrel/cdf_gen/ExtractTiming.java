@@ -3,14 +3,16 @@ package edu.ucsc.barrel.cdf_gen;
 import java.util.Arrays;
 
 /*
-ExactTiming.java v12.10.22
+ExactTiming.java v12.10.24
 
 Description:
    Uses a block of gps time info to create a more exact time variable.
    Ported from MPM's C code.
 
-v12.11.22
-   -Added an extra iterating variable to correctTime() so timeRecs indexed correctly
+v12.11.24
+   -Fixed lots and lots of bug.
+   -Changed offset to adjust the GPS start time to J2000.
+   -Writes values to DataHolder object now.
    
 v12.11.20
    -Changed references to Level_Generator to CDF_Gen
@@ -26,7 +28,7 @@ public class ExtractTiming {
    // OFFSET is used to reference the calculated
    // milliseconds time to something other than the default
    // start of gps time (06Jan1980).
-   private static final double OFFSET = 914803200.0;// (01Jan2009 - 06Jan1980) in seconds
+   private static final double OFFSET = 630763200.;// (01Jan2009 - 06Jan1980) in seconds
    private static final int MAX_RECS = 2000;// max number of frames into model           
    private static final double NOM_RATE = 999.89;// nominal ms per frame
    private static final double SPERWEEK = 604800.0;// #seconds in a week
@@ -73,9 +75,9 @@ public class ExtractTiming {
    }
    
    private class BarrelTime{
-      private double ms = -1.0;//frame time; ms after GPS 00:00:00 1 Jan 2010
+      private double ms = -1.;//frame time; ms after GPS 00:00:00 1 Jan 2010
       private long fc = -1;//frame counter
-      private double ms_of_week = -1.0;// ms since 00:00 on Sunday
+      private double ms_of_week = -1;// ms since 00:00 on Sunday
       private long week = -1;//weeks since 6-Jan-1980
       private long pps = -1;//ms into frame when GPS pps comes
       private short quality = 0;//quality of recovered time
@@ -103,35 +105,35 @@ public class ExtractTiming {
    //set an array of time pairs
    private TimePair[] time_pairs = new TimePair[MAX_RECS];
    
-   public void fillTime(BarrelTime[] recs, int last_rec){
+   //holder for BarrelTime objects
+   public BarrelTime[] timeRecs;
+   
+   public void fillTime(int last_rec){
       double temp;
       Model q;
       int pair_cnt, good_cnt, goodfit, 
          remaining_recs, rec_end_i, rec_start_i;
 
-      if (!check(recs, last_rec)) return;
+      if (!check(last_rec)) return;
 
       rec_start_i = 0;
       remaining_recs = last_rec;
       while (remaining_recs > 0) {
          //find the end of the array for this pass 
-         System.out.println(remaining_recs + " remaining...");
          rec_end_i = Math.min(MAX_RECS, remaining_recs); 
          
-         pair_cnt = makePairs(recs, rec_start_i, rec_end_i);
-      System.out.println(pair_cnt + " pairs...");
+         pair_cnt = makePairs(rec_start_i, rec_end_i);
          if (pair_cnt < 2) {
             if (evaluateModel(time_model, pair_cnt)){
-               updateData(recs, rec_start_i, rec_end_i);
+               updateBT(rec_start_i, rec_end_i);
             }
             else{
                for (int rec_i = rec_start_i; rec_i < rec_end_i; rec_i++){
-                  recs[rec_i].setQuality(NOINFO);
+                  timeRecs[rec_i].setQuality(NOINFO);
                }
             }
          }else{
             good_cnt = selectPairs(pair_cnt);
-System.out.println("good_cnt = " + good_cnt);
             if (good_cnt > 2) {
                //Improve condition
                q = genModel(good_cnt);
@@ -143,7 +145,7 @@ System.out.println("good_cnt = " + good_cnt);
                ;
                //FINISH THIS
             }
-            updateData(recs, rec_start_i, rec_end_i);
+            updateBT(rec_start_i, rec_end_i);
          }
          // printf("Using model time(ms) = %17.13lf(fc + %19.9lf)\n",
          //model.rate, model.offset);
@@ -152,7 +154,7 @@ System.out.println("good_cnt = " + good_cnt);
       }
    }
    
-   public int makePairs(BarrelTime[] recs, int start, int end){
+   public int makePairs(int start, int end){
       int goodcnt = 0;
       int cnt;
       
@@ -161,29 +163,29 @@ System.out.println("good_cnt = " + good_cnt);
       if (cnt <= 0 || cnt > MAX_RECS){return 0;}
 
       for(int rec_i = start; rec_i < end; rec_i++) {
-         if(recs[rec_i].getMS_of_week() != MSFILL 
-            && recs[rec_i].getWeek() != WKFILL
+         if(timeRecs[rec_i].getMS_of_week() != MSFILL 
+            && timeRecs[rec_i].getWeek() != WKFILL
          ) {
             time_pairs[goodcnt] = new TimePair();
-            if (recs[rec_i].getPPS() < 241) {
+            if (timeRecs[rec_i].getPPS() < 241) {
 			      time_pairs[goodcnt].setTime( 
-                  1000 * (SPERWEEK * recs[rec_i].getWeek() - OFFSET) +
-                  recs[rec_i].getMS_of_week() - recs[rec_i].getPPS()
+                  1000 * (SPERWEEK * timeRecs[rec_i].getWeek() - OFFSET) +
+                  timeRecs[rec_i].getMS_of_week() - timeRecs[rec_i].getPPS()
                );
             } else {
                time_pairs[goodcnt].setTime(
-                  1000 * (SPERWEEK * recs[rec_i].getWeek() + 1 - OFFSET) +
-                  recs[rec_i].getMS_of_week() - recs[rec_i].getPPS()
+                  1000 * (SPERWEEK * timeRecs[rec_i].getWeek() + 1 - OFFSET) +
+                  timeRecs[rec_i].getMS_of_week() - timeRecs[rec_i].getPPS()
                );
             }
-            time_pairs[goodcnt].setFrame(recs[rec_i].getFrame());
+            time_pairs[goodcnt].setFrame(timeRecs[rec_i].getFrame());
             goodcnt++;
          }
       }
       return goodcnt;
    }
    
-   public boolean check(BarrelTime[] recs, int last){
+   public boolean check(int last){
       boolean status = true; //false means the list of times was rejected
       
       if (last < 1){
@@ -192,36 +194,40 @@ System.out.println("good_cnt = " + good_cnt);
       }
 
       for(int rec_i = 0; rec_i < last; rec_i++) {
-         if (recs[rec_i].getFrame() < 0) {
-            recs[rec_i].setQuality(BADFC);
+         if(timeRecs[rec_i].getFrame() < 0) {
+            timeRecs[rec_i].setQuality(BADFC);
             status = false;
          }
-         if (recs[rec_i].getWeek() != WKFILL && 
-            (recs[rec_i].getWeek() < MINWEEK || recs[rec_i].getWeek() > MAXWEEK)
-         ) {
-            recs[rec_i].setQuality(BADWK);
-            recs[rec_i].setWeek(WKFILL);
-         }
-         if (
-            recs[rec_i].getMS_of_week() != MSFILL &&
+         if(
+            timeRecs[rec_i].getWeek() != WKFILL && 
             (
-               recs[rec_i].getMS_of_week() < 0 || 
-               recs[rec_i].getMS_of_week() > (SPERWEEK * 1000)
+               timeRecs[rec_i].getWeek() < MINWEEK || 
+               timeRecs[rec_i].getWeek() > MAXWEEK
             )
          ) {
-            recs[rec_i].setQuality(BADMS);
-            recs[rec_i].setMS_of_week(MSFILL);
+            timeRecs[rec_i].setQuality(BADWK);
+            timeRecs[rec_i].setWeek(WKFILL);
          }
-         if (recs[rec_i].getPPS() == 0xFFFF){recs[rec_i].setPPS(0);}
+         if(
+            timeRecs[rec_i].getMS_of_week() != MSFILL &&
+            (
+               timeRecs[rec_i].getMS_of_week() < 0 || 
+               timeRecs[rec_i].getMS_of_week() > (SPERWEEK * 1000)
+            )
+         ) {
+            timeRecs[rec_i].setQuality(BADMS);
+            timeRecs[rec_i].setMS_of_week(MSFILL);
+         }
+         if(timeRecs[rec_i].getPPS() == 0xFFFF){timeRecs[rec_i].setPPS(0);}
          
-         if (recs[rec_i].getPPS() > 1000){recs[rec_i].setQuality(BADPPS);}
+         if (timeRecs[rec_i].getPPS() > 1000){timeRecs[rec_i].setQuality(BADPPS);}
       }
       
       return status;
    }
    
    public int selectPairs(int m){
-      double[] offsets = new double[m], qoffsets = new double[m];
+      double[] offsets = new double[m];
       double med;
       int last_pair_i;
 
@@ -229,14 +235,14 @@ System.out.println("good_cnt = " + good_cnt);
       if (m < 2){return m;}
       
       //get offsets from set of time pairs
-      for (int pair_i = 0; pair_i < time_pairs.length; pair_i++){
-         qoffsets[pair_i] = offsets[pair_i] = 
+      for (int pair_i = 0; pair_i < m; pair_i++){
+         offsets[pair_i] = 
             time_pairs[pair_i].getTime() - 
             (NOM_RATE * time_pairs[pair_i].getFrame());
       }
       
-      med = median(qoffsets);
-
+      med = median(offsets);
+      
       last_pair_i = 0;
       for (int pair_i = 0; pair_i < m; pair_i++) {
          if (Math.abs(offsets[pair_i] - med) > 200.0){continue;}
@@ -321,37 +327,47 @@ System.out.println("good_cnt = " + good_cnt);
        }
    }
    
-   public void updateData(BarrelTime[] recs, int start, int end){
-      double ms, sec;
-      long week, msofweek;
+   public void updateBT(int start, int end){
+      double ms, msofweek;
+      long week;
 
-      for(int time_i = start; time_i <= end; time_i++) {
+      for(int time_i = start; time_i < end; time_i++) {
          ms = 
             time_model.getRate() * 
-            (recs[time_i].getFrame() + time_model.getOffset());
-         sec = ms / 1000. + OFFSET;
-         week = (long) (sec / SPERWEEK);
-         msofweek = (long) (1000. * Math.floor(sec - week * SPERWEEK));
+            (timeRecs[time_i].getFrame() + time_model.getOffset())
+            + (OFFSET * 1000);
          
-         if (msofweek != recs[time_i].getMS_of_week()) {
-            recs[time_i].setQuality(NEW_MSOFWEEK);
-            recs[time_i].setMS_of_week(msofweek);
+         week = (long) (ms / (SPERWEEK * 1000));
+         
+         msofweek =  ms - (week * SPERWEEK * 1000);
+         
+         if (msofweek != timeRecs[time_i].getMS_of_week()) {
+            timeRecs[time_i].setQuality(NEW_MSOFWEEK);
+            timeRecs[time_i].setMS_of_week(msofweek);
          }
          
-         if (week != recs[time_i].getWeek()) {
-            recs[time_i].setQuality(NEW_WEEK);
-            recs[time_i].setWeek(week);
+         if (week != timeRecs[time_i].getWeek()) {
+            timeRecs[time_i].setQuality(NEW_WEEK);
+            timeRecs[time_i].setWeek(week);
          }
-         
-         recs[time_i].setMS(ms);
-         recs[time_i].setQuality(FILLED);
+         System.out.println(msofweek);
+         timeRecs[time_i].setMS(ms);
+         timeRecs[time_i].setQuality(FILLED);
       }
    }
    
-   public BarrelTime[] correctTime(DataHolder data){
+   public void copyTime(DataHolder data, int data_start, int total){
+      for(int rec_i = 0; rec_i < total; rec_i++){
+         data.ms_of_week[data_start + rec_i] = 
+            (long) (timeRecs[rec_i].getMS_of_week());
+         data.epoch[data_start + rec_i] = 
+            (long) (timeRecs[rec_i].getMS() * 1000);
+      }
+   }
+   
+   public void buildBT(DataHolder data){
       int temp, day, fc, week, ms, pps, cnt;
-      BarrelTime[] timeRecs = new BarrelTime[MAX_RECS];
-      
+      timeRecs = new BarrelTime[MAX_RECS];
       //data set index reference
       int FC = 0, DAY = 1, WEEK = 2, MS = 3, PPS = 4;
       int rec_i = 0; //keep track of current record in BarrelTime object array
@@ -359,11 +375,15 @@ System.out.println("good_cnt = " + good_cnt);
       for(int data_i = 0; data_i < data.getSize(); rec_i++, data_i++){
          //check if the BarrelTimes array is full
          if(rec_i == MAX_RECS ){
-            //generate a model and refill the array with adjusted time
-            fillTime(timeRecs, rec_i);
+			//generate a model and refill the array with adjusted time
+            fillTime(rec_i);
+            
+            //copy the BarrelTime data to the DataHolder object
+            copyTime(data, (data_i - MAX_RECS), MAX_RECS);
+            
             timeRecs = new BarrelTime[MAX_RECS];
-            System.out.println("Using model time(ms) = " + time_model.rate +
-               "(fc + " + time_model.offset + ")\n");
+            //System.out.println("Using model time(ms) = " + time_model.rate +
+            //   "(fc + " + time_model.offset + ")\n");
          
 		    rec_i = 0;
          }
@@ -384,15 +404,11 @@ System.out.println("good_cnt = " + good_cnt);
       }
 
       //process any remaining records
-      fillTime(timeRecs, rec_i);
-      
-      //null out the BarrelTime array
-      timeRecs = null;
-
-      System.out.println("Using model time(ms) = " + time_model.rate +
-         "(fc + " + time_model.offset + ")\n");
-      System.out.println("Time extracted.\n");
-      
-      return timeRecs;
-  }
+      fillTime(rec_i);
+      copyTime(data, (data.getSize() - rec_i), rec_i);
+            
+      //System.out.println("Using model time(ms) = " + time_model.rate +
+      //   "(fc + " + time_model.offset + ")\n");
+      System.out.println("Time corrected.\n");
+   }
 }

@@ -9,10 +9,13 @@ import java.io.IOException;
 import java.util.Calendar;
 
 /*
-LevelOne.java v12.11.20
+LevelOne.java v12.11.24
 
 Description:
    Creates level one CDF files
+
+v12.11.24
+   -Removed epoch calculations
 
 v12.11.20
    -Changed references to Level_Generator to CDF_Gen
@@ -157,7 +160,7 @@ public class LevelOne{
 		 }
          data.ms_of_week[frm_i] = ms_of_week;
          
-         //set date and time
+         /*//set date and time
          if(
             weeks >= 0 && weeks <= 65535 && 
             ms_of_week >= 0 && ms_of_week < 4294967295L
@@ -178,6 +181,7 @@ public class LevelOne{
                (double) dateObj.get(Calendar.MILLISECOND)
             );
          }
+         */
          
          //GPS
          switch(mod4){
@@ -199,7 +203,7 @@ public class LevelOne{
                );
                CDF_Gen.putData(
                   gps_cdf, "ms_of_week", gps_rec, 
-                  Long.valueOf(ms_of_week), 0L
+                  Long.valueOf(data.ms_of_week[frm_i]), 0L
                );
                break;
             case 2:
