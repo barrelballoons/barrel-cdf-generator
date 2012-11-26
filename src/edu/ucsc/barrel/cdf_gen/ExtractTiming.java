@@ -1,17 +1,22 @@
 package edu.ucsc.barrel.cdf_gen;
 
+import gsfc.nssdc.cdf.CDFException;
+import gsfc.nssdc.cdf.util.CDFTT2000;
+
 import java.util.Arrays;
+import java.util.Calendar;
 
 /*
-ExactTiming.java v12.10.24
+ExactTiming.java v12.10.26
 
 Description:
    Uses a block of gps time info to create a more exact time variable.
    Ported from MPM's C code.
 
-v12.11.24
+v12.11.26
    -Fixed lots and lots of bug.
    -Changed offset to adjust the GPS start time to J2000.
+   -Uses Calendar date object to calculate time relative to GPS start time
    -Writes values to DataHolder object now.
    
 v12.11.20
@@ -24,11 +29,6 @@ v12.10.15
 
 public class ExtractTiming {
    //Set some constant values
-   
-   // OFFSET is used to reference the calculated
-   // milliseconds time to something other than the default
-   // start of gps time (06Jan1980).
-   private static final double OFFSET = 630763200.;// (01Jan2009 - 06Jan1980) in seconds
    private static final int MAX_RECS = 2000;// max number of frames into model           
    private static final double NOM_RATE = 999.89;// nominal ms per frame
    private static final double SPERWEEK = 604800.0;// #seconds in a week
@@ -45,6 +45,9 @@ public class ExtractTiming {
    private static final short MINWEEK = 1200;
    private static final short MAXWEEK = 1880;
 
+   //will get set by constructor
+   private static long GPS_START_TIME;
+   
    //model parameters for a linear fit
    //Example: ms = rate * (fc + offset);
    public class Model{
@@ -67,10 +70,10 @@ public class ExtractTiming {
       private double ms;// frame time; ms after GPS 00:00:00 1 Jan 2010
       private long fc;//frame counter
 
-      public void setTime(double t){ms = t;}
+      public void setMS(double t){ms = t;}
       public void setFrame(long f){fc = f;}
       
-      public double getTime(){return ms;}
+      public double getMS(){return ms;}
       public long getFrame(){return fc;}
    }
    
@@ -78,7 +81,7 @@ public class ExtractTiming {
       private double ms = -1.;//frame time; ms after GPS 00:00:00 1 Jan 2010
       private long fc = -1;//frame counter
       private double ms_of_week = -1;// ms since 00:00 on Sunday
-      private long week = -1;//weeks since 6-Jan-1980
+      private int week = -1;//weeks since 6-Jan-1980
       private long pps = -1;//ms into frame when GPS pps comes
       private short quality = 0;//quality of recovered time
       private long flag = -1;//unused for now
@@ -86,7 +89,7 @@ public class ExtractTiming {
       public void setMS(double t){ms = t;}
       public void setFrame(long f){fc = f;}
       public void setMS_of_week(double msw){ms_of_week = msw;}
-      public void setWeek(long w){week = w;}
+      public void setWeek(int w){week = w;}
       public void setPPS(long p){pps = p;}
       public void setQuality(short q){quality |= q;}
       public void setFlag(long f){flag = f;}
@@ -94,26 +97,37 @@ public class ExtractTiming {
       public double getMS(){return ms;}
       public long getFrame(){return fc;}
       public double getMS_of_week(){return ms_of_week;}
-      public long getWeek(){return week;}
+      public int getWeek(){return week;}
       public long getPPS(){return pps;}
       public short getQuality(){return quality;}
       public long getFlag(){return flag;}
    }
    
    //set initial time model
-   private Model time_model = new Model(1.0, 0.0);
+   private Model time_model;
    //set an array of time pairs
-   private TimePair[] time_pairs = new TimePair[MAX_RECS];
+   private TimePair[] time_pairs;
    
    //holder for BarrelTime objects
    public BarrelTime[] timeRecs;
+   
+   public ExtractTiming(){
+      time_model = new Model(1.0, 0.0);
+      time_pairs = new TimePair[MAX_RECS];
+      
+      //set time object to gps start time
+      Calendar gps_start_time;
+      gps_start_time = Calendar.getInstance();
+      gps_start_time.setTimeInMillis(0L);
+      gps_start_time.set(1980, 00, 06);
+      GPS_START_TIME = gps_start_time.getTimeInMillis();
+   }
    
    public void fillTime(int last_rec){
       double temp;
       Model q;
       int pair_cnt, good_cnt, goodfit, 
          remaining_recs, rec_end_i, rec_start_i;
-
       if (!check(last_rec)) return;
 
       rec_start_i = 0;
@@ -134,16 +148,12 @@ public class ExtractTiming {
             }
          }else{
             good_cnt = selectPairs(pair_cnt);
-            if (good_cnt > 2) {
-               //Improve condition
-               q = genModel(good_cnt);
-               if (evaluateModel(q, good_cnt)) {
-                  time_model.setRate(q.getRate());
-                  time_model.setOffset(q.getOffset());
-               }
-            }else{
-               ;
-               //FINISH THIS
+            
+            //Improve condition
+            q = genModel(good_cnt);
+            if (evaluateModel(q, good_cnt)) {
+               time_model.setRate(q.getRate());
+               time_model.setOffset(q.getOffset());
             }
             updateBT(rec_start_i, rec_end_i);
          }
@@ -157,6 +167,7 @@ public class ExtractTiming {
    public int makePairs(int start, int end){
       int goodcnt = 0;
       int cnt;
+      Calendar date = Calendar.getInstance();
       
       //Make sure there are a good number of records
       cnt = end - start;
@@ -167,16 +178,29 @@ public class ExtractTiming {
             && timeRecs[rec_i].getWeek() != WKFILL
          ) {
             time_pairs[goodcnt] = new TimePair();
+            
+            //set a date object to gps start time
+            date.setTimeInMillis(GPS_START_TIME);
+            date.add(Calendar.WEEK_OF_YEAR, timeRecs[rec_i].getWeek());
+            
             if (timeRecs[rec_i].getPPS() < 241) {
-			      time_pairs[goodcnt].setTime( 
-                  1000 * (SPERWEEK * timeRecs[rec_i].getWeek() - OFFSET) +
-                  timeRecs[rec_i].getMS_of_week() - timeRecs[rec_i].getPPS()
+               date.add(
+                  Calendar.MILLISECOND, 
+                  (int)(
+                     timeRecs[rec_i].getMS_of_week() - 
+                     timeRecs[rec_i].getPPS()
+                  )
                );
+               time_pairs[goodcnt].setMS(date.getTimeInMillis());
             } else {
-               time_pairs[goodcnt].setTime(
-                  1000 * (SPERWEEK * timeRecs[rec_i].getWeek() + 1 - OFFSET) +
-                  timeRecs[rec_i].getMS_of_week() - timeRecs[rec_i].getPPS()
+               date.add(
+                  Calendar.MILLISECOND, 
+                  (int)(
+                     timeRecs[rec_i].getMS_of_week() + 1000 - 
+                     timeRecs[rec_i].getPPS()
+                  )
                );
+               time_pairs[goodcnt].setMS(date.getTimeInMillis());
             }
             time_pairs[goodcnt].setFrame(timeRecs[rec_i].getFrame());
             goodcnt++;
@@ -237,7 +261,7 @@ public class ExtractTiming {
       //get offsets from set of time pairs
       for (int pair_i = 0; pair_i < m; pair_i++){
          offsets[pair_i] = 
-            time_pairs[pair_i].getTime() - 
+            time_pairs[pair_i].getMS() - 
             (NOM_RATE * time_pairs[pair_i].getFrame());
       }
       
@@ -279,7 +303,7 @@ public class ExtractTiming {
       //get mean x and y values
       for (int pnt_i = 0; pnt_i < n; pnt_i++) {
          mux += time_pairs[pnt_i].getFrame();
-         muy += time_pairs[pnt_i].getTime();
+         muy += time_pairs[pnt_i].getMS();
       }
       mux /= n;
       muy /= n;
@@ -287,7 +311,7 @@ public class ExtractTiming {
       //calculate the least square regression
       for (int pnt_i = 0; pnt_i < n; pnt_i++) {
          x = time_pairs[pnt_i].getFrame() - mux;
-         y = time_pairs[pnt_i].getTime() - muy;
+         y = time_pairs[pnt_i].getMS() - muy;
          xx += x * x;
          xy += x * y;
       }
@@ -314,7 +338,7 @@ public class ExtractTiming {
       
          //test to see if model gives less than 50ms change
          if(Math.abs(ms1 - ms2) < 0.5 && 
-            Math.abs(ms2 - time_pairs[0].getTime()) < 0.5
+            Math.abs(ms2 - time_pairs[0].getMS()) < 0.5
          ){
             return true;
          }
@@ -328,40 +352,41 @@ public class ExtractTiming {
    }
    
    public void updateBT(int start, int end){
-      double ms, msofweek;
-      long week;
-
-      for(int time_i = start; time_i < end; time_i++) {
-         ms = 
+      for(int rec_i = start; rec_i < end; rec_i++) {
+         timeRecs[rec_i].setMS( 
             time_model.getRate() * 
-            (timeRecs[time_i].getFrame() + time_model.getOffset())
-            + (OFFSET * 1000);
-         
-         week = (long) (ms / (SPERWEEK * 1000));
-         
-         msofweek =  ms - (week * SPERWEEK * 1000);
-         
-         if (msofweek != timeRecs[time_i].getMS_of_week()) {
-            timeRecs[time_i].setQuality(NEW_MSOFWEEK);
-            timeRecs[time_i].setMS_of_week(msofweek);
-         }
-         
-         if (week != timeRecs[time_i].getWeek()) {
-            timeRecs[time_i].setQuality(NEW_WEEK);
-            timeRecs[time_i].setWeek(week);
-         }
-         System.out.println(msofweek);
-         timeRecs[time_i].setMS(ms);
-         timeRecs[time_i].setQuality(FILLED);
+            (timeRecs[rec_i].getFrame() + time_model.getOffset())
+         );
+         timeRecs[rec_i].setQuality(FILLED);
       }
    }
    
-   public void copyTime(DataHolder data, int data_start, int total){
+   public void fillEpoch(DataHolder data, int data_start, int total){
+      Calendar date = Calendar.getInstance();
+      long tempEpoch;
+      
+      
       for(int rec_i = 0; rec_i < total; rec_i++){
-         data.ms_of_week[data_start + rec_i] = 
-            (long) (timeRecs[rec_i].getMS_of_week());
-         data.epoch[data_start + rec_i] = 
-            (long) (timeRecs[rec_i].getMS() * 1000);
+         
+         date.setTimeInMillis((long)timeRecs[rec_i].getMS());
+         
+         tempEpoch = date.getTimeInMillis();
+         
+         try{
+            data.epoch[data_start + rec_i] =
+               CDFTT2000.fromUTCparts(
+                  (double) date.get(Calendar.YEAR), 
+                  (double) (date.get(Calendar.MONTH) +1 ), 
+                  (double) date.get(Calendar.DAY_OF_MONTH), 
+                  (double) date.get(Calendar.HOUR), 
+                  (double) date.get(Calendar.MINUTE),
+                  (double) date.get(Calendar.SECOND),
+                  (double) date.get(Calendar.MILLISECOND)
+               );
+         }catch(CDFException ex){
+            data.epoch[data_start + rec_i] = 
+               data.epoch[data_start + rec_i - 1] + 1000000; 
+         }
       }
    }
    
@@ -375,17 +400,15 @@ public class ExtractTiming {
       for(int data_i = 0; data_i < data.getSize(); rec_i++, data_i++){
          //check if the BarrelTimes array is full
          if(rec_i == MAX_RECS ){
-			//generate a model and refill the array with adjusted time
+			   //generate a model and refill the array with adjusted time
             fillTime(rec_i);
             
             //copy the BarrelTime data to the DataHolder object
-            copyTime(data, (data_i - MAX_RECS), MAX_RECS);
+            fillEpoch(data, (data_i - MAX_RECS), MAX_RECS);
             
             timeRecs = new BarrelTime[MAX_RECS];
-            //System.out.println("Using model time(ms) = " + time_model.rate +
-            //   "(fc + " + time_model.offset + ")\n");
-         
-		    rec_i = 0;
+            
+            rec_i = 0;
          }
          
          //initialize the BarrelTime object
@@ -402,13 +425,12 @@ public class ExtractTiming {
          }
          timeRecs[rec_i].setPPS(data.pps[data_i]);
       }
-
+      
       //process any remaining records
       fillTime(rec_i);
-      copyTime(data, (data.getSize() - rec_i), rec_i);
+      
+      fillEpoch(data, (data.getSize() - rec_i), rec_i);
             
-      //System.out.println("Using model time(ms) = " + time_model.rate +
-      //   "(fc + " + time_model.offset + ")\n");
       System.out.println("Time corrected.\n");
    }
 }

@@ -1,15 +1,15 @@
 package edu.ucsc.barrel.cdf_gen;
 
 /*
-CDF_Gen.java v12.11.24
+CDF_Gen.java v12.11.26
 
 Description:
    Entry point for .jar file.
    Reads ini file.
    Creates all objects needed for operation. 
 
-v12.11.24
-   -Output directoy is set in ini file.
+v12.11.26
+   -Output directory is set in ini file.
    -Calls time extraction code after level zero is created. 
    -Nulls out L1 and L2 objects after use.
    
@@ -76,6 +76,7 @@ import gsfc.nssdc.cdf.CDF;
 import gsfc.nssdc.cdf.CDFConstants;
 import gsfc.nssdc.cdf.CDFException;
 import gsfc.nssdc.cdf.Variable;
+import gsfc.nssdc.cdf.util.CDFTT2000;
 
 import java.io.BufferedReader;
 import java.io.File;

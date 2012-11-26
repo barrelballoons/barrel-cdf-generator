@@ -9,12 +9,12 @@ import java.io.IOException;
 import java.util.Calendar;
 
 /*
-LevelOne.java v12.11.24
+LevelOne.java v12.11.26
 
 Description:
    Creates level one CDF files
 
-v12.11.24
+v12.11.26
    -Removed epoch calculations
 
 v12.11.20
@@ -24,7 +24,7 @@ v12.11.20
    -Changed epoch to being only stored in DataHolder instead of also being a local variable
    -Removed ms_of_week from all files except GPS
    -Uses DataHolder.rc_label to write rc CDF variables instead of the switch statment
-   -Wraps primative variable types stored in DataHolded in proper objects before writing to CDF
+   -Wraps primitive variable types stored in DataHolded in proper objects before writing to CDF
    
 v12.11.05
    -Saves ints (or longs) to cdf files. CDF's are now full of completely raw variables (except EPOCH and ms_of_week)
@@ -155,33 +155,9 @@ public class LevelOne{
          if(frm_i > 0 && mod4 != 1){
             //Increment time 
             ms_of_week += ((data.frameNum[frm_i] - data.frameNum[frm_i - 1]) * 1000);
-	     }else{
-	        ms_of_week = data.gps_raw[frm_i];
-		 }
-         data.ms_of_week[frm_i] = ms_of_week;
-         
-         /*//set date and time
-         if(
-            weeks >= 0 && weeks <= 65535 && 
-            ms_of_week >= 0 && ms_of_week < 4294967295L
-         ){
-            dateObj.setTimeInMillis(0L);
-            dateObj.set(1980, 00, 06);
-            dateObj.add(Calendar.WEEK_OF_YEAR, weeks);
-            dateObj.add(
-               Calendar.MILLISECOND, (int) ms_of_week
-            );
-            data.epoch[frm_i] = CDFTT2000.fromUTCparts(
-               (double) dateObj.get(Calendar.YEAR), 
-               (double) (dateObj.get(Calendar.MONTH) +1 ), 
-               (double) dateObj.get(Calendar.DAY_OF_MONTH), 
-               (double) dateObj.get(Calendar.HOUR), 
-               (double) dateObj.get(Calendar.MINUTE),
-               (double) dateObj.get(Calendar.SECOND),
-               (double) dateObj.get(Calendar.MILLISECOND)
-            );
-         }
-         */
+	      }else{
+	         ms_of_week = data.gps_raw[frm_i];
+		   }
          
          //GPS
          switch(mod4){
