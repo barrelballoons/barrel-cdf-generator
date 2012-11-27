@@ -11,10 +11,13 @@ import java.io.FileReader;
 import java.io.IOException;
 
 /*
-LevelTwo.java v12.11.20
+LevelTwo.java v12.11.26
 
 Description:
    Creates Level Two CDF files
+
+v12.11.26
+   -Does not set payload directory in outpath here.
 
 v12.11.20
    -Changed references to Level_Generator to CDF_Gen
@@ -94,7 +97,7 @@ public class LevelTwo implements CDFConstants{
             "Creating Level Two CDF... (" + data.getSize() + " frames)");
       
       //set file output path
-      outputPath = CDF_Gen.L2_Dir + "/" + payload + "/";
+      outputPath = CDF_Gen.L2_Dir;
       File outDir = new File(outputPath);
       if(!outDir.exists()){outDir.mkdirs();}
       

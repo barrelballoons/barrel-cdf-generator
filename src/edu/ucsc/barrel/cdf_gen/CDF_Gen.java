@@ -10,6 +10,8 @@ Description:
 
 v12.11.26
    -Output directory is set in ini file.
+   -Output files are sorted into date subdirectories.
+   -Sets full output path in the payload loop
    -Calls time extraction code after level zero is created. 
    -Nulls out L1 and L2 objects after use.
    
@@ -127,17 +129,20 @@ public class CDF_Gen implements CDFConstants{
       //read the ini file and command line arguments
       loadConfig(args);
       
-      //set output paths
-      if(getSetting("outDir") != ""){output_Dir = getSetting("outDir");}
-      tlm_Dir = output_Dir + "/tlm";
-      L0_Dir = output_Dir + "/l0";
-      L1_Dir = output_Dir + "/l1";
-      L2_Dir = output_Dir + "/l2";
-   
-      
       //for each payload, create an object to download the files,
       // read the list of data files on each server, then download the files
       for(String payload_i : payloads){
+         //set output paths
+         if(getSetting("outDir") != ""){output_Dir = getSetting("outDir");}
+         tlm_Dir = 
+            output_Dir + "/tlm/" + payload_i + "/" + getSetting("date") + "/";
+         L0_Dir = 
+            output_Dir + "/l0/" + payload_i + "/" + getSetting("date") + "/";
+         L1_Dir = 
+            output_Dir + "/l1/" + payload_i + "/" + getSetting("date") + "/";
+         L2_Dir = 
+            output_Dir + "/l2/" + payload_i + "/" + getSetting("date") + "/";
+         
          //set working payload
          settings.put("currentPayload", payload_i);
          

@@ -1,11 +1,14 @@
 package edu.ucsc.barrel.cdf_gen;
 
 /*
-LevelZero.java v12.11.20
+LevelZero.java v12.11.26
 
 Description:
    Copies each data file, byte by byte, to a day-long data file.
    Rejects short frames, long frames, and frames with bad checksums.
+
+v12.11.26
+   -Does not set payload directory in outpath here.
 
 v12.11.20
    -Changed references to Level_Generator to CDF_Gen
@@ -93,7 +96,7 @@ public class LevelZero{
       currentPayload = payload;
       currentDate = date;
       inputPath = inputDir + "/" + currentPayload + "/" + currentDate;
-      outputPath = outputDir + "/" + currentPayload;
+      outputPath = outputDir;
       
       //set get a list of input files
       File tempDir = new File(
@@ -103,7 +106,7 @@ public class LevelZero{
       Arrays.sort(fileList);
       
       //make sure the output directory exists
-      tempDir = new File(outputDir + "/" + currentPayload + "/");
+      tempDir = new File(outputDir + "/");
       if(!tempDir.exists()){tempDir.mkdirs();}
       
       //set output file name

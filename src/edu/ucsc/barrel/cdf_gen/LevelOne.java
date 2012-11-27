@@ -16,6 +16,7 @@ Description:
 
 v12.11.26
    -Removed epoch calculations
+   -Does not add payload onto directory path 
 
 v12.11.20
    -Changed references to Level_Generator to CDF_Gen
@@ -84,7 +85,7 @@ public class LevelOne{
       data = CDF_Gen.getDataSet();
       
       //set output path
-      outputPath = CDF_Gen.L1_Dir + "/" + payload + "/";
+      outputPath = CDF_Gen.L1_Dir;
       File outDir = new File(outputPath);
       if(!outDir.exists()){outDir.mkdirs();}
       
