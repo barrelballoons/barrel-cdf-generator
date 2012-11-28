@@ -7,12 +7,16 @@ import java.util.Arrays;
 import java.util.Calendar;
 
 /*
-ExactTiming.java v12.10.26
+ExactTiming.java v12.10.27
 
 Description:
    Uses a block of gps time info to create a more exact time variable.
    Ported from MPM's C code.
 
+v12.11.27
+   -Grabs DataHolder object from CDF_Gen as a member rather than having it passed through all function
+   -Rewroked a number of routines to add ability to fill missing time 
+   
 v12.11.26
    -Fixed lots and lots of bug.
    -Changed offset to adjust the GPS start time to J2000.
@@ -47,6 +51,7 @@ public class ExtractTiming {
 
    //will get set by constructor
    private static long GPS_START_TIME;
+   private static long SYSTEM_EPOCH_TIME;
    
    //model parameters for a linear fit
    //Example: ms = rate * (fc + offset);
@@ -101,6 +106,12 @@ public class ExtractTiming {
       public long getPPS(){return pps;}
       public short getQuality(){return quality;}
       public long getFlag(){return flag;}
+      
+      public boolean testQuality(short test_pattern){
+         if((getQuality() & test_pattern) == test_pattern){
+            return true;
+         }else{return false;}
+      }
    }
    
    //set initial time model
@@ -111,69 +122,113 @@ public class ExtractTiming {
    //holder for BarrelTime objects
    public BarrelTime[] timeRecs;
    
+   private DataHolder data;
+   
    public ExtractTiming(){
-      time_model = new Model(1.0, 0.0);
+      //get DataHolder storage object
+      data = CDF_Gen.getDataSet();
+      
+      time_model = null;
       time_pairs = new TimePair[MAX_RECS];
       
       //set time object to gps start time
       Calendar gps_start_time;
       gps_start_time = Calendar.getInstance();
       gps_start_time.setTimeInMillis(0L);
+      
+      SYSTEM_EPOCH_TIME = gps_start_time.getTimeInMillis();
+      
       gps_start_time.set(1980, 00, 06);
       GPS_START_TIME = gps_start_time.getTimeInMillis();
+      
+      int temp, day, fc, week, ms, pps, cnt;
+      timeRecs = new BarrelTime[MAX_RECS];
+      //data set index reference
+      int FC = 0, DAY = 1, WEEK = 2, MS = 3, PPS = 4;
+      int rec_i = 0, data_i = 0;
+      
+      
+      //loop through all of the frames and generate time models
+      for(data_i = 0; data_i < data.getSize(); data_i++){
+         rec_i = data_i % MAX_RECS;
+         
+         //check if the BarrelTimes array is full
+         if(data_i % MAX_RECS == 0 && data_i > 1){
+            //generate a model and fill BarrelTime array
+            fillTime(data_i, MAX_RECS);
+           
+            timeRecs = new BarrelTime[MAX_RECS];
+         }
+         
+         //initialize the BarrelTime object
+         timeRecs[rec_i] = new BarrelTime();
+         
+         //fill a BarrelTime object with data values
+         timeRecs[rec_i].setFrame(data.frameNum[data_i]);
+         timeRecs[rec_i].setWeek(data.weeks[data_i]);
+         
+         if(data.ms_of_week[data_i] == 0){ 
+            timeRecs[rec_i].setMS_of_week(MSFILL);
+         }else{
+            timeRecs[rec_i].setMS_of_week(data.ms_of_week[data_i]);
+         }
+         timeRecs[rec_i].setPPS(data.pps[data_i]);
+      }
+      
+      //process any remaining records
+      fillTime(data_i, (rec_i + 1));
+
+      backFillModels();
+      
+      //calculate epoch data for the DataHolder object
+      fillEpoch();
+            
+      System.out.println("Time corrected.\n");
    }
    
-   public void fillTime(int last_rec){
+   public void fillTime(int current_data_i, int num_of_recs){
       double temp;
       Model q;
-      int pair_cnt, good_cnt, goodfit, 
-         remaining_recs, rec_end_i, rec_start_i;
-      if (!check(last_rec)) return;
+      int pair_cnt, good_cnt, goodfit;
+      if (!check(num_of_recs)) return;
 
-      rec_start_i = 0;
-      remaining_recs = last_rec;
-      while (remaining_recs > 0) {
-         //find the end of the array for this pass 
-         rec_end_i = Math.min(MAX_RECS, remaining_recs); 
-         
-         pair_cnt = makePairs(rec_start_i, rec_end_i);
-         if (pair_cnt < 2) {
-            if (evaluateModel(time_model, pair_cnt)){
-               updateBT(rec_start_i, rec_end_i);
-            }
-            else{
-               for (int rec_i = rec_start_i; rec_i < rec_end_i; rec_i++){
-                  timeRecs[rec_i].setQuality(NOINFO);
-               }
-            }
-         }else{
-            good_cnt = selectPairs(pair_cnt);
-            
-            //Improve condition
-            q = genModel(good_cnt);
-            if (evaluateModel(q, good_cnt)) {
-               time_model.setRate(q.getRate());
-               time_model.setOffset(q.getOffset());
-            }
-            updateBT(rec_start_i, rec_end_i);
+      pair_cnt = makePairs(num_of_recs);
+      
+      if(pair_cnt < 2) {
+         if(evaluateModel(time_model, pair_cnt)){
+            updateTimes(current_data_i, num_of_recs);
          }
-         // printf("Using model time(ms) = %17.13lf(fc + %19.9lf)\n",
-         //model.rate, model.offset);
-         remaining_recs -= rec_end_i;
-         rec_start_i += rec_end_i;
+         else{
+            for (int rec_i = 0; rec_i < num_of_recs; rec_i++){
+               timeRecs[rec_i].setQuality(NOINFO);
+
+               data.quality[current_data_i - num_of_recs + rec_i] |= NOINFO; 
+            }
+         }
+      }else{
+         good_cnt = selectPairs(pair_cnt);
+         
+         //Improve condition
+         q = genModel(good_cnt);
+         if (evaluateModel(q, good_cnt)) {
+            time_model = new Model(q.getRate(), q.getOffset());
+         }
+         
+         updateTimes(current_data_i, num_of_recs);
       }
+      
+      // printf("Using model time(ms) = %17.13lf(fc + %19.9lf)\n",
+      //model.rate, model.offset);
    }
    
-   public int makePairs(int start, int end){
+   public int makePairs(int cnt){
       int goodcnt = 0;
-      int cnt;
       Calendar date = Calendar.getInstance();
       
       //Make sure there are a good number of records
-      cnt = end - start;
       if (cnt <= 0 || cnt > MAX_RECS){return 0;}
 
-      for(int rec_i = start; rec_i < end; rec_i++) {
+      for(int rec_i = 0; rec_i < cnt; rec_i++) {
          if(timeRecs[rec_i].getMS_of_week() != MSFILL 
             && timeRecs[rec_i].getWeek() != WKFILL
          ) {
@@ -244,7 +299,7 @@ public class ExtractTiming {
          }
          if(timeRecs[rec_i].getPPS() == 0xFFFF){timeRecs[rec_i].setPPS(0);}
          
-         if (timeRecs[rec_i].getPPS() > 1000){timeRecs[rec_i].setQuality(BADPPS);}
+         if(timeRecs[rec_i].getPPS() > 1000){timeRecs[rec_i].setQuality(BADPPS);}
       }
       
       return status;
@@ -325,16 +380,16 @@ public class ExtractTiming {
    }
 
    public boolean evaluateModel(Model test_model, int cnt){
-      if (test_model == null || cnt == 0){
+      if(test_model == null || cnt < 2){
          return false;
       }
-      else if (cnt == 1) {
+      else if (cnt == 2) {
          double ms1 = 
             test_model.getRate() * 
                (time_pairs[0].getFrame() + test_model.getOffset());
          double ms2 = 
             time_model.getRate() * 
-               (time_pairs[0].getFrame() + time_model.getOffset());
+               (time_pairs[1].getFrame() + time_model.getOffset());
       
          //test to see if model gives less than 50ms change
          if(Math.abs(ms1 - ms2) < 0.5 && 
@@ -351,29 +406,52 @@ public class ExtractTiming {
        }
    }
    
-   public void updateBT(int start, int end){
-      for(int rec_i = start; rec_i < end; rec_i++) {
+   public void updateTimes(int current_data_i, int num_of_recs){
+      int data_i=0;
+      
+      for(int rec_i = 0; rec_i < num_of_recs; rec_i++) {
+         data_i = current_data_i - num_of_recs + rec_i;
+         
          timeRecs[rec_i].setMS( 
             time_model.getRate() * 
             (timeRecs[rec_i].getFrame() + time_model.getOffset())
          );
          timeRecs[rec_i].setQuality(FILLED);
+
+         data.time_model_offset[data_i] = time_model.getOffset();
+         data.time_model_rate[data_i] = time_model.getRate();
+         data.ms_since_epoch[data_i] = timeRecs[rec_i].getMS();
       }
    }
    
-   public void fillEpoch(DataHolder data, int data_start, int total){
+   public void backFillModels(){
+      double last_offset = -999, last_rate = -999;
+      
+      for(int data_i = data.getSize() - 1; data_i >= 0 ; data_i--){
+         if((data.quality[data_i] & NOINFO) != NOINFO){
+            last_offset = data.time_model_offset[data_i];
+            last_rate = data.time_model_rate[data_i];
+         }
+         else if(last_offset != -999 && last_rate != -999){
+            data.time_model_offset[data_i] = last_offset;
+            data.time_model_rate[data_i] = last_rate;
+            
+            data.ms_since_epoch[data_i] = 
+               last_rate * (data.frameNum[data_i] + last_offset);
+         }
+        
+      }
+   }
+   
+   public void fillEpoch(){
       Calendar date = Calendar.getInstance();
-      long tempEpoch;
       
-      
-      for(int rec_i = 0; rec_i < total; rec_i++){
+      for(int data_i = 0; data_i < data.getSize(); data_i++){
          
-         date.setTimeInMillis((long)timeRecs[rec_i].getMS());
-         
-         tempEpoch = date.getTimeInMillis();
+         date.setTimeInMillis((long) data.ms_since_epoch[data_i]);
          
          try{
-            data.epoch[data_start + rec_i] =
+            data.epoch[data_i] =
                CDFTT2000.fromUTCparts(
                   (double) date.get(Calendar.YEAR), 
                   (double) (date.get(Calendar.MONTH) +1 ), 
@@ -384,53 +462,9 @@ public class ExtractTiming {
                   (double) date.get(Calendar.MILLISECOND)
                );
          }catch(CDFException ex){
-            data.epoch[data_start + rec_i] = 
-               data.epoch[data_start + rec_i - 1] + 1000000; 
+            data.epoch[data_i] = 
+               data.epoch[data_i - 1] + 1000000; 
          }
       }
-   }
-   
-   public void buildBT(DataHolder data){
-      int temp, day, fc, week, ms, pps, cnt;
-      timeRecs = new BarrelTime[MAX_RECS];
-      //data set index reference
-      int FC = 0, DAY = 1, WEEK = 2, MS = 3, PPS = 4;
-      int rec_i = 0; //keep track of current record in BarrelTime object array
-      
-      for(int data_i = 0; data_i < data.getSize(); rec_i++, data_i++){
-         //check if the BarrelTimes array is full
-         if(rec_i == MAX_RECS ){
-			   //generate a model and refill the array with adjusted time
-            fillTime(rec_i);
-            
-            //copy the BarrelTime data to the DataHolder object
-            fillEpoch(data, (data_i - MAX_RECS), MAX_RECS);
-            
-            timeRecs = new BarrelTime[MAX_RECS];
-            
-            rec_i = 0;
-         }
-         
-         //initialize the BarrelTime object
-         timeRecs[rec_i] = new BarrelTime();
-         
-         //fill a BarrelTime object with data values
-         timeRecs[rec_i].setFrame(data.frameNum[data_i]);
-         timeRecs[rec_i].setWeek(data.weeks[data_i]);
-         
-         if(data.ms_of_week[data_i] == 0){ 
-            timeRecs[rec_i].setMS_of_week(MSFILL);
-         }else{
-            timeRecs[rec_i].setMS_of_week(data.ms_of_week[data_i]);
-         }
-         timeRecs[rec_i].setPPS(data.pps[data_i]);
-      }
-      
-      //process any remaining records
-      fillTime(rec_i);
-      
-      fillEpoch(data, (data.getSize() - rec_i), rec_i);
-            
-      System.out.println("Time corrected.\n");
    }
 }

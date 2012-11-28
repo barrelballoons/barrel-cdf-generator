@@ -99,9 +99,7 @@ public class LevelZero{
       outputPath = outputDir;
       
       //set get a list of input files
-      File tempDir = new File(
-         inputDir + "/" + currentPayload  + "/" + currentDate
-      );
+      File tempDir = new File(inputPath);
       fileList = tempDir.list();
       Arrays.sort(fileList);
       

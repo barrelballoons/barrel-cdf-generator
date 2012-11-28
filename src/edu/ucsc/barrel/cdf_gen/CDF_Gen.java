@@ -149,19 +149,24 @@ public class CDF_Gen implements CDFConstants{
          //create a new storage object
          data = new DataHolder();
          
-         dataPull = new DataCollector( 
-            tlm_Dir, 
-            servers, 
-            settings.get("currentPayload"), 
-            Integer.parseInt(settings.get("date"))
-         );
-         
-         //read each repository and build a list of data file URLs
-         dataPull.getFileList();
-         
-         //download each file after the URL list is made
-         dataPull.getFiles();
-                  
+         //Figure out where the input files are coming from
+         if(getSetting("local") == ""){
+            dataPull = new DataCollector( 
+               tlm_Dir, 
+               servers, 
+               settings.get("currentPayload"), 
+               Integer.parseInt(settings.get("date"))
+            );
+            
+            //read each repository and build a list of data file URLs
+            dataPull.getFileList();
+            
+            //download each file after the URL list is made
+            dataPull.getFiles();
+         }else{
+            tlm_Dir = getSetting("local");
+         }
+                     
          //Create level zero object and convert the data files to a level 0 file
          try{
             System.out.println("Creating Level Zero...");
@@ -179,40 +184,41 @@ public class CDF_Gen implements CDFConstants{
             System.out.println(
                "Completed Level 0 for payload " + getSetting("currentPayload")
             );
-            
-            //calculate throughput value
+         
+            //If we didn't get any data, move on to the next payload.
             if(data.getSize() > 0){
-			   System.out.println(
-                  "Payload " + getSetting("currentPayload") + 
-                  " Throughput: " + (100 * data.getSize() - 1) /
-			      (data.frameNum[data.getSize() - 1] - 
-			      (data.frameNum[0]))
-			      + " %"
-			   );
-            }
             
-            //Fill the time variable
-            ExtractTiming barrel_time = new ExtractTiming();
-            barrel_time.buildBT(data);
-            barrel_time = null;
+               //calculate throughput value
+               System.out.println(
+                     "Payload " + getSetting("currentPayload") + 
+                     " Throughput: " + (100 * data.getSize() - 1) /
+   			      (data.frameNum[data.getSize() - 1] - 
+   			      (data.frameNum[0]))
+   			      + " %"
+   			   );
             
-            if(getSetting("L").indexOf("1") > -1){
-               //create Level One 
-               LevelOne L1 = new LevelOne(
-                  getSetting("date"), 
-                  getSetting("currentPayload")
-               );
-               L1 = null;
-			}
-            
-            if(getSetting("L").indexOf("2") > -1){
-               //create Level Two
-               LevelTwo L2 = new LevelTwo(
-                  getSetting("date"), 
-                  getSetting("currentPayload")
-               );
+               //Fill the time variable
+               ExtractTiming barrel_time = new ExtractTiming();
+               barrel_time = null;
                
-               L2 = null;
+               if(getSetting("L").indexOf("1") > -1){
+                  //create Level One 
+                  LevelOne L1 = new LevelOne(
+                     getSetting("date"), 
+                     getSetting("currentPayload")
+                  );
+                  L1 = null;
+               }
+               
+               if(getSetting("L").indexOf("2") > -1){
+                  //create Level Two
+                  LevelTwo L2 = new LevelTwo(
+                     getSetting("date"), 
+                     getSetting("currentPayload")
+                  );
+                  
+                  L2 = null;
+               }
             }
          }catch(IOException ex){
             System.out.println(

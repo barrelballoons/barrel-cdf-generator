@@ -8,8 +8,14 @@ DataHolder.java 12.11.22
 Description:
    Stores the data frames that are being processed
 
+v12.11.27
+   -Added members to hold time model info
+   -Added holder for quality flag
+   -Fixed fspc extraction
+   
 v12.11.22
    -Saves ms_of_week variable when reading it when processing a gps time frame
+
 v12.11.20
    -Changed references to Level_Generator to CDF_Gen
    -Changed many of the objects to primitave types
@@ -79,7 +85,10 @@ public class DataHolder{
       magz_raw = new Long[MAX_FRAMES][4];
    public double[]
       gps = new double[MAX_FRAMES],
-      hkpg = new double[MAX_FRAMES];
+      hkpg = new double[MAX_FRAMES],
+      time_model_rate = new double[MAX_FRAMES],
+      time_model_offset = new double[MAX_FRAMES],
+      ms_since_epoch = new double[MAX_FRAMES];
    public Double[][]
       magx = new Double[MAX_FRAMES][4],
       magy = new Double[MAX_FRAMES][4],
@@ -88,7 +97,8 @@ public class DataHolder{
       frameNum = new int[MAX_FRAMES],
       weeks = new int[MAX_FRAMES],
       pps = new int[MAX_FRAMES],
-      cmdCnt = new int[MAX_FRAMES];
+      cmdCnt = new int[MAX_FRAMES],
+      quality = new int[MAX_FRAMES];
    public Integer[][]
       lc1_raw = new Integer[MAX_FRAMES][20],
       lc2_raw = new Integer[MAX_FRAMES][20],
@@ -199,13 +209,13 @@ public class DataHolder{
             frame.shiftRight(1296 - (48 * lc_i))
                .and(BigInteger.valueOf(65535)).intValue();
          lc2_raw[frm_i][lc_i] =
-            frame.shiftRight(1296 - (48 * lc_i) - 16)
+            frame.shiftRight(1280 - (48 * lc_i))
                .and(BigInteger.valueOf(65535)).intValue();
          lc3_raw[frm_i][lc_i] =
-            frame.shiftRight(1296 - (48 * lc_i) - 32)
+            frame.shiftRight(1272 - (48 * lc_i))
                .and(BigInteger.valueOf(255)).intValue();
          lc4_raw[frm_i][lc_i] =
-            frame.shiftRight(1296 - (48 * lc_i) - 40)
+            frame.shiftRight(1264 - (48 * lc_i))
                .and(BigInteger.valueOf(255)).intValue();
       }
        

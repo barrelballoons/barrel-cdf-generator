@@ -11,11 +11,16 @@ import java.io.FileReader;
 import java.io.IOException;
 
 /*
-LevelTwo.java v12.11.26
+LevelTwo.java v12.11.27
 
 Description:
    Creates Level Two CDF files
 
+v12.11.27
+   -Fixed hpkg_rec incrementing.
+   -Fills rate counter file
+   -Magnetometer data is now saved in CDF files as both extracted and gain corrected variables
+   
 v12.11.26
    -Does not set payload directory in outpath here.
 
@@ -183,6 +188,9 @@ public class LevelTwo implements CDFConstants{
       sspc_cdf = CDF_Gen.openCDF( 
          outputPath + "barCLL_" + payload + "_S_l2_sspc_" + date + "_v++.cdf" 
       );
+      rcnt_cdf = CDF_Gen.openCDF( 
+         outputPath + "barCLL_" + payload + "_S_l2_rcnt_" + date + "_v++.cdf" 
+      );
 
       for(int frm_i = 0; frm_i < data.getSize(); frm_i++){
          System.out.println(
@@ -199,6 +207,13 @@ public class LevelTwo implements CDFConstants{
          switch(mod4){
             case 0:
                gps_rec++;
+               
+               int q = 0; 
+               q |= data.quality[frm_i]; 
+               if((frm_i + 1) < data.getSize()) q |= data.quality[frm_i + 1];
+               if((frm_i + 2) < data.getSize()) q |= data.quality[frm_i + 2];
+               if((frm_i + 3) < data.getSize()) q |= data.quality[frm_i + 3];
+               CDF_Gen.putData(gps_cdf, "Q", gps_rec, Long.valueOf(q), 0L);
                
                CDF_Gen.putData(
                   gps_cdf, "FrameGroup", gps_rec, 
@@ -277,13 +292,22 @@ public class LevelTwo implements CDFConstants{
          
          
          //Extract Housekeeping
-         hkpg_rec++;
-         
          switch(mod40){
             case 0:
+               hkpg_rec++;
+               
                data.hkpg[frm_i] = 
                   (data.hkpg_raw[frm_i] * hkpg_scale[mod40]) + 
                   hkpg_offset[mod40];
+               
+               //calculate quality factor for all of the housekeeping frames
+               int q = 0;
+               for(int q_i = frm_i; 
+                  q_i < Math.min((frm_i + 40), data.getSize()); 
+                  q_i++
+               ){
+                  q |= data.quality[q_i];
+               }
                
                CDF_Gen.putData(
                   hkpg_cdf, "Epoch", hkpg_rec, 
@@ -375,14 +399,6 @@ public class LevelTwo implements CDFConstants{
             data.magz[frm_i][set_i] = 
                (data.magz_raw[frm_i][set_i] - 8388608) / 83886.070;
             
-            //do mag gain correction if we have a valid temperature
-            if(magTemp > 0){
-               //get the gain correction factors
-               data.magx[frm_i][set_i] *= magCal[1] * (magTemp - 20);   
-               data.magy[frm_i][set_i] *= magCal[2] * (magTemp - 20);
-               data.magx[frm_i][set_i] *= magCal[3] * (magTemp - 20);
-            }
-            
             //calculate magnitude of field
             mag_tot = 
                Math.sqrt(
@@ -391,7 +407,7 @@ public class LevelTwo implements CDFConstants{
                   Math.pow(data.magz[frm_i][set_i], 2)
                );
             
-            //save data
+            //save gain corrected data
             CDF_Gen.putData(
                mag_cdf, "MAG_X", mag_rec, 
                Double.valueOf(data.magx[frm_i][set_i]), 0L
@@ -402,17 +418,57 @@ public class LevelTwo implements CDFConstants{
             );
             CDF_Gen.putData(
                mag_cdf, "MAG_Z", mag_rec, 
-               Double.valueOf(data.magx[frm_i][set_i]), 0L
+               Double.valueOf(data.magz[frm_i][set_i]), 0L
             );
             CDF_Gen.putData(
                mag_cdf, "Total", mag_rec, 
                Double.valueOf(mag_tot), 0L
             );
             
+            
+            //do mag gain correction if we have a valid temperature
+            if(magTemp > 0){
+               //get the gain correction factors
+               data.magx[frm_i][set_i] *= magCal[1] * (magTemp - 20);   
+               data.magy[frm_i][set_i] *= magCal[2] * (magTemp - 20);
+               data.magx[frm_i][set_i] *= magCal[3] * (magTemp - 20);
+            }
+            
+            //calculate magnitude of gain corrected field
+            mag_tot = 
+               Math.sqrt(
+                  Math.pow(data.magx[frm_i][set_i], 2) + 
+                  Math.pow(data.magy[frm_i][set_i], 2) + 
+                  Math.pow(data.magz[frm_i][set_i], 2)
+               );
+            
+            //save gain corrected data
+            CDF_Gen.putData(
+               mag_cdf, "MAG_X_ADJ", mag_rec, 
+               Double.valueOf(data.magx[frm_i][set_i]), 0L
+            );
+            CDF_Gen.putData(
+               mag_cdf, "MAG_Y_ADJ", mag_rec, 
+               Double.valueOf(data.magy[frm_i][set_i]), 0L
+            );
+            CDF_Gen.putData(
+               mag_cdf, "MAG_Z_ADJ", mag_rec, 
+               Double.valueOf(data.magz[frm_i][set_i]), 0L
+            );
+            CDF_Gen.putData(
+               mag_cdf, "Total_ADJ", mag_rec, 
+               Double.valueOf(mag_tot), 0L
+            );
+            
+            CDF_Gen.putData(
+               mag_cdf, "Q", mag_rec, 
+               Long.valueOf(data.quality[frm_i]), 0L
+            );
+               
             //Add offset to time and epoch because this is 4Hz data 
             CDF_Gen.putData(
                mag_cdf, "Epoch", mag_rec, 
-               Long.valueOf((data.epoch[frm_i]+(250000000 * set_i))),0L
+               Long.valueOf((data.epoch[frm_i] + (250000000 * set_i))), 0L
             );
             CDF_Gen.putData(
                mag_cdf, "FrameGroup", mag_rec, 
@@ -436,6 +492,16 @@ public class LevelTwo implements CDFConstants{
             sspc_rec++;
             
             sspc_first_frm = data.frameNum[frm_i];
+            
+            //calculate quality factor for all of the slow spectrum frames
+            int q = 0;
+            for(int q_i = frm_i; 
+               q_i < Math.min((frm_i + 32), data.getSize()); 
+               q_i++
+            ){
+               q |= data.quality[q_i];
+            }
+            CDF_Gen.putData(sspc_cdf, "Q", sspc_rec, Long.valueOf(q), 0L);
             
             CDF_Gen.putData(
                sspc_cdf, "Epoch", sspc_rec, 
@@ -486,7 +552,6 @@ public class LevelTwo implements CDFConstants{
             }
          }
          
-         
          //Medium Spectrum
          System.arraycopy(
             data.mspc_raw[frm_i], 0, 
@@ -496,6 +561,14 @@ public class LevelTwo implements CDFConstants{
             mspc_rec++;
             
             mspc_first_frm = data.frameNum[frm_i];
+            
+            //calculate the data quality for this frame group
+            int q = 0; 
+            q |= data.quality[frm_i]; 
+            if((frm_i + 1) < data.getSize()) q |= data.quality[frm_i + 1];
+            if((frm_i + 2) < data.getSize()) q |= data.quality[frm_i + 2];
+            if((frm_i + 3) < data.getSize()) q |= data.quality[frm_i + 3];
+            CDF_Gen.putData(mspc_cdf, "Q", mspc_rec, Long.valueOf(q), 0L);
             
             CDF_Gen.putData(
                mspc_cdf, "Epoch", mspc_rec, data.epoch[frm_i], 0L
@@ -560,13 +633,19 @@ public class LevelTwo implements CDFConstants{
             //convert counts and count error to cnts/kev/sec
             countsToEnergy(fspc_error, stdSpectraEdges[2]);
             countsToEnergy(fspc_rebin, stdSpectraEdges[2]);
-   
+            
             fspc_rec++;
+            
+            //calculate the data quality for this frame group
+            CDF_Gen.putData(rcnt_cdf, "Q", rcnt_rec, 
+               Long.valueOf(data.quality[frm_i]), 0L
+            );
+            
             CDF_Gen.putData(
                fspc_cdf, "FrameGroup", fspc_rec, 
                Integer.valueOf(data.frameNum[frm_i]), 0L
             );
-         
+            
             //write spectra to cdf files
             //Add epoch and time offsets because data comes at 20Hz
             CDF_Gen.putData(
@@ -613,7 +692,31 @@ public class LevelTwo implements CDFConstants{
          }
          
          //Rate Counters
-         /* FIX THIS */
+         if(mod4 == 0){
+            rcnt_rec++;
+
+            //calculate the data quality for this frame group
+            int q = 0; 
+            q |= data.quality[frm_i]; 
+            if((frm_i + 1) < data.getSize()) q |= data.quality[frm_i + 1];
+            if((frm_i + 2) < data.getSize()) q |= data.quality[frm_i + 2];
+            if((frm_i + 3) < data.getSize()) q |= data.quality[frm_i + 3];
+            CDF_Gen.putData(rcnt_cdf, "Q", rcnt_rec, Long.valueOf(q), 0L);
+            
+            CDF_Gen.putData(
+               rcnt_cdf, "Epoch", rcnt_rec, 
+               Long.valueOf(data.epoch[frm_i]), 0L
+            );
+            CDF_Gen.putData(
+               rcnt_cdf, "FrameGroup", rcnt_rec, 
+               Integer.valueOf(frameGrp4), 0L
+            );
+         }
+         
+         CDF_Gen.putData(
+            rcnt_cdf, DataHolder.rc_label[mod4], rcnt_rec, 
+            Double.valueOf(data.rc_raw[frm_i] / 4), 0L
+         );
       }
       
       sspc_cdf.close();
@@ -622,6 +725,7 @@ public class LevelTwo implements CDFConstants{
       hkpg_cdf.close();
       gps_cdf.close();
       pps_cdf.close();
+      rcnt_cdf.close();
       
       System.out.println("Created Level Two.");
    }

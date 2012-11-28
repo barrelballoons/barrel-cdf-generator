@@ -134,15 +134,12 @@ public class LevelOne{
       System.out.println(
          "Creating Level One... (" + data.getSize() + " frames)");
       
-      long epoch = 0;
       int mod4, mod32, mod40, frameGrp4, frameGrp32, frameGrp40;
    
       
       for( int frm_i = 0; frm_i < data.getSize(); frm_i++ ){
          System.out.println(
             frm_i + " (" + (100 * frm_i) / data.getSize() + "%)");
-         
-         epoch = 0L;
          
          //get all the frame groups and mux index
          mod4 = data.frameNum[frm_i] % 4;
@@ -151,33 +148,33 @@ public class LevelOne{
          frameGrp4 = data.frameNum[frm_i] - mod4;
          frameGrp32 = data.frameNum[frm_i] - mod32;
          frameGrp40 = data.frameNum[frm_i] - mod40;
-      
-         //Do time simple correction
-         if(frm_i > 0 && mod4 != 1){
-            //Increment time 
-            ms_of_week += ((data.frameNum[frm_i] - data.frameNum[frm_i - 1]) * 1000);
-	      }else{
-	         ms_of_week = data.gps_raw[frm_i];
-		   }
          
          //GPS
          switch(mod4){
             case 0:
                gps_rec++;
+               
+               int q = 0; 
+               q |= data.quality[frm_i]; 
+               if((frm_i + 1) < data.getSize()) q |= data.quality[frm_i + 1];
+               if((frm_i + 2) < data.getSize()) q |= data.quality[frm_i + 2];
+               if((frm_i + 3) < data.getSize()) q |= data.quality[frm_i + 3];
+               CDF_Gen.putData(gps_cdf, "Q", gps_rec, Long.valueOf(q), 0L);
+               
                CDF_Gen.putData(
-                  gps_cdf, "FrameGroup", gps_rec, 
-                  Integer.valueOf(data.frameNum[frm_i]), 0L
+                  gps_cdf, "Epoch", gps_rec, 
+                  Long.valueOf(data.epoch[frm_i]), 0L
                );
+               CDF_Gen.putData(
+                     gps_cdf, "FrameGroup", gps_rec, 
+                     Integer.valueOf(data.frameNum[frm_i]), 0L
+                  );
                CDF_Gen.putData(
                   gps_cdf, "GPS_Alt", gps_rec, 
                   Long.valueOf(data.gps_raw[frm_i]), 0L
                );
                break;
             case 1:
-               CDF_Gen.putData(
-                  gps_cdf, "Epoch", gps_rec, 
-                  Long.valueOf(data.epoch[frm_i]), 0L
-               );
                CDF_Gen.putData(
                   gps_cdf, "ms_of_week", gps_rec, 
                   Long.valueOf(data.ms_of_week[frm_i]), 0L
@@ -200,6 +197,11 @@ public class LevelOne{
          
          //PPS
          pps_rec++;
+       
+         CDF_Gen.putData(
+            pps_cdf, "Q", pps_rec, 
+            Long.valueOf(data.quality[frm_i]), 0L
+         );
          CDF_Gen.putData(
             pps_cdf, "Epoch", pps_rec, 
             Long.valueOf(data.epoch[frm_i]), 0L
@@ -225,6 +227,10 @@ public class LevelOne{
          for(int set_i = 0; set_i < 4; set_i++){
             mag_rec++;
             
+            CDF_Gen.putData(
+               mag_cdf, "Q", mag_rec, 
+               Long.valueOf(data.quality[frm_i]), 0L
+            );
             //Add offset to time and epoch because this is 4Hz data 
             CDF_Gen.putData(
                mag_cdf, "Epoch", mag_rec, 
@@ -251,6 +257,18 @@ public class LevelOne{
          //HKPG
          if(mod40 == 0){ //start a new record for each new group of frames
             hkpg_rec++;
+            
+            //calculate quality factor for all of the housekeeping frames
+            int q = 0;
+            for(int q_i = frm_i; 
+               q_i < Math.min((frm_i + 40), data.getSize()); 
+               q_i++
+            ){
+               q |= data.quality[q_i];
+            }
+            
+            CDF_Gen.putData(hkpg_cdf, "Q", hkpg_rec, Long.valueOf(q), 0L);
+            
             CDF_Gen.putData(
                hkpg_cdf, "Epoch", hkpg_rec, 
                Long.valueOf(data.epoch[frm_i]), 0L
@@ -308,12 +326,16 @@ public class LevelOne{
          //FSPC
          for(int set_i = 0; set_i < 20; set_i++){
             fspc_rec++;
+            
+            //Add epoch and time offsets because data comes at 20Hz
+            CDF_Gen.putData(
+               fspc_cdf, "Q", fspc_rec, 
+               Long.valueOf(data.quality[frm_i]), 0L
+            );
             CDF_Gen.putData(
                fspc_cdf, "FrameGroup", fspc_rec, 
                Integer.valueOf(data.frameNum[frm_i]), 0L
             );
-            
-            //Add epoch and time offsets because data comes at 20Hz
             CDF_Gen.putData(
                fspc_cdf, "Epoch", fspc_rec, 
                Long.valueOf(data.epoch[frm_i] + (50000000 * set_i)), 0L);
@@ -334,6 +356,16 @@ public class LevelOne{
          //MSPC
          if(mod4 == 0){
             mspc_rec++;
+            
+            //calculate the data quality for this frame group
+            int q = 0; 
+            q |= data.quality[frm_i]; 
+            if((frm_i + 1) < data.getSize()) q |= data.quality[frm_i + 1];
+            if((frm_i + 2) < data.getSize()) q |= data.quality[frm_i + 2];
+            if((frm_i + 3) < data.getSize()) q |= data.quality[frm_i + 3];
+            CDF_Gen.putData(mspc_cdf, "Q", mspc_rec, Long.valueOf(q), 0L);
+            
+            
             CDF_Gen.putData(
                mspc_cdf, "Epoch", mspc_rec, 
                Long.valueOf(data.epoch[frm_i]), 0L
@@ -353,6 +385,17 @@ public class LevelOne{
          //SSPC
          if(mod32 == 0){
             sspc_rec++;
+            
+            //calculate quality factor for all of the slow spectrum frames
+            int q = 0;
+            for(int q_i = frm_i; 
+               q_i < Math.min((frm_i + 32), data.getSize()); 
+               q_i++
+            ){
+               q |= data.quality[q_i];
+            }
+            CDF_Gen.putData(sspc_cdf, "Q", sspc_rec, Long.valueOf(q), 0L);
+            
             CDF_Gen.putData(
                sspc_cdf, "Epoch", sspc_rec, 
                Long.valueOf(data.epoch[frm_i]), 0L
@@ -372,6 +415,16 @@ public class LevelOne{
          //RC
          if(mod4 == 0){
             rcnt_rec++;
+            
+            //calculate the data quality for this frame group
+            int q = 0; 
+            q |= data.quality[frm_i]; 
+            if((frm_i + 1) < data.getSize()) q |= data.quality[frm_i + 1];
+            if((frm_i + 2) < data.getSize()) q |= data.quality[frm_i + 2];
+            if((frm_i + 3) < data.getSize()) q |= data.quality[frm_i + 3];
+            
+            CDF_Gen.putData(rcnt_cdf, "Q", rcnt_rec, Long.valueOf(q), 0L);
+            
             CDF_Gen.putData(
                rcnt_cdf, "Epoch", rcnt_rec, 
                Long.valueOf(data.epoch[frm_i]), 0L
@@ -381,10 +434,11 @@ public class LevelOne{
                Integer.valueOf(frameGrp4), 0L
             );
          }
-            CDF_Gen.putData(
-               rcnt_cdf, DataHolder.rc_label[mod4], rcnt_rec, 
-               Long.valueOf(data.rc_raw[frm_i]), 0L
-            );
+         
+         CDF_Gen.putData(
+            rcnt_cdf, DataHolder.rc_label[mod4], rcnt_rec, 
+            Long.valueOf(data.rc_raw[frm_i]), 0L
+         );
           
 
          lastFrame = data.frameNum[frm_i];
