@@ -13,6 +13,9 @@ Description:
    Uses a block of gps time info to create a more exact time variable.
    Ported from MPM's C code.
 
+v12.11.28
+   -Fixed null pointer error caused by trying to process data without a linear model
+
 v12.11.27
    -Grabs DataHolder object from CDF_Gen as a member rather than having it passed through all function
    -Rewroked a number of routines to add ability to fill missing time 
@@ -195,26 +198,34 @@ public class ExtractTiming {
       pair_cnt = makePairs(num_of_recs);
       
       if(pair_cnt < 2) {
+         if(time_model == null){System.out.println(current_data_i);}
          if(evaluateModel(time_model, pair_cnt)){
             updateTimes(current_data_i, num_of_recs);
          }
          else{
             for (int rec_i = 0; rec_i < num_of_recs; rec_i++){
                timeRecs[rec_i].setQuality(NOINFO);
-
                data.quality[current_data_i - num_of_recs + rec_i] |= NOINFO; 
             }
          }
       }else{
          good_cnt = selectPairs(pair_cnt);
          
-         //Improve condition
+         //Try to create a new model
          q = genModel(good_cnt);
          if (evaluateModel(q, good_cnt)) {
             time_model = new Model(q.getRate(), q.getOffset());
          }
          
-         updateTimes(current_data_i, num_of_recs);
+         //Make sure we have a model
+         if(time_model != null){
+            updateTimes(current_data_i, num_of_recs);
+         }else{//or just set quality bits to noinfo
+            for (int rec_i = 0; rec_i < num_of_recs; rec_i++){
+               timeRecs[rec_i].setQuality(NOINFO);
+               data.quality[current_data_i - num_of_recs + rec_i] |= NOINFO; 
+            }
+         }
       }
       
       // printf("Using model time(ms) = %17.13lf(fc + %19.9lf)\n",
@@ -344,7 +355,11 @@ public class ExtractTiming {
       
       Arrays.sort(sortedList);
       
-      return sortedList[(sortedList.length/2) + 1];
+      if(list.length > 2){
+         return sortedList[(int) (sortedList.length / 2) + 1];
+      }else{
+         return sortedList[0];
+      }
    }
    
    public Model genModel(int n){
@@ -408,19 +423,20 @@ public class ExtractTiming {
    
    public void updateTimes(int current_data_i, int num_of_recs){
       int data_i=0;
-      
-      for(int rec_i = 0; rec_i < num_of_recs; rec_i++) {
-         data_i = current_data_i - num_of_recs + rec_i;
-         
-         timeRecs[rec_i].setMS( 
-            time_model.getRate() * 
-            (timeRecs[rec_i].getFrame() + time_model.getOffset())
-         );
-         timeRecs[rec_i].setQuality(FILLED);
-
-         data.time_model_offset[data_i] = time_model.getOffset();
-         data.time_model_rate[data_i] = time_model.getRate();
-         data.ms_since_epoch[data_i] = timeRecs[rec_i].getMS();
+      if(true){
+         for(int rec_i = 0; rec_i < num_of_recs; rec_i++) {
+            data_i = current_data_i - num_of_recs + rec_i;
+            
+            timeRecs[rec_i].setMS( 
+               time_model.getRate() * 
+               (timeRecs[rec_i].getFrame() + time_model.getOffset())
+            );
+            timeRecs[rec_i].setQuality(FILLED);
+   
+            data.time_model_offset[data_i] = time_model.getOffset();
+            data.time_model_rate[data_i] = time_model.getRate();
+            data.ms_since_epoch[data_i] = timeRecs[rec_i].getMS();
+         }
       }
    }
    

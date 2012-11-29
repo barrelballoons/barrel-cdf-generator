@@ -9,10 +9,13 @@ import java.io.IOException;
 import java.util.Calendar;
 
 /*
-LevelOne.java v12.11.26
+LevelOne.java v12.11.28
 
 Description:
    Creates level one CDF files
+
+v12.11.28
+   -Modified terminal output to indicate payload and date
 
 v12.11.26
    -Removed epoch calculations
@@ -71,15 +74,16 @@ public class LevelOne{
    int lastFrame = -1;
    long ms_of_week = 0;
    int weeks = 0;
-   String date;
+   String date, payload;
    Calendar dateObj = Calendar.getInstance();
 
    private DataHolder data;
    
-   public LevelOne(final String d, final String payload)
+   public LevelOne(final String d, final String p)
       throws IOException
    {
       date = d;
+      payload = p;
       
       //get the data storage object
       data = CDF_Gen.getDataSet();
@@ -139,6 +143,7 @@ public class LevelOne{
       
       for( int frm_i = 0; frm_i < data.getSize(); frm_i++ ){
          System.out.println(
+            "L1 for " + payload + " on " + date + ": " + 
             frm_i + " (" + (100 * frm_i) / data.getSize() + "%)");
          
          //get all the frame groups and mux index

@@ -15,12 +15,21 @@
 
     <target name="compile">
         <mkdir dir="build/classes"/>
-        <javac srcdir="${src.dir}" destdir="${build.dir}/classes" classpathref="classpath"/>
+        <javac 
+    		debug="true" 
+    	    debuglevel="lines,vars,source"
+    		srcdir="${src.dir}" 
+    		destdir="${build.dir}/classes" 
+        	classpathref="classpath"
+        />
     </target>
 
     <target name="jar" depends="compile" >
         <mkdir dir="build/jar"/>
-        <jar destfile="${build.dir}/jar/cdf_gen.jar" basedir="${build.dir}/classes">
+        <jar 
+        	destfile="${build.dir}/jar/cdf_gen.jar" 
+        	basedir="${build.dir}/classes"
+    	>
             <manifest>
                 <attribute name="Main-Class" value="${main-class}"/>
                 <attribute name="Class-Path" value="cdfjava.jar"/>

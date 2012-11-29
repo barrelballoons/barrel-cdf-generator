@@ -11,11 +11,14 @@ import java.io.FileReader;
 import java.io.IOException;
 
 /*
-LevelTwo.java v12.11.27
+LevelTwo.java v12.11.28
 
 Description:
    Creates Level Two CDF files
 
+v12.11.28
+   -Modified terminal output to indicate payload and date
+   
 v12.11.27
    -Fixed hpkg_rec incrementing.
    -Fills rate counter file
@@ -194,6 +197,7 @@ public class LevelTwo implements CDFConstants{
 
       for(int frm_i = 0; frm_i < data.getSize(); frm_i++){
          System.out.println(
+            "L2 for " + payload + " on " + date + ": " +
             frm_i + " (" + (100 * frm_i) / data.getSize() + "%)");
          
          mod4 = data.frameNum[frm_i] % 4;
