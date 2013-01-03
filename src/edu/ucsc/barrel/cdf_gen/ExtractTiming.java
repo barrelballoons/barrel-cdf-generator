@@ -5,6 +5,7 @@ import gsfc.nssdc.cdf.util.CDFTT2000;
 
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 /*
 ExactTiming.java v12.10.27
@@ -13,6 +14,10 @@ Description:
    Uses a block of gps time info to create a more exact time variable.
    Ported from MPM's C code.
 
+v12.12.31
+   -Removed redundant calculation of rec_i when checking if BarrelTimes array is full
+   
+   
 v12.11.28
    -Fixed null pointer error caused by trying to process data without a linear model
 
@@ -51,10 +56,8 @@ public class ExtractTiming {
    private static final byte WKFILL = 0;// fill value for week
    private static final short MINWEEK = 1200;
    private static final short MAXWEEK = 1880;
-
-   //will get set by constructor
-   private static long GPS_START_TIME;
-   private static long SYSTEM_EPOCH_TIME;
+   private static long GPS_START_TIME =
+      new GregorianCalendar(1980, 00, 06).getTime();
    
    //model parameters for a linear fit
    //Example: ms = rate * (fc + offset);
@@ -75,7 +78,7 @@ public class ExtractTiming {
    }
    
    private class TimePair{
-      private double ms;// frame time; ms after GPS 00:00:00 1 Jan 2010
+      private double ms;// frame time; ms after GPS 00:00:00 6 Jan 1980
       private long fc;//frame counter
 
       public void setMS(double t){ms = t;}
@@ -88,7 +91,7 @@ public class ExtractTiming {
    private class BarrelTime{
       private double ms = -1.;//frame time; ms after GPS 00:00:00 1 Jan 2010
       private long fc = -1;//frame counter
-      private double ms_of_week = -1;// ms since 00:00 on Sunday
+      private double ms_of_week = -1.;// ms since 00:00 on Sunday
       private int week = -1;//weeks since 6-Jan-1980
       private long pps = -1;//ms into frame when GPS pps comes
       private short quality = 0;//quality of recovered time
@@ -134,29 +137,18 @@ public class ExtractTiming {
       time_model = null;
       time_pairs = new TimePair[MAX_RECS];
       
-      //set time object to gps start time
-      Calendar gps_start_time;
-      gps_start_time = Calendar.getInstance();
-      gps_start_time.setTimeInMillis(0L);
-      
-      SYSTEM_EPOCH_TIME = gps_start_time.getTimeInMillis();
-      
-      gps_start_time.set(1980, 00, 06);
-      GPS_START_TIME = gps_start_time.getTimeInMillis();
-      
       int temp, day, fc, week, ms, pps, cnt;
       timeRecs = new BarrelTime[MAX_RECS];
       //data set index reference
       int FC = 0, DAY = 1, WEEK = 2, MS = 3, PPS = 4;
       int rec_i = 0, data_i = 0;
       
-      
       //loop through all of the frames and generate time models
       for(data_i = 0; data_i < data.getSize(); data_i++){
          rec_i = data_i % MAX_RECS;
          
          //check if the BarrelTimes array is full
-         if(data_i % MAX_RECS == 0 && data_i > 1){
+         if(rec_i == 0 && data_i > 1){
             //generate a model and fill BarrelTime array
             fillTime(data_i, MAX_RECS);
            
@@ -194,7 +186,7 @@ public class ExtractTiming {
       Model q;
       int pair_cnt, good_cnt, goodfit;
       if (!check(num_of_recs)) return;
-
+   
       pair_cnt = makePairs(num_of_recs);
       
       if(pair_cnt < 2) {
@@ -391,6 +383,8 @@ public class ExtractTiming {
       linfit.setRate(m);
       linfit.setOffset(muy / m - mux);
       
+      System.out.println(linfit.getRate() + " " + linfit.getOffset());
+      
       return linfit;
    }
 
@@ -432,7 +426,7 @@ public class ExtractTiming {
                (timeRecs[rec_i].getFrame() + time_model.getOffset())
             );
             timeRecs[rec_i].setQuality(FILLED);
-   
+            
             data.time_model_offset[data_i] = time_model.getOffset();
             data.time_model_rate[data_i] = time_model.getRate();
             data.ms_since_epoch[data_i] = timeRecs[rec_i].getMS();
