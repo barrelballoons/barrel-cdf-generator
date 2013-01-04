@@ -56,8 +56,9 @@ public class ExtractTiming {
    private static final byte WKFILL = 0;// fill value for week
    private static final short MINWEEK = 1200;
    private static final short MAXWEEK = 1880;
-   private static long GPS_START_TIME =
-      new GregorianCalendar(1980, 00, 06).getTime();
+   
+   //date offset info
+   private static long MS_OFFSET = 0;
    
    //model parameters for a linear fit
    //Example: ms = rate * (fc + offset);
@@ -136,6 +137,18 @@ public class ExtractTiming {
       
       time_model = null;
       time_pairs = new TimePair[MAX_RECS];
+      
+      //set the gps_start_time and j2000 calendar objects
+      new Calendar gps_start_time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+      gps_start_time.set(
+         1960, 00, 06, 00, 00, 00);
+      new Calendar j2000 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+      j2000.set(
+         2000, 00, 01, 11, 58, 55);
+      j2000.add(Calendar.MILLISECOND, 816);
+      
+      //calculate the number of ms from gps start time to j2000
+      MS_OFFSET = j2000.getTimeInMills() - gps_start_time.getTimeInMills();
       
       int temp, day, fc, week, ms, pps, cnt;
       timeRecs = new BarrelTime[MAX_RECS];
@@ -457,20 +470,10 @@ public class ExtractTiming {
       Calendar date = Calendar.getInstance();
       
       for(int data_i = 0; data_i < data.getSize(); data_i++){
-         
-         date.setTimeInMillis((long) data.ms_since_epoch[data_i]);
-         
          try{
+            //convert from "ms since 1980-01-06" to "ns since J2000"
             data.epoch[data_i] =
-               CDFTT2000.fromUTCparts(
-                  (double) date.get(Calendar.YEAR), 
-                  (double) (date.get(Calendar.MONTH) +1 ), 
-                  (double) date.get(Calendar.DAY_OF_MONTH), 
-                  (double) date.get(Calendar.HOUR), 
-                  (double) date.get(Calendar.MINUTE),
-                  (double) date.get(Calendar.SECOND),
-                  (double) date.get(Calendar.MILLISECOND)
-               );
+               (data.ms_since_epoch[data_i] - MS_OFFSET) * 1000;
          }catch(CDFException ex){
             data.epoch[data_i] = 
                data.epoch[data_i - 1] + 1000000; 
