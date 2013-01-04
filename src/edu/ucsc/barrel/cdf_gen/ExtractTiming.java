@@ -58,7 +58,8 @@ public class ExtractTiming {
    private static final short MAXWEEK = 1880;
    
    //date offset info
-   private static long MS_OFFSET = 0;
+   private static long GPS_START_TIME = 0; //Offset in ms from system epoch to gps start time (00:00:00 190-01-60 UTC) 
+   private static long J2000 = 0; //ms from system epoch to J2000 (11:58:55.816 2000-01-01 UTC)
    
    //model parameters for a linear fit
    //Example: ms = rate * (fc + offset);
@@ -139,16 +140,16 @@ public class ExtractTiming {
       time_pairs = new TimePair[MAX_RECS];
       
       //set the gps_start_time and j2000 calendar objects
-      new Calendar gps_start_time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-      gps_start_time.set(
+      Calendar gps_start_cal = new Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+      gps_start_cal.set(
          1960, 00, 06, 00, 00, 00);
-      new Calendar j2000 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-      j2000.set(
-         2000, 00, 01, 11, 58, 55);
-      j2000.add(Calendar.MILLISECOND, 816);
+      GPS_START_TIME = gps_start_cal.getTimeInMills();
       
-      //calculate the number of ms from gps start time to j2000
-      MS_OFFSET = j2000.getTimeInMills() - gps_start_time.getTimeInMills();
+      Calendar j2000_cal = new Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+      j2000_cal.set(
+         2000, 00, 01, 11, 58, 55);
+      j2000_cal.add(Calendar.MILLISECOND, 816);
+      J2000 = j2000_cal.getTimeInMills();
       
       int temp, day, fc, week, ms, pps, cnt;
       timeRecs = new BarrelTime[MAX_RECS];
@@ -185,7 +186,7 @@ public class ExtractTiming {
       
       //process any remaining records
       fillTime(data_i, (rec_i + 1));
-
+      
       backFillModels();
       
       //calculate epoch data for the DataHolder object
@@ -262,7 +263,6 @@ public class ExtractTiming {
                      timeRecs[rec_i].getPPS()
                   )
                );
-               time_pairs[goodcnt].setMS(date.getTimeInMillis());
             } else {
                date.add(
                   Calendar.MILLISECOND, 
@@ -271,8 +271,10 @@ public class ExtractTiming {
                      timeRecs[rec_i].getPPS()
                   )
                );
-               time_pairs[goodcnt].setMS(date.getTimeInMillis());
             }
+            
+            //save the ms since gps start time in ms since system epoch
+            time_pairs[goodcnt].setMS(date.getTimeInMillis());
             time_pairs[goodcnt].setFrame(timeRecs[rec_i].getFrame());
             goodcnt++;
          }
@@ -442,7 +444,7 @@ public class ExtractTiming {
             
             data.time_model_offset[data_i] = time_model.getOffset();
             data.time_model_rate[data_i] = time_model.getRate();
-            data.ms_since_epoch[data_i] = timeRecs[rec_i].getMS();
+            data.ms_since_sys_epoch[data_i] = timeRecs[rec_i].getMS();
          }
       }
    }
@@ -459,10 +461,9 @@ public class ExtractTiming {
             data.time_model_offset[data_i] = last_offset;
             data.time_model_rate[data_i] = last_rate;
             
-            data.ms_since_epoch[data_i] = 
+            data.ms_since_sys_epoch[data_i] = 
                last_rate * (data.frameNum[data_i] + last_offset);
          }
-        
       }
    }
    
@@ -471,9 +472,9 @@ public class ExtractTiming {
       
       for(int data_i = 0; data_i < data.getSize(); data_i++){
          try{
-            //convert from "ms since 1980-01-06" to "ns since J2000"
+            //convert from "ms since system epoch" to "ns since J2000"
             data.epoch[data_i] =
-               (data.ms_since_epoch[data_i] - MS_OFFSET) * 1000;
+               (data.ms_since_sys_epoch[data_i] - J2000) * 1000;
          }catch(CDFException ex){
             data.epoch[data_i] = 
                data.epoch[data_i - 1] + 1000000; 
