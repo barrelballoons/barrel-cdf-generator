@@ -481,10 +481,10 @@ public class LevelTwo implements CDFConstants{
          }
          
          //Extract Energy Spectra
-   
+         
          //get spectra edges based on temperature
          realSpectraEdges = SpectrumExtract.getBinEdges(2.44 * 1.01); //FIX THIS
-   
+         
          //Slow Spectrum
          System.arraycopy(
             data.sspc_raw[frm_i], 0, 
@@ -719,7 +719,7 @@ public class LevelTwo implements CDFConstants{
          
          CDF_Gen.putData(
             rcnt_cdf, DataHolder.rc_label[mod4], rcnt_rec, 
-            Double.valueOf(data.rc_raw[frm_i] / 4), 0L
+            Double.valueOf(data.rc_raw[frm_i] / 4.0), 0L
          );
       }
       

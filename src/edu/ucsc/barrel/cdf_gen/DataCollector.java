@@ -1,12 +1,15 @@
 package edu.ucsc.barrel.cdf_gen;
 
 /*
-dataCollector.java v12.10.21
+dataCollector.java v13.01.04
 
 Description:
    Downloads files from each server listed in ini file.
    Saves all files to a directory tree as ./DATAROOT/payloadX/out/tlm/DATE
 
+
+v13.01.04
+   -Fixed redundancy in output path
 
 v12.11.21
    -Downloads files from the soc-nas now
@@ -49,7 +52,6 @@ import java.util.ArrayList;
 public class DataCollector{
    private ArrayList<String> urls = new ArrayList<String>();
    private ArrayList<String> serverList = new ArrayList<String>();
-   private String outRoot = ".";
    private String outDir = ".";
    private String outFile = "default";
    private String currentPayload;
@@ -59,7 +61,7 @@ public class DataCollector{
       final String path, final ArrayList<String> servers, 
       final String payload, final int date
    ){
-      outRoot = path;
+      outDir = path;
       serverList = servers;
       currentPayload = payload;
       currentDate = date;
@@ -104,8 +106,6 @@ public class DataCollector{
    //File names and repo location are used to build url file list
    //Does this for each repository in the repo ArrayList
    public void getFileList(){
-      //make sure the output directory exists and is empty
-      outDir = outRoot + "/" + currentPayload + "/" + currentDate;
       testOutputDir(new File(outDir));
       
       for(String server_i : serverList){

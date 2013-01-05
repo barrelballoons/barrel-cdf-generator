@@ -3,11 +3,14 @@ package edu.ucsc.barrel.cdf_gen;
 import java.math.BigInteger;
 
 /*
-DataHolder.java 12.11.22
+DataHolder.java 13.01.04
 
 Description:
    Stores the data frames that are being processed
 
+v13.01.04
+   -Changed "ms_since_epoch" or "ms_since_sys_epoch" for clairity
+   
 v12.11.27
    -Added members to hold time model info
    -Added holder for quality flag
@@ -88,7 +91,7 @@ public class DataHolder{
       hkpg = new double[MAX_FRAMES],
       time_model_rate = new double[MAX_FRAMES],
       time_model_offset = new double[MAX_FRAMES],
-      ms_since_epoch = new double[MAX_FRAMES];
+      ms_since_sys_epoch = new double[MAX_FRAMES];
    public Double[][]
       magx = new Double[MAX_FRAMES][4],
       magy = new Double[MAX_FRAMES][4],

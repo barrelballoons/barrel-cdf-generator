@@ -5,15 +5,18 @@ import gsfc.nssdc.cdf.util.CDFTT2000;
 
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 /*
-ExactTiming.java v12.10.27
+ExactTiming.java v13.01.04
 
 Description:
    Uses a block of gps time info to create a more exact time variable.
    Ported from MPM's C code.
 
+v13.01.04
+   -Changed the way epoch is calculated and fixed the "12h bug"
+   
 v12.12.31
    -Removed redundant calculation of rec_i when checking if BarrelTimes array is full
    
@@ -140,16 +143,16 @@ public class ExtractTiming {
       time_pairs = new TimePair[MAX_RECS];
       
       //set the gps_start_time and j2000 calendar objects
-      Calendar gps_start_cal = new Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+      Calendar gps_start_cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
       gps_start_cal.set(
-         1960, 00, 06, 00, 00, 00);
-      GPS_START_TIME = gps_start_cal.getTimeInMills();
+         1980, 00, 06, 00, 00, 00);
+      GPS_START_TIME = gps_start_cal.getTimeInMillis();
       
-      Calendar j2000_cal = new Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+      Calendar j2000_cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
       j2000_cal.set(
          2000, 00, 01, 11, 58, 55);
       j2000_cal.add(Calendar.MILLISECOND, 816);
-      J2000 = j2000_cal.getTimeInMills();
+      J2000 = j2000_cal.getTimeInMillis();
       
       int temp, day, fc, week, ms, pps, cnt;
       timeRecs = new BarrelTime[MAX_RECS];
@@ -471,14 +474,9 @@ public class ExtractTiming {
       Calendar date = Calendar.getInstance();
       
       for(int data_i = 0; data_i < data.getSize(); data_i++){
-         try{
-            //convert from "ms since system epoch" to "ns since J2000"
-            data.epoch[data_i] =
-               (data.ms_since_sys_epoch[data_i] - J2000) * 1000;
-         }catch(CDFException ex){
-            data.epoch[data_i] = 
-               data.epoch[data_i - 1] + 1000000; 
-         }
+         //convert from "ms since system epoch" to "ns since J2000"
+         data.epoch[data_i] =
+            (long)((data.ms_since_sys_epoch[data_i] - J2000) * 1000000);
       }
    }
 }
