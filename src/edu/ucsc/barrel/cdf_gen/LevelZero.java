@@ -95,7 +95,7 @@ public class LevelZero{
       frameLength = length;
       currentPayload = payload;
       currentDate = date;
-      inputPath = inputDir + "/" + currentPayload + "/" + currentDate;
+      inputPath = inputDir;
       outputPath = outputDir;
       
       //set get a list of input files
