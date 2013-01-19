@@ -7,6 +7,9 @@ Description:
    Copies each data file, byte by byte, to a day-long data file.
    Rejects short frames, long frames, and frames with bad checksums.
 
+v13.01.18
+   -Updated the filename format
+
 v12.11.26
    -Does not set payload directory in outpath here.
 
@@ -15,7 +18,8 @@ v12.11.20
    -changed text of output filename to lowercase
 
 v12.11.05
-   -Now uses "getDataSet()" method of Level_Generator to add frames to the correct set
+   -Now uses "getDataSet()" method of Level_Generator
+   to add frames to the correct set
 
 v12.10.11
    -Changed version numbers to a date format
@@ -76,9 +80,7 @@ public class LevelZero{
    private String outputPath;
    private String outName;
    private String[] fileList;
-   private String currentPayload;
-   private int currentDate;
-   
+   private String revNum;
    private OutputStream outFile;
    
    public LevelZero(
@@ -87,17 +89,22 @@ public class LevelZero{
       final String sync, 
       final String inputDir, 
       final String outputDir,
-      final String payload, 
-      final int date
+      final String p,
+		final String f,
+		final String s,
+		final String d
    ){
 	   //set object properties
       syncWord = sync;
       frameLength = length;
-      currentPayload = payload;
-      currentDate = date;
       inputPath = inputDir;
       outputPath = outputDir;
       
+		//get file revision number
+      if(CDF_Gen.getSetting("rev") != null){
+         revNum = CDF_Gen.getSetting("rev");
+      }
+		
       //set get a list of input files
       File tempDir = new File(inputPath);
       fileList = tempDir.list();
@@ -108,10 +115,9 @@ public class LevelZero{
       if(!tempDir.exists()){tempDir.mkdirs();}
       
       //set output file name
-      String revNum = (CDF_Gen.getSetting("rev") != null) ? 
-         CDF_Gen.getSetting("rev") : (revNum = "00");
-      outName = "bar0_" + currentDate + "_SLL_" + currentPayload + "_V" 
-         + revNum + ".tlm";
+		outName =
+			"bar1" + f + "_" + p + "_" + s +
+			"_l0_20" + d +  "_v" + revNum + ".tlm";
    }
    
    public void processRawFiles() throws IOException{

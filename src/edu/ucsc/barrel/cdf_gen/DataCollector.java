@@ -8,6 +8,9 @@ Description:
    Saves all files to a directory tree as ./DATAROOT/payloadX/out/tlm/DATE
 
 
+v13.01.18
+   -Changed date input to accept string
+
 v13.01.04
    -Fixed redundancy in output path
 
@@ -55,11 +58,11 @@ public class DataCollector{
    private String outDir = ".";
    private String outFile = "default";
    private String currentPayload;
-   private int currentDate;
+   private String currentDate;
    
    public DataCollector(
       final String path, final ArrayList<String> servers, 
-      final String payload, final int date
+      final String payload, final String date
    ){
       outDir = path;
       serverList = servers;

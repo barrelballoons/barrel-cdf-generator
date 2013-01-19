@@ -8,6 +8,10 @@ Description:
    Reads ini file.
    Creates all objects needed for operation. 
 
+v13.01.18
+   -Added ability to get launch site and launch order from ini file.
+   -Keeps track of file revision numnber in the constructor
+	
 v12.11.26
    -Output directory is set in ini file.
    -Output files are sorted into date subdirectories.
@@ -103,10 +107,10 @@ public class CDF_Gen implements CDFConstants{
    private static ArrayList<String> payloads = new ArrayList<String>();
    private static Map<String, String> settings = new HashMap<String, String>();
    
-   //Directory settings
+   //Directory and file settings
    private static String output_Dir = "out";
    public static String tlm_Dir;
-   public static String L0_Dir;
+	public static String L0_Dir;
    public static String L1_Dir;
    public static String L2_Dir;
    
@@ -117,7 +121,9 @@ public class CDF_Gen implements CDFConstants{
    public static DataHolder getDataSet(){return data;}
    
    public static void main(String[] args){
-      
+      //array to hold payload id, lauch order, and launch site
+		String[] payload = new String[3];
+		
       //ensure there is some user input
       if(args.length == 0){
          System.out.println(
@@ -129,19 +135,35 @@ public class CDF_Gen implements CDFConstants{
       //read the ini file and command line arguments
       loadConfig(args);
       
-      //for each payload, create an object to download the files,
+		//for each payload, create an object to download the files,
       // read the list of data files on each server, then download the files
       for(String payload_i : payloads){
+			String
+				date = "000000",
+				id = "00",
+				flt = "00",
+				stn = "0",
+				revNum = "00";
+			
+			//break payload apart into id, flight number and launch station
+			String[] payload_parts = payload_i.split(",");
+			if(payload_parts[0] != null){id = payload_parts[0];}
+			if(payload_parts[1] != null){flt = payload_parts[1];}
+			if(payload_parts[2] != null){stn = payload_parts[2];}
+			
          //set output paths
-         if(getSetting("outDir") != ""){output_Dir = getSetting("outDir");}
+         if(getSetting("outDir") != ""){
+			   //check if user specified a place to store the files
+				output_Dir = getSetting("outDir");
+			}
          tlm_Dir = 
-            output_Dir + "/tlm/" + payload_i + "/" + getSetting("date") + "/";
+            output_Dir + "/tlm/" + id + "/" + getSetting("date") + "/";
          L0_Dir = 
-            output_Dir + "/l0/" + payload_i + "/" + getSetting("date") + "/";
+            output_Dir + "/l0/" + id + "/" + getSetting("date") + "/";
          L1_Dir = 
-            output_Dir + "/l1/" + payload_i + "/" + getSetting("date") + "/";
+            output_Dir + "/l1/" + id + "/" + getSetting("date") + "/";
          L2_Dir = 
-            output_Dir + "/l2/" + payload_i + "/" + getSetting("date") + "/";
+            output_Dir + "/l2/" + id + "/" + getSetting("date") + "/";
          
          //set working payload
          settings.put("currentPayload", payload_i);
@@ -151,12 +173,8 @@ public class CDF_Gen implements CDFConstants{
          
          //Figure out where the input files are coming from
          if(getSetting("local") == ""){
-            dataPull = new DataCollector( 
-               tlm_Dir, 
-               servers, 
-               settings.get("currentPayload"), 
-               Integer.parseInt(settings.get("date"))
-            );
+            dataPull =
+				   new DataCollector(tlm_Dir, servers, id, settings.get("date"));
             
             //read each repository and build a list of data file URLs
             dataPull.getFileList();
@@ -166,7 +184,7 @@ public class CDF_Gen implements CDFConstants{
          }else{
             tlm_Dir = getSetting("local");
          }
-                     
+         
          //Create level zero object and convert the data files to a level 0 file
          try{
             System.out.println("Creating Level Zero...");
@@ -176,8 +194,10 @@ public class CDF_Gen implements CDFConstants{
                settings.get("syncWord"),
                tlm_Dir, 
                L0_Dir,
-               settings.get("currentPayload"), 
-               Integer.parseInt(getSetting("date"))
+               id,
+					flt,
+					stn,
+               getSetting("date")
             );
             L0.processRawFiles();
             L0.finish();
@@ -203,19 +223,15 @@ public class CDF_Gen implements CDFConstants{
                
                if(getSetting("L").indexOf("1") > -1){
                   //create Level One 
-                  LevelOne L1 = new LevelOne(
-                     getSetting("date"), 
-                     getSetting("currentPayload")
-                  );
+                  LevelOne L1 =
+						   new LevelOne(getSetting("date"), id, flt, stn);
                   L1 = null;
                }
                
                if(getSetting("L").indexOf("2") > -1){
                   //create Level Two
-                  LevelTwo L2 = new LevelTwo(
-                     getSetting("date"), 
-                     getSetting("currentPayload")
-                  );
+                  LevelTwo L2 =
+						   new LevelTwo(getSetting("date"), id, flt, stn);
                   
                   L2 = null;
                }

@@ -16,6 +16,9 @@ LevelTwo.java v12.11.28
 Description:
    Creates Level Two CDF files
 
+v13.01.18
+   -Updated the filename format
+   
 v12.11.28
    -Modified terminal output to indicate payload and date
    
@@ -68,9 +71,13 @@ public class LevelTwo implements CDFConstants{
       mspc_cdf, sspc_cdf, hkpg_cdf, pps_cdf;
    long mag_rec = -1L, rcnt_rec = -1L, gps_rec = -1L, fspc_rec = -1L, 
       mspc_rec = -1L, sspc_rec = -1L, hkpg_rec = -1L, pps_rec = -1L;
-   String outputPath = "",
-      date = "",
-      payload = "";
+   String outputPath = "";
+   String
+      date = "000000",
+      id = "00",
+      flt = "00",
+      stn = "0",
+      revNum = "00";
    Double[] mag_slope;
    DataHolder data;
    Double[] magCal = getCalDat("magGain.cal", 4, "0219", 0);
@@ -92,11 +99,20 @@ public class LevelTwo implements CDFConstants{
       0.0, 0.0, 0.0, 0.0, 0.0
    };
    
-   public LevelTwo(final String d, final String p)
-         throws IOException
+   public LevelTwo(
+      final String d, final String p, final String f, final String s
+   ) throws IOException
    {  
+      //get file revision number
+      if(CDF_Gen.getSetting("rev") != null){
+         revNum = CDF_Gen.getSetting("rev");
+      }
+      
+      //save input arguments
+      id = p;
+      flt = f;
+      stn = s;
       date = d;
-      payload = p;
       
       //get the data storage object
       data = CDF_Gen.getDataSet();
@@ -111,15 +127,16 @@ public class LevelTwo implements CDFConstants{
       
       //copy the CDF skeletons to the new files 
       for(int type_i = 0; type_i < CDF_Gen.fileTypes.length; type_i++){
-         String srcName =
-            "cdf_skels/l2/" + "barCLL_PP_S_l2_" + 
-               CDF_Gen.fileTypes[type_i] + "_YYYYMMDD_v++.cdf";
+         String srcName = 
+            "cdf_skels/l2/" + "barCLL_PP_S_l1_" + 
+            CDF_Gen.fileTypes[type_i] + "_YYYYMMDD_v++.cdf";
          String destName = 
-            outputPath + "barCLL_" + payload + "_S_l2_" + 
-            CDF_Gen.fileTypes[type_i] + "_" + date + "_v++.cdf";
-         
+            outputPath + "bar1" + flt + "_" + id + "_" + stn + "_l2_" +
+            CDF_Gen.fileTypes[type_i] + "_20" + date +  "_v" + revNum +
+            ".cdf";
          CDF_Gen.copyFile(new File(srcName), new File(destName));
       }
+      
       
       //Make whatever corrections to the data that are needed and save them to the L2 CDFs
       try{
@@ -171,33 +188,41 @@ public class LevelTwo implements CDFConstants{
       
       //Open all cdf files
       gps_cdf = CDF_Gen.openCDF( 
-         outputPath + "barCLL_" + payload + "_S_l2_gps-_" + date + "_v++.cdf"
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l2_gps-_20" + date +  "_v" + revNum + ".cdf"
+      );
+      mag_cdf = CDF_Gen.openCDF( 
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l2_magn_20" + date +  "_v" + revNum + ".cdf"
       );
       pps_cdf = CDF_Gen.openCDF( 
-         outputPath + "barCLL_" + payload + "_S_l2_pps-_" + date + "_v++.cdf"
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l2_pps-_20" + date +  "_v" + revNum + ".cdf"
       );
       hkpg_cdf = CDF_Gen.openCDF( 
-         outputPath + "barCLL_" + payload + "_S_l2_hkpg_" + date + "_v++.cdf"
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l2_hkpg_20" + date +  "_v" + revNum + ".cdf"
       ); 
-      mag_cdf = CDF_Gen.openCDF( 
-         outputPath + "barCLL_" + payload + "_S_l2_magn_" + date + "_v++.cdf" 
-      );
       fspc_cdf = CDF_Gen.openCDF( 
-         outputPath + "barCLL_" + payload + "_S_l2_fspc_" + date + "_v++.cdf" 
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l2_fspc_20" + date +  "_v" + revNum + ".cdf"
       );
       mspc_cdf = CDF_Gen.openCDF( 
-         outputPath + "barCLL_" + payload + "_S_l2_mspc_" + date + "_v++.cdf" 
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l2_mspc_20" + date +  "_v" + revNum + ".cdf"
       );
       sspc_cdf = CDF_Gen.openCDF( 
-         outputPath + "barCLL_" + payload + "_S_l2_sspc_" + date + "_v++.cdf" 
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l2_sspc_20" + date +  "_v" + revNum + ".cdf"
       );
       rcnt_cdf = CDF_Gen.openCDF( 
-         outputPath + "barCLL_" + payload + "_S_l2_rcnt_" + date + "_v++.cdf" 
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l2_rcnt_20" + date +  "_v" + revNum + ".cdf"
       );
 
       for(int frm_i = 0; frm_i < data.getSize(); frm_i++){
          System.out.println(
-            "L2 for " + payload + " on " + date + ": " +
+            "L2 for " + id + " on " + date + ": " +
             frm_i + " (" + (100 * frm_i) / data.getSize() + "%)");
          
          mod4 = data.frameNum[frm_i] % 4;

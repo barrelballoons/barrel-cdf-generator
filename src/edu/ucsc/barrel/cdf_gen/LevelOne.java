@@ -14,6 +14,9 @@ LevelOne.java v12.11.28
 Description:
    Creates level one CDF files
 
+v13.01.18
+   -Updated the filename format
+   
 v12.11.28
    -Modified terminal output to indicate payload and date
 
@@ -74,16 +77,30 @@ public class LevelOne{
    int lastFrame = -1;
    long ms_of_week = 0;
    int weeks = 0;
-   String date, payload;
+   String
+      date = "000000",
+      id = "00",
+      flt = "00",
+      stn = "0",
+      revNum = "00";
    Calendar dateObj = Calendar.getInstance();
 
    private DataHolder data;
    
-   public LevelOne(final String d, final String p)
-      throws IOException
+   public LevelOne(
+      final String d, final String p, final String f, final String s
+   ) throws IOException
    {
+      //get file revision number
+      if(CDF_Gen.getSetting("rev") != null){
+         revNum = CDF_Gen.getSetting("rev");
+      }
+      
+      //save input arguments
+      id = p;
+      flt = f;
+      stn = s;
       date = d;
-      payload = p;
       
       //get the data storage object
       data = CDF_Gen.getDataSet();
@@ -99,29 +116,45 @@ public class LevelOne{
             "cdf_skels/l1/" + "barCLL_PP_S_l1_" + 
             CDF_Gen.fileTypes[type_i] + "_YYYYMMDD_v++.cdf";
          String destName = 
-            outputPath + "barCLL_" + payload + "_S_l1_" + 
-            CDF_Gen.fileTypes[type_i] + "_" + date + "_v++.cdf";
-         
+            outputPath + "bar1" + flt + "_" + id + "_" + stn + "_l1_" +
+            CDF_Gen.fileTypes[type_i] + "_20" + date +  "_v" + revNum +
+            ".cdf";
          CDF_Gen.copyFile(new File(srcName), new File(destName));
       }
 
       //open each CDF file and save the id
       gps_cdf = CDF_Gen.openCDF( 
-         outputPath + "barCLL_" + payload + "_S_l1_gps-_" + date + "_v++.cdf" );
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l1_gps-_20" + date +  "_v" + revNum + ".cdf"
+      );
       mag_cdf = CDF_Gen.openCDF( 
-         outputPath + "barCLL_" + payload + "_S_l1_magn_" + date + "_v++.cdf" );
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l1_magn_20" + date +  "_v" + revNum + ".cdf"
+      );
       pps_cdf = CDF_Gen.openCDF( 
-         outputPath + "barCLL_" + payload + "_S_l1_pps-_" + date + "_v++.cdf" );
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l1_pps-_20" + date +  "_v" + revNum + ".cdf"
+      );
       hkpg_cdf = CDF_Gen.openCDF( 
-         outputPath + "barCLL_" + payload + "_S_l1_hkpg_" + date + "_v++.cdf" ); 
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l1_hkpg_20" + date +  "_v" + revNum + ".cdf"
+      ); 
       fspc_cdf = CDF_Gen.openCDF( 
-         outputPath + "barCLL_" + payload + "_S_l1_fspc_" + date + "_v++.cdf" );
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l1_fspc_20" + date +  "_v" + revNum + ".cdf"
+      );
       mspc_cdf = CDF_Gen.openCDF( 
-         outputPath + "barCLL_" + payload + "_S_l1_mspc_" + date + "_v++.cdf" );
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l1_mspc_20" + date +  "_v" + revNum + ".cdf"
+      );
       sspc_cdf = CDF_Gen.openCDF( 
-         outputPath + "barCLL_" + payload + "_S_l1_sspc_" + date + "_v++.cdf" );
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l1_sspc_20" + date +  "_v" + revNum + ".cdf"
+      );
       rcnt_cdf = CDF_Gen.openCDF( 
-         outputPath + "barCLL_" + payload + "_S_l1_rcnt_" + date + "_v++.cdf" );
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l1_rcnt_20" + date +  "_v" + revNum + ".cdf"
+      );
    
       //get data from DataHolder and save them to CDF files
       try{
@@ -143,7 +176,7 @@ public class LevelOne{
       
       for( int frm_i = 0; frm_i < data.getSize(); frm_i++ ){
          System.out.println(
-            "L1 for " + payload + " on " + date + ": " + 
+            "L1 for " + id + " on " + date + ": " + 
             frm_i + " (" + (100 * frm_i) / data.getSize() + "%)");
          
          //get all the frame groups and mux index
