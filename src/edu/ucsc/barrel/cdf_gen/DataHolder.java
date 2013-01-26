@@ -25,7 +25,8 @@ v12.11.20
    -Changed raw_* to *_raw
    
 v12.11.05
-   -Added a number of raw variables so the level 1 files could all be int or long values
+   -Added a number of raw variables so the level 1 files could all
+   be int or long values
    -Added static "constant" variables to index different mod values
 
 v12.10.11

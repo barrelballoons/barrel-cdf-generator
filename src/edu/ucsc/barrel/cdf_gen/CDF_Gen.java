@@ -379,8 +379,10 @@ public class CDF_Gen implements CDFConstants{
          if (status != CDF_OK){
             String statusText = CDF.getStatusText(status);
             if(statusText.indexOf("INFO") == -1){
-               System.out.println ("Problem with record " + record + " of " + var.getName() + ": " +
-               statusText);
+               System.out.println (
+						"Problem with record " + record + " of " +
+						var.getName() + ": " + statusText
+					);
             }
          }
          

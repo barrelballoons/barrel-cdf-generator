@@ -7,7 +7,8 @@ import gsfc.nssdc.cdf.util.CDFTT2000;
 import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
-
+import java.util.Vector;
+import java.util.Arrays;
 /*
 LevelOne.java v12.11.28
 
@@ -71,8 +72,7 @@ public class LevelOne{
    File cdfFile;
    CDF mag_cdf, rcnt_cdf, gps_cdf, fspc_cdf, 
       mspc_cdf, sspc_cdf, hkpg_cdf, pps_cdf;
-   long mag_rec = -1, rcnt_rec = -1, gps_rec = -1, fspc_rec = -1, 
-      mspc_rec = -1, sspc_rec = -1, hkpg_rec = -1, pps_rec = -1;
+   
    String outputPath;
    int lastFrame = -1;
    long ms_of_week = 0;
@@ -84,7 +84,9 @@ public class LevelOne{
       stn = "0",
       revNum = "00";
    Calendar dateObj = Calendar.getInstance();
-
+   
+   short INCOMPLETE_GROUP = 8196;
+   
    private DataHolder data;
    
    public LevelOne(
@@ -121,7 +123,7 @@ public class LevelOne{
             ".cdf";
          CDF_Gen.copyFile(new File(srcName), new File(destName));
       }
-
+      
       //open each CDF file and save the id
       gps_cdf = CDF_Gen.openCDF( 
          outputPath + "bar1" + flt + "_" + id + "_" + stn +
@@ -155,7 +157,7 @@ public class LevelOne{
          outputPath + "bar1" + flt + "_" + id + "_" + stn +
          "_l1_rcnt_20" + date +  "_v" + revNum + ".cdf"
       );
-   
+      
       //get data from DataHolder and save them to CDF files
       try{
          saveFrames();
@@ -164,20 +166,106 @@ public class LevelOne{
       }
    }
    
-   /*
-    * Pull each value out of the frame and store it in the appropriate CDF.
-    */
+   //Pull each value out of the frame and store it in the appropriate CDF.
    private void saveFrames() throws CDFException{
+         //declare all of the variables needed to build up records
+      long
+         mag_rec_num = 0, rcnt_rec_num = 0, gps_rec_num = 0, fspc_rec_num = 0,
+         mspc_rec_num = 0, sspc_rec_num = 0, hkpg_rec_num = 0, pps_rec_num = 0;
+      
+      Long[] blank_vals = {
+         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
+         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
+         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
+         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
+         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
+         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
+         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
+         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
+         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
+         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
+         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
+         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
+         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
+         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
+         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
+         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
+         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
+         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
+         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
+         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
+         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
+         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
+         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
+         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE
+      };
+      Integer[] test = {1,1,1,1,1,1};
+      Vector
+         gps_data = new Vector(
+            Arrays.asList(test)
+         ),
+         pps_data = new Vector(6, 1),
+         mag_data = new Vector(6, 1),
+         hkpg_data = new Vector(46, 1),
+         rcnt_data = new Vector(7, 1),
+         fspc_data = new Vector(7, 1),
+         mspc_data = new Vector(4, 1),
+         sspc_data = new Vector(4, 1);
+      Integer[]
+         mspc_buff = new Integer[48],
+         sspc_buff = new Integer[256];
+      
+      String[]
+         gps_var_names = {
+            "GPS_Alt", "ms_of_week", "GPS_Lat", "GPS_Lon",  
+            "FrameGroup", "Epoch", "Q"
+         },
+         pps_var_names = {
+            "GPS_PPS", " Payload_ID", "Version",
+            "FrameGroup", "Epoch", "Q"
+         },
+         mag_var_names = {
+            "MAG_X", "MAG_Y", "MAG_Z",
+            "FrameGroup", "Epoch", "Q"
+         },
+         rcnt_var_names = {
+            "Interrupt", "LowLevel", "PeakDet", "HighLevel",
+            "FrameGroup", "Epoch", "Q"
+         },
+         fspc_var_names = {
+            "LC1", "LC2", "LC3", "LC4",
+            "FrameGroup", "Epoch", "Q"
+         },
+         mspc_var_names =
+            {"MSPC", "FrameGroup", "Epoch", "Q"},
+         sspc_var_names =
+            {"SSPC", "FrameGroup", "Epoch", "Q"},
+         hkpg_var_names = {
+            "V0_VoltAtLoad", "I0_TotalLoad", "V1_Battery", "I1_TotalSolar", 
+            "V2_Solar1", "I2_Solar1", "V3_POS_DPU", "I3_POS_DPU",
+            "V4_POS_XRayDet", "I4_POS_XRayDet","V5_Modem", "I5_Modem",
+            "V6_NEG_XRayDet",  "I6_NEG_XRayDet", "V7_NEG_DPU", "I7_NEG_DPU",
+            "T0_Scint", "T8_Solar1", "T1_Mag", "T9_Solar2", "T2_ChargeCont",
+            "T10_Solar3", "T3_Battery", "T11_Solar4", "T4_PowerConv",
+            "T12_TermTemp", "T5_DPU", "T13_TermBatt", "T6_Modem", "T14_TermCap",
+            "T7_Structure", "T15_CCStat", "V8_Mag", "V9_Solar2", "V10_Solar3",
+            "V11_Solar4", "numOfSats", "timeOffset", "weeks", "termStatus", 
+            "cmdCounter", "dcdCounter", "modemCounter",
+            "FrameGroup", "Epoch", "Q"
+         };
+         
+      int gps_q = 0, rcnt_q = 0, mspc_q = 0, sspc_q = 0, hkpg_q = 0;
+      int mod4 = 0, mod32 = 0, mod40 = 0;
+      int frameGrp4 = 0, frameGrp32 = 0, frameGrp40 = 0;
+      
       System.out.println(
          "Creating Level One... (" + data.getSize() + " frames)");
       
-      int mod4, mod32, mod40, frameGrp4, frameGrp32, frameGrp40;
-   
-      
-      for( int frm_i = 0; frm_i < data.getSize(); frm_i++ ){
+      for(int frm_i = 0; frm_i < data.getSize(); frm_i++){
          System.out.println(
             "L1 for " + id + " on " + date + ": " + 
-            frm_i + " (" + (100 * frm_i) / data.getSize() + "%)");
+            frm_i + " (" + (100 * frm_i) / data.getSize() + "%)"
+         );
          
          //get all the frame groups and mux index
          mod4 = data.frameNum[frm_i] % 4;
@@ -188,297 +276,299 @@ public class LevelOne{
          frameGrp40 = data.frameNum[frm_i] - mod40;
          
          //GPS
-         switch(mod4){
-            case 0:
-               gps_rec++;
-               
-               int q = 0; 
-               q |= data.quality[frm_i]; 
-               if((frm_i + 1) < data.getSize()) q |= data.quality[frm_i + 1];
-               if((frm_i + 2) < data.getSize()) q |= data.quality[frm_i + 2];
-               if((frm_i + 3) < data.getSize()) q |= data.quality[frm_i + 3];
-               CDF_Gen.putData(gps_cdf, "Q", gps_rec, Long.valueOf(q), 0L);
-               
-               CDF_Gen.putData(
-                  gps_cdf, "Epoch", gps_rec, 
-                  Long.valueOf(data.epoch[frm_i]), 0L
-               );
-               CDF_Gen.putData(
-                     gps_cdf, "FrameGroup", gps_rec, 
-                     Integer.valueOf(data.frameNum[frm_i]), 0L
-                  );
-               CDF_Gen.putData(
-                  gps_cdf, "GPS_Alt", gps_rec, 
-                  Long.valueOf(data.gps_raw[frm_i]), 0L
-               );
-               break;
-            case 1:
-               CDF_Gen.putData(
-                  gps_cdf, "ms_of_week", gps_rec, 
-                  Long.valueOf(data.ms_of_week[frm_i]), 0L
-               );
-               break;
-            case 2:
-               CDF_Gen.putData(
-                  gps_cdf, "GPS_Lat", gps_rec, 
-                  Long.valueOf(data.gps_raw[frm_i]), 0L
-               );
-               break;
-            default:  
-               CDF_Gen.putData(
-                  gps_cdf, "GPS_Lon", gps_rec, 
-                  Long.valueOf(data.gps_raw[frm_i]), 0L
-               );
-               
-               break;
+         if(mod4 == 0){
+            gps_data.add(4, Integer.valueOf(frameGrp4));
+            gps_data.add(5, Long.valueOf(data.epoch[frm_i]));
+         }else
+         //make sure we are still in the same frame group
+         if(frameGrp4 != gps_data.get(4)){
+            //set the quality bit for an incomplete group
+            gps_q |= INCOMPLETE_GROUP;
+            gps_data.add(6, Long.valueOf(gps_q));
+            
+            //write the record we have so far and clear data vector
+            gps_cdf.putRecord(gps_rec_num, gps_var_names, gps_data);
+            gps_data = new Vector(Arrays.asList(test));
+            
+            //start a new record 
+            gps_rec_num++;
+            gps_q = 0;
+            gps_data.add(4, Integer.valueOf(frameGrp4));
+            gps_data.add(5, Long.valueOf(data.epoch[frm_i]));   
          }
          
+         //OR in the quality of this frame
+         gps_q |= data.quality[frm_i];
+         
+         switch(mod4){
+            case 0:
+               //save altitude
+               gps_data.add(0, Long.valueOf(data.gps_raw[frm_i]));
+               break;
+            case 1:
+               //add ms_of_week variable
+               gps_data.add(1, Long.valueOf(data.ms_of_week[frm_i]));
+               break;
+            case 2:
+               //add lat variable
+               gps_data.add(2, Long.valueOf(data.gps_raw[frm_i]));
+               break;
+            case 3:
+               //add lon variable
+               gps_data.add(3, Long.valueOf(data.gps_raw[frm_i]));
+               
+               //add the quality flag
+               gps_data.add(6, Long.valueOf(gps_q));
+               
+               //This is the last frame in the set, write the record
+               gps_cdf.putRecord(gps_rec_num, gps_var_names, gps_data);
+               gps_data = new Vector(7, 1);
+               gps_q = 0;
+               
+               gps_rec_num++;
+               break; 
+            default: break;
+         }
+         System.out.println("did gps");
          //PPS
-         pps_rec++;
-       
-         CDF_Gen.putData(
-            pps_cdf, "Q", pps_rec, 
-            Long.valueOf(data.quality[frm_i]), 0L
-         );
-         CDF_Gen.putData(
-            pps_cdf, "Epoch", pps_rec, 
-            Long.valueOf(data.epoch[frm_i]), 0L
-         );
-         CDF_Gen.putData(
-            pps_cdf, "FrameGroup", pps_rec, 
-            Integer.valueOf(data.frameNum[frm_i]), 0L
-         );
-         CDF_Gen.putData(
-            pps_cdf, "GPS_PPS", pps_rec, 
-            Integer.valueOf(data.pps[frm_i]), 0L
-         );
-         CDF_Gen.putData(
-            pps_cdf, "Payload_ID", pps_rec, 
-            Short.valueOf(data.payID[frm_i]), 0L
-         );
-         CDF_Gen.putData(
-            pps_cdf, "Version", pps_rec, 
-            Short.valueOf(data.ver[frm_i]), 0L
-         );
-
+         pps_data = new Vector(6, 1);
+         pps_data.add(0, Integer.valueOf(data.pps[frm_i]));
+         pps_data.add(1, Short.valueOf(data.payID[frm_i]));
+         pps_data.add(2, Short.valueOf(data.ver[frm_i]));
+         pps_data.add(3, Integer.valueOf(data.frameNum[frm_i]));
+         pps_data.add(4, Long.valueOf(data.epoch[frm_i]));
+         pps_data.add(5, Long.valueOf(data.quality[frm_i]));
+         
+         pps_cdf.putRecord(pps_rec_num, pps_var_names, pps_data);
+         pps_rec_num++;
+         
          //B
          for(int set_i = 0; set_i < 4; set_i++){
-            mag_rec++;
+            mag_data = new Vector(6, 1);
             
-            CDF_Gen.putData(
-               mag_cdf, "Q", mag_rec, 
-               Long.valueOf(data.quality[frm_i]), 0L
+            mag_data.add(0, Long.valueOf(data.magx_raw[frm_i][set_i]));
+            mag_data.add(1, Long.valueOf(data.magy_raw[frm_i][set_i]));
+            mag_data.add(2, Long.valueOf(data.magz_raw[frm_i][set_i]));
+            mag_data.add(3, Integer.valueOf(data.frameNum[frm_i]));
+            mag_data.add(
+               4, Long.valueOf(data.epoch[frm_i] + (250000000 * set_i))
             );
-            //Add offset to time and epoch because this is 4Hz data 
-            CDF_Gen.putData(
-               mag_cdf, "Epoch", mag_rec, 
-               Long.valueOf(data.epoch[frm_i] + (250000000 * set_i)), 0L
-            );
-            CDF_Gen.putData(
-               mag_cdf, "FrameGroup", mag_rec, 
-               Integer.valueOf(data.frameNum[frm_i]), 0L
-            );
-            CDF_Gen.putData(
-               mag_cdf, "MAG_X", mag_rec, 
-               Long.valueOf(data.magx_raw[frm_i][set_i]), 0L
-            );
-            CDF_Gen.putData(
-               mag_cdf, "MAG_Y", mag_rec, 
-               Long.valueOf(data.magy_raw[frm_i][set_i]), 0L
-            );
-            CDF_Gen.putData(
-               mag_cdf, "MAG_Z", mag_rec, 
-               Long.valueOf(data.magx_raw[frm_i][set_i]), 0L
-            );
+            mag_data.add(5, Long.valueOf(data.quality[frm_i]));
+            
+            mag_cdf.putRecord(mag_rec_num, mag_var_names, mag_data);   
+            mag_rec_num++;
          }
          
          //HKPG
          if(mod40 == 0){ //start a new record for each new group of frames
-            hkpg_rec++;
+            //save the frame group and epoch info for this set
+            hkpg_data.add(43, Integer.valueOf(frameGrp40));
+            hkpg_data.add(44, Long.valueOf(data.epoch[frm_i]));
+         }else if(frameGrp40 != gps_data.get(43)){
+            //check to make sure we are still in the same frame group
+            //if not, put the incomplete record and start a new one
             
-            //calculate quality factor for all of the housekeeping frames
-            int q = 0;
-            for(int q_i = frm_i; 
-               q_i < Math.min((frm_i + 40), data.getSize()); 
-               q_i++
-            ){
-               q |= data.quality[q_i];
-            }
+            //set the quality bit for an incomplete group
+            hkpg_q |= INCOMPLETE_GROUP;
+            hkpg_data.add(45, Long.valueOf(hkpg_q));
             
-            CDF_Gen.putData(hkpg_cdf, "Q", hkpg_rec, Long.valueOf(q), 0L);
+            //write the record we have so far and clear the arrays
+            hkpg_cdf.putRecord(hkpg_rec_num, hkpg_var_names, hkpg_data);
+            hkpg_data = new Vector(46, 1);
             
-            CDF_Gen.putData(
-               hkpg_cdf, "Epoch", hkpg_rec, 
-               Long.valueOf(data.epoch[frm_i]), 0L
-            );
-            CDF_Gen.putData(
-               hkpg_cdf, "FrameGroup", hkpg_rec, 
-               Integer.valueOf(frameGrp40), 0L
-            );
+            //start a new record 
+            hkpg_rec_num++;
+            hkpg_q = 0;
+            hkpg_data.add(43, Integer.valueOf(frameGrp40));
+            hkpg_data.add(44, Long.valueOf(data.epoch[frm_i]));
          }
+            
+         //OR in the quality flag
+         hkpg_q |= data.quality[frm_i];
+         
+         //add the appropriate variables
          switch(mod40){
             case 36:
-               CDF_Gen.putData(
-                  hkpg_cdf, "numOfSats", hkpg_rec, 
-                  Short.valueOf(data.sats[frm_i]), 0L
-               );
-               CDF_Gen.putData(
-                  hkpg_cdf, "timeOffset", hkpg_rec, 
-                  Short.valueOf(data.offset[frm_i]), 0L
-               );
+               hkpg_data.add(36, Short.valueOf(data.sats[frm_i]));
+               hkpg_data.add(37, Short.valueOf(data.offset[frm_i]));
                break;
             case 37:
                weeks = data.weeks[frm_i];
-               
-               CDF_Gen.putData(hkpg_cdf, "weeks", hkpg_rec, 
-                  Integer.valueOf(data.weeks[frm_i]), 0L);
+               hkpg_data.add(38, Integer.valueOf(data.weeks[frm_i]));
                break;
             case 38:
-               CDF_Gen.putData(
-                  hkpg_cdf, "termStatus", hkpg_rec, 
-                  Short.valueOf(data.termStat[frm_i]), 0L
-               );
-               CDF_Gen.putData(
-                  hkpg_cdf, "cmdCounter", hkpg_rec, 
-                  Integer.valueOf(data.cmdCnt[frm_i]), 0L
-               );
+               hkpg_data.add(39, Short.valueOf(data.termStat[frm_i]));
+               hkpg_data.add(40, Integer.valueOf(data.cmdCnt[frm_i]));
                break;
             case 39:
-               CDF_Gen.putData(
-                  hkpg_cdf, "dcdCounter", hkpg_rec, 
-                  Short.valueOf(data.dcdCnt[frm_i]), 0L
-               );
-               CDF_Gen.putData(
-                  hkpg_cdf, "modemCounter", hkpg_rec, 
-                  Short.valueOf(data.modemCnt[frm_i]), 0L
-               );
+               hkpg_data.add(41, Short.valueOf(data.dcdCnt[frm_i]));
+               hkpg_data.add(42, Short.valueOf(data.modemCnt[frm_i]));
+              
+               //last frame for this record
+               //add quality flag
+               hkpg_data.add(45, Long.valueOf(hkpg_q));
+               
+               //write the record and clear the data array
+               hkpg_cdf.putRecord(hkpg_rec_num, hkpg_var_names, hkpg_data);
+               hkpg_data = new Vector(46, 1);
+               hkpg_q = data.quality[frm_i];
+               hkpg_rec_num++;
+               
                break;
             default:
-               CDF_Gen.putData(
-                  hkpg_cdf, DataHolder.hkpg_label[mod40], hkpg_rec, 
-                  Long.valueOf(data.hkpg_raw[frm_i]), 0L
-               );
+               hkpg_data.add(mod40, Long.valueOf(data.hkpg_raw[frm_i]));
                break;
          }
          
          //FSPC
          for(int set_i = 0; set_i < 20; set_i++){
-            fspc_rec++;
-            
             //Add epoch and time offsets because data comes at 20Hz
-            CDF_Gen.putData(
-               fspc_cdf, "Q", fspc_rec, 
-               Long.valueOf(data.quality[frm_i]), 0L
+            fspc_data.add(0, data.lc1_raw[frm_i][set_i]);
+            fspc_data.add(1, data.lc2_raw[frm_i][set_i]);
+            fspc_data.add(2, data.lc3_raw[frm_i][set_i]);
+            fspc_data.add(3, data.lc4_raw[frm_i][set_i]);
+            fspc_data.add(4, Integer.valueOf(data.frameNum[frm_i]));
+            fspc_data.add(
+               5, Long.valueOf(data.epoch[frm_i] + (50000000 * set_i))
             );
-            CDF_Gen.putData(
-               fspc_cdf, "FrameGroup", fspc_rec, 
-               Integer.valueOf(data.frameNum[frm_i]), 0L
-            );
-            CDF_Gen.putData(
-               fspc_cdf, "Epoch", fspc_rec, 
-               Long.valueOf(data.epoch[frm_i] + (50000000 * set_i)), 0L);
-            CDF_Gen.putData(
-               fspc_cdf, "LC1", fspc_rec, 
-               data.lc1_raw[frm_i][set_i], 0L);
-            CDF_Gen.putData(
-               fspc_cdf, "LC2", fspc_rec, 
-               data.lc2_raw[frm_i][set_i], 0L);
-            CDF_Gen.putData(
-               fspc_cdf, "LC3", fspc_rec, 
-               data.lc3_raw[frm_i][set_i], 0L);
-            CDF_Gen.putData(
-               fspc_cdf, "LC4", fspc_rec, 
-               data.lc4_raw[frm_i][set_i], 0L);
+            fspc_data.add(6, Long.valueOf(data.quality[frm_i]));
+            
+            fspc_cdf.putRecord(fspc_rec_num, fspc_var_names, fspc_data);
+            fspc_data = new Vector(7, 1);
+            fspc_rec_num++;
          }
          
          //MSPC
          if(mod4 == 0){
-            mspc_rec++;
+            mspc_data.add(1, Integer.valueOf(frameGrp4));
+            mspc_data.add(2, Long.valueOf(data.epoch[frm_i]));
+         }else if(frameGrp4 != gps_data.get(1)){
+            //set the quality bit for an incomplete group
+            mspc_q |= INCOMPLETE_GROUP;
+            mspc_data.add(3, Long.valueOf(mspc_q));
             
-            //calculate the data quality for this frame group
-            int q = 0; 
-            q |= data.quality[frm_i]; 
-            if((frm_i + 1) < data.getSize()) q |= data.quality[frm_i + 1];
-            if((frm_i + 2) < data.getSize()) q |= data.quality[frm_i + 2];
-            if((frm_i + 3) < data.getSize()) q |= data.quality[frm_i + 3];
-            CDF_Gen.putData(mspc_cdf, "Q", mspc_rec, Long.valueOf(q), 0L);
+            //get whatever part of the spectrum buffer we have
+            mspc_data.add(0, mspc_buff);
+            mspc_buff = new Integer[48];
             
+            //write the record we have so far and clear the arrays
+            mspc_cdf.putRecord(mspc_rec_num, mspc_var_names, mspc_data);
+            mspc_data = new Vector(4, 1);
             
-            CDF_Gen.putData(
-               mspc_cdf, "Epoch", mspc_rec, 
-               Long.valueOf(data.epoch[frm_i]), 0L
-            );
-            CDF_Gen.putData(
-               mspc_cdf, "FrameGroup", mspc_rec, 
-               Integer.valueOf(frameGrp4), 0L
-            );
+            //start a new record 
+            mspc_rec_num++;
+            mspc_q = 0;
+            mspc_data.add(1, Integer.valueOf(frameGrp40));
+            mspc_data.add(2, Long.valueOf(data.epoch[frm_i]));
          }
          
-         for(int chan_i = 0; chan_i < 12; chan_i ++){
-            CDF_Gen.putData(mspc_cdf, "MSPC", mspc_rec, 
-               data.mspc_raw[frm_i][chan_i], ((12 * mod4) + chan_i)
-            );
+         //save the data from this frame
+         for(int chan_i = 0; chan_i < 12; chan_i++){
+            mspc_buff[((12 * mod4) + chan_i)] = data.mspc_raw[frm_i][chan_i];
+         }
+         
+         //OR in the quality flag
+         mspc_q |= data.quality[frm_i];
+         
+         if(mod4 == 3){
+            //Add the quality flag
+            mspc_data.add(3, Long.valueOf(mspc_q));
+            
+            //add the spectrum buffer into the data record
+            mspc_data.add(0, mspc_buff);
+            
+            mspc_cdf.putRecord(mspc_rec_num, mspc_var_names, mspc_data);
+            mspc_data = new Vector(4, 1);
+            mspc_buff = new Integer[48];
+            mspc_q = 0;
+            mspc_rec_num++;
          }
          
          //SSPC
          if(mod32 == 0){
-            sspc_rec++;
+            sspc_data.add(1, Integer.valueOf(frameGrp4));
+            sspc_data.add(2, Long.valueOf(data.epoch[frm_i]));
+         }else if(frameGrp4 != gps_data.get(1)){
+            //set the quality bit for an incomplete group
+            sspc_q |= INCOMPLETE_GROUP;
+            sspc_data.add(3, Long.valueOf(sspc_q));
             
-            //calculate quality factor for all of the slow spectrum frames
-            int q = 0;
-            for(int q_i = frm_i; 
-               q_i < Math.min((frm_i + 32), data.getSize()); 
-               q_i++
-            ){
-               q |= data.quality[q_i];
-            }
-            CDF_Gen.putData(sspc_cdf, "Q", sspc_rec, Long.valueOf(q), 0L);
+            //get whatever part of the spectrum buffer we have
+            sspc_data.add(0, sspc_buff);
+            sspc_buff = new Integer[256];
             
-            CDF_Gen.putData(
-               sspc_cdf, "Epoch", sspc_rec, 
-               Long.valueOf(data.epoch[frm_i]), 0L
-            );
-            CDF_Gen.putData(
-               sspc_cdf, "FrameGroup", sspc_rec, 
-               Integer.valueOf(frameGrp32), 0L
-            );
+            //write the record we have so far and clear the arrays
+            sspc_cdf.putRecord(sspc_rec_num, sspc_var_names, sspc_data);
+            sspc_data = new Vector(4, 1);
+            
+            //start a new record 
+            sspc_rec_num++;
+            sspc_q = 0;
+            sspc_data.add(1, Integer.valueOf(frameGrp40));
+            sspc_data.add(2, Long.valueOf(data.epoch[frm_i]));   
          }
          
-         for(int chan_i = 0; chan_i < 8; chan_i ++){
-            CDF_Gen.putData(sspc_cdf, "SSPC", sspc_rec, 
-               data.sspc_raw[frm_i][chan_i], ((8 * mod32) + chan_i)
-            );
+         //save the data from this frame
+         for(int chan_i = 0; chan_i < 8; chan_i++){
+            sspc_buff[((8 * mod32) + chan_i)] = data.sspc_raw[frm_i][chan_i];
          }
-
+         
+         //OR in the quality flag
+         sspc_q |= data.quality[frm_i];
+         
+         if(mod32 == 31){
+            //Add the quality flag
+            sspc_data.add(3, Long.valueOf(sspc_q));
+            
+            //add the spectrum buffer into the data record
+            sspc_data.add(0, sspc_buff);
+            
+            sspc_cdf.putRecord(sspc_rec_num, sspc_var_names, sspc_data);
+            sspc_data = new Vector(4, 1);
+            sspc_buff = new Integer[256];
+            sspc_q = 0;
+            sspc_rec_num++;
+         }
+         
          //RC
+         rcnt_data.add(mod4, Long.valueOf(data.rc_raw[frm_i]));
          if(mod4 == 0){
-            rcnt_rec++;
+            rcnt_data.add(4, Integer.valueOf(frameGrp4));
+            rcnt_data.add(5, Long.valueOf(data.epoch[frm_i]));
+         }else if(frameGrp4 != gps_data.get(4)){
+            //set the quality bit for an incomplete group
+            rcnt_q |= INCOMPLETE_GROUP;
+            rcnt_data.add(6, Long.valueOf(rcnt_q));
             
-            //calculate the data quality for this frame group
-            int q = 0; 
-            q |= data.quality[frm_i]; 
-            if((frm_i + 1) < data.getSize()) q |= data.quality[frm_i + 1];
-            if((frm_i + 2) < data.getSize()) q |= data.quality[frm_i + 2];
-            if((frm_i + 3) < data.getSize()) q |= data.quality[frm_i + 3];
+            //write the record we have so far and clear the arrays
+            rcnt_cdf.putRecord(rcnt_rec_num, rcnt_var_names, rcnt_data);
+            rcnt_data = new Vector(7, 1);
             
-            CDF_Gen.putData(rcnt_cdf, "Q", rcnt_rec, Long.valueOf(q), 0L);
-            
-            CDF_Gen.putData(
-               rcnt_cdf, "Epoch", rcnt_rec, 
-               Long.valueOf(data.epoch[frm_i]), 0L
-            );
-            CDF_Gen.putData(
-               rcnt_cdf, "FrameGroup", rcnt_rec, 
-               Integer.valueOf(frameGrp4), 0L
-            );
+            //start a new record 
+            rcnt_rec_num++;
+            rcnt_q = 0;
+            rcnt_data.add(4, Integer.valueOf(frameGrp40));
+            rcnt_data.add(5, Long.valueOf(data.epoch[frm_i]));
          }
          
-         CDF_Gen.putData(
-            rcnt_cdf, DataHolder.rc_label[mod4], rcnt_rec, 
-            Long.valueOf(data.rc_raw[frm_i]), 0L
-         );
-          
-
+         //save the rate counter data
+         rcnt_data.add(mod4, Long.valueOf(data.rc_raw[frm_i]));
+         //OR in the quality flag
+         rcnt_q |= data.quality[frm_i];
+         
+         if(mod4 == 3){
+            //last frame in this record
+            
+            //Add the quality flag
+            sspc_data.add(3, Long.valueOf(rcnt_q));
+            
+            rcnt_cdf.putRecord(rcnt_rec_num, rcnt_var_names, rcnt_data);
+            rcnt_data = new Vector(7, 1);
+            rcnt_q = 0;
+            rcnt_rec_num++;
+         }
+         
+         //Done with this frame
          lastFrame = data.frameNum[frm_i];
          
       }
