@@ -27,29 +27,39 @@ v12.11.26
 
 v12.11.20
    -Changed references to Level_Generator to CDF_Gen
-   -Moved the declaration of frameGrp and mod variables outside the main loop.   
+   -Moved the declaration of frameGrp and mod variables outside the main loop. 
    -Moved time calculation code to top of loop
-   -Changed epoch to being only stored in DataHolder instead of also being a local variable
+   -Changed epoch to being only stored in DataHolder instead of also being a 
+      local variable
    -Removed ms_of_week from all files except GPS
-   -Uses DataHolder.rc_label to write rc CDF variables instead of the switch statment
-   -Wraps primitive variable types stored in DataHolded in proper objects before writing to CDF
+   -Uses DataHolder.rc_label to write rc CDF variables instead of the switch 
+      statment
+   -Wraps primitive variable types stored in DataHolded in proper objects before
+      writing to CDF
    
 v12.11.05
-   -Saves ints (or longs) to cdf files. CDF's are now full of completely raw variables (except EPOCH and ms_of_week)
-   -Changed "Time" CDF variable to "ms_of_week" to avoid TDAS namespace collision
+   -Saves ints (or longs) to cdf files. CDF's are now full of completely raw 
+      variables (except EPOCH and ms_of_week)
+   -Changed "Time" CDF variable to "ms_of_week" to avoid TDAS namespace
+      collision
    
 v12.10.11
    -Changed version numbers to a date format
    -No longer has any public members or methods other than the constructor.
-   -Constructor calls functions to process all data held in DataHolder object and produce CDF files.
+   -Constructor calls functions to process all data held in DataHolder object 
+      and produce CDF files.
    -Removed HexToBit function
-   -Moved functions "copyFile()", "putData()" and "openCDF()" to Level_Generator.java
+   -Moved functions "copyFile()", "putData()" and "openCDF()" to 
+      Level_Generator.java
    -Now gets output path from Level_Generator.L1_Dir
-   -Types of CDF files are now pulled from a public member of Level_Generator.java
+   -Types of CDF files are now pulled from a public member of 
+      Level_Generator.java
 
 v0.3
-   -Epoch is now calculated from "weeks" and "time" variables rather than filename
-   -Improved the way Epoch offsets are added to variables that come faster than 1Hz
+   -Epoch is now calculated from "weeks" and "time" variables rather than 
+      filename
+   -Improved the way Epoch offsets are added to variables that come faster than 
+      1Hz
    
 v0.2
    -added CDF libraries
