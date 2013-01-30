@@ -80,9 +80,10 @@ public class DataHolder{
    public long[]
       epoch = new long[MAX_FRAMES],
       rc_raw = new long[MAX_FRAMES],
-      gps_raw = new long[MAX_FRAMES],
       hkpg_raw = new long[MAX_FRAMES],
       ms_of_week = new long[MAX_FRAMES];
+   public long[][]
+      gps_raw = new long[7][MAX_FRAMES/4];
    public Long[][]
       magx_raw = new Long[MAX_FRAMES][4],
       magy_raw = new Long[MAX_FRAMES][4],

@@ -80,7 +80,7 @@ Planned Changes:
 
 public class LevelOne{
    File cdfFile;
-   CDF mag_cdf, rcnt_cdf, gps_cdf, fspc_cdf, 
+   CDF mag_cdf, rcnt_cdf, fspc_cdf, 
       mspc_cdf, sspc_cdf, hkpg_cdf, pps_cdf;
    
    String outputPath;
@@ -135,10 +135,6 @@ public class LevelOne{
       }
       
       //open each CDF file and save the id
-      gps_cdf = CDF_Gen.openCDF( 
-         outputPath + "bar1" + flt + "_" + id + "_" + stn +
-         "_l1_gps-_20" + date +  "_v" + revNum + ".cdf"
-      );
       mag_cdf = CDF_Gen.openCDF( 
          outputPath + "bar1" + flt + "_" + id + "_" + stn +
          "_l1_magn_20" + date +  "_v" + revNum + ".cdf"
@@ -178,179 +174,98 @@ public class LevelOne{
    
    //Pull each value out of the frame and store it in the appropriate CDF.
    private void saveFrames() throws CDFException{
-         //declare all of the variables needed to build up records
-      long
-         mag_rec_num = 0, rcnt_rec_num = 0, gps_rec_num = 0, fspc_rec_num = 0,
-         mspc_rec_num = 0, sspc_rec_num = 0, hkpg_rec_num = 0, pps_rec_num = 0;
-      
-      Long[] blank_vals = {
-         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
-         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
-         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
-         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
-         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
-         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
-         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
-         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
-         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
-         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
-         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
-         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
-         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
-         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
-         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
-         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
-         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
-         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
-         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
-         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
-         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
-         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
-         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
-         Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE
-      };
-      Integer[] test = {1,1,1,1,1,1};
-      Vector
-         gps_data = new Vector(
-            Arrays.asList(test)
-         ),
-         pps_data = new Vector(6, 1),
-         mag_data = new Vector(6, 1),
-         hkpg_data = new Vector(46, 1),
-         rcnt_data = new Vector(7, 1),
-         fspc_data = new Vector(7, 1),
-         mspc_data = new Vector(4, 1),
-         sspc_data = new Vector(4, 1);
-      Integer[]
-         mspc_buff = new Integer[48],
-         sspc_buff = new Integer[256];
-      
-      String[]
-         gps_var_names = {
-            "GPS_Alt", "ms_of_week", "GPS_Lat", "GPS_Lon",  
-            "FrameGroup", "Epoch", "Q"
-         },
-         pps_var_names = {
-            "GPS_PPS", " Payload_ID", "Version",
-            "FrameGroup", "Epoch", "Q"
-         },
-         mag_var_names = {
-            "MAG_X", "MAG_Y", "MAG_Z",
-            "FrameGroup", "Epoch", "Q"
-         },
-         rcnt_var_names = {
-            "Interrupt", "LowLevel", "PeakDet", "HighLevel",
-            "FrameGroup", "Epoch", "Q"
-         },
-         fspc_var_names = {
-            "LC1", "LC2", "LC3", "LC4",
-            "FrameGroup", "Epoch", "Q"
-         },
-         mspc_var_names =
-            {"MSPC", "FrameGroup", "Epoch", "Q"},
-         sspc_var_names =
-            {"SSPC", "FrameGroup", "Epoch", "Q"},
-         hkpg_var_names = {
-            "V0_VoltAtLoad", "I0_TotalLoad", "V1_Battery", "I1_TotalSolar", 
-            "V2_Solar1", "I2_Solar1", "V3_POS_DPU", "I3_POS_DPU",
-            "V4_POS_XRayDet", "I4_POS_XRayDet","V5_Modem", "I5_Modem",
-            "V6_NEG_XRayDet",  "I6_NEG_XRayDet", "V7_NEG_DPU", "I7_NEG_DPU",
-            "T0_Scint", "T8_Solar1", "T1_Mag", "T9_Solar2", "T2_ChargeCont",
-            "T10_Solar3", "T3_Battery", "T11_Solar4", "T4_PowerConv",
-            "T12_TermTemp", "T5_DPU", "T13_TermBatt", "T6_Modem", "T14_TermCap",
-            "T7_Structure", "T15_CCStat", "V8_Mag", "V9_Solar2", "V10_Solar3",
-            "V11_Solar4", "numOfSats", "timeOffset", "weeks", "termStatus", 
-            "cmdCounter", "dcdCounter", "modemCounter",
-            "FrameGroup", "Epoch", "Q"
-         };
-         
-      int gps_q = 0, rcnt_q = 0, mspc_q = 0, sspc_q = 0, hkpg_q = 0;
-      int mod4 = 0, mod32 = 0, mod40 = 0;
-      int frameGrp4 = 0, frameGrp32 = 0, frameGrp40 = 0;
-      
+      //create a holder for the current CDF and Variable
+      CDF cur_cdf;
+      Variable cur_var;
+
       System.out.println(
-         "Creating Level One... (" + data.getSize() + " frames)");
+         "Creating Level One... (" + data.getSize() + " frames)"
+      );
       
-      for(int frm_i = 0; frm_i < data.getSize(); frm_i++){
-         System.out.println(
-            "L1 for " + id + " on " + date + ": " + 
-            frm_i + " (" + (100 * frm_i) / data.getSize() + "%)"
-         );
-         
-         //get all the frame groups and mux index
-         mod4 = data.frameNum[frm_i] % 4;
-         mod32 = data.frameNum[frm_i] % 32;
-         mod40 = data.frameNum[frm_i] % 40;
-         frameGrp4 = data.frameNum[frm_i] - mod4;
-         frameGrp32 = data.frameNum[frm_i] - mod32;
-         frameGrp40 = data.frameNum[frm_i] - mod40;
-         
-         //GPS
-         if(mod4 == 0){
-            gps_data.add(4, Integer.valueOf(frameGrp4));
-            gps_data.add(5, Long.valueOf(data.epoch[frm_i]));
-         }else
-         //make sure we are still in the same frame group
-         if(frameGrp4 != gps_data.get(4)){
-            //set the quality bit for an incomplete group
-            gps_q |= INCOMPLETE_GROUP;
-            gps_data.add(6, Long.valueOf(gps_q));
-            
-            //write the record we have so far and clear data vector
-            gps_cdf.putRecord(gps_rec_num, gps_var_names, gps_data);
-            gps_data = new Vector(Arrays.asList(test));
-            
-            //start a new record 
-            gps_rec_num++;
-            gps_q = 0;
-            gps_data.add(4, Integer.valueOf(frameGrp4));
-            gps_data.add(5, Long.valueOf(data.epoch[frm_i]));   
-         }
-         
-         //OR in the quality of this frame
-         gps_q |= data.quality[frm_i];
-         
-         switch(mod4){
-            case 0:
-               //save altitude
-               gps_data.add(0, Long.valueOf(data.gps_raw[frm_i]));
-               break;
-            case 1:
-               //add ms_of_week variable
-               gps_data.add(1, Long.valueOf(data.ms_of_week[frm_i]));
-               break;
-            case 2:
-               //add lat variable
-               gps_data.add(2, Long.valueOf(data.gps_raw[frm_i]));
-               break;
-            case 3:
-               //add lon variable
-               gps_data.add(3, Long.valueOf(data.gps_raw[frm_i]));
-               
-               //add the quality flag
-               gps_data.add(6, Long.valueOf(gps_q));
-               
-               //This is the last frame in the set, write the record
-               gps_cdf.putRecord(gps_rec_num, gps_var_names, gps_data);
-               gps_data = new Vector(7, 1);
-               gps_q = 0;
-               
-               gps_rec_num++;
-               break; 
-            default: break;
-         }
-         System.out.println("did gps");
-         //PPS
-         pps_data = new Vector(6, 1);
-         pps_data.add(0, Integer.valueOf(data.pps[frm_i]));
-         pps_data.add(1, Short.valueOf(data.payID[frm_i]));
-         pps_data.add(2, Short.valueOf(data.ver[frm_i]));
-         pps_data.add(3, Integer.valueOf(data.frameNum[frm_i]));
-         pps_data.add(4, Long.valueOf(data.epoch[frm_i]));
-         pps_data.add(5, Long.valueOf(data.quality[frm_i]));
-         
-         pps_cdf.putRecord(pps_rec_num, pps_var_names, pps_data);
-         pps_rec_num++;
+      //GPS
+      //open GPS CDF and save the reference in the cur_cdf variable
+      cur_cdf = CDF_Gen.openCDF( 
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l1_gps-_20" + date +  "_v" + revNum + ".cdf"
+      );
+      
+      //put an entire day's worth of data at once for each CDF variable
+      cur_var = cdf.getVariable("GPS_Alt");
+      cur_var.putHyperData(
+         0, data.getSize(), 1, {0}, {1}, {1}, data.gps_raw[0]
+      );
+
+      cur_var = cdf.getVariable("ms_of_week");
+      cur_var.putHyperData(
+         0, data.getSize(), 1, {0}, {1}, {1}, data.gps_raw[1]
+      );
+
+      cur_var = cdf.getVariable("GPS_Lat");
+      cur_var.putHyperData(
+         0, data.getSize(), 1, {0}, {1}, {1}, data.gps_raw[2]
+      );
+
+      cur_var = cdf.getVariable("GPS_Lon");
+      cur_var.putHyperData(
+         0, data.getSize(), 1, {0}, {1}, {1}, data.gps_raw[3]
+      );
+
+      cur_var = cdf.getVariable("FrameGroup");
+      cur_var.putHyperData(
+         0, data.getSize(), 1, {0}, {1}, {1}, data.gps_raw[4]
+      );
+
+      cur_var = cdf.getVariable("Epoch");
+      cur_var.putHyperData(
+         0, data.getSize(), 1, {0}, {1}, {1}, data.gps_raw[5]
+      );
+
+      cur_var = cdf.getVariable("Q");
+      cur_var.putHyperData(
+         0, data.getSize(), 1, {0}, {1}, {1}, data.gps_raw[6]
+      );
+
+      //close current cdf
+      cur_cdf.close();
+
+      //PPS
+      cur_cdf = CDF_Gen.openCDF( 
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l1_gps-_20" + date +  "_v" + revNum + ".cdf"
+      );
+      
+      cur_var = cdf.getVariable("GPS_PPS");
+      cur_var.putHyperData(
+         0, data.getSize(), 1, {0}, {1}, {1}, data.pps
+      );
+
+      cur_var = cdf.getVariable("Version");
+      cur_var.putHyperData(
+         0, data.getSize(), 1, {0}, {1}, {1}, data.ver
+      );
+
+      cur_var = cdf.getVariable("Payload_ID");
+      cur_var.putHyperData(
+         0, data.getSize(), 1, {0}, {1}, {1}, data.payID
+      );
+
+      cur_var = cdf.getVariable("FrameGroup");
+      cur_var.putHyperData(
+         0, data.getSize(), 1, {0}, {1}, {1}, data.frameNum
+      );
+
+      cur_var = cdf.getVariable("Epoch");
+      cur_var.putHyperData(
+         0, data.getSize(), 1, {0}, {1}, {1}, data.epoch
+      );
+
+      cur_var = cdf.getVariable("Q");
+      cur_var.putHyperData(
+         0, data.getSize(), 1, {0}, {1}, {1}, data.q
+      );
+
+      //close current cdf
+      cur_cdf.close();
          
          //B
          for(int set_i = 0; set_i < 4; set_i++){
@@ -583,7 +498,6 @@ public class LevelOne{
          
       }
       
-      gps_cdf.close();
       mag_cdf.close();
       rcnt_cdf.close();
       fspc_cdf.close();
