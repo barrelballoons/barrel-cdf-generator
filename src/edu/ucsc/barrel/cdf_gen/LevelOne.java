@@ -231,7 +231,7 @@ public class LevelOne{
       //PPS
       cur_cdf = CDF_Gen.openCDF( 
          outputPath + "bar1" + flt + "_" + id + "_" + stn +
-         "_l1_gps-_20" + date +  "_v" + revNum + ".cdf"
+         "_l1_pps-_20" + date +  "_v" + revNum + ".cdf"
       );
       
       cur_var = cdf.getVariable("GPS_PPS");
@@ -267,7 +267,45 @@ public class LevelOne{
       //close current cdf
       cur_cdf.close();
          
-         //B
+      //B
+      cur_cdf = CDF_Gen.openCDF( 
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l1_magn_20" + date +  "_v" + revNum + ".cdf"
+      );
+      
+      cur_var = cdf.getVariable("GPS_PPS");
+      cur_var.putHyperData(
+         0, data.getSize(), 1, {0}, {1}, {1}, data.pps
+      );
+
+      cur_var = cdf.getVariable("Version");
+      cur_var.putHyperData(
+         0, data.getSize(), 1, {0}, {1}, {1}, data.ver
+      );
+
+      cur_var = cdf.getVariable("Payload_ID");
+      cur_var.putHyperData(
+         0, data.getSize(), 1, {0}, {1}, {1}, data.payID
+      );
+
+      cur_var = cdf.getVariable("FrameGroup");
+      cur_var.putHyperData(
+         0, data.getSize(), 1, {0}, {1}, {1}, data.frameNum
+      );
+
+      cur_var = cdf.getVariable("Epoch");
+      cur_var.putHyperData(
+         0, data.getSize(), 1, {0}, {1}, {1}, data.epoch
+      );
+
+      cur_var = cdf.getVariable("Q");
+      cur_var.putHyperData(
+         0, data.getSize(), 1, {0}, {1}, {1}, data.q
+      );
+
+      //close current cdf
+      cur_cdf.close();
+         
          for(int set_i = 0; set_i < 4; set_i++){
             mag_data = new Vector(6, 1);
             
