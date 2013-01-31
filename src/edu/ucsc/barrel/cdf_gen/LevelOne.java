@@ -134,46 +134,16 @@ public class LevelOne{
          CDF_Gen.copyFile(new File(srcName), new File(destName));
       }
       
-      //open each CDF file and save the id
-      mag_cdf = CDF_Gen.openCDF( 
-         outputPath + "bar1" + flt + "_" + id + "_" + stn +
-         "_l1_magn_20" + date +  "_v" + revNum + ".cdf"
-      );
-      pps_cdf = CDF_Gen.openCDF( 
-         outputPath + "bar1" + flt + "_" + id + "_" + stn +
-         "_l1_pps-_20" + date +  "_v" + revNum + ".cdf"
-      );
-      hkpg_cdf = CDF_Gen.openCDF( 
-         outputPath + "bar1" + flt + "_" + id + "_" + stn +
-         "_l1_hkpg_20" + date +  "_v" + revNum + ".cdf"
-      ); 
-      fspc_cdf = CDF_Gen.openCDF( 
-         outputPath + "bar1" + flt + "_" + id + "_" + stn +
-         "_l1_fspc_20" + date +  "_v" + revNum + ".cdf"
-      );
-      mspc_cdf = CDF_Gen.openCDF( 
-         outputPath + "bar1" + flt + "_" + id + "_" + stn +
-         "_l1_mspc_20" + date +  "_v" + revNum + ".cdf"
-      );
-      sspc_cdf = CDF_Gen.openCDF( 
-         outputPath + "bar1" + flt + "_" + id + "_" + stn +
-         "_l1_sspc_20" + date +  "_v" + revNum + ".cdf"
-      );
-      rcnt_cdf = CDF_Gen.openCDF( 
-         outputPath + "bar1" + flt + "_" + id + "_" + stn +
-         "_l1_rcnt_20" + date +  "_v" + revNum + ".cdf"
-      );
-      
       //get data from DataHolder and save them to CDF files
       try{
-         saveFrames();
+         writeData();
       }catch(CDFException ex){
          System.out.println(ex.getMessage());
       }
    }
    
    //Pull each value out of the frame and store it in the appropriate CDF.
-   private void saveFrames() throws CDFException{
+   private void writeData() throws CDFException{
       //create a holder for the current CDF and Variable
       CDF cur_cdf;
       Variable cur_var;
@@ -182,367 +152,335 @@ public class LevelOne{
          "Creating Level One... (" + data.getSize() + " frames)"
       );
       
-      //GPS
-      //open GPS CDF and save the reference in the cur_cdf variable
-      cur_cdf = CDF_Gen.openCDF( 
-         outputPath + "bar1" + flt + "_" + id + "_" + stn +
-         "_l1_gps-_20" + date +  "_v" + revNum + ".cdf"
-      );
-      
-      //put an entire day's worth of data at once for each CDF variable
-      cur_var = cdf.getVariable("GPS_Alt");
-      cur_var.putHyperData(
-         0, data.getSize(), 1, {0}, {1}, {1}, data.gps_raw[0]
-      );
-
-      cur_var = cdf.getVariable("ms_of_week");
-      cur_var.putHyperData(
-         0, data.getSize(), 1, {0}, {1}, {1}, data.gps_raw[1]
-      );
-
-      cur_var = cdf.getVariable("GPS_Lat");
-      cur_var.putHyperData(
-         0, data.getSize(), 1, {0}, {1}, {1}, data.gps_raw[2]
-      );
-
-      cur_var = cdf.getVariable("GPS_Lon");
-      cur_var.putHyperData(
-         0, data.getSize(), 1, {0}, {1}, {1}, data.gps_raw[3]
-      );
-
-      cur_var = cdf.getVariable("FrameGroup");
-      cur_var.putHyperData(
-         0, data.getSize(), 1, {0}, {1}, {1}, data.gps_raw[4]
-      );
-
-      cur_var = cdf.getVariable("Epoch");
-      cur_var.putHyperData(
-         0, data.getSize(), 1, {0}, {1}, {1}, data.gps_raw[5]
-      );
-
-      cur_var = cdf.getVariable("Q");
-      cur_var.putHyperData(
-         0, data.getSize(), 1, {0}, {1}, {1}, data.gps_raw[6]
-      );
-
-      //close current cdf
-      cur_cdf.close();
-
-      //PPS
-      cur_cdf = CDF_Gen.openCDF( 
-         outputPath + "bar1" + flt + "_" + id + "_" + stn +
-         "_l1_pps-_20" + date +  "_v" + revNum + ".cdf"
-      );
-      
-      cur_var = cdf.getVariable("GPS_PPS");
-      cur_var.putHyperData(
-         0, data.getSize(), 1, {0}, {1}, {1}, data.pps
-      );
-
-      cur_var = cdf.getVariable("Version");
-      cur_var.putHyperData(
-         0, data.getSize(), 1, {0}, {1}, {1}, data.ver
-      );
-
-      cur_var = cdf.getVariable("Payload_ID");
-      cur_var.putHyperData(
-         0, data.getSize(), 1, {0}, {1}, {1}, data.payID
-      );
-
-      cur_var = cdf.getVariable("FrameGroup");
-      cur_var.putHyperData(
-         0, data.getSize(), 1, {0}, {1}, {1}, data.frameNum
-      );
-
-      cur_var = cdf.getVariable("Epoch");
-      cur_var.putHyperData(
-         0, data.getSize(), 1, {0}, {1}, {1}, data.epoch
-      );
-
-      cur_var = cdf.getVariable("Q");
-      cur_var.putHyperData(
-         0, data.getSize(), 1, {0}, {1}, {1}, data.q
-      );
-
-      //close current cdf
-      cur_cdf.close();
+      //GPS//
+         //open GPS CDF and save the reference in the cur_cdf variable
+         cur_cdf = CDF_Gen.openCDF( 
+            outputPath + "bar1" + flt + "_" + id + "_" + stn +
+            "_l1_gps-_20" + date +  "_v" + revNum + ".cdf"
+         );
          
-      //B
-      cur_cdf = CDF_Gen.openCDF( 
-         outputPath + "bar1" + flt + "_" + id + "_" + stn +
-         "_l1_magn_20" + date +  "_v" + revNum + ".cdf"
-      );
-      
-      cur_var = cdf.getVariable("GPS_PPS");
-      cur_var.putHyperData(
-         0, data.getSize(), 1, {0}, {1}, {1}, data.pps
-      );
+         //put an entire day's worth of data at once for each CDF variable
+         cur_var = cdf.getVariable("GPS_Alt");
+         cur_var.putHyperData(
+            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.gps_raw[0]
+         );
 
-      cur_var = cdf.getVariable("Version");
-      cur_var.putHyperData(
-         0, data.getSize(), 1, {0}, {1}, {1}, data.ver
-      );
+         cur_var = cdf.getVariable("ms_of_week");
+         cur_var.putHyperData(
+            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.gps_raw[1]
+         );
 
-      cur_var = cdf.getVariable("Payload_ID");
-      cur_var.putHyperData(
-         0, data.getSize(), 1, {0}, {1}, {1}, data.payID
-      );
+         cur_var = cdf.getVariable("GPS_Lat");
+         cur_var.putHyperData(
+            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.gps_raw[2]
+         );
 
-      cur_var = cdf.getVariable("FrameGroup");
-      cur_var.putHyperData(
-         0, data.getSize(), 1, {0}, {1}, {1}, data.frameNum
-      );
+         cur_var = cdf.getVariable("GPS_Lon");
+         cur_var.putHyperData(
+            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.gps_raw[3]
+         );
 
-      cur_var = cdf.getVariable("Epoch");
-      cur_var.putHyperData(
-         0, data.getSize(), 1, {0}, {1}, {1}, data.epoch
-      );
+         cur_var = cdf.getVariable("FrameGroup");
+         cur_var.putHyperData(
+            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.frame_mod4
+         );
 
-      cur_var = cdf.getVariable("Q");
-      cur_var.putHyperData(
-         0, data.getSize(), 1, {0}, {1}, {1}, data.q
-      );
+         cur_var = cdf.getVariable("Epoch");
+         cur_var.putHyperData(
+            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.epoch_mod4
+         );
 
-      //close current cdf
-      cur_cdf.close();
+         cur_var = cdf.getVariable("Q");
+         cur_var.putHyperData(
+            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.gps_q
+         );
+
+         //close current cdf
+         cur_cdf.close();
+
+      //PPS//
+         cur_cdf = CDF_Gen.openCDF( 
+            outputPath + "bar1" + flt + "_" + id + "_" + stn +
+            "_l1_pps-_20" + date +  "_v" + revNum + ".cdf"
+         );
          
-         for(int set_i = 0; set_i < 4; set_i++){
-            mag_data = new Vector(6, 1);
+         cur_var = cdf.getVariable("GPS_PPS");
+         cur_var.putHyperData(
+            0, data.getSize(), 1, {0}, {1}, {1}, data.pps
+         );
+
+         cur_var = cdf.getVariable("Version");
+         cur_var.putHyperData(
+            0, data.getSize(), 1, {0}, {1}, {1}, data.ver
+         );
+
+         cur_var = cdf.getVariable("Payload_ID");
+         cur_var.putHyperData(
+            0, data.getSize(), 1, {0}, {1}, {1}, data.payID
+         );
+
+         cur_var = cdf.getVariable("FrameGroup");
+         cur_var.putHyperData(
+            0, data.getSize(), 1, {0}, {1}, {1}, data.frame_1Hz
+         );
+
+         cur_var = cdf.getVariable("Epoch");
+         cur_var.putHyperData(
+            0, data.getSize(), 1, {0}, {1}, {1}, data.epoch_1Hz
+         );
+
+         cur_var = cdf.getVariable("Q");
+         cur_var.putHyperData(
+            0, data.getSize(), 1, {0}, {1}, {1}, data.pps_q
+         );
+
+         cur_cdf.close();
+         
+      //B//
+         cur_cdf = CDF_Gen.openCDF( 
+            outputPath + "bar1" + flt + "_" + id + "_" + stn +
+            "_l1_magn_20" + date +  "_v" + revNum + ".cdf"
+         );
+         
+         cur_var = cdf.getVariable("MAG_X");
+         cur_var.putHyperData(
+            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.magx_raw
+         );
+
+         cur_var = cdf.getVariable("MAG_Y");
+         cur_var.putHyperData(
+            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.magy_raw
+         );
+
+         cur_var = cdf.getVariable("MAG_Z");
+         cur_var.putHyperData(
+            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.mag_z_raw
+         );
+
+         cur_var = cdf.getVariable("FrameGroup");
+         cur_var.putHyperData(
+            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.frame_4Hz
+         );
+
+         cur_var = cdf.getVariable("Epoch");
+         cur_var.putHyperData(
+            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.epoch_4hz
+         );
+
+         cur_var = cdf.getVariable("Q");
+         cur_var.putHyperData(
+            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.magn_q
+         );
+
+         cur_cdf.close();
+         
+      //HKPG
+         cur_cdf = CDF_Gen.openCDF( 
+            outputPath + "bar1" + flt + "_" + id + "_" + stn +
+            "_l1_hkpg_20" + date +  "_v" + revNum + ".cdf"
+         );
             
-            mag_data.add(0, Long.valueOf(data.magx_raw[frm_i][set_i]));
-            mag_data.add(1, Long.valueOf(data.magy_raw[frm_i][set_i]));
-            mag_data.add(2, Long.valueOf(data.magz_raw[frm_i][set_i]));
-            mag_data.add(3, Integer.valueOf(data.frameNum[frm_i]));
-            mag_data.add(
-               4, Long.valueOf(data.epoch[frm_i] + (250000000 * set_i))
+         for(int var_i = 0; var_i < 36; var_i++){
+            cur_var = cdf.getVariable(data.hkpg_label[var_i]);
+            cur_var.putHyperData(
+               0, (data.getSize() / 40), 1, {0}, {1}, {1}, data.hkpg_raw[var_i]
             );
-            mag_data.add(5, Long.valueOf(data.quality[frm_i]));
-            
-            mag_cdf.putRecord(mag_rec_num, mag_var_names, mag_data);   
-            mag_rec_num++;
          }
+
+         cur_var = cdf.getVariable("numOfSats");
+         cur_var.putHyperData(
+            0, (data.getSize() / 40), 1, {0}, {1}, {1}, data.sats
+         );
+
+         cur_var = cdf.getVariable("timeOffset");
+         cur_var.putHyperData(
+            0, (data.getSize() / 40), 1, {0}, {1}, {1}, data.offset
+         );
          
-         //HKPG
-         if(mod40 == 0){ //start a new record for each new group of frames
-            //save the frame group and epoch info for this set
-            hkpg_data.add(43, Integer.valueOf(frameGrp40));
-            hkpg_data.add(44, Long.valueOf(data.epoch[frm_i]));
-         }else if(frameGrp40 != gps_data.get(43)){
-            //check to make sure we are still in the same frame group
-            //if not, put the incomplete record and start a new one
-            
-            //set the quality bit for an incomplete group
-            hkpg_q |= INCOMPLETE_GROUP;
-            hkpg_data.add(45, Long.valueOf(hkpg_q));
-            
-            //write the record we have so far and clear the arrays
-            hkpg_cdf.putRecord(hkpg_rec_num, hkpg_var_names, hkpg_data);
-            hkpg_data = new Vector(46, 1);
-            
-            //start a new record 
-            hkpg_rec_num++;
-            hkpg_q = 0;
-            hkpg_data.add(43, Integer.valueOf(frameGrp40));
-            hkpg_data.add(44, Long.valueOf(data.epoch[frm_i]));
-         }
-            
-         //OR in the quality flag
-         hkpg_q |= data.quality[frm_i];
+         cur_var = cdf.getVariable("termStatus");
+         cur_var.putHyperData(
+            0, (data.getSize() / 40), 1, {0}, {1}, {1}, data.termStat
+         );
+
+         cur_var = cdf.getVariable("cmdCounter");
+         cur_var.putHyperData(
+            0, (data.getSize() / 40), 1, {0}, {1}, {1}, data.cmdCnt
+         );
+
+         cur_var = cdf.getVariable("modemCounter");
+         cur_var.putHyperData(
+            0, (data.getSize() / 40), 1, {0}, {1}, {1}, data.modemCnt
+         );
+
+         cur_var = cdf.getVariable("dcdCounter");
+         cur_var.putHyperData(
+            0, (data.getSize() / 40), 1, {0}, {1}, {1}, data.dcdCnt
+         );
+
+         cur_var = cdf.getVariable("weeks");
+         cur_var.putHyperData(
+            0, (data.getSize() / 40), 1, {0}, {1}, {1}, data.weeks
+         );
+
+         cur_var = cdf.getVariable("FrameGroup");
+         cur_var.putHyperData(
+            0, (data.getSize() / 40), 1, {0}, {1}, {1}, data.frame_mod40
+         );
+
+         cur_var = cdf.getVariable("Epoch");
+         cur_var.putHyperData(
+            0, (data.getSize() / 40), 1, {0}, {1}, {1}, data.epoch_mod40
+         );
+
+         cur_var = cdf.getVariable("Q");
+         cur_var.putHyperData(
+            0, (data.getSize() / 40), 1, {0}, {1}, {1}, data.hkpg_q
+         );
+
+         cur_cdf.close();
          
-         //add the appropriate variables
-         switch(mod40){
-            case 36:
-               hkpg_data.add(36, Short.valueOf(data.sats[frm_i]));
-               hkpg_data.add(37, Short.valueOf(data.offset[frm_i]));
-               break;
-            case 37:
-               weeks = data.weeks[frm_i];
-               hkpg_data.add(38, Integer.valueOf(data.weeks[frm_i]));
-               break;
-            case 38:
-               hkpg_data.add(39, Short.valueOf(data.termStat[frm_i]));
-               hkpg_data.add(40, Integer.valueOf(data.cmdCnt[frm_i]));
-               break;
-            case 39:
-               hkpg_data.add(41, Short.valueOf(data.dcdCnt[frm_i]));
-               hkpg_data.add(42, Short.valueOf(data.modemCnt[frm_i]));
-              
-               //last frame for this record
-               //add quality flag
-               hkpg_data.add(45, Long.valueOf(hkpg_q));
-               
-               //write the record and clear the data array
-               hkpg_cdf.putRecord(hkpg_rec_num, hkpg_var_names, hkpg_data);
-               hkpg_data = new Vector(46, 1);
-               hkpg_q = data.quality[frm_i];
-               hkpg_rec_num++;
-               
-               break;
-            default:
-               hkpg_data.add(mod40, Long.valueOf(data.hkpg_raw[frm_i]));
-               break;
-         }
+      //FSPC//
+         cur_cdf = CDF_Gen.openCDF( 
+            outputPath + "bar1" + flt + "_" + id + "_" + stn +
+            "_l1_fspc_20" + date +  "_v" + revNum + ".cdf"
+         );
          
-         //FSPC
-         for(int set_i = 0; set_i < 20; set_i++){
-            //Add epoch and time offsets because data comes at 20Hz
-            fspc_data.add(0, data.lc1_raw[frm_i][set_i]);
-            fspc_data.add(1, data.lc2_raw[frm_i][set_i]);
-            fspc_data.add(2, data.lc3_raw[frm_i][set_i]);
-            fspc_data.add(3, data.lc4_raw[frm_i][set_i]);
-            fspc_data.add(4, Integer.valueOf(data.frameNum[frm_i]));
-            fspc_data.add(
-               5, Long.valueOf(data.epoch[frm_i] + (50000000 * set_i))
-            );
-            fspc_data.add(6, Long.valueOf(data.quality[frm_i]));
-            
-            fspc_cdf.putRecord(fspc_rec_num, fspc_var_names, fspc_data);
-            fspc_data = new Vector(7, 1);
-            fspc_rec_num++;
-         }
+         cur_var = cdf.getVariable("LC1");
+         cur_var.putHyperData(
+            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.lc1_raw
+         );
+
+         cur_var = cdf.getVariable("LC2");
+         cur_var.putHyperData(
+            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.lc2_raw
+         );
+
+         cur_var = cdf.getVariable("LC3");
+         cur_var.putHyperData(
+            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.lc3_raw
+         );
+
+         cur_var = cdf.getVariable("LC4");
+         cur_var.putHyperData(
+            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.lc4_raw
+         );
+
+         cur_var = cdf.getVariable("FrameGroup");
+         cur_var.putHyperData(
+            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.frame_20Hz
+         );
+
+         cur_var = cdf.getVariable("Epoch");
+         cur_var.putHyperData(
+            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.epoch_20Hz
+         );
+
+         cur_var = cdf.getVariable("Q");
+         cur_var.putHyperData(
+            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.fspc_q
+         );
+
+         cur_cdf.close();
          
-         //MSPC
-         if(mod4 == 0){
-            mspc_data.add(1, Integer.valueOf(frameGrp4));
-            mspc_data.add(2, Long.valueOf(data.epoch[frm_i]));
-         }else if(frameGrp4 != gps_data.get(1)){
-            //set the quality bit for an incomplete group
-            mspc_q |= INCOMPLETE_GROUP;
-            mspc_data.add(3, Long.valueOf(mspc_q));
-            
-            //get whatever part of the spectrum buffer we have
-            mspc_data.add(0, mspc_buff);
-            mspc_buff = new Integer[48];
-            
-            //write the record we have so far and clear the arrays
-            mspc_cdf.putRecord(mspc_rec_num, mspc_var_names, mspc_data);
-            mspc_data = new Vector(4, 1);
-            
-            //start a new record 
-            mspc_rec_num++;
-            mspc_q = 0;
-            mspc_data.add(1, Integer.valueOf(frameGrp40));
-            mspc_data.add(2, Long.valueOf(data.epoch[frm_i]));
-         }
+      //MSPC//
+         cur_cdf = CDF_Gen.openCDF( 
+            outputPath + "bar1" + flt + "_" + id + "_" + stn +
+            "_l1_mspc_20" + date +  "_v" + revNum + ".cdf"
+         );
+
+         cur_var = cdf.getVariable("MSPC");
+         cur_var.putHyperData(
+            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.mspc_raw
+         );
+
+         cur_var = cdf.getVariable("FrameGroup");
+         cur_var.putHyperData(
+            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.frame_mod4
+         );
+
+         cur_var = cdf.getVariable("Epoch");
+         cur_var.putHyperData(
+            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.epoch_mod4
+         );
+
+         cur_var = cdf.getVariable("Q");
+         cur_var.putHyperData(
+            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.mspc_q
+         );
+
+         cur_cdf.close();
          
-         //save the data from this frame
-         for(int chan_i = 0; chan_i < 12; chan_i++){
-            mspc_buff[((12 * mod4) + chan_i)] = data.mspc_raw[frm_i][chan_i];
-         }
+      //SSPC//
+         cur_cdf = CDF_Gen.openCDF( 
+            outputPath + "bar1" + flt + "_" + id + "_" + stn +
+            "_l1_sspc_20" + date +  "_v" + revNum + ".cdf"
+         );
+
+         cur_var = cdf.getVariable("SSPC");
+         cur_var.putHyperData(
+            0, (data.getSize() / 32), 1, {0}, {1}, {1}, data.sspc_raw
+         );
+
+         cur_var = cdf.getVariable("FrameGroup");
+         cur_var.putHyperData(
+            0, (data.getSize() / 32), 1, {0}, {1}, {1}, data.frame_mod32
+         );
+
+         cur_var = cdf.getVariable("Epoch");
+         cur_var.putHyperData(
+            0, (data.getSize() / 32), 1, {0}, {1}, {1}, data.epoch_mod32
+         );
+
+         cur_var = cdf.getVariable("Q");
+         cur_var.putHyperData(
+            0, (data.getSize() / 32), 1, {0}, {1}, {1}, data.sspc_q
+         );
+
+         cur_cdf.close();
          
-         //OR in the quality flag
-         mspc_q |= data.quality[frm_i];
-         
-         if(mod4 == 3){
-            //Add the quality flag
-            mspc_data.add(3, Long.valueOf(mspc_q));
-            
-            //add the spectrum buffer into the data record
-            mspc_data.add(0, mspc_buff);
-            
-            mspc_cdf.putRecord(mspc_rec_num, mspc_var_names, mspc_data);
-            mspc_data = new Vector(4, 1);
-            mspc_buff = new Integer[48];
-            mspc_q = 0;
-            mspc_rec_num++;
-         }
-         
-         //SSPC
-         if(mod32 == 0){
-            sspc_data.add(1, Integer.valueOf(frameGrp4));
-            sspc_data.add(2, Long.valueOf(data.epoch[frm_i]));
-         }else if(frameGrp4 != gps_data.get(1)){
-            //set the quality bit for an incomplete group
-            sspc_q |= INCOMPLETE_GROUP;
-            sspc_data.add(3, Long.valueOf(sspc_q));
-            
-            //get whatever part of the spectrum buffer we have
-            sspc_data.add(0, sspc_buff);
-            sspc_buff = new Integer[256];
-            
-            //write the record we have so far and clear the arrays
-            sspc_cdf.putRecord(sspc_rec_num, sspc_var_names, sspc_data);
-            sspc_data = new Vector(4, 1);
-            
-            //start a new record 
-            sspc_rec_num++;
-            sspc_q = 0;
-            sspc_data.add(1, Integer.valueOf(frameGrp40));
-            sspc_data.add(2, Long.valueOf(data.epoch[frm_i]));   
-         }
-         
-         //save the data from this frame
-         for(int chan_i = 0; chan_i < 8; chan_i++){
-            sspc_buff[((8 * mod32) + chan_i)] = data.sspc_raw[frm_i][chan_i];
-         }
-         
-         //OR in the quality flag
-         sspc_q |= data.quality[frm_i];
-         
-         if(mod32 == 31){
-            //Add the quality flag
-            sspc_data.add(3, Long.valueOf(sspc_q));
-            
-            //add the spectrum buffer into the data record
-            sspc_data.add(0, sspc_buff);
-            
-            sspc_cdf.putRecord(sspc_rec_num, sspc_var_names, sspc_data);
-            sspc_data = new Vector(4, 1);
-            sspc_buff = new Integer[256];
-            sspc_q = 0;
-            sspc_rec_num++;
-         }
-         
-         //RC
-         rcnt_data.add(mod4, Long.valueOf(data.rc_raw[frm_i]));
-         if(mod4 == 0){
-            rcnt_data.add(4, Integer.valueOf(frameGrp4));
-            rcnt_data.add(5, Long.valueOf(data.epoch[frm_i]));
-         }else if(frameGrp4 != gps_data.get(4)){
-            //set the quality bit for an incomplete group
-            rcnt_q |= INCOMPLETE_GROUP;
-            rcnt_data.add(6, Long.valueOf(rcnt_q));
-            
-            //write the record we have so far and clear the arrays
-            rcnt_cdf.putRecord(rcnt_rec_num, rcnt_var_names, rcnt_data);
-            rcnt_data = new Vector(7, 1);
-            
-            //start a new record 
-            rcnt_rec_num++;
-            rcnt_q = 0;
-            rcnt_data.add(4, Integer.valueOf(frameGrp40));
-            rcnt_data.add(5, Long.valueOf(data.epoch[frm_i]));
-         }
-         
-         //save the rate counter data
-         rcnt_data.add(mod4, Long.valueOf(data.rc_raw[frm_i]));
-         //OR in the quality flag
-         rcnt_q |= data.quality[frm_i];
-         
-         if(mod4 == 3){
-            //last frame in this record
-            
-            //Add the quality flag
-            sspc_data.add(3, Long.valueOf(rcnt_q));
-            
-            rcnt_cdf.putRecord(rcnt_rec_num, rcnt_var_names, rcnt_data);
-            rcnt_data = new Vector(7, 1);
-            rcnt_q = 0;
-            rcnt_rec_num++;
-         }
-         
-         //Done with this frame
-         lastFrame = data.frameNum[frm_i];
-         
+      //RC
+         cur_cdf = CDF_Gen.openCDF( 
+            outputPath + "bar1" + flt + "_" + id + "_" + stn +
+            "_l1_rcnt_20" + date +  "_v" + revNum + ".cdf"
+         );
+
+         cur_var = cdf.getVariable("PeakDet");
+         cur_var.putHyperData(
+            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.
+         );
+
+         cur_var = cdf.getVariable("LowLevel");
+         cur_var.putHyperData(
+            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.sspc_raw
+         );
+
+         cur_var = cdf.getVariable("Interrupt");
+         cur_var.putHyperData(
+            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.sspc_raw
+         );
+
+         cur_var = cdf.getVariable("HighLevel");
+         cur_var.putHyperData(
+            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.sspc_raw
+         );
+
+         cur_var = cdf.getVariable("FrameGroup");
+         cur_var.putHyperData(
+            0, (data.getSize() / 32), 1, {0}, {1}, {1}, data.frame_mod4
+         );
+
+         cur_var = cdf.getVariable("Epoch");
+         cur_var.putHyperData(
+            0, (data.getSize() / 32), 1, {0}, {1}, {1}, data.epoch_mod4
+         );
+
+         cur_var = cdf.getVariable("Q");
+         cur_var.putHyperData(
+            0, (data.getSize() / 32), 1, {0}, {1}, {1}, data.rcnt_q
+         );
+
+         cur_cdf.close();
       }
-      
-      mag_cdf.close();
-      rcnt_cdf.close();
-      fspc_cdf.close();
-      mspc_cdf.close();
-      sspc_cdf.close();
-      hkpg_cdf.close();
-      pps_cdf.close();
       
       System.out.println("Created Level One.");
    }
