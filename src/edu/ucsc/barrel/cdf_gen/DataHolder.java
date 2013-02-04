@@ -37,7 +37,8 @@ v12.10.11
 
 public class DataHolder{
    ///Largest number of frames we can store.
-   //Need to add error checking for to make sure that the total amount of data never exceeds this
+   //Need to add error checking for to make sure that 
+   // the total amount of data never exceeds this
    final static int MAX_FRAMES = 172800;
    
    //Index references for 2d arrays that hold different data types
@@ -86,7 +87,7 @@ public class DataHolder{
       epoch_mod40 = new long[MAX_FRAMES],
       ms_of_week = new long[MAX_FRAMES / 4],
    public long[][]
-      hkpg_raw = new long[36][MAX_FRAMES];
+      hkpg_raw = new long[40][MAX_FRAMES];
       gps_raw = new long[4][MAX_FRAMES / 4],
       rcnt_raw = new long[4][MAX_FRAMES / 4];
    public Long[]
@@ -94,12 +95,12 @@ public class DataHolder{
       magy_raw = new Long[MAX_FRAMES * 4],
       magz_raw = new Long[MAX_FRAMES * 4];
    public double[]
-      gps = new double[MAX_FRAMES / 4],
       time_model_rate = new double[MAX_FRAMES],
       time_model_offset = new double[MAX_FRAMES],
       ms_since_sys_epoch = new double[MAX_FRAMES];
    public double[][]
       hkpg = new double[36][MAX_FRAMES / 40],
+      gps = new double[4][MAX_FRAMES / 4];
    public Double[]
       magx = new Double[MAX_FRAMES * 4],
       magy = new Double[MAX_FRAMES * 4],
@@ -139,8 +140,14 @@ public class DataHolder{
    }
    
    public void addFrame(BigInteger frame){
-      int fc_mod4, fc_mod32, fc_mod40;
-      
+      int mod4 = 0, mod32 = 0, mod40 = 0;
+
+      rec_num_4Hz = rec_num * 4;
+      rec_num_20Hz = rec_num * 20;
+      rec_num_mod4 = rec_num % 4;
+      rec_num_mod32 = rec_num % 32;
+      rec_num_mod40 = rec_num % 40;
+         
       //sync word
       //frame.shiftRight(1696);
       
@@ -153,88 +160,91 @@ public class DataHolder{
       frame_1Hz[rec_num] = 
          frame.shiftRight(1664).and(BigInteger.valueOf(2097151)).intValue();
       
+      //get multiplex info
+      mod4 = frameNum[rec_num] % 4;
+      mod32 = frameNum[rec_num] % 32;
+      mod40 = frameNum[rec_num] % 40;
+      
       //figure out the other time scale frame counters
-      for(int rec_i = (rec_num * 4); rec_i < (frm_i * 5); rec_i++){
+      for(int rec_i = rec_num_4Hz; rec_i < (rec_num_4Hz + 4); rec_i++){
          frame_4Hz[rec_i] = frame_1Hz[rec_num];
       }
-      for(int rec_i = (rec_num * 20); rec_i < (frm_i * 21); rec_i++){
+      for(int rec_i = rec_num_20Hz; rec_i < (rec_num_20Hz + 20); rec_i++){
          frame_20Hz[rec_i] = frame_1Hz[rec_num];
       }
-      frame_mod4[rec_num % 4] = frame_1Hz[frm_i];
-      frame_mod32[rec_num % 32] = frame_1Hz[frm_i];
-      frame_mod40[rec_num % 40] = frame_1Hz[frm_i];
-      
-      //get mod info
-      fc_mod4 = frameNum[rec_num] % 4;
-      fc_mod32 = frameNum[rec_num] % 32;
-      fc_mod40 = frameNum[rec_num] % 40;
+      //calculate and save the first frame number of the current group
+      frame_mod4[rec_num_mod4] = frame_1Hz[frm_i] - mod4;
+      frame_mod32[rec_num_mod32] = frame_1Hz[frm_i] - mod32;
+      frame_mod40[rec_num_mod40] = frame_1Hz[frm_i] - mod40;
       
       //get gps info: 32 bits of mod4 gps data followed by 16 bits of pps data
       gps_raw[mod4][rec_num] = 
-         frame.shiftRight(1632).and(BigInteger.valueOf(4294967295L)).longValue();
+         frame.shiftRight(1632).and(
+            BigInteger.valueOf(4294967295L)
+         ).longValue();
       switch(mod4){
          case 0: // alt
-            gps[rec_num] = gps_raw[frm_i] + 0.0;
+            gps[mod4][rec_num] = gps_raw[frm_i] + 0.0;
             break;
          case 1: // time
-            gps[rec_num] = gps_raw[frm_i] + 0.0;
+            gps[mod4][rec_num] = gps_raw[frm_i] + 0.0;
             ms_of_week[rec_num] = gps_raw[frm_i];
             break;
          default: // coord
-            if(gps_raw[rec_num] > 2147483648L){
-               gps_raw[rec_num] -= 4294967296L;
+            if(gps_raw[mod4][rec_num] > 2147483648L){
+               gps_raw[mod4][rec_num] -= 4294967296L;
             }
             gps[rec_num] = 
-               gps_raw[rec_num] * 8.38190317154 * Math.pow(10,-8);
+               gps_raw[mod4][rec_num] * 8.38190317154 * Math.pow(10,-8);
             break;
       }
       pps[rec_num] = 
          frame.shiftRight(1616).and(BigInteger.valueOf(65535)).intValue();
       
       //mag data 4 sets of xyz vectors. 24 bits/component
-      magx_raw[rec_num][0] = 
+      magx_raw[rec_num_4Hz] = 
          frame.shiftRight(1592).and(BigInteger.valueOf(16777215)).longValue();
-      magy_raw[rec_num][0] = 
+      magy_raw[rec_num_4Hz] = 
          frame.shiftRight(1568).and(BigInteger.valueOf(16777215)).longValue();
-      magz_raw[rec_num][0] = 
+      magz_raw[rec_num_4Hz] = 
          frame.shiftRight(1544).and(BigInteger.valueOf(16777215)).longValue();
-      magx_raw[rec_num][1] = 
+      magx_raw[rec_num_4Hz + 1] = 
          frame.shiftRight(1520).and(BigInteger.valueOf(16777215)).longValue();
-      magy_raw[rec_num][1] = 
+      magy_raw[rec_num_4Hz + 1] = 
          frame.shiftRight(1496).and(BigInteger.valueOf(16777215)).longValue();
-      magz_raw[rec_num][1] = 
+      magz_raw[rec_num_4Hz + 1] = 
          frame.shiftRight(1472).and(BigInteger.valueOf(16777215)).longValue();
-      magx_raw[rec_num][2] = 
+      magx_raw[rec_num_4Hz + 2] = 
          frame.shiftRight(1448).and(BigInteger.valueOf(16777215)).longValue();
-      magy_raw[rec_num][2] = 
+      magy_raw[rec_num_4Hz + 2] = 
          frame.shiftRight(1424).and(BigInteger.valueOf(16777215)).longValue();
-      magz_raw[rec_num][2] = 
+      magz_raw[rec_num_4Hz + 2] = 
          frame.shiftRight(1400).and(BigInteger.valueOf(16777215)).longValue();
-      magx_raw[rec_num][3] = 
+      magx_raw[rec_num_4Hz + 3] = 
          frame.shiftRight(1376).and(BigInteger.valueOf(16777215)).longValue();
-      magy_raw[rec_num][3] = 
+      magy_raw[rec_num_4Hz + 3] = 
          frame.shiftRight(1352).and(BigInteger.valueOf(16777215)).longValue();
-      magz_raw[rec_num][3] = 
+      magz_raw[rec_num_4Hz + 3] = 
          frame.shiftRight(1328).and(BigInteger.valueOf(16777215)).longValue();
       
       //mod40 housekeeping data: 16bits
-      hkpg_raw[rec_num] = 
+      hkpg_raw[mod40][rec_num_mod40] = 
          frame.shiftRight(1312).and(BigInteger.valueOf(65535)).longValue();
       switch(frameNum[rec_num] % 40 ){
          case 36:
-            sats[rec_num] = (short)(hkpg_raw[frm_i] >> 8);
-            offset[rec_num] = (short)(hkpg_raw[frm_i] & 255);
+            sats[rec_num_mod40] = (short)(hkpg_raw[frm_i] >> 8);
+            offset[rec_num_mod40] = (short)(hkpg_raw[frm_i] & 255);
             break;
          case 37:
-            weeks[rec_num] = (int) hkpg_raw[frm_i];
+            weeks[rec_num_mod40] = (int)hkpg_raw[frm_i];
             break;
          case 38:
-            termStat[rec_num] = (short)(hkpg_raw[frm_i] >> 15);
-            cmdCnt[rec_num] = (int)(hkpg_raw[frm_i] & 32768);
+            termStat[rec_num_mod40] = (short)(hkpg_raw[frm_i] >> 15);
+            cmdCnt[rec_num_mod40] = (int)(hkpg_raw[frm_i] & 32768);
             break;
          case 39:
-            dcdCnt[rec_num] = (short)(hkpg_raw[frm_i] >> 8);
-            modemCnt[rec_num] = (short)(hkpg_raw[frm_i] & 255);
+            dcdCnt[rec_num_mod40] = (short)(hkpg_raw[frm_i] >> 8);
+            modemCnt[rec_num_mod40] = (short)(hkpg_raw[frm_i] & 255);
             break;
          default:
             break;
