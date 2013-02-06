@@ -35,12 +35,15 @@ v12.11.05
 
 v12.10.11
    -Changed version numbers to a date format
-   -Removed function "addHexFrame" and variable "hexDataStr" because they are unused.
+   -Removed function "addHexFrame" and variable "hexDataStr" because they 
+   are unused.
    -Creates L2 object
    -Changes the way L1 CDF files are created
    -Moved "Creating Level One" message to LevelOne.java
-   -Added functions "copyFile()", "putData()" and "opemCDF()" as public static methods
-   -Made directory settings public so they didn't need to be set in each object's constructor
+   -Added functions "copyFile()", "putData()" and "opemCDF()" as public static 
+   methods
+   -Made directory settings public so they didn't need to be set in each 
+   object's constructor
    -putData() does not print "INFO" messages from the cdf status
    -moved CDF type list here
 
