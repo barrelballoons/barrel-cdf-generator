@@ -134,35 +134,49 @@ public class DataHolder{
    public int 
       rec_num_1Hz = 0, rec_num_4Hz = 0, rec_num_20Hz = 0,
       rec_num_mod4 = 0, rec_num_mod32 = 0, rec_num_mod40 = 0;
-   
+   public firstFC = null;
+
    public int getSize(){
       return rec_num_1Hz;
    }
    
    public void addFrame(BigInteger frame){
       int mod4 = 0, mod32 = 0, mod40 = 0;
-      long tempGPS = 0;
+      long tmpFc = 0, tmpGPS = 0;
+      short tmpVer = 0, tmpPayID = 0;
+      
+      //Breakdown frame counter words: 
+      //save the frame counter parts as temp variables,
+      //they will be written to the main structure once rec_num is calculated.
+      //First 5 bits are version, next 6 are id, last 21 are FC
+      tmpVer = 
+         frame.shiftRight(1691).and(BigInteger.valueOf(31)).shortValue();
+      tmpPayID = 
+         frame.shiftRight(1685).and(BigInteger.valueOf(63)).shortValue();
+      tmpFC = 
+         frame.shiftRight(1664).and(BigInteger.valueOf(2097151)).intValue();
+      
+      //check to see if the first frame counter has been recorded yet
+      if(firstFC == null){firstFC = tmpFC;}
 
+      //calculate the record numbers
+      rec_num_1Hz = tmpFC - firstFC;
       rec_num_4Hz = rec_num_1Hz * 4;
       rec_num_20Hz = rec_num_1Hz * 20;
       rec_num_mod4 = rec_num_1Hz % 4;
       rec_num_mod32 = rec_num_1Hz % 32;
       rec_num_mod40 = rec_num_1Hz % 40;
          
-      //breakdown frame counter words: 
-      //First 5 bits are version, next 6 are id, last 21 are FC
-      ver[rec_num_1Hz] = 
-         frame.shiftRight(1691).and(BigInteger.valueOf(31)).shortValue();
-      payID[rec_num_1Hz] = 
-         frame.shiftRight(1685).and(BigInteger.valueOf(63)).shortValue();
-      frame_1Hz[rec_num_1Hz] = 
-         frame.shiftRight(1664).and(BigInteger.valueOf(2097151)).intValue();
-      
       //get multiplex info
       mod4 = frame_1Hz[rec_num_1Hz] % 4;
       mod32 = frame_1Hz[rec_num_1Hz] % 32;
       mod40 = frame_1Hz[rec_num_1Hz] % 40;
-      
+     
+      //save the info from the frame counter word
+      ver[rec_num_1Hz] = tmpVer;
+      payID[rec_num_1Hz] = tmpPayID;
+      frame_1Hz[rec_num_1Hz] = tmpFc;
+
       //figure out the other time scale frame counters
       for(int rec_i = rec_num_4Hz; rec_i < (rec_num_4Hz + 4); rec_i++){
          frame_4Hz[rec_i] = frame_1Hz[rec_num_1Hz];
@@ -289,7 +303,5 @@ public class DataHolder{
       //rate counter: mod4 data, 16bits
       rc_raw[mod4][rec_num_mod4] = 
          frame.shiftRight(16).and(BigInteger.valueOf(65535)).longValue();
-         
-      rec_num++;
    }
 }
