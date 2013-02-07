@@ -216,8 +216,8 @@ public class CDF_Gen implements CDFConstants{
                System.out.println(
                      "Payload " + getSetting("currentPayload") + 
                      " Throughput: " + (100 * data.getSize() - 1) /
-   			      (data.frameNum[data.getSize() - 1] - 
-   			      (data.frameNum[0]))
+   			      (data.frame_1Hz[data.getSize() - 1] - 
+   			      (data.frame_1Hz[0]))
    			      + " %"
    			   );
             

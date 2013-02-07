@@ -18,14 +18,17 @@ v13.01.04
    -Changed the way epoch is calculated and fixed the "12h bug"
    
 v12.12.31
-   -Removed redundant calculation of rec_i when checking if BarrelTimes array is full
+   -Removed redundant calculation of rec_i when 
+   checking if BarrelTimes array is full
    
    
 v12.11.28
-   -Fixed null pointer error caused by trying to process data without a linear model
+   -Fixed null pointer error caused by trying to 
+   process data without a linear model
 
 v12.11.27
-   -Grabs DataHolder object from CDF_Gen as a member rather than having it passed through all function
+   -Grabs DataHolder object from CDF_Gen as a member 
+   rather than having it passed through all function
    -Rewroked a number of routines to add ability to fill missing time 
    
 v12.11.26
@@ -44,7 +47,7 @@ v12.10.15
 
 public class ExtractTiming {
    //Set some constant values
-   private static final int MAX_RECS = 2000;// max number of frames into model           
+   private static final int MAX_RECS = 2000;// max number of frames into model
    private static final double NOM_RATE = 999.89;// nominal ms per frame
    private static final double SPERWEEK = 604800.0;// #seconds in a week
    private static final byte FILLED = 1;//quality bit---ms time filled
@@ -61,8 +64,11 @@ public class ExtractTiming {
    private static final short MAXWEEK = 1880;
    
    //date offset info
-   private static long GPS_START_TIME = 0; //Offset in ms from system epoch to gps start time (00:00:00 190-01-60 UTC) 
-   private static long J2000 = 0; //ms from system epoch to J2000 (11:58:55.816 2000-01-01 UTC)
+   //Offset in ms from system epoch to gps start time (00:00:00 190-01-60 UTC) 
+   private static long GPS_START_TIME = 0; 
+   
+   //ms from system epoch to J2000 (11:58:55.816 2000-01-01 UTC)
+   private static long J2000 = 0; 
    
    //model parameters for a linear fit
    //Example: ms = rate * (fc + offset);
@@ -143,7 +149,8 @@ public class ExtractTiming {
       time_pairs = new TimePair[MAX_RECS];
       
       //set the gps_start_time and j2000 calendar objects
-      Calendar gps_start_cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+      Calendar gps_start_cal = 
+         Calendar.getInstance(TimeZone.getTimeZone("UTC"));
       gps_start_cal.set(
          1980, 00, 06, 00, 00, 00);
       GPS_START_TIME = gps_start_cal.getTimeInMillis();
@@ -176,8 +183,8 @@ public class ExtractTiming {
          timeRecs[rec_i] = new BarrelTime();
          
          //fill a BarrelTime object with data values
-         timeRecs[rec_i].setFrame(data.frameNum[data_i]);
-         timeRecs[rec_i].setWeek(data.weeks[data_i]);
+         timeRecs[rec_i].setFrame(data.frame_1Hz[data_i]);
+         timeRecs[rec_i].setWeek(data.weeks[data_i / 40]);
          
          if(data.ms_of_week[data_i] == 0){ 
             timeRecs[rec_i].setMS_of_week(MSFILL);
@@ -214,7 +221,7 @@ public class ExtractTiming {
          else{
             for (int rec_i = 0; rec_i < num_of_recs; rec_i++){
                timeRecs[rec_i].setQuality(NOINFO);
-               data.quality[current_data_i - num_of_recs + rec_i] |= NOINFO; 
+               data.time_q[current_data_i - num_of_recs + rec_i] |= NOINFO; 
             }
          }
       }else{
@@ -232,7 +239,7 @@ public class ExtractTiming {
          }else{//or just set quality bits to noinfo
             for (int rec_i = 0; rec_i < num_of_recs; rec_i++){
                timeRecs[rec_i].setQuality(NOINFO);
-               data.quality[current_data_i - num_of_recs + rec_i] |= NOINFO; 
+               data.time_q[current_data_i - num_of_recs + rec_i] |= NOINFO; 
             }
          }
       }
@@ -456,7 +463,7 @@ public class ExtractTiming {
       double last_offset = -999, last_rate = -999;
       
       for(int data_i = data.getSize() - 1; data_i >= 0 ; data_i--){
-         if((data.quality[data_i] & NOINFO) != NOINFO){
+         if((data.time_q[data_i] & NOINFO) != NOINFO){
             last_offset = data.time_model_offset[data_i];
             last_rate = data.time_model_rate[data_i];
          }
@@ -465,7 +472,7 @@ public class ExtractTiming {
             data.time_model_rate[data_i] = last_rate;
             
             data.ms_since_sys_epoch[data_i] = 
-               last_rate * (data.frameNum[data_i] + last_offset);
+               last_rate * (data.frame_1Hz[data_i] + last_offset);
          }
       }
    }
@@ -475,8 +482,27 @@ public class ExtractTiming {
       
       for(int data_i = 0; data_i < data.getSize(); data_i++){
          //convert from "ms since system epoch" to "ns since J2000"
-         data.epoch[data_i] =
+         data.epoch_1Hz[data_i] =
             (long)((data.ms_since_sys_epoch[data_i] - J2000) * 1000000);
+         
+         //Convert save epoch to the various time scales
+         //fill the >1Hz times 
+         for(int fill_i = 0; fill_i < 4; fill_i++){
+            data.epoch_4Hz[data_i + fill_i] = data.epoch_1Hz[data_i];
+         }
+         for(int fill_i = 0; fill_i < 4; fill_i++){
+            data.epoch_20Hz[data_i + fill_i] = data.epoch_1Hz[data_i];
+         }
+         //save the time if it has not been set for this group yet
+         if(data.epoch_mod4[data_i / 4] == 0){
+            data.epoch_mod4[data_i / 4] = data.epoch_1Hz[data_i];
+         }
+         if(data.epoch_mod32[data_i / 32] == 0){
+            data.epoch_mod32[data_i / 32] = data.epoch_1Hz[data_i];
+         }
+         if(data.epoch_mod40[data_i / 40] == 0){
+            data.epoch_mod40[data_i / 40] = data.epoch_1Hz[data_i];
+         }
       }
    }
 }

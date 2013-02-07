@@ -3,6 +3,7 @@ package edu.ucsc.barrel.cdf_gen;
 import gsfc.nssdc.cdf.CDF;
 import gsfc.nssdc.cdf.CDFException;
 import gsfc.nssdc.cdf.util.CDFTT2000;
+import gsfc.nssdc.cdf.Variable;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,7 +39,7 @@ v12.11.20
       writing to CDF
    
 v12.11.05
-   -Saves ints (or longs) to cdf files. CDF's are now full of completely raw 
+   -Saves ints (or longs) to cur_cdf.files. CDF's are now full of completely raw
       variables (except EPOCH and ms_of_week)
    -Changed "Time" CDF variable to "ms_of_week" to avoid TDAS namespace
       collision
@@ -160,39 +161,67 @@ public class LevelOne{
          );
          
          //put an entire day's worth of data at once for each CDF variable
-         cur_var = cdf.getVariable("GPS_Alt");
+         cur_var = cur_cdf.getVariable("GPS_Alt");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.gps_raw[0]
+            0, (data.getSize() / 4), 1,
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.gps_raw[0]
          );
 
-         cur_var = cdf.getVariable("ms_of_week");
+         cur_var = cur_cdf.getVariable("ms_of_week");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.gps_raw[1]
+            0, (data.getSize() / 4), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.gps_raw[1]
          );
 
-         cur_var = cdf.getVariable("GPS_Lat");
+         cur_var = cur_cdf.getVariable("GPS_Lat");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.gps_raw[2]
+            0, (data.getSize() / 4), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.gps_raw[2]
          );
 
-         cur_var = cdf.getVariable("GPS_Lon");
+         cur_var = cur_cdf.getVariable("GPS_Lon");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.gps_raw[3]
+            0, (data.getSize() / 4), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.gps_raw[3]
          );
 
-         cur_var = cdf.getVariable("FrameGroup");
+         cur_var = cur_cdf.getVariable("FrameGroup");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.frame_mod4
+            0, (data.getSize() / 4), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.frame_mod4
          );
 
-         cur_var = cdf.getVariable("Epoch");
+         cur_var = cur_cdf.getVariable("Epoch");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.epoch_mod4
+            0, (data.getSize() / 4), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.epoch_mod4
          );
 
-         cur_var = cdf.getVariable("Q");
+         cur_var = cur_cdf.getVariable("Q");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.gps_q
+            0, (data.getSize() / 4), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.gps_q
          );
 
          //close current cdf
@@ -204,34 +233,58 @@ public class LevelOne{
             "_l1_pps-_20" + date +  "_v" + revNum + ".cdf"
          );
          
-         cur_var = cdf.getVariable("GPS_PPS");
+         cur_var = cur_cdf.getVariable("GPS_PPS");
          cur_var.putHyperData(
-            0, data.getSize(), 1, {0}, {1}, {1}, data.pps
+            0, data.getSize(), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.pps
          );
 
-         cur_var = cdf.getVariable("Version");
+         cur_var = cur_cdf.getVariable("Version");
          cur_var.putHyperData(
-            0, data.getSize(), 1, {0}, {1}, {1}, data.ver
+            0, data.getSize(), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.ver
          );
 
-         cur_var = cdf.getVariable("Payload_ID");
+         cur_var = cur_cdf.getVariable("Payload_ID");
          cur_var.putHyperData(
-            0, data.getSize(), 1, {0}, {1}, {1}, data.payID
+            0, data.getSize(), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.payID
          );
 
-         cur_var = cdf.getVariable("FrameGroup");
+         cur_var = cur_cdf.getVariable("FrameGroup");
          cur_var.putHyperData(
-            0, data.getSize(), 1, {0}, {1}, {1}, data.frame_1Hz
+            0, data.getSize(), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.frame_1Hz
          );
 
-         cur_var = cdf.getVariable("Epoch");
+         cur_var = cur_cdf.getVariable("Epoch");
          cur_var.putHyperData(
-            0, data.getSize(), 1, {0}, {1}, {1}, data.epoch_1Hz
+            0, data.getSize(), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.epoch_1Hz
          );
 
-         cur_var = cdf.getVariable("Q");
+         cur_var = cur_cdf.getVariable("Q");
          cur_var.putHyperData(
-            0, data.getSize(), 1, {0}, {1}, {1}, data.pps_q
+            0, data.getSize(), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.pps_q
          );
 
          cur_cdf.close();
@@ -242,34 +295,58 @@ public class LevelOne{
             "_l1_magn_20" + date +  "_v" + revNum + ".cdf"
          );
          
-         cur_var = cdf.getVariable("MAG_X");
+         cur_var = cur_cdf.getVariable("MAG_X");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.magx_raw
+            0, (data.getSize() * 20), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.magx_raw
          );
 
-         cur_var = cdf.getVariable("MAG_Y");
+         cur_var = cur_cdf.getVariable("MAG_Y");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.magy_raw
+            0, (data.getSize() * 20), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.magy_raw
          );
 
-         cur_var = cdf.getVariable("MAG_Z");
+         cur_var = cur_cdf.getVariable("MAG_Z");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.mag_z_raw
+            0, (data.getSize() * 20), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.magz_raw
          );
 
-         cur_var = cdf.getVariable("FrameGroup");
+         cur_var = cur_cdf.getVariable("FrameGroup");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.frame_4Hz
+            0, (data.getSize() * 20), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.frame_4Hz
          );
 
-         cur_var = cdf.getVariable("Epoch");
+         cur_var = cur_cdf.getVariable("Epoch");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.epoch_4hz
+            0, (data.getSize() * 20), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.epoch_4Hz
          );
 
-         cur_var = cdf.getVariable("Q");
+         cur_var = cur_cdf.getVariable("Q");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.magn_q
+            0, (data.getSize() * 20), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.magn_q
          );
 
          cur_cdf.close();
@@ -281,60 +358,104 @@ public class LevelOne{
          );
             
          for(int var_i = 0; var_i < 36; var_i++){
-            cur_var = cdf.getVariable(data.hkpg_label[var_i]);
+            cur_var = cur_cdf.getVariable(data.hkpg_label[var_i]);
             cur_var.putHyperData(
-               0, (data.getSize() / 40), 1, {0}, {1}, {1}, data.hkpg_raw[var_i]
+               0, (data.getSize() / 40), 1, 
+               new long[] {0}, 
+               new long[] {1}, 
+               new long[] {1}, 
+               data.hkpg_raw[var_i]
             );
          }
 
-         cur_var = cdf.getVariable("numOfSats");
+         cur_var = cur_cdf.getVariable("numOfSats");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, {0}, {1}, {1}, data.sats
+            0, (data.getSize() / 40), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.sats
          );
 
-         cur_var = cdf.getVariable("timeOffset");
+         cur_var = cur_cdf.getVariable("timeOffset");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, {0}, {1}, {1}, data.offset
+            0, (data.getSize() / 40), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.offset
          );
          
-         cur_var = cdf.getVariable("termStatus");
+         cur_var = cur_cdf.getVariable("termStatus");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, {0}, {1}, {1}, data.termStat
+            0, (data.getSize() / 40), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.termStat
          );
 
-         cur_var = cdf.getVariable("cmdCounter");
+         cur_var = cur_cdf.getVariable("cmdCounter");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, {0}, {1}, {1}, data.cmdCnt
+            0, (data.getSize() / 40), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.cmdCnt
          );
 
-         cur_var = cdf.getVariable("modemCounter");
+         cur_var = cur_cdf.getVariable("modemCounter");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, {0}, {1}, {1}, data.modemCnt
+            0, (data.getSize() / 40), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.modemCnt
          );
 
-         cur_var = cdf.getVariable("dcdCounter");
+         cur_var = cur_cdf.getVariable("dcdCounter");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, {0}, {1}, {1}, data.dcdCnt
+            0, (data.getSize() / 40), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.dcdCnt
          );
 
-         cur_var = cdf.getVariable("weeks");
+         cur_var = cur_cdf.getVariable("weeks");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, {0}, {1}, {1}, data.weeks
+            0, (data.getSize() / 40), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.weeks
          );
 
-         cur_var = cdf.getVariable("FrameGroup");
+         cur_var = cur_cdf.getVariable("FrameGroup");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, {0}, {1}, {1}, data.frame_mod40
+            0, (data.getSize() / 40), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.frame_mod40
          );
 
-         cur_var = cdf.getVariable("Epoch");
+         cur_var = cur_cdf.getVariable("Epoch");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, {0}, {1}, {1}, data.epoch_mod40
+            0, (data.getSize() / 40), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.epoch_mod40
          );
 
-         cur_var = cdf.getVariable("Q");
+         cur_var = cur_cdf.getVariable("Q");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, {0}, {1}, {1}, data.hkpg_q
+            0, (data.getSize() / 40), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.hkpg_q
          );
 
          cur_cdf.close();
@@ -345,39 +466,67 @@ public class LevelOne{
             "_l1_fspc_20" + date +  "_v" + revNum + ".cdf"
          );
          
-         cur_var = cdf.getVariable("LC1");
+         cur_var = cur_cdf.getVariable("LC1");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.lc1_raw
+            0, (data.getSize() * 20), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.lc1_raw
          );
 
-         cur_var = cdf.getVariable("LC2");
+         cur_var = cur_cdf.getVariable("LC2");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.lc2_raw
+            0, (data.getSize() * 20), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.lc2_raw
          );
 
-         cur_var = cdf.getVariable("LC3");
+         cur_var = cur_cdf.getVariable("LC3");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.lc3_raw
+            0, (data.getSize() * 20), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.lc3_raw
          );
 
-         cur_var = cdf.getVariable("LC4");
+         cur_var = cur_cdf.getVariable("LC4");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.lc4_raw
+            0, (data.getSize() * 20), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.lc4_raw
          );
 
-         cur_var = cdf.getVariable("FrameGroup");
+         cur_var = cur_cdf.getVariable("FrameGroup");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.frame_20Hz
+            0, (data.getSize() * 20), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.frame_20Hz
          );
 
-         cur_var = cdf.getVariable("Epoch");
+         cur_var = cur_cdf.getVariable("Epoch");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.epoch_20Hz
+            0, (data.getSize() * 20), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.epoch_20Hz
          );
 
-         cur_var = cdf.getVariable("Q");
+         cur_var = cur_cdf.getVariable("Q");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, {0}, {1}, {1}, data.fspc_q
+            0, (data.getSize() * 20), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.fspc_q
          );
 
          cur_cdf.close();
@@ -388,24 +537,40 @@ public class LevelOne{
             "_l1_mspc_20" + date +  "_v" + revNum + ".cdf"
          );
 
-         cur_var = cdf.getVariable("MSPC");
+         cur_var = cur_cdf.getVariable("MSPC");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.mspc_raw
+            0, (data.getSize() / 4), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.mspc_raw
          );
 
-         cur_var = cdf.getVariable("FrameGroup");
+         cur_var = cur_cdf.getVariable("FrameGroup");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.frame_mod4
+            0, (data.getSize() / 4), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.frame_mod4
          );
 
-         cur_var = cdf.getVariable("Epoch");
+         cur_var = cur_cdf.getVariable("Epoch");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.epoch_mod4
+            0, (data.getSize() / 4), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.epoch_mod4
          );
 
-         cur_var = cdf.getVariable("Q");
+         cur_var = cur_cdf.getVariable("Q");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.mspc_q
+            0, (data.getSize() / 4), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.mspc_q
          );
 
          cur_cdf.close();
@@ -416,24 +581,40 @@ public class LevelOne{
             "_l1_sspc_20" + date +  "_v" + revNum + ".cdf"
          );
 
-         cur_var = cdf.getVariable("SSPC");
+         cur_var = cur_cdf.getVariable("SSPC");
          cur_var.putHyperData(
-            0, (data.getSize() / 32), 1, {0}, {1}, {1}, data.sspc_raw
+            0, (data.getSize() / 32), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.sspc_raw
          );
 
-         cur_var = cdf.getVariable("FrameGroup");
+         cur_var = cur_cdf.getVariable("FrameGroup");
          cur_var.putHyperData(
-            0, (data.getSize() / 32), 1, {0}, {1}, {1}, data.frame_mod32
+            0, (data.getSize() / 32), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.frame_mod32
          );
 
-         cur_var = cdf.getVariable("Epoch");
+         cur_var = cur_cdf.getVariable("Epoch");
          cur_var.putHyperData(
-            0, (data.getSize() / 32), 1, {0}, {1}, {1}, data.epoch_mod32
+            0, (data.getSize() / 32), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.epoch_mod32
          );
 
-         cur_var = cdf.getVariable("Q");
+         cur_var = cur_cdf.getVariable("Q");
          cur_var.putHyperData(
-            0, (data.getSize() / 32), 1, {0}, {1}, {1}, data.sspc_q
+            0, (data.getSize() / 32), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.sspc_q
          );
 
          cur_cdf.close();
@@ -444,43 +625,70 @@ public class LevelOne{
             "_l1_rcnt_20" + date +  "_v" + revNum + ".cdf"
          );
 
-         cur_var = cdf.getVariable("PeakDet");
+         cur_var = cur_cdf.getVariable("Interrupt");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.
+            0, (data.getSize() / 4), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.rcnt_raw[0]
          );
 
-         cur_var = cdf.getVariable("LowLevel");
+         cur_var = cur_cdf.getVariable("LowLevel");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.sspc_raw
+            0, (data.getSize() / 4), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.rcnt_raw[1]
          );
 
-         cur_var = cdf.getVariable("Interrupt");
+         cur_var = cur_cdf.getVariable("PeakDet");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.sspc_raw
+            0, (data.getSize() / 4), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.rcnt_raw[2]
          );
 
-         cur_var = cdf.getVariable("HighLevel");
+         cur_var = cur_cdf.getVariable("HighLevel");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, {0}, {1}, {1}, data.sspc_raw
+            0, (data.getSize() / 4), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.rcnt_raw[3]
          );
 
-         cur_var = cdf.getVariable("FrameGroup");
+         cur_var = cur_cdf.getVariable("FrameGroup");
          cur_var.putHyperData(
-            0, (data.getSize() / 32), 1, {0}, {1}, {1}, data.frame_mod4
+            0, (data.getSize() / 32), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.frame_mod4
          );
 
-         cur_var = cdf.getVariable("Epoch");
+         cur_var = cur_cdf.getVariable("Epoch");
          cur_var.putHyperData(
-            0, (data.getSize() / 32), 1, {0}, {1}, {1}, data.epoch_mod4
+            0, (data.getSize() / 32), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1},
+            data.epoch_mod4
          );
 
-         cur_var = cdf.getVariable("Q");
+         cur_var = cur_cdf.getVariable("Q");
          cur_var.putHyperData(
-            0, (data.getSize() / 32), 1, {0}, {1}, {1}, data.rcnt_q
+            0, (data.getSize() / 32), 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            data.rcnt_q
          );
 
-         cur_cdf.close();
-      }
+      cur_cdf.close();
       
       System.out.println("Created Level One.");
    }

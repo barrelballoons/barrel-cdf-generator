@@ -80,14 +80,14 @@ public class DataHolder{
       dcdCnt = new short[MAX_FRAMES / 40];
    public long[]
       epoch_1Hz = new long[MAX_FRAMES],
-      epoch_4Hz = new long[MAX_FRAMES],
-      epoch_20Hz = new long[MAX_FRAMES],
-      epoch_mod4 = new long[MAX_FRAMES],
-      epoch_mod32 = new long[MAX_FRAMES],
-      epoch_mod40 = new long[MAX_FRAMES],
-      ms_of_week = new long[MAX_FRAMES / 4],
+      epoch_4Hz = new long[MAX_FRAMES * 4],
+      epoch_20Hz = new long[MAX_FRAMES * 20],
+      epoch_mod4 = new long[MAX_FRAMES / 4],
+      epoch_mod32 = new long[MAX_FRAMES / 32],
+      epoch_mod40 = new long[MAX_FRAMES / 40],
+      ms_of_week = new long[MAX_FRAMES / 4];
    public long[][]
-      hkpg_raw = new long[40][MAX_FRAMES];
+      hkpg_raw = new long[40][MAX_FRAMES],
       gps_raw = new long[4][MAX_FRAMES / 4],
       rcnt_raw = new long[4][MAX_FRAMES / 4];
    public Long[]
@@ -107,11 +107,11 @@ public class DataHolder{
       magz = new Double[MAX_FRAMES * 4];
    public int[]
       frame_1Hz = new int[MAX_FRAMES],
-      frame_4Hz = new int[MAX_FRAMES],
-      frame_20Hz = new int[MAX_FRAMES],
-      frame_mod4 = new int[MAX_FRAMES],
-      frame_mod32 = new int[MAX_FRAMES],
-      frame_mod40 = new int[MAX_FRAMES],
+      frame_4Hz = new int[MAX_FRAMES * 4],
+      frame_20Hz = new int[MAX_FRAMES * 20],
+      frame_mod4 = new int[MAX_FRAMES / 4],
+      frame_mod32 = new int[MAX_FRAMES / 32],
+      frame_mod40 = new int[MAX_FRAMES / 40],
       weeks = new int[MAX_FRAMES / 40],
       pps = new int[MAX_FRAMES],
       cmdCnt = new int[MAX_FRAMES / 40],
@@ -122,7 +122,8 @@ public class DataHolder{
       rcnt_q = new int[MAX_FRAMES / 4],
       fspc_q = new int[MAX_FRAMES * 20],
       mspc_q = new int[MAX_FRAMES / 4],
-      sspc_q = new int[MAX_FRAMES / 32];
+      sspc_q = new int[MAX_FRAMES / 32],
+      time_q = new int[MAX_FRAMES];
    public Integer[][]
       mspc_raw = new Integer[MAX_FRAMES / 4][48],
       sspc_raw = new Integer[MAX_FRAMES / 32][256];
@@ -134,7 +135,7 @@ public class DataHolder{
    public int 
       rec_num_1Hz = 0, rec_num_4Hz = 0, rec_num_20Hz = 0,
       rec_num_mod4 = 0, rec_num_mod32 = 0, rec_num_mod40 = 0;
-   public firstFC = null;
+   public long firstFC = 0;
 
    public int getSize(){
       return rec_num_1Hz;
@@ -142,7 +143,7 @@ public class DataHolder{
    
    public void addFrame(BigInteger frame){
       int mod4 = 0, mod32 = 0, mod40 = 0;
-      long tmpFc = 0, tmpGPS = 0;
+      long tmpFC = 0, tmpGPS = 0;
       short tmpVer = 0, tmpPayID = 0;
       
       //Breakdown frame counter words: 
@@ -157,15 +158,15 @@ public class DataHolder{
          frame.shiftRight(1664).and(BigInteger.valueOf(2097151)).intValue();
       
       //check to see if the first frame counter has been recorded yet
-      if(firstFC == null){firstFC = tmpFC;}
+      if(firstFC == 0){firstFC = tmpFC;}
 
       //calculate the record numbers
-      rec_num_1Hz = tmpFC - firstFC;
+      rec_num_1Hz = (int)(tmpFC - firstFC);
       rec_num_4Hz = rec_num_1Hz * 4;
       rec_num_20Hz = rec_num_1Hz * 20;
-      rec_num_mod4 = rec_num_1Hz % 4;
-      rec_num_mod32 = rec_num_1Hz % 32;
-      rec_num_mod40 = rec_num_1Hz % 40;
+      rec_num_mod4 = rec_num_1Hz / 4;
+      rec_num_mod32 = rec_num_1Hz / 32;
+      rec_num_mod40 = rec_num_1Hz / 40;
          
       //get multiplex info
       mod4 = frame_1Hz[rec_num_1Hz] % 4;
@@ -175,7 +176,7 @@ public class DataHolder{
       //save the info from the frame counter word
       ver[rec_num_1Hz] = tmpVer;
       payID[rec_num_1Hz] = tmpPayID;
-      frame_1Hz[rec_num_1Hz] = tmpFc;
+      frame_1Hz[rec_num_1Hz] = (int)tmpFC;
 
       //figure out the other time scale frame counters
       for(int rec_i = rec_num_4Hz; rec_i < (rec_num_4Hz + 4); rec_i++){
@@ -190,28 +191,33 @@ public class DataHolder{
       frame_mod40[rec_num_mod40] = frame_1Hz[rec_num_1Hz] - mod40;
       
       //get gps info: 32 bits of mod4 gps data followed by 16 bits of pps data
-      tempGPS = 
+      tmpGPS = 
          frame.shiftRight(1632).and(
             BigInteger.valueOf(4294967295L)
          ).longValue();
       switch(mod4){
          case 0: // alt
-            gps[mod4][rec_num_mod4] = tempGPS + 0.0;
+            gps[mod4][rec_num_mod4] = tmpGPS + 0.0;
             break;
          case 1: // time
-            gps[mod4][rec_num_mod4] = tempGPS + 0.0;
-            ms_of_week[rec_num_mod4] = tempGPS;
+            gps[mod4][rec_num_mod4] = tmpGPS + 0.0;
+            ms_of_week[rec_num_mod4] = tmpGPS;
             break;
          default: // coord
-            if(tempGPS > 2147483648L){
-               tempGPS -= 4294967296L;
+            if(tmpGPS > 2147483648L){
+               tmpGPS -= 4294967296L;
             }
             gps[mod4][rec_num_mod4] = 
-               tempGPS * 8.38190317154 * Math.pow(10,-8);
+               tmpGPS * 8.38190317154 * Math.pow(10,-8);
             break;
       }
-      pps[rec_num] = 
+      //fill the quality flag with a 0 for now
+      gps_q[rec_num_mod4] = 0;
+
+      //GPS PPS
+      pps[rec_num_1Hz] = 
          frame.shiftRight(1616).and(BigInteger.valueOf(65535)).intValue();
+      pps_q[rec_num_1Hz] = 0;
       
       //mag data 4 sets of xyz vectors. 24 bits/component
       magx_raw[rec_num_4Hz] = 
@@ -238,6 +244,7 @@ public class DataHolder{
          frame.shiftRight(1352).and(BigInteger.valueOf(16777215)).longValue();
       magz_raw[rec_num_4Hz + 3] = 
          frame.shiftRight(1328).and(BigInteger.valueOf(16777215)).longValue();
+      magn_q[rec_num_1Hz] = 0;
       
       //mod40 housekeeping data: 16bits
       hkpg_raw[mod40][rec_num_mod40] = 
@@ -268,6 +275,7 @@ public class DataHolder{
          default:
             break;
       }
+      hkpg_q[rec_num_mod40] = 0;
          
       //fast spectra: 20 sets of 4 channel data. 
       //ch1 and ch2 are 16 bits, ch3 and ch4 are 8bits 
@@ -285,6 +293,7 @@ public class DataHolder{
             frame.shiftRight(1264 - (48 * lc_i))
                .and(BigInteger.valueOf(255)).intValue();
       }
+      fspc_q[rec_num_1Hz] = 0;
        
       //medium spectra: 12 channels per frame, 16 bits/channels
       for(int mspc_i = 0; mspc_i < 12; mspc_i++){
@@ -292,6 +301,7 @@ public class DataHolder{
                frame.shiftRight(336 - (16 * mspc_i))
                   .and(BigInteger.valueOf(65535)).intValue();
       }
+      mspc_q[rec_num_mod4] = 0;
     
       //slow spectra: 8 channels per frame, 16 bits/channels
       for(int sspc_i = 0; sspc_i < 8; sspc_i++){
@@ -299,9 +309,11 @@ public class DataHolder{
                frame.shiftRight(144 - (16 * sspc_i))
                   .and(BigInteger.valueOf(65535)).intValue();
       }
+      sspc_q[rec_num_mod32] = 0;
       
       //rate counter: mod4 data, 16bits
-      rc_raw[mod4][rec_num_mod4] = 
+      rcnt_raw[mod4][rec_num_mod4] = 
          frame.shiftRight(16).and(BigInteger.valueOf(65535)).longValue();
+      rcnt_q[rec_num_mod4] = 0;
    }
 }
