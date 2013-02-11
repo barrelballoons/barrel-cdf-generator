@@ -161,16 +161,22 @@ public class ExtractTiming {
       j2000_cal.add(Calendar.MILLISECOND, 816);
       J2000 = j2000_cal.getTimeInMillis();
       
-      int temp, day, fc, week, ms, pps, cnt;
+      int temp, day, fc, week, ms, pps, cnt, mod4, mod40;
       timeRecs = new BarrelTime[MAX_RECS];
+      
       //data set index reference
       int FC = 0, DAY = 1, WEEK = 2, MS = 3, PPS = 4;
       int rec_i = 0, data_i = 0;
       
       //loop through all of the frames and generate time models
       for(data_i = 0; data_i < data.getSize(); data_i++){
+         //Figure out which record in the set of MAX_RECS this is 
          rec_i = data_i % MAX_RECS;
-         
+
+         //figure out the mod4 and mod40 values
+         mod4 = data.frame_1Hz[data_i] % 4;
+         mod40 = data.frame_1Hz[data_i] % 40;
+
          //check if the BarrelTimes array is full
          if(rec_i == 0 && data_i > 1){
             //generate a model and fill BarrelTime array
@@ -186,10 +192,14 @@ public class ExtractTiming {
          timeRecs[rec_i].setFrame(data.frame_1Hz[data_i]);
          timeRecs[rec_i].setWeek(data.weeks[data_i / 40]);
          
-         if(data.ms_of_week[data_i] == 0){ 
+         //set the ms_of_week to a fill value if mod4!=1 or the saved value is 0
+         if(
+            (mod4 != 1) || 
+            (data.ms_of_week[data_i / 4] == 0)
+         ){ 
             timeRecs[rec_i].setMS_of_week(MSFILL);
          }else{
-            timeRecs[rec_i].setMS_of_week(data.ms_of_week[data_i]);
+            timeRecs[rec_i].setMS_of_week(data.ms_of_week[data_i / 4]);
          }
          timeRecs[rec_i].setPPS(data.pps[data_i]);
       }

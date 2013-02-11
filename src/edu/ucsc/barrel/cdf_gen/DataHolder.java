@@ -114,7 +114,8 @@ public class DataHolder{
       frame_mod40 = new int[MAX_FRAMES / 40],
       weeks = new int[MAX_FRAMES / 40],
       pps = new int[MAX_FRAMES],
-      cmdCnt = new int[MAX_FRAMES / 40],
+      cmdCnt = new int[MAX_FRAMES / 40];
+   public int[]
       gps_q = new int[MAX_FRAMES / 4],
       pps_q = new int[MAX_FRAMES],
       magn_q = new int[MAX_FRAMES * 4],
@@ -124,9 +125,9 @@ public class DataHolder{
       mspc_q = new int[MAX_FRAMES / 4],
       sspc_q = new int[MAX_FRAMES / 32],
       time_q = new int[MAX_FRAMES];
-   public Integer[][]
-      mspc_raw = new Integer[MAX_FRAMES / 4][48],
-      sspc_raw = new Integer[MAX_FRAMES / 32][256];
+   public int[][]
+      mspc_raw = new int[MAX_FRAMES / 4][48],
+      sspc_raw = new int[MAX_FRAMES / 32][256];
    public Integer[]
       lc1_raw = new Integer[MAX_FRAMES * 20],
       lc2_raw = new Integer[MAX_FRAMES * 20],
@@ -168,11 +169,6 @@ public class DataHolder{
       rec_num_mod32 = rec_num_1Hz / 32;
       rec_num_mod40 = rec_num_1Hz / 40;
          
-      //get multiplex info
-      mod4 = frame_1Hz[rec_num_1Hz] % 4;
-      mod32 = frame_1Hz[rec_num_1Hz] % 32;
-      mod40 = frame_1Hz[rec_num_1Hz] % 40;
-     
       //save the info from the frame counter word
       ver[rec_num_1Hz] = tmpVer;
       payID[rec_num_1Hz] = tmpPayID;
@@ -190,11 +186,15 @@ public class DataHolder{
       frame_mod32[rec_num_mod32] = frame_1Hz[rec_num_1Hz] - mod32;
       frame_mod40[rec_num_mod40] = frame_1Hz[rec_num_1Hz] - mod40;
       
+      //get multiplex info
+      mod4 = frame_1Hz[rec_num_1Hz] % 4;
+      mod32 = frame_1Hz[rec_num_1Hz] % 32;
+      mod40 = frame_1Hz[rec_num_1Hz] % 40;
+     
       //get gps info: 32 bits of mod4 gps data followed by 16 bits of pps data
       tmpGPS = 
-         frame.shiftRight(1632).and(
-            BigInteger.valueOf(4294967295L)
-         ).longValue();
+         frame.shiftRight(1632).and(BigInteger.valueOf(4294967295L)).
+            longValue();
       switch(mod4){
          case 0: // alt
             gps[mod4][rec_num_mod4] = tmpGPS + 0.0;
@@ -208,7 +208,7 @@ public class DataHolder{
                tmpGPS -= 4294967296L;
             }
             gps[mod4][rec_num_mod4] = 
-               tmpGPS * 8.38190317154 * Math.pow(10,-8);
+               tmpGPS * 8.38190317154 * Math.pow(10, -8);
             break;
       }
       //fill the quality flag with a 0 for now
@@ -296,8 +296,9 @@ public class DataHolder{
       fspc_q[rec_num_1Hz] = 0;
        
       //medium spectra: 12 channels per frame, 16 bits/channels
+System.out.println(mod4);
       for(int mspc_i = 0; mspc_i < 12; mspc_i++){
-         mspc_raw[rec_num_mod4][mod4 + mspc_i] =
+         mspc_raw[rec_num_mod4][(mod4 * 12) + mspc_i] =
                frame.shiftRight(336 - (16 * mspc_i))
                   .and(BigInteger.valueOf(65535)).intValue();
       }
@@ -305,7 +306,7 @@ public class DataHolder{
     
       //slow spectra: 8 channels per frame, 16 bits/channels
       for(int sspc_i = 0; sspc_i < 8; sspc_i++){
-         sspc_raw[rec_num_mod32][mod32 + sspc_i] =
+         sspc_raw[rec_num_mod32][(mod32 * 8) + sspc_i] =
                frame.shiftRight(144 - (16 * sspc_i))
                   .and(BigInteger.valueOf(65535)).intValue();
       }
