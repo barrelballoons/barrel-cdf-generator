@@ -87,7 +87,7 @@ public class DataHolder{
       epoch_mod40 = new long[MAX_FRAMES / 40],
       ms_of_week = new long[MAX_FRAMES / 4];
    public long[][]
-      hkpg_raw = new long[40][MAX_FRAMES],
+      hkpg_raw = new long[40][MAX_FRAMES / 40],
       gps_raw = new long[4][MAX_FRAMES / 4],
       rcnt_raw = new long[4][MAX_FRAMES / 4];
    public Long[]
@@ -138,8 +138,24 @@ public class DataHolder{
       rec_num_mod4 = 0, rec_num_mod32 = 0, rec_num_mod40 = 0;
    public long firstFC = 0;
 
-   public int getSize(){
-      return rec_num_1Hz;
+   public int 
+      size_1Hz = 0, size_4Hz = 0, size_20Hz = 0, 
+      size_mod4 = 0, size_mod32 = 0; size_mod40 = 0;
+
+   public int getSize(String cadence){
+      if(cadance == '1Hz'){
+         return size_1Hz;
+      }else if(cadance == '4Hz'){
+         return size_4Hz;
+      }else if(cadance == '20Hz'){
+         return size_20Hz;
+      }else if(cadance == 'mod4'){
+         return size_mod4;
+      }else if(cadance == 'mod32'){
+         return size_mod32;
+      }else{
+         return size_mod40;
+      }
    }
    
    public void addFrame(BigInteger frame){
@@ -158,16 +174,13 @@ public class DataHolder{
       tmpFC = 
          frame.shiftRight(1664).and(BigInteger.valueOf(2097151)).intValue();
       
-      //check to see if the first frame counter has been recorded yet
-      if(firstFC == 0){firstFC = tmpFC;}
-
-      //calculate the record numbers
-      rec_num_1Hz = (int)(tmpFC - firstFC);
-      rec_num_4Hz = rec_num_1Hz * 4;
-      rec_num_20Hz = rec_num_1Hz * 20;
-      rec_num_mod4 = rec_num_1Hz / 4;
-      rec_num_mod32 = rec_num_1Hz / 32;
-      rec_num_mod40 = rec_num_1Hz / 40;
+      //sets the current record number
+      rec_num_1Hz = tmpFC % MAX_FRAMES; 
+      rec_num_4Hz = tmpFC % (MAX_FRAMES * 4);
+      rec_num_20Hz = tmpFC % (MAX_FRAMES * 20);
+      rec_num_mod4 = tmpFC % (MAX_FRAMES / 4);
+      rec_num_mod32 = tmpFC % (MAX_FRAMES / 32);
+      rec_num_mod40 = tmpFC % (MAX_FRAMES / 40);
          
       //save the info from the frame counter word
       ver[rec_num_1Hz] = tmpVer;
@@ -296,7 +309,6 @@ public class DataHolder{
       fspc_q[rec_num_1Hz] = 0;
        
       //medium spectra: 12 channels per frame, 16 bits/channels
-System.out.println(mod4);
       for(int mspc_i = 0; mspc_i < 12; mspc_i++){
          mspc_raw[rec_num_mod4][(mod4 * 12) + mspc_i] =
                frame.shiftRight(336 - (16 * mspc_i))
@@ -316,5 +328,49 @@ System.out.println(mod4);
       rcnt_raw[mod4][rec_num_mod4] = 
          frame.shiftRight(16).and(BigInteger.valueOf(65535)).longValue();
       rcnt_q[rec_num_mod4] = 0;
+   }
+
+   public void finalizeFrames(){
+      //Sorts through each of the CDF Variable arrays and removes frame gaps
+      //Sets the size properties
+      //start with 1Hz data
+
+      //we assume there is no data in the rec_i=0 slot
+      for(int rec_i = 0; rec_i < MAX_FRAMES; rec_i++){
+         //find next good point
+         for(int jump = 1; (rec_i + jump) < MAX_FRAMES; jump++){
+            if(frame_1Hz[rec_i + jump] > 0){
+               
+               break;
+            }
+         }
+
+         //this index of the array was not set,
+         //start seaching for the next set index
+         int old_rec = rec_i;
+
+         //the next data point was found,
+         //copy it to the rec_i - 1 index of all the 1Hz arrays
+         frame_1Hz[rec_i - 1] = frame_1Hz[rec_i];
+         frame_1Hz[rec_i] = 0;
+         pps[rec_i - 1] = pps[rec_i];
+         pps[rec_i] = 0;
+         ver[rec_i - 1] = ver[rec_i];
+         ver[rec_i] = 0;
+         payId[rec_i - 1] = payID[rec_i];
+         payID[rec_i] = 0;
+         pps_q[rec_i - 1] = pps_q[rec_i];
+         pps_q[rec_i] = 0;
+               
+         
+         for(; rec_i < MAX_FRAMES; rec_i++){
+            if(frame_1Hz[rec_i] > 1){
+               //back up the index 
+               rec_i--;
+
+               break;
+            }
+         }
+      }
    }
 }

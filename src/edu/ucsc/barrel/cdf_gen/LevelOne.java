@@ -161,6 +161,9 @@ public class LevelOne{
             "_l1_gps-_20" + date +  "_v" + revNum + ".cdf"
          );
          
+         
+
+
          //put an entire day's worth of data at once for each CDF variable
          cur_var = cur_cdf.getVariable("GPS_Alt");
          System.out.println("GPS_Alt...");
