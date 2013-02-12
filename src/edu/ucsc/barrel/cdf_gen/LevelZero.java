@@ -224,6 +224,9 @@ public class LevelZero{
             System.out.println("Long Frame in file " + file + ".");
          }
       }
+
+      //remove gaps from data structure after all frames were added.
+      CDF_Gen.getDataSet().finalizeFrames();
    }
    
    private void processFrame(String frame, String fileName) throws IOException{

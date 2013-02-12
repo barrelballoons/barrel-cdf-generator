@@ -333,44 +333,144 @@ public class DataHolder{
    public void finalizeFrames(){
       //Sorts through each of the CDF Variable arrays and removes frame gaps
       //Sets the size properties
+      
+      int old_i, new_i;
+
       //start with 1Hz data
-
       //we assume there is no data in the rec_i=0 slot
-      for(int rec_i = 0; rec_i < MAX_FRAMES; rec_i++){
-         //find next good point
-         for(int jump = 1; (rec_i + jump) < MAX_FRAMES; jump++){
-            if(frame_1Hz[rec_i + jump] > 0){
-               
-               break;
-            }
-         }
+      for(old_i = 1, new_i = 0; old_i < frame_1Hz.length; old_i++){
+         if(frame_1Hz[old_i] > 0){
+            //the next data point was found at the old_i index,
+            //copy it to the new_i index of all the 1Hz arrays
+            //and clear the data from the old_i position
+            frame_1Hz[new_i] = frame_1Hz[old_i];
+            frame_1Hz[old_i] = 0;
+            pps[new_i] = pps[old_i];
+            pps[old_i] = 0;
+            ver[new_i] = ver[old_i];
+            ver[old_i] = 0;
+            payId[new_i] = payID[old_i];
+            payID[old_i] = 0;
+            pps_q[new_i] = pps_q[old_i];
+            pps_q[old_i] = 0;
 
-         //this index of the array was not set,
-         //start seaching for the next set index
-         int old_rec = rec_i;
-
-         //the next data point was found,
-         //copy it to the rec_i - 1 index of all the 1Hz arrays
-         frame_1Hz[rec_i - 1] = frame_1Hz[rec_i];
-         frame_1Hz[rec_i] = 0;
-         pps[rec_i - 1] = pps[rec_i];
-         pps[rec_i] = 0;
-         ver[rec_i - 1] = ver[rec_i];
-         ver[rec_i] = 0;
-         payId[rec_i - 1] = payID[rec_i];
-         payID[rec_i] = 0;
-         pps_q[rec_i - 1] = pps_q[rec_i];
-         pps_q[rec_i] = 0;
-               
-         
-         for(; rec_i < MAX_FRAMES; rec_i++){
-            if(frame_1Hz[rec_i] > 1){
-               //back up the index 
-               rec_i--;
-
-               break;
-            }
+            //incriment the new array index
+            new_i++;
          }
       }
+      size_1Hz = new_i;
+
+      for(old_i = 1, new_i = 0; old_i < frame_4Hz.length; old_i++){
+         if(frame_4Hz[old_i] > 0){
+            frame_4Hz[new_i] = frame_4Hz[old_i];
+            frame_4Hz[old_i] = 0;
+            magx_raw[new_i] = magx_raw[old_i];
+            magx_raw[old_i] = 0;
+            magy_raw[new_i] = magy_raw[old_i];
+            magy_raw[old_i] = 0;
+            magz_raw[new_i] = magz_raw[old_i];
+            magz_raw[old_i] = 0;
+            magn_q[new_i] = magn_q[old_i];
+            magn_q[old_i] = 0;
+            new_i++;
+         }
+      }
+      size_4Hz = new_i;
+
+      for(old_i = 1, new_i = 0; old_i < frame_20Hz.length; old_i++){
+         if(frame_20Hz[old_i] > 0){
+            frame_20Hz[new_i] = frame_20Hz[old_i];
+            frame_20Hz[old_i] = 0;
+            lc1_raw[new_i] = lc1_raw[old_i];
+            lc1_raw[old_i] = 0;
+            lc2_raw[new_i] = lc2_raw[old_i];
+            lc2_raw[old_i] = 0;
+            lc3_raw[new_i] = lc3_raw[old_i];
+            lc3_raw[old_i] = 0;
+            lc4_raw[new_i] = lc4_raw[old_i];
+            lc5_raw[old_i] = 0;
+            fspc_q[new_i] = fspc_q[old_i];
+            fspc_q[old_i] = 0;
+            new_i++;
+         }
+      }
+      size_20Hz = new_i;
+
+      for(old_i = 1, new_i = 0; old_i < frame_mod4.length; old_i++){
+         if(frame_mod4[old_i] > 0){
+            frame_mod4[new_i] = frame_mod4[old_i];
+            frame_mod4[old_i] = 0;
+            gps_raw[0][new_i] = gps_raw[0][old_i];
+            gps_raw[0][old_i] = 0;
+            gps_raw[1][new_i] = gps_raw[1][old_i];
+            gps_raw[1][old_i] = 0;
+            gps_raw[2][new_i] = gps_raw[2][old_i];
+            gps_raw[2][old_i] = 0;
+            gps_raw[3][new_i] = gps_raw[3][old_i];
+            gps_raw[3][old_i] = 0;
+            gps_q[new_i] = gps_q[old_i];
+            gps_q[old_i] = 0;
+            rcnt_raw[0][new_i] = rcnt_raw[0][old_i];
+            rcnt_raw[0][old_i] = 0;
+            rcnt_raw[1][new_i] = rcnt_raw[1][old_i];
+            rcnt_raw[1][old_i] = 0;
+            rcnt_raw[2][new_i] = rcnt_raw[2][old_i];
+            rcnt_raw[2][old_i] = 0;
+            rcnt_raw[3][new_i] = rcnt_raw[3][old_i];
+            rcnt_raw[3][old_i] = 0;
+            rcnt_q[new_i] = rcnt_q[old_i];
+            rcnt_q[old_i] = 0;
+            mspc[new_i] = mspc[old_i];
+            mspc[old_i] = {};
+            mspc_q[new_i] = mspc_q[old_i];
+            mspc_q[old_i] = 0;
+            new_i++;
+         }
+      }
+      size_mod4 = new_i;
+
+      for(old_i = 1, new_i = 0; old_i < frame_mod32.length; old_i++){
+         if(frame_mod32[old_i] > 0){
+            frame_mod32[new_i] = frame_mod32[old_i];
+            frame_mod32[old_i] = 0;
+            sspc[new_i] = sspc[old_i];
+            sspc[old_i] = {};
+            sspc_q[new_i] = sspc_q[old_i];
+            sspc_q[old_i] = 0;
+            new_i++;
+         }
+      }
+      size_mod32 = new_i;
+
+      for(old_i = 1, new_i = 0; old_i < frame_mod40; old_i++){
+         if(frame_mod40[old_i] > 0){
+            frame_mod40[new_i] = frame_mod40[old_i];
+            frame_mod40[old_i] = 0;
+
+            //loop through all of the houskeeping values
+            for(int hkpg_i = 0; hkpg_i < 40; hkpg_i++){
+               hkpg_raw[hkpg_i][new_i] = hkpg_raw[hkpg_i][old_i];
+               hkpg_raw[hkpg_i][old_i] = 0; 
+            }
+            weeks[new_i] = weeks[old_i];
+            weeks[old_i] = 0;
+            cmdCnt[new_i] = cmdCnt[old_i];
+            cmdCnt[old_i] = 0;
+            sats[new_i] = sats[old_i];
+            sats[old_i] = 0;
+            offset[new_i] = offset[old_i];
+            offset[old_i] = 0;
+            termStat[new_i] = termStat[old_i];
+            termStat[old_i] = 0;
+            modemCnt[new_i] = modemCnt[old_i];
+            modemCnt[old_i] = 0;
+            dcdCnt[new_i] = dcdCnt[old_i];
+            dcdCnt[old_i] = 0;
+            hkpg_q[new_i] = hkpg_q[old_i];
+            hkpg_q[old_i] = 0;
+            new_i++;
+         }
+      }
+      size_mod40 = new_i;
    }
 }
