@@ -90,10 +90,10 @@ public class DataHolder{
       hkpg_raw = new long[40][MAX_FRAMES / 40],
       gps_raw = new long[4][MAX_FRAMES / 4],
       rcnt_raw = new long[4][MAX_FRAMES / 4];
-   public Long[]
-      magx_raw = new Long[MAX_FRAMES * 4],
-      magy_raw = new Long[MAX_FRAMES * 4],
-      magz_raw = new Long[MAX_FRAMES * 4];
+   public long[]
+      magx_raw = new long[MAX_FRAMES * 4],
+      magy_raw = new long[MAX_FRAMES * 4],
+      magz_raw = new long[MAX_FRAMES * 4];
    public double[]
       time_model_rate = new double[MAX_FRAMES],
       time_model_offset = new double[MAX_FRAMES],
@@ -128,11 +128,11 @@ public class DataHolder{
    public int[][]
       mspc_raw = new int[MAX_FRAMES / 4][48],
       sspc_raw = new int[MAX_FRAMES / 32][256];
-   public Integer[]
-      lc1_raw = new Integer[MAX_FRAMES * 20],
-      lc2_raw = new Integer[MAX_FRAMES * 20],
-      lc3_raw = new Integer[MAX_FRAMES * 20],
-      lc4_raw = new Integer[MAX_FRAMES * 20];
+   public int[]
+      lc1_raw = new int[MAX_FRAMES * 20],
+      lc2_raw = new int[MAX_FRAMES * 20],
+      lc3_raw = new int[MAX_FRAMES * 20],
+      lc4_raw = new int[MAX_FRAMES * 20];
    public int 
       //Hz record numbers are incrimented on the first record so
       //they start at 0
@@ -210,25 +210,14 @@ public class DataHolder{
       frame_mod40[rec_num_mod40] = frame_1Hz[rec_num_1Hz] - mod40;
       
       //get gps info: 32 bits of mod4 gps data followed by 16 bits of pps data
-      tmpGPS = 
+      gps_raw[mod4][rec_num_mod4] = 
          frame.shiftRight(1632).and(BigInteger.valueOf(4294967295L)).
             longValue();
-      switch(mod4){
-         case 0: //alt
-            gps[mod4][rec_num_mod4] = tmpGPS + 0.0;
-            break;
-         case 1: // time
-            gps[mod4][rec_num_mod4] = tmpGPS + 0.0;
-            ms_of_week[rec_num_mod4] = tmpGPS;
-            break;
-         default: // coord
-            if(tmpGPS > 2147483648L){
-               tmpGPS -= 4294967296L;
-            }
-            gps[mod4][rec_num_mod4] = 
-               tmpGPS * 8.38190317154 * Math.pow(10, -8);
-            break;
+      
+      if(mod4 == 1){
+         ms_of_week[rec_num_mod4] = gps_raw[mod4][rec_num_mod4];
       }
+
       //fill the quality flag with a 0 for now
       gps_q[rec_num_mod4] = 0;
 
