@@ -176,12 +176,12 @@ public class DataHolder{
       
       //sets the current record number
       rec_num_1Hz = (int)tmpFC % MAX_FRAMES; 
-      rec_num_4Hz = (int)tmpFC % (MAX_FRAMES * 4);
-      rec_num_20Hz = (int)tmpFC % (MAX_FRAMES * 20);
-      rec_num_mod4 = (int)tmpFC % (MAX_FRAMES / 4);
-      rec_num_mod32 = (int)tmpFC % (MAX_FRAMES / 32);
-      rec_num_mod40 = (int)tmpFC % (MAX_FRAMES / 40);
-         
+      rec_num_4Hz = (int)(tmpFC % MAX_FRAMES) * 4;
+      rec_num_20Hz = (int)(tmpFC % MAX_FRAMES) * 20;
+      rec_num_mod4 = (int)(tmpFC % MAX_FRAMES) / 4;
+      rec_num_mod32 = (int)(tmpFC % MAX_FRAMES) / 32;
+      rec_num_mod40 = (int)(tmpFC % MAX_FRAMES) / 40;
+
       //save the info from the frame counter word
       ver[rec_num_1Hz] = tmpVer;
       payID[rec_num_1Hz] = tmpPayID;
@@ -194,22 +194,23 @@ public class DataHolder{
       for(int rec_i = rec_num_20Hz; rec_i < (rec_num_20Hz + 20); rec_i++){
          frame_20Hz[rec_i] = frame_1Hz[rec_num_1Hz];
       }
-      //calculate and save the first frame number of the current group
-      frame_mod4[rec_num_mod4] = frame_1Hz[rec_num_1Hz] - mod4;
-      frame_mod32[rec_num_mod32] = frame_1Hz[rec_num_1Hz] - mod32;
-      frame_mod40[rec_num_mod40] = frame_1Hz[rec_num_1Hz] - mod40;
-      
+
       //get multiplex info
       mod4 = frame_1Hz[rec_num_1Hz] % 4;
       mod32 = frame_1Hz[rec_num_1Hz] % 32;
       mod40 = frame_1Hz[rec_num_1Hz] % 40;
      
+      //calculate and save the first frame number of the current group
+      frame_mod4[rec_num_mod4] = frame_1Hz[rec_num_1Hz] - mod4;
+      frame_mod32[rec_num_mod32] = frame_1Hz[rec_num_1Hz] - mod32;
+      frame_mod40[rec_num_mod40] = frame_1Hz[rec_num_1Hz] - mod40;
+      
       //get gps info: 32 bits of mod4 gps data followed by 16 bits of pps data
       tmpGPS = 
          frame.shiftRight(1632).and(BigInteger.valueOf(4294967295L)).
             longValue();
       switch(mod4){
-         case 0: // alt
+         case 0: //alt
             gps[mod4][rec_num_mod4] = tmpGPS + 0.0;
             break;
          case 1: // time
