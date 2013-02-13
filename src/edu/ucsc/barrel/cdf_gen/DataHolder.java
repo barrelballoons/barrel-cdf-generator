@@ -134,8 +134,12 @@ public class DataHolder{
       lc3_raw = new Integer[MAX_FRAMES * 20],
       lc4_raw = new Integer[MAX_FRAMES * 20];
    public int 
+      //Hz record numbers are incrimented on the first record so
+      //they start at 0
       rec_num_1Hz = 0, rec_num_4Hz = 0, rec_num_20Hz = 0,
-      rec_num_mod4 = 0, rec_num_mod32 = 0, rec_num_mod40 = 0;
+      //mod record numbers are not incrimented by default so
+      //they must start at 1
+      rec_num_mod4 = 1, rec_num_mod32 = 1, rec_num_mod40 = 1;
    public long firstFC = 0;
 
    public int 
@@ -173,14 +177,19 @@ public class DataHolder{
          frame.shiftRight(1685).and(BigInteger.valueOf(63)).shortValue();
       tmpFC = 
          frame.shiftRight(1664).and(BigInteger.valueOf(2097151)).intValue();
+
+      //get multiplex info
+      mod4 = (int)tmpFC % 4;
+      mod32 = (int)tmpFC % 32;
+      mod40 = (int)tmpFC % 40;
       
       //sets the current record number
-      rec_num_1Hz = (int)tmpFC % MAX_FRAMES; 
-      rec_num_4Hz = (int)(tmpFC % MAX_FRAMES) * 4;
-      rec_num_20Hz = (int)(tmpFC % MAX_FRAMES) * 20;
-      rec_num_mod4 = (int)(tmpFC % MAX_FRAMES) / 4;
-      rec_num_mod32 = (int)(tmpFC % MAX_FRAMES) / 32;
-      rec_num_mod40 = (int)(tmpFC % MAX_FRAMES) / 40;
+      rec_num_1Hz++;
+      rec_num_4Hz = rec_num_4Hz + 4;
+      rec_num_20Hz = rec_num_20Hz + 20;
+      if((tmpFC - mod4) != frame_mod4[rec_num_mod4]){rec_num_mod4++;}
+      if((tmpFC - mod32) != frame_mod32[rec_num_mod32]){rec_num_mod32++;}
+      if((tmpFC - mod40) != frame_mod40[rec_num_mod40]){rec_num_mod40++;}
 
       //save the info from the frame counter word
       ver[rec_num_1Hz] = tmpVer;
@@ -194,11 +203,6 @@ public class DataHolder{
       for(int rec_i = rec_num_20Hz; rec_i < (rec_num_20Hz + 20); rec_i++){
          frame_20Hz[rec_i] = frame_1Hz[rec_num_1Hz];
       }
-
-      //get multiplex info
-      mod4 = frame_1Hz[rec_num_1Hz] % 4;
-      mod32 = frame_1Hz[rec_num_1Hz] % 32;
-      mod40 = frame_1Hz[rec_num_1Hz] % 40;
      
       //calculate and save the first frame number of the current group
       frame_mod4[rec_num_mod4] = frame_1Hz[rec_num_1Hz] - mod4;
