@@ -160,9 +160,6 @@ public class LevelOne{
             outputPath + "bar1" + flt + "_" + id + "_" + stn +
             "_l1_gps-_20" + date +  "_v" + revNum + ".cdf"
          );
-         
-         
-
 
          //put an entire day's worth of data at once for each CDF variable
          cur_var = cur_cdf.getVariable("GPS_Alt");
@@ -637,7 +634,7 @@ System.out.println("Done with GPS!");
          cur_var.putHyperData(
             0, (data.getSize("mod32")), 1, 
             new long[] {0}, 
-            new long[] {1}, 
+            new long[] {256, 1}, 
             new long[] {1}, 
             data.sspc_raw
          );
