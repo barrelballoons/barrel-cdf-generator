@@ -169,7 +169,7 @@ public class ExtractTiming {
       int rec_i = 0, data_i = 0;
       
       //loop through all of the frames and generate time models
-      for(data_i = 0; data_i < data.getSize(); data_i++){
+      for(data_i = 0; data_i < data.getSize("1Hz"); data_i++){
          //Figure out which record in the set of MAX_RECS this is 
          rec_i = data_i % MAX_RECS;
 
@@ -472,7 +472,7 @@ public class ExtractTiming {
    public void backFillModels(){
       double last_offset = -999, last_rate = -999;
       
-      for(int data_i = data.getSize() - 1; data_i >= 0 ; data_i--){
+      for(int data_i = data.getSize("1Hz") - 1; data_i >= 0 ; data_i--){
          if((data.time_q[data_i] & NOINFO) != NOINFO){
             last_offset = data.time_model_offset[data_i];
             last_rate = data.time_model_rate[data_i];
@@ -490,7 +490,7 @@ public class ExtractTiming {
    public void fillEpoch(){
       Calendar date = Calendar.getInstance();
       
-      for(int data_i = 0; data_i < data.getSize(); data_i++){
+      for(int data_i = 0; data_i < data.getSize("1Hz"); data_i++){
          //convert from "ms since system epoch" to "ns since J2000"
          data.epoch_1Hz[data_i] =
             (long)((data.ms_since_sys_epoch[data_i] - J2000) * 1000000);

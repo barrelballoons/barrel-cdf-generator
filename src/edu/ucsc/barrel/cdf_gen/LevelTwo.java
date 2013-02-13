@@ -87,7 +87,7 @@ public class LevelTwo{
       Variable cur_var;
 
       System.out.println(
-         "Creating Level One... (" + data.getSize() + " frames)"
+         "Creating Level One... (" + data.getSize("1Hz") + " frames)"
       );
       
       //GPS//
@@ -100,7 +100,7 @@ public class LevelTwo{
          //put an entire day's worth of data at once for each CDF variable
          cur_var = cur_cdf.getVariable("GPS_Alt");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1,
+            0, (data.getSize("mod4")), 1,
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -109,7 +109,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("ms_of_week");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -118,7 +118,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("GPS_Lat");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -127,7 +127,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("GPS_Lon");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -136,7 +136,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("FrameGroup");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -145,7 +145,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("Epoch");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -154,7 +154,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("Q");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -172,7 +172,7 @@ public class LevelTwo{
          
          cur_var = cur_cdf.getVariable("GPS_PPS");
          cur_var.putHyperData(
-            0, data.getSize(), 1, 
+            0, data.getSize("1Hz"), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -181,7 +181,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("Version");
          cur_var.putHyperData(
-            0, data.getSize(), 1, 
+            0, data.getSize("1Hz"), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -190,7 +190,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("Payload_ID");
          cur_var.putHyperData(
-            0, data.getSize(), 1, 
+            0, data.getSize("1Hz"), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -199,7 +199,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("FrameGroup");
          cur_var.putHyperData(
-            0, data.getSize(), 1, 
+            0, data.getSize("1Hz"), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -208,7 +208,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("Epoch");
          cur_var.putHyperData(
-            0, data.getSize(), 1, 
+            0, data.getSize("1Hz"), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -217,7 +217,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("Q");
          cur_var.putHyperData(
-            0, data.getSize(), 1, 
+            0, data.getSize("1Hz"), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -234,7 +234,7 @@ public class LevelTwo{
          
          cur_var = cur_cdf.getVariable("MAG_X");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, 
+            0, (data.getSize("4Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -243,7 +243,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("MAG_Y");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, 
+            0, (data.getSize("4Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -252,7 +252,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("MAG_Z");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, 
+            0, (data.getSize("4Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -261,7 +261,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("FrameGroup");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, 
+            0, (data.getSize("4Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -270,7 +270,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("Epoch");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, 
+            0, (data.getSize("4Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -279,7 +279,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("Q");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, 
+            0, (data.getSize("4Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -297,7 +297,7 @@ public class LevelTwo{
          for(int var_i = 0; var_i < 36; var_i++){
             cur_var = cur_cdf.getVariable(data.hkpg_label[var_i]);
             cur_var.putHyperData(
-               0, (data.getSize() / 40), 1, 
+               0, (data.getSize("mod40")), 1, 
                new long[] {0}, 
                new long[] {1}, 
                new long[] {1}, 
@@ -307,7 +307,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("numOfSats");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, 
+            0, (data.getSize("mod40")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -316,7 +316,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("timeOffset");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, 
+            0, (data.getSize("mod40")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -325,7 +325,7 @@ public class LevelTwo{
          
          cur_var = cur_cdf.getVariable("termStatus");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, 
+            0, (data.getSize("mod40")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -334,7 +334,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("cmdCounter");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, 
+            0, (data.getSize("mod40")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -343,7 +343,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("modemCounter");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, 
+            0, (data.getSize("mod40")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -352,7 +352,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("dcdCounter");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, 
+            0, (data.getSize("mod40")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -361,7 +361,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("weeks");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, 
+            0, (data.getSize("mod40")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -370,7 +370,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("FrameGroup");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, 
+            0, (data.getSize("mod40")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -379,7 +379,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("Epoch");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, 
+            0, (data.getSize("mod40")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -388,7 +388,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("Q");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, 
+            0, (data.getSize("mod40")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -405,7 +405,7 @@ public class LevelTwo{
          
          cur_var = cur_cdf.getVariable("LC1");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, 
+            0, (data.getSize("20Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -414,7 +414,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("LC2");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, 
+            0, (data.getSize("20Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -423,7 +423,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("LC3");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, 
+            0, (data.getSize("20Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -432,7 +432,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("LC4");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, 
+            0, (data.getSize("20Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -441,7 +441,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("FrameGroup");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, 
+            0, (data.getSize("20Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -450,7 +450,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("Epoch");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, 
+            0, (data.getSize("20Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -459,7 +459,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("Q");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, 
+            0, (data.getSize("20Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -476,7 +476,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("MSPC");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -485,7 +485,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("FrameGroup");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -494,7 +494,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("Epoch");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -503,7 +503,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("Q");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -520,7 +520,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("SSPC");
          cur_var.putHyperData(
-            0, (data.getSize() / 32), 1, 
+            0, (data.getSize("mod32")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -529,7 +529,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("FrameGroup");
          cur_var.putHyperData(
-            0, (data.getSize() / 32), 1, 
+            0, (data.getSize("mod32")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -538,7 +538,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("Epoch");
          cur_var.putHyperData(
-            0, (data.getSize() / 32), 1, 
+            0, (data.getSize("mod32")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -547,7 +547,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("Q");
          cur_var.putHyperData(
-            0, (data.getSize() / 32), 1, 
+            0, (data.getSize("mod32")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -564,7 +564,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("Interrupt");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -573,7 +573,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("LowLevel");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -582,7 +582,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("PeakDet");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -591,7 +591,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("HighLevel");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -600,7 +600,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("FrameGroup");
          cur_var.putHyperData(
-            0, (data.getSize() / 32), 1, 
+            0, (data.getSize("mod32")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -609,7 +609,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("Epoch");
          cur_var.putHyperData(
-            0, (data.getSize() / 32), 1, 
+            0, (data.getSize("mod32")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1},
@@ -618,7 +618,7 @@ public class LevelTwo{
 
          cur_var = cur_cdf.getVariable("Q");
          cur_var.putHyperData(
-            0, (data.getSize() / 32), 1, 
+            0, (data.getSize("mod32")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 

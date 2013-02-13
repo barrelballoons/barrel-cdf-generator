@@ -210,13 +210,13 @@ public class CDF_Gen implements CDFConstants{
             );
          
             //If we didn't get any data, move on to the next payload.
-            if(data.getSize() > 0){
+            if(data.getSize("1Hz") > 0){
             
                //calculate throughput value
                System.out.println(
                      "Payload " + getSetting("currentPayload") + 
-                     " Throughput: " + (100 * data.getSize() - 1) /
-   			      (data.frame_1Hz[data.getSize() - 1] - 
+                     " Throughput: " + (100 * data.getSize("1Hz") - 1) /
+   			      (data.frame_1Hz[data.getSize("1Hz") - 1] - 
    			      (data.frame_1Hz[0]))
    			      + " %"
    			   );

@@ -150,7 +150,7 @@ public class LevelOne{
       Variable cur_var;
 
       System.out.println(
-         "Creating Level One... (" + data.getSize() + " frames)"
+         "Creating Level One... (" + data.getSize("1Hz") + " frames)"
       );
       
       //GPS//
@@ -168,7 +168,7 @@ public class LevelOne{
          cur_var = cur_cdf.getVariable("GPS_Alt");
          System.out.println("GPS_Alt...");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1,
+            0, (data.getSize("mod4")), 1,
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -178,7 +178,7 @@ public class LevelOne{
          cur_var = cur_cdf.getVariable("ms_of_week");
          System.out.println("ms_of_week...");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -188,7 +188,7 @@ public class LevelOne{
          cur_var = cur_cdf.getVariable("GPS_Lat");
          System.out.println("GPS_Lat...");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -198,7 +198,7 @@ public class LevelOne{
          cur_var = cur_cdf.getVariable("GPS_Lon");
          System.out.println("GPS_Lon...");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -208,7 +208,7 @@ public class LevelOne{
          cur_var = cur_cdf.getVariable("FrameGroup");
          System.out.println("FrameGroup...");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -218,7 +218,7 @@ public class LevelOne{
          cur_var = cur_cdf.getVariable("Epoch");
          System.out.println("Epoch...");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -228,7 +228,7 @@ System.out.println(data.gps_q.length + data.gps_q[data.gps_q.length - 1]);
          cur_var = cur_cdf.getVariable("Q");
          System.out.println("Q...");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -248,7 +248,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("GPS_PPS");
          System.out.println("GPS_PPS...");
          cur_var.putHyperData(
-            0, data.getSize(), 1, 
+            0, data.getSize("1Hz"), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -258,7 +258,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("Version");
          System.out.println("Version...");
          cur_var.putHyperData(
-            0, data.getSize(), 1, 
+            0, data.getSize("1Hz"), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -268,7 +268,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("Payload_ID");
          System.out.println("Payload_ID...");
          cur_var.putHyperData(
-            0, data.getSize(), 1, 
+            0, data.getSize("1Hz"), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -278,7 +278,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("FrameGroup");
          System.out.println("FrameGroup...");
          cur_var.putHyperData(
-            0, data.getSize(), 1, 
+            0, data.getSize("1Hz"), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -288,7 +288,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("Epoch");
          System.out.println("Epoch...");
          cur_var.putHyperData(
-            0, data.getSize(), 1, 
+            0, data.getSize("1Hz"), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -298,7 +298,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("Q");
          System.out.println("Q...");
          cur_var.putHyperData(
-            0, data.getSize(), 1, 
+            0, data.getSize("1Hz"), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -317,7 +317,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("MAG_X");
          System.out.println("MAG_X... ");
          cur_var.putHyperData(
-            0, (data.getSize() * 4), 1, 
+            0, (data.getSize("4Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -327,7 +327,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("MAG_Y");
          System.out.println("MAG_Y...");
          cur_var.putHyperData(
-            0, (data.getSize() * 4), 1, 
+            0, (data.getSize("4Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -337,7 +337,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("MAG_Z");
          System.out.println("MAG_Z...");
          cur_var.putHyperData(
-            0, (data.getSize() * 4), 1, 
+            0, (data.getSize("4Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -347,7 +347,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("FrameGroup");
          System.out.println("FrameGroup...");
          cur_var.putHyperData(
-            0, (data.getSize() * 4), 1, 
+            0, (data.getSize("4Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -357,7 +357,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("Epoch");
          System.out.println("Epoch...");
          cur_var.putHyperData(
-            0, (data.getSize() * 4), 1, 
+            0, (data.getSize("4Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -367,7 +367,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("Q");
          System.out.println("Q...");
          cur_var.putHyperData(
-            0, (data.getSize() * 4), 1, 
+            0, (data.getSize("4Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -387,7 +387,7 @@ System.out.println("Done with GPS!");
             cur_var = cur_cdf.getVariable(data.hkpg_label[var_i]);
             System.out.println(data.hkpg_label[var_i] + "...");
             cur_var.putHyperData(
-               0, (data.getSize() / 40), 1, 
+               0, (data.getSize("mod40")), 1, 
                new long[] {0}, 
                new long[] {1}, 
                new long[] {1}, 
@@ -398,7 +398,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("numOfSats");
          System.out.println("numOfSats...");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, 
+            0, (data.getSize("mod40")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -408,7 +408,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("timeOffset");
          System.out.println("timeOffset...");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, 
+            0, (data.getSize("mod40")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -418,7 +418,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("termStatus");
          System.out.println("termStatus...");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, 
+            0, (data.getSize("mod40")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -428,7 +428,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("cmdCounter");
          System.out.println("cmdCounter...");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, 
+            0, (data.getSize("mod40")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -438,7 +438,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("modemCounter");
          System.out.println("modemCounter...");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, 
+            0, (data.getSize("mod40")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -448,7 +448,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("dcdCounter");
          System.out.println("dcdCounter...");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, 
+            0, (data.getSize("mod40")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -458,7 +458,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("weeks");
          System.out.println("weeks...");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, 
+            0, (data.getSize("mod40")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -468,7 +468,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("FrameGroup");
          System.out.println("FrameGroup...");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, 
+            0, (data.getSize("mod40")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -478,7 +478,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("Epoch");
          System.out.println("Epoch...");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, 
+            0, (data.getSize("mod40")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -488,7 +488,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("Q");
          System.out.println("Q...");
          cur_var.putHyperData(
-            0, (data.getSize() / 40), 1, 
+            0, (data.getSize("mod40")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -507,7 +507,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("LC1");
          System.out.println("LC1...");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, 
+            0, (data.getSize("20Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -517,7 +517,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("LC2");
          System.out.println("LC2...");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, 
+            0, (data.getSize("20Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -527,7 +527,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("LC3");
          System.out.println("LC3...");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, 
+            0, (data.getSize("20Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -537,7 +537,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("LC4");
          System.out.println("LC4...");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, 
+            0, (data.getSize("20Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -547,7 +547,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("FrameGroup");
          System.out.println("FrameGroup...");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, 
+            0, (data.getSize("20Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -557,7 +557,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("Epoch");
          System.out.println("Epoch...");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, 
+            0, (data.getSize("20Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -567,7 +567,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("Q");
          System.out.println("Q...");
          cur_var.putHyperData(
-            0, (data.getSize() * 20), 1, 
+            0, (data.getSize("20Hz")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -586,7 +586,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("MSPC");
          System.out.println("Spectrum Arrays...");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0, 0}, 
             new long[] {48, 1}, 
             new long[] {1, 1}, 
@@ -596,7 +596,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("FrameGroup");
          System.out.println("FrameGroup...");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -606,7 +606,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("Epoch");
          System.out.println("Epoch...");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -616,7 +616,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("Q");
          System.out.println("Q...");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -635,7 +635,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("SSPC");
          System.out.println("Spectrum Arrays...");
          cur_var.putHyperData(
-            0, (data.getSize() / 32), 1, 
+            0, (data.getSize("mod32")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -645,7 +645,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("FrameGroup");
          System.out.println("FrameGroup...");
          cur_var.putHyperData(
-            0, (data.getSize() / 32), 1, 
+            0, (data.getSize("mod32")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -655,7 +655,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("Epoch");
          System.out.println("Epoch...");
          cur_var.putHyperData(
-            0, (data.getSize() / 32), 1, 
+            0, (data.getSize("mod32")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -665,7 +665,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("Q");
          System.out.println("Q...");
          cur_var.putHyperData(
-            0, (data.getSize() / 32), 1, 
+            0, (data.getSize("mod32")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -684,7 +684,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("Interrupt");
          System.out.println("Interrupt...");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -694,7 +694,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("LowLevel");
          System.out.println("LowLevel...");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -704,7 +704,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("PeakDet");
          System.out.println("PeakDet...");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -714,7 +714,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("HighLevel");
          System.out.println("HighLevel...");
          cur_var.putHyperData(
-            0, (data.getSize() / 4), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -724,7 +724,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("FrameGroup");
          System.out.println("FrameGroup...");
          cur_var.putHyperData(
-            0, (data.getSize() / 32), 1, 
+            0, (data.getSize("mod32")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -734,7 +734,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("Epoch");
          System.out.println("Epoch...");
          cur_var.putHyperData(
-            0, (data.getSize() / 32), 1, 
+            0, (data.getSize("mod32")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1},
@@ -744,7 +744,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("Q");
          System.out.println("Q...");
          cur_var.putHyperData(
-            0, (data.getSize() / 32), 1, 
+            0, (data.getSize("mod32")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 

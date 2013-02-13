@@ -140,18 +140,18 @@ public class DataHolder{
 
    public int 
       size_1Hz = 0, size_4Hz = 0, size_20Hz = 0, 
-      size_mod4 = 0, size_mod32 = 0; size_mod40 = 0;
+      size_mod4 = 0, size_mod32 = 0, size_mod40 = 0;
 
    public int getSize(String cadence){
-      if(cadance == '1Hz'){
+      if(cadence == "1Hz"){
          return size_1Hz;
-      }else if(cadance == '4Hz'){
+      }else if(cadence == "4Hz"){
          return size_4Hz;
-      }else if(cadance == '20Hz'){
+      }else if(cadence == "20Hz"){
          return size_20Hz;
-      }else if(cadance == 'mod4'){
+      }else if(cadence == "mod4"){
          return size_mod4;
-      }else if(cadance == 'mod32'){
+      }else if(cadence == "mod32"){
          return size_mod32;
       }else{
          return size_mod40;
@@ -175,12 +175,12 @@ public class DataHolder{
          frame.shiftRight(1664).and(BigInteger.valueOf(2097151)).intValue();
       
       //sets the current record number
-      rec_num_1Hz = tmpFC % MAX_FRAMES; 
-      rec_num_4Hz = tmpFC % (MAX_FRAMES * 4);
-      rec_num_20Hz = tmpFC % (MAX_FRAMES * 20);
-      rec_num_mod4 = tmpFC % (MAX_FRAMES / 4);
-      rec_num_mod32 = tmpFC % (MAX_FRAMES / 32);
-      rec_num_mod40 = tmpFC % (MAX_FRAMES / 40);
+      rec_num_1Hz = (int)tmpFC % MAX_FRAMES; 
+      rec_num_4Hz = (int)tmpFC % (MAX_FRAMES * 4);
+      rec_num_20Hz = (int)tmpFC % (MAX_FRAMES * 20);
+      rec_num_mod4 = (int)tmpFC % (MAX_FRAMES / 4);
+      rec_num_mod32 = (int)tmpFC % (MAX_FRAMES / 32);
+      rec_num_mod40 = (int)tmpFC % (MAX_FRAMES / 40);
          
       //save the info from the frame counter word
       ver[rec_num_1Hz] = tmpVer;
@@ -349,7 +349,7 @@ public class DataHolder{
             pps[old_i] = 0;
             ver[new_i] = ver[old_i];
             ver[old_i] = 0;
-            payId[new_i] = payID[old_i];
+            payID[new_i] = payID[old_i];
             payID[old_i] = 0;
             pps_q[new_i] = pps_q[old_i];
             pps_q[old_i] = 0;
@@ -365,11 +365,11 @@ public class DataHolder{
             frame_4Hz[new_i] = frame_4Hz[old_i];
             frame_4Hz[old_i] = 0;
             magx_raw[new_i] = magx_raw[old_i];
-            magx_raw[old_i] = 0;
+            magx_raw[old_i] = 0L;
             magy_raw[new_i] = magy_raw[old_i];
-            magy_raw[old_i] = 0;
+            magy_raw[old_i] = 0L;
             magz_raw[new_i] = magz_raw[old_i];
-            magz_raw[old_i] = 0;
+            magz_raw[old_i] = 0L;
             magn_q[new_i] = magn_q[old_i];
             magn_q[old_i] = 0;
             new_i++;
@@ -388,7 +388,7 @@ public class DataHolder{
             lc3_raw[new_i] = lc3_raw[old_i];
             lc3_raw[old_i] = 0;
             lc4_raw[new_i] = lc4_raw[old_i];
-            lc5_raw[old_i] = 0;
+            lc4_raw[old_i] = 0;
             fspc_q[new_i] = fspc_q[old_i];
             fspc_q[old_i] = 0;
             new_i++;
@@ -420,8 +420,8 @@ public class DataHolder{
             rcnt_raw[3][old_i] = 0;
             rcnt_q[new_i] = rcnt_q[old_i];
             rcnt_q[old_i] = 0;
-            mspc[new_i] = mspc[old_i];
-            mspc[old_i] = {};
+            mspc_raw[new_i] = mspc_raw[old_i];
+            mspc_raw[old_i] = new int[48];
             mspc_q[new_i] = mspc_q[old_i];
             mspc_q[old_i] = 0;
             new_i++;
@@ -433,8 +433,8 @@ public class DataHolder{
          if(frame_mod32[old_i] > 0){
             frame_mod32[new_i] = frame_mod32[old_i];
             frame_mod32[old_i] = 0;
-            sspc[new_i] = sspc[old_i];
-            sspc[old_i] = {};
+            sspc_raw[new_i] = sspc_raw[old_i];
+            sspc_raw[old_i] = new int[256];
             sspc_q[new_i] = sspc_q[old_i];
             sspc_q[old_i] = 0;
             new_i++;
@@ -442,7 +442,7 @@ public class DataHolder{
       }
       size_mod32 = new_i;
 
-      for(old_i = 1, new_i = 0; old_i < frame_mod40; old_i++){
+      for(old_i = 1, new_i = 0; old_i < frame_mod40.length; old_i++){
          if(frame_mod40[old_i] > 0){
             frame_mod40[new_i] = frame_mod40[old_i];
             frame_mod40[old_i] = 0;
