@@ -221,7 +221,7 @@ public class LevelOne{
             new long[] {1}, 
             data.epoch_mod4
          );
-System.out.println(data.gps_q.length + data.gps_q[data.gps_q.length - 1]);
+         
          cur_var = cur_cdf.getVariable("Q");
          System.out.println("Q...");
          cur_var.putHyperData(

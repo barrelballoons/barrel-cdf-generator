@@ -210,14 +210,11 @@ public class DataHolder{
       frame_mod40[rec_num_mod40] = frame_1Hz[rec_num_1Hz] - mod40;
       
       //get gps info: 32 bits of mod4 gps data followed by 16 bits of pps data
-      tmpGPS = 
+      gps_raw[mod4][rec_num_mod4] =
          frame.shiftRight(1632).and(BigInteger.valueOf(4294967295L)).
             longValue();
 
-      //make sure the gps coords are not negative
-      gps_raw[mod4][rec_num_mod4] = 
-         tmpGPS - ((tmpGPS > 2147483648L) ? 4294967296L : 0L);
-
+      //save the time variable separately for the epoch calculation 
       if(mod4 == 1){
          ms_of_week[rec_num_mod4] = gps_raw[mod4][rec_num_mod4];
       }
