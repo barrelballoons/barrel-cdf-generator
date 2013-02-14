@@ -88,8 +88,8 @@ public class DataHolder{
       ms_of_week = new long[MAX_FRAMES / 4];
    public long[][]
       hkpg_raw = new long[40][MAX_FRAMES / 40],
-      gps_raw = new long[4][MAX_FRAMES / 4],
-      rcnt_raw = new long[4][MAX_FRAMES / 4];
+      rcnt_raw = new long[4][MAX_FRAMES / 4],
+      gps_raw = new long[4][MAX_FRAMES / 4];
    public long[]
       magx_raw = new long[MAX_FRAMES * 4],
       magy_raw = new long[MAX_FRAMES * 4],
@@ -210,10 +210,14 @@ public class DataHolder{
       frame_mod40[rec_num_mod40] = frame_1Hz[rec_num_1Hz] - mod40;
       
       //get gps info: 32 bits of mod4 gps data followed by 16 bits of pps data
-      gps_raw[mod4][rec_num_mod4] = 
+      tmpGPS = 
          frame.shiftRight(1632).and(BigInteger.valueOf(4294967295L)).
             longValue();
-      
+
+      //make sure the gps coords are not negative
+      gps_raw[mod4][rec_num_mod4] = 
+         tmpGPS - ((tmpGPS > 2147483648L) ? 4294967296L : 0L);
+
       if(mod4 == 1){
          ms_of_week[rec_num_mod4] = gps_raw[mod4][rec_num_mod4];
       }
