@@ -123,7 +123,6 @@ public class LevelTwo{
          "_l2_gps-_20" + date +  "_v" + revNum + ".cdf"
       );
 
-      //put an entire day's worth of data at once for each CDF variable
       var = cdf.getVariable("GPS_Alt");
       System.out.println("GPS_Alt...");
       var.putHyperData(
@@ -201,11 +200,11 @@ public class LevelTwo{
    
    //write the pps file, no processing needed
    public void doPpsCdf() throws CDFException{
-      int numOfRecs = data.getSize("mod4");
+      int numOfRecs = data.getSize("1Hz");
       CDF cdf;
       Variable var;
       
-      System.out.println("\nSaving PPS CDF...");
+      System.out.println("\nSaving PPS Level Two CDF...");
 
       cdf = CDF_Gen.openCDF( 
          outputPath + "bar1" + flt + "_" + id + "_" + stn +
@@ -275,6 +274,112 @@ public class LevelTwo{
       cdf.close();
    }
    
+   public void doMagCdf() throws CDFException{
+      int numOfRecs = data.getSize("1Hz");
+
+      CDF cdf;
+      Variable var;
+      
+      double[] 
+         magx = new double[numOfRecs],
+         magy = new double[numOfRecs],
+         magz = new double[numOfRecs],
+         magTot = new double[numOfRecs];
+
+      System.out.println("\nSaving Magnetometer Level Two CDF...");
+      cdf = CDF_Gen.openCDF( 
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l2_magn_20" + date +  "_v" + revNum + ".cdf"
+      );
+     
+      //extract the nominal magnetometer value and calculate |B|
+      for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
+         magx[rec_i] = (data.magx_raw[rec_i] - 8388608.0) / 83886.070;
+         magy[rec_i] = (data.magy_raw[rec_i] - 8388608.0) / 83886.070;
+         magz[rec_i] = (data.magz_raw[rec_i] - 8388608.0) / 83886.070;
+
+         magTot[rec_i] = 
+            Math.sqrt(
+               (magx[rec_i] * magx[rec_i]) + 
+               (magy[rec_i] * magy[rec_i]) +
+               (magz[rec_i] * magz[rec_i]) 
+            );
+      }
+
+      var = cdf.getVariable("MAG_X");
+      System.out.println("MAG_X... ");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         magx 
+      );
+
+      var = cdf.getVariable("MAG_Y");
+      System.out.println("MAG_Y...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         magy
+      );
+
+      var = cdf.getVariable("MAG_Z");
+      System.out.println("MAG_Z...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         magz
+      );
+
+      var = cdf.getVariable("Total");
+      System.out.println("Field Magnitude...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         magTot 
+      );
+
+      var = cdf.getVariable("FrameGroup");
+      System.out.println("FrameGroup...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.frame_4Hz
+      );
+
+      var = cdf.getVariable("Epoch");
+      System.out.println("Epoch...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.epoch_4Hz
+      );
+
+      var = cdf.getVariable("Q");
+      System.out.println("Q...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.magn_q
+      );
+
+      cdf.close();
+
+   }
+
    //Pull each value out of the frame and store it in the appropriate CDF.
    private void writeData() throws CDFException{
       //create a holder for the current CDF and Variable
@@ -287,76 +392,8 @@ public class LevelTwo{
       
       doGpsCdf();
       doPpsCdf();
-
+      doMagCdf();
          
-      //B//
-         System.out.println("\nSaving Magnetometer CDF...");
-         cur_cdf = CDF_Gen.openCDF( 
-            outputPath + "bar1" + flt + "_" + id + "_" + stn +
-            "_l2_magn_20" + date +  "_v" + revNum + ".cdf"
-         );
-         
-         cur_var = cur_cdf.getVariable("MAG_X");
-         System.out.println("MAG_X... ");
-         cur_var.putHyperData(
-            0, (data.getSize("4Hz")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.magx_raw
-         );
-
-         cur_var = cur_cdf.getVariable("MAG_Y");
-         System.out.println("MAG_Y...");
-         cur_var.putHyperData(
-            0, (data.getSize("4Hz")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.magy_raw
-         );
-
-         cur_var = cur_cdf.getVariable("MAG_Z");
-         System.out.println("MAG_Z...");
-         cur_var.putHyperData(
-            0, (data.getSize("4Hz")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.magz_raw
-         );
-
-         cur_var = cur_cdf.getVariable("FrameGroup");
-         System.out.println("FrameGroup...");
-         cur_var.putHyperData(
-            0, (data.getSize("4Hz")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.frame_4Hz
-         );
-
-         cur_var = cur_cdf.getVariable("Epoch");
-         System.out.println("Epoch...");
-         cur_var.putHyperData(
-            0, (data.getSize("4Hz")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.epoch_4Hz
-         );
-
-         cur_var = cur_cdf.getVariable("Q");
-         System.out.println("Q...");
-         cur_var.putHyperData(
-            0, (data.getSize("4Hz")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.magn_q
-         );
-
-         cur_cdf.close();
          
       //HKPG
          System.out.println("\nSaving HKPG...");
