@@ -19,7 +19,7 @@ import java.util.Arrays;
 */
 
 
-public class LevelOne{
+public class LevelTwo{
    File cdfFile;
    CDF mag_cdf, rcnt_cdf, fspc_cdf, 
       mspc_cdf, sspc_cdf, hkpg_cdf, pps_cdf;
@@ -40,7 +40,7 @@ public class LevelOne{
    
    private DataHolder data;
    
-   public LevelOne(
+   public LevelTwo(
       final String d, final String p, final String f, final String s
    ) throws IOException
    {
@@ -59,17 +59,17 @@ public class LevelOne{
       data = CDF_Gen.getDataSet();
       
       //set output path
-      outputPath = CDF_Gen.L1_Dir;
+      outputPath = CDF_Gen.L2_Dir;
       File outDir = new File(outputPath);
       if(!outDir.exists()){outDir.mkdirs();}
       
       //copy the CDF skeletons to the new files 
       for(int type_i = 0; type_i < CDF_Gen.fileTypes.length; type_i++){
          String srcName = 
-            "cdf_skels/l1/" + "barCLL_PP_S_l1_" + 
+            "cdf_skels/l2/" + "barCLL_PP_S_l2_" + 
             CDF_Gen.fileTypes[type_i] + "_YYYYMMDD_v++.cdf";
          String destName = 
-            outputPath + "bar1" + flt + "_" + id + "_" + stn + "_l1_" +
+            outputPath + "bar1" + flt + "_" + id + "_" + stn + "_l2_" +
             CDF_Gen.fileTypes[type_i] + "_20" + date +  "_v" + revNum +
             ".cdf";
          CDF_Gen.copyFile(new File(srcName), new File(destName));
@@ -83,6 +83,198 @@ public class LevelOne{
       }
    }
    
+   //Convert the GPS data and save it to CDF files
+   public void doGpsCdf() throws CDFException{
+      int numOfRecs = data.getSize("mod4");
+      CDF cdf;
+      Variable var;
+
+      float[] 
+         lat = new float[numOfRecs], 
+         lon = new float[numOfRecs], 
+         alt = new float[numOfRecs];
+      
+      System.out.println("\nSaving GPS Level 2 CDF...");
+
+      //convert lat, lon, and alt values
+      for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
+        //convert mm to km
+        alt[rec_i] = (float)data.gps_raw[0][rec_i] / 1000000;
+
+        //convert lat and lon to physical units
+        lat[rec_i] = (float)data.gps_raw[2][rec_i];
+        if((data.gps_raw[2][rec_i] >> 31) > 0){
+           lat[rec_i] -=  0x100000000L;
+        }
+        lat[rec_i] *= 
+           Float.intBitsToFloat(Integer.valueOf("33B40000",16).intValue());
+
+        lon[rec_i] = (float)data.gps_raw[3][rec_i];
+        if((data.gps_raw[3][rec_i] >> 31) > 0){
+           lon[rec_i] -=  0x100000000L;
+        }
+        lon[rec_i] *= 
+           Float.intBitsToFloat(Integer.valueOf("33B40000",16).intValue());
+      }
+
+      //open GPS CDF and save the reference in the cur_cdf variable
+      cdf = CDF_Gen.openCDF( 
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l2_gps-_20" + date +  "_v" + revNum + ".cdf"
+      );
+
+      //put an entire day's worth of data at once for each CDF variable
+      var = cdf.getVariable("GPS_Alt");
+      System.out.println("GPS_Alt...");
+      var.putHyperData(
+         0, numOfRecs, 1,
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         alt
+      );
+
+      var = cdf.getVariable("ms_of_week");
+      System.out.println("ms_of_week...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.gps_raw[1]
+      );
+
+      var = cdf.getVariable("GPS_Lat");
+      System.out.println("GPS_Lat...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         lat 
+      );
+
+      var = cdf.getVariable("GPS_Lon");
+      System.out.println("GPS_Lon...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         lon
+      );
+
+      var = cdf.getVariable("FrameGroup");
+      System.out.println("FrameGroup...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.frame_mod4
+      );
+
+      var = cdf.getVariable("Epoch");
+      System.out.println("Epoch...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.epoch_mod4
+      );
+      
+      var = cdf.getVariable("Q");
+      System.out.println("Q...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.gps_q
+      );
+
+      System.out.println("Done with GPS!");
+      //close current cdf
+      cdf.close();
+   }
+   
+   //write the pps file, no processing needed
+   public void doPpsCdf() throws CDFException{
+      int numOfRecs = data.getSize("mod4");
+      CDF cdf;
+      Variable var;
+      
+      System.out.println("\nSaving PPS CDF...");
+
+      cdf = CDF_Gen.openCDF( 
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l2_pps-_20" + date +  "_v" + revNum + ".cdf"
+      );
+      
+      var = cdf.getVariable("GPS_PPS");
+      System.out.println("GPS_PPS...");
+      var.putHyperData(
+         0, data.getSize("1Hz"), 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.pps
+      );
+
+      var = cdf.getVariable("Version");
+      System.out.println("Version...");
+      var.putHyperData(
+         0, data.getSize("1Hz"), 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.ver
+      );
+
+      var = cdf.getVariable("Payload_ID");
+      System.out.println("Payload_ID...");
+      var.putHyperData(
+         0, data.getSize("1Hz"), 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.payID
+      );
+
+      var = cdf.getVariable("FrameGroup");
+      System.out.println("FrameGroup...");
+      var.putHyperData(
+         0, data.getSize("1Hz"), 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.frame_1Hz
+      );
+
+      var = cdf.getVariable("Epoch");
+      System.out.println("Epoch...");
+      var.putHyperData(
+         0, data.getSize("1Hz"), 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.epoch_1Hz
+      );
+
+      var = cdf.getVariable("Q");
+      System.out.println("Q...");
+      var.putHyperData(
+         0, data.getSize("1Hz"), 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.pps_q
+      );
+
+      cdf.close();
+   }
+   
    //Pull each value out of the frame and store it in the appropriate CDF.
    private void writeData() throws CDFException{
       //create a holder for the current CDF and Variable
@@ -90,165 +282,18 @@ public class LevelOne{
       Variable cur_var;
 
       System.out.println(
-         "Creating Level One... (" + data.getSize("1Hz") + " frames)"
+         "Creating Level Two... (" + data.getSize("1Hz") + " frames)"
       );
       
-      //GPS//
-         System.out.println("\nSaving GPS CDF...");
-         //open GPS CDF and save the reference in the cur_cdf variable
-         cur_cdf = CDF_Gen.openCDF( 
-            outputPath + "bar1" + flt + "_" + id + "_" + stn +
-            "_l1_gps-_20" + date +  "_v" + revNum + ".cdf"
-         );
+      doGpsCdf();
+      doPpsCdf();
 
-         //put an entire day's worth of data at once for each CDF variable
-         cur_var = cur_cdf.getVariable("GPS_Alt");
-         System.out.println("GPS_Alt...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod4")), 1,
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.gps_raw[0]
-         );
-
-         cur_var = cur_cdf.getVariable("ms_of_week");
-         System.out.println("ms_of_week...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod4")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.gps_raw[1]
-         );
-
-         cur_var = cur_cdf.getVariable("GPS_Lat");
-         System.out.println("GPS_Lat...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod4")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.gps_raw[2]
-         );
-
-         cur_var = cur_cdf.getVariable("GPS_Lon");
-         System.out.println("GPS_Lon...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod4")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.gps_raw[3]
-         );
-
-         cur_var = cur_cdf.getVariable("FrameGroup");
-         System.out.println("FrameGroup...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod4")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.frame_mod4
-         );
-
-         cur_var = cur_cdf.getVariable("Epoch");
-         System.out.println("Epoch...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod4")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.epoch_mod4
-         );
-         
-         cur_var = cur_cdf.getVariable("Q");
-         System.out.println("Q...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod4")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.gps_q
-         );
-System.out.println("Done with GPS!");
-         //close current cdf
-         cur_cdf.close();
-
-      //PPS//
-         System.out.println("\nSaving PPS CDF...");
-         cur_cdf = CDF_Gen.openCDF( 
-            outputPath + "bar1" + flt + "_" + id + "_" + stn +
-            "_l1_pps-_20" + date +  "_v" + revNum + ".cdf"
-         );
-         
-         cur_var = cur_cdf.getVariable("GPS_PPS");
-         System.out.println("GPS_PPS...");
-         cur_var.putHyperData(
-            0, data.getSize("1Hz"), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.pps
-         );
-
-         cur_var = cur_cdf.getVariable("Version");
-         System.out.println("Version...");
-         cur_var.putHyperData(
-            0, data.getSize("1Hz"), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.ver
-         );
-
-         cur_var = cur_cdf.getVariable("Payload_ID");
-         System.out.println("Payload_ID...");
-         cur_var.putHyperData(
-            0, data.getSize("1Hz"), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.payID
-         );
-
-         cur_var = cur_cdf.getVariable("FrameGroup");
-         System.out.println("FrameGroup...");
-         cur_var.putHyperData(
-            0, data.getSize("1Hz"), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.frame_1Hz
-         );
-
-         cur_var = cur_cdf.getVariable("Epoch");
-         System.out.println("Epoch...");
-         cur_var.putHyperData(
-            0, data.getSize("1Hz"), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.epoch_1Hz
-         );
-
-         cur_var = cur_cdf.getVariable("Q");
-         System.out.println("Q...");
-         cur_var.putHyperData(
-            0, data.getSize("1Hz"), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.pps_q
-         );
-
-         cur_cdf.close();
          
       //B//
          System.out.println("\nSaving Magnetometer CDF...");
          cur_cdf = CDF_Gen.openCDF( 
             outputPath + "bar1" + flt + "_" + id + "_" + stn +
-            "_l1_magn_20" + date +  "_v" + revNum + ".cdf"
+            "_l2_magn_20" + date +  "_v" + revNum + ".cdf"
          );
          
          cur_var = cur_cdf.getVariable("MAG_X");
@@ -317,7 +362,7 @@ System.out.println("Done with GPS!");
          System.out.println("\nSaving HKPG...");
          cur_cdf = CDF_Gen.openCDF( 
             outputPath + "bar1" + flt + "_" + id + "_" + stn +
-            "_l1_hkpg_20" + date +  "_v" + revNum + ".cdf"
+            "_l2_hkpg_20" + date +  "_v" + revNum + ".cdf"
          );
             
          for(int var_i = 0; var_i < 36; var_i++){
@@ -438,7 +483,7 @@ System.out.println("Done with GPS!");
          System.out.println("\nSaving FSPC...");
          cur_cdf = CDF_Gen.openCDF( 
             outputPath + "bar1" + flt + "_" + id + "_" + stn +
-            "_l1_fspc_20" + date +  "_v" + revNum + ".cdf"
+            "_l2_fspc_20" + date +  "_v" + revNum + ".cdf"
          );
          
          cur_var = cur_cdf.getVariable("LC1");
@@ -517,7 +562,7 @@ System.out.println("Done with GPS!");
          System.out.println("\nSaving MSPC...");
          cur_cdf = CDF_Gen.openCDF( 
             outputPath + "bar1" + flt + "_" + id + "_" + stn +
-            "_l1_mspc_20" + date +  "_v" + revNum + ".cdf"
+            "_l2_mspc_20" + date +  "_v" + revNum + ".cdf"
          );
 
          cur_var = cur_cdf.getVariable("MSPC");
@@ -566,7 +611,7 @@ System.out.println("Done with GPS!");
          System.out.println("\nSaving SSPC...");
          cur_cdf = CDF_Gen.openCDF( 
             outputPath + "bar1" + flt + "_" + id + "_" + stn +
-            "_l1_sspc_20" + date +  "_v" + revNum + ".cdf"
+            "_l2_sspc_20" + date +  "_v" + revNum + ".cdf"
          );
 
          cur_var = cur_cdf.getVariable("SSPC");
@@ -615,7 +660,7 @@ System.out.println("Done with GPS!");
          System.out.println("\nSaving RCNT...");
          cur_cdf = CDF_Gen.openCDF( 
             outputPath + "bar1" + flt + "_" + id + "_" + stn +
-            "_l1_rcnt_20" + date +  "_v" + revNum + ".cdf"
+            "_l2_rcnt_20" + date +  "_v" + revNum + ".cdf"
          );
 
          cur_var = cur_cdf.getVariable("Interrupt");
@@ -690,6 +735,6 @@ System.out.println("Done with GPS!");
 
       cur_cdf.close();
       
-      System.out.println("Created Level One.");
+      System.out.println("Created Level Two.");
    }
  }
