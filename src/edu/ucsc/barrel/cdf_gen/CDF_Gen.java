@@ -147,13 +147,15 @@ public class CDF_Gen implements CDFConstants{
 				id = "00",
 				flt = "00",
 				stn = "0",
-				revNum = "00";
+				revNum = "00",
+            mag = "0000";
 			
 			//break payload apart into id, flight number and launch station
 			String[] payload_parts = payload_i.split(",");
 			if(payload_parts[0] != null){id = payload_parts[0];}
 			if(payload_parts[1] != null){flt = payload_parts[1];}
 			if(payload_parts[2] != null){stn = payload_parts[2];}
+			if(payload_parts[3] != null){mag = payload_parts[3];}
 			
          //set output paths
          if(getSetting("outDir") != ""){
@@ -235,7 +237,7 @@ public class CDF_Gen implements CDFConstants{
                if(getSetting("L").indexOf("2") > -1){
                   //create Level Two
                   LevelTwo L2 =
-						   new LevelTwo(getSetting("date"), id, flt, stn);
+						   new LevelTwo(getSetting("date"), id, flt, stn, mag);
                   
                   L2 = null;
                }
