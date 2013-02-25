@@ -384,7 +384,6 @@ public class LevelTwo{
          float magTemp = data.hkpg_raw[data.T1][hkpg_rec];
 
          magTemp = (magTemp != 0) ? magTemp * data.hkpg_scale[data.T1] : 20;
-System.out.println("Using mag temp: " + magTemp + ". Using x slope: " + slopex + ". Correction: " + (slopex * (magTemp - 20) + 1));
          magx[mag_rec] = magx[mag_rec] * (slopex * (magTemp - 20) + 1);
          magy[mag_rec] = magy[mag_rec] * (slopey * (magTemp - 20) + 1);
          magz[mag_rec] = magz[mag_rec] * (slopez * (magTemp - 20) + 1);
