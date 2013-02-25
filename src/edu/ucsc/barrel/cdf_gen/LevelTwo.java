@@ -5,8 +5,13 @@ import gsfc.nssdc.cdf.CDFException;
 import gsfc.nssdc.cdf.util.CDFTT2000;
 import gsfc.nssdc.cdf.Variable;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
@@ -33,7 +38,8 @@ public class LevelTwo{
       id = "00",
       flt = "00",
       stn = "0",
-      revNum = "00";
+      revNum = "00",
+      mag_id = "";
    Calendar dateObj = Calendar.getInstance();
    
    short INCOMPLETE_GROUP = 8196;
@@ -41,7 +47,8 @@ public class LevelTwo{
    private DataHolder data;
    
    public LevelTwo(
-      final String d, final String p, final String f, final String s
+      final String d, final String p, 
+      final String f, final String s, final String m
    ) throws IOException
    {
       //get file revision number
@@ -54,7 +61,8 @@ public class LevelTwo{
       flt = f;
       stn = s;
       date = d;
-      
+      mag_id = m;
+
       //get the data storage object
       data = CDF_Gen.getDataSet();
       
@@ -286,12 +294,35 @@ public class LevelTwo{
          magz = new double[numOfRecs],
          magTot = new double[numOfRecs];
 
+      float slopex = 0.0f, slopey = 0.0f, slopez = 0.0f;
+
       System.out.println("\nSaving Magnetometer Level Two CDF...");
       cdf = CDF_Gen.openCDF( 
          outputPath + "bar1" + flt + "_" + id + "_" + stn +
          "_l2_magn_20" + date +  "_v" + revNum + ".cdf"
       );
      
+      //get gain correction slope for this payload
+	   try{
+         FileReader fr = new FileReader("magGain.cal");
+         BufferedReader iniFile = new BufferedReader(fr);
+         String line;
+
+         while((line = iniFile.readLine()) != null){
+            String[] fields = line.split(",");
+            if(fields[0].equals(mag_id)){
+               slopex = Float.parseFloat(fields[1]);
+               slopey = Float.parseFloat(fields[2]);
+               slopez = Float.parseFloat(fields[3]);
+               break;
+            }
+         }      
+      }catch(IOException ex){
+         System.out.println(
+            "Could not read config file: " + ex.getMessage()
+         );
+      }
+
       //extract the nominal magnetometer value and calculate |B|
       for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
          magx[rec_i] = (data.magx_raw[rec_i] - 8388608.0) / 83886.070;
@@ -306,6 +337,7 @@ public class LevelTwo{
             );
       }
 
+      //store the nominal mag values
       var = cdf.getVariable("MAG_X");
       System.out.println("MAG_X... ");
       var.putHyperData(
@@ -346,6 +378,67 @@ public class LevelTwo{
          magTot 
       );
 
+      //do gain correction on nominal values
+      for(int mag_rec = 0; mag_rec < numOfRecs; mag_rec++){
+         int hkpg_rec = mag_rec / 160; //convert from 4Hz to mod40
+         float magTemp = data.hkpg_raw[data.T1][hkpg_rec];
+
+         magTemp = (magTemp != 0) ? magTemp * data.hkpg_scale[data.T1] : 20;
+System.out.println("Using mag temp: " + magTemp + ". Using x slope: " + slopex + ". Correction: " + (slopex * (magTemp - 20) + 1));
+         magx[mag_rec] = magx[mag_rec] * (slopex * (magTemp - 20) + 1);
+         magy[mag_rec] = magy[mag_rec] * (slopey * (magTemp - 20) + 1);
+         magz[mag_rec] = magz[mag_rec] * (slopez * (magTemp - 20) + 1);
+         magTot[mag_rec] = 
+            Math.sqrt(
+               (magx[mag_rec] * magx[mag_rec]) + 
+               (magy[mag_rec] * magy[mag_rec]) +
+               (magz[mag_rec] * magz[mag_rec]) 
+            );
+      }
+
+      //store the gain adjusted values
+      var = cdf.getVariable("MAG_X_ADJ");
+      System.out.println("Gain Adjusted MAG_X... ");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         magx 
+      );
+
+      var = cdf.getVariable("MAG_Y_ADJ");
+      System.out.println("Gain Adjusted MAG_Y...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         magy
+      );
+
+      var = cdf.getVariable("MAG_Z_ADJ");
+      System.out.println("Gain Adjusted MAG_Z...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         magz
+      );
+
+      var = cdf.getVariable("Total_ADJ");
+      System.out.println("Gain Adjusted Field Magnitude...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         magTot 
+      );
+
+
+      //save the rest of the file
       var = cdf.getVariable("FrameGroup");
       System.out.println("FrameGroup...");
       var.putHyperData(
