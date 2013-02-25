@@ -54,7 +54,17 @@ public class DataHolder{
       SATSOFF = 36, WEEK = 37, CMDCNT = 38, MDMCNT = 39,
       //rate counter index
       INTER = 0, LL = 1, PD = 2, HL = 3;
-   
+  
+   static public final float[] hkpg_scale = {
+      0.007629f, 0.007629f, 0.007629f, 0.007629f, 0.007629f, 0.007629f, 
+      0.007629f, 0.007629f, 0.007629f, 0.007629f, 0.007629f, 0.007629f, 
+      0.007629f, 0.0003052f, 0.0003052f, 0.0001526f, 0.0003052f, 0.0003052f, 
+      0.0006104f, 0.0001526f, 0.0001526f, 0.0003052f, -0.0001526f, -0.0001526f,
+      0.0001526f, 0.0006104f, 0.0006104f, 0.0006104f, 0.050863406f, 
+      0.061036087f, 0.061036087f, 0.010172681f, 0.0010172681f, 0.050863406f, 
+      -0.000126107f, -0.0010172681f
+   };
+
    static public final String[] hkpg_label = { 
       "V0_VoltAtLoad", "I0_TotalLoad", "V1_Battery", "I1_TotalSolar", 
       "V2_Solar1", "I2_Solar1", "V3_POS_DPU", "I3_POS_DPU", "V4_POS_XRayDet",
