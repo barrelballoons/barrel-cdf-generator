@@ -125,7 +125,7 @@ public class LevelTwo{
            Float.intBitsToFloat(Integer.valueOf("33B40000",16).intValue());
       }
 
-      //open GPS CDF and save the reference in the cur_cdf variable
+      //open GPS CDF and save the reference in the cdf variable
       cdf = CDF_Gen.openCDF( 
          outputPath + "bar1" + flt + "_" + id + "_" + stn +
          "_l2_gps-_20" + date +  "_v" + revNum + ".cdf"
@@ -471,13 +471,471 @@ public class LevelTwo{
       cdf.close();
 
    }
+   
+   public void doHkpgCdf() throws CDFException{
+      CDF cdf;
+      Variable var;
+      
+      int numOfRecs = data.getSize("mod40");
+
+      System.out.println("\nSaving HKPG...");
+      cdf = CDF_Gen.openCDF( 
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l2_hkpg_20" + date +  "_v" + revNum + ".cdf"
+      );
+         
+      for(int var_i = 0; var_i < data.hkpg_scale.length; var_i++){
+         //scale all the records for this variable
+         double[] hkpg_scaled = new double[numOfRecs];
+         for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
+            hkpg_scaled[rec_i] = 
+               data.hkpg_raw[var_i][rec_i] * data.hkpg_scale[var_i];
+         }
+
+         var = cdf.getVariable(data.hkpg_label[var_i]);
+         System.out.println(data.hkpg_label[var_i] + "...");
+         var.putHyperData(
+            0, numOfRecs, 1, 
+            new long[] {0}, 
+            new long[] {1}, 
+            new long[] {1}, 
+            hkpg_scaled
+         );
+      }
+
+      var = cdf.getVariable("numOfSats");
+      System.out.println("numOfSats...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.sats
+      );
+
+      var = cdf.getVariable("timeOffset");
+      System.out.println("timeOffset...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.offset
+      );
+      
+      var = cdf.getVariable("termStatus");
+      System.out.println("termStatus...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.termStat
+      );
+
+      var = cdf.getVariable("cmdCounter");
+      System.out.println("cmdCounter...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.cmdCnt
+      );
+
+      var = cdf.getVariable("modemCounter");
+      System.out.println("modemCounter...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.modemCnt
+      );
+
+      var = cdf.getVariable("dcdCounter");
+      System.out.println("dcdCounter...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.dcdCnt
+      );
+
+      var = cdf.getVariable("weeks");
+      System.out.println("weeks...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.weeks
+      );
+
+      var = cdf.getVariable("FrameGroup");
+      System.out.println("FrameGroup...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.frame_mod40
+      );
+
+      var = cdf.getVariable("Epoch");
+      System.out.println("Epoch...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.epoch_mod40
+      );
+
+      var = cdf.getVariable("Q");
+      System.out.println("Q...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.hkpg_q
+      );
+
+      cdf.close();
+   }
+
+   public void doFspcCdf() throws CDFException{
+      CDF cdf;
+      Variable var;
+      int numOfRecs = data.getSize("20Hz");
+      double[][] lc_rebin = new double[4][numOfRecs];
+
+      System.out.println("\nSaving FSPC...");
+      cdf = CDF_Gen.openCDF( 
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l2_fspc_20" + date +  "_v" + revNum + ".cdf"
+      );
+    
+      //rebin and save the light curves
+      for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
+         //rebin each spectra created from the 4 light curves
+         for(int spc_i = 0; spc_i < 20; spc_i++){
+            //create the spectrum
+            float[] lc_spec = {
+               data.lc1_raw[rec_i],
+               data.lc2_raw[rec_i],
+               data.lc3_raw[rec_i],
+               data.lc4_raw[rec_i]
+            };
+
+            /* do something to actually rebin the spectrum here...*/
+
+            //write the spectrum to the new array
+            lc_rebin[0][rec_i] = lc_spec[0];
+            lc_rebin[1][rec_i] = lc_spec[1];
+            lc_rebin[2][rec_i] = lc_spec[2];
+            lc_rebin[3][rec_i] = lc_spec[3];
+         }
+      }
+      var = cdf.getVariable("LC1");
+      System.out.println("LC1...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         lc_rebin[0]
+      );
+      
+      var = cdf.getVariable("LC2");
+      System.out.println("LC2...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         lc_rebin[1]
+      );
+
+      var = cdf.getVariable("LC3");
+      System.out.println("LC3...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         lc_rebin[2]
+      );
+
+      var = cdf.getVariable("LC4");
+      System.out.println("LC4...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         lc_rebin[3]
+      );
+
+      var = cdf.getVariable("FrameGroup");
+      System.out.println("FrameGroup...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.frame_20Hz
+      );
+
+      var = cdf.getVariable("Epoch");
+      System.out.println("Epoch...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.epoch_20Hz
+      );
+
+      var = cdf.getVariable("Q");
+      System.out.println("Q...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.fspc_q
+      );
+
+      cdf.close();
+
+   }
+
+   public void doMspcCdf() throws CDFException{
+      CDF cdf;
+      Variable var;
+      
+      int numOfRecs = data.getSize("mod8");
+      double[][] mspc_rebin = new double[numOfRecs][48];
+
+      //rebin the mspc spectra
+      for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
+         /* need to do something other than just copy the spectra*/
+         for(int val_i = 0; val_i < 48; val_i++){
+            mspc_rebin[rec_i][val_i] = data.mspc_raw[rec_i][val_i];
+         }
+      }
+
+      System.out.println("\nSaving MSPC...");
+      cdf = CDF_Gen.openCDF( 
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l2_mspc_20" + date +  "_v" + revNum + ".cdf"
+      );
+
+      var = cdf.getVariable("MSPC");
+      System.out.println("Spectrum Arrays...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0, 0}, 
+         new long[] {48, 1}, 
+         new long[] {1, 1}, 
+         mspc_rebin
+      );
+
+      var = cdf.getVariable("FrameGroup");
+      System.out.println("FrameGroup...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.frame_mod4
+      );
+
+      var = cdf.getVariable("Epoch");
+      System.out.println("Epoch...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.epoch_mod4
+      );
+
+      var = cdf.getVariable("Q");
+      System.out.println("Q...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.mspc_q
+      );
+
+      cdf.close();
+   }
+
+   public void doSspcCdf() throws CDFException{
+      CDF cdf;
+      Variable var;
+      
+      int numOfRecs = data.getSize("mod32");
+      double[][] sspc_rebin = new double[numOfRecs][256];
+
+      //rebin the mspc spectra
+      for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
+         /* need to do something other than just copy the spectra*/
+         for(int val_i = 0; val_i < 48; val_i++){
+            sspc_rebin[rec_i][val_i] = data.sspc_raw[rec_i][val_i];
+         }
+      }
+
+      System.out.println("\nSaving SSPC...");
+      cdf = CDF_Gen.openCDF( 
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l2_sspc_20" + date +  "_v" + revNum + ".cdf"
+      );
+
+      var = cdf.getVariable("SSPC");
+      System.out.println("Spectrum Arrays...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {256, 1}, 
+         new long[] {1}, 
+         sspc_rebin
+      );
+
+      var = cdf.getVariable("FrameGroup");
+      System.out.println("FrameGroup...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.frame_mod32
+      );
+
+      var = cdf.getVariable("Epoch");
+      System.out.println("Epoch...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.epoch_mod32
+      );
+
+      var = cdf.getVariable("Q");
+      System.out.println("Q...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.sspc_q
+      );
+
+      cdf.close();
+   }
+
+   public void doRcntCdf() throws CDFException{
+      CDF cdf;
+      Variable var;
+      
+      int numOfRecs = data.getSize("mod4");
+      double[][] rc_timeScaled = new double[4][numOfRecs];
+
+      //change all the units from cnts/4sec to cnts/sec
+      for(int var_i = 0; var_i < 4; var_i++){
+         for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
+            rc_timeScaled[var_i][rec_i] = rc_timeScaled[var_i][rec_i] / 4;
+         }
+      }
+
+      System.out.println("\nSaving RCNT...");
+      cdf = CDF_Gen.openCDF( 
+         outputPath + "bar1" + flt + "_" + id + "_" + stn +
+         "_l2_rcnt_20" + date +  "_v" + revNum + ".cdf"
+      );
+
+      var = cdf.getVariable("Interrupt");
+      System.out.println("Interrupt...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         rc_timeScaled[0]
+      );
+
+      var = cdf.getVariable("LowLevel");
+      System.out.println("LowLevel...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         rc_timeScaled[1]
+      );
+
+      var = cdf.getVariable("PeakDet");
+      System.out.println("PeakDet...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         rc_timeScaled[2]
+      );
+
+      var = cdf.getVariable("HighLevel");
+      System.out.println("HighLevel...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         rc_timeScaled[3]
+      );
+
+      var = cdf.getVariable("FrameGroup");
+      System.out.println("FrameGroup...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.frame_mod4
+      );
+
+      var = cdf.getVariable("Epoch");
+      System.out.println("Epoch...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1},
+         data.epoch_mod4
+      );
+
+      var = cdf.getVariable("Q");
+      System.out.println("Q...");
+      var.putHyperData(
+         0, numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         data.rcnt_q
+      );
+
+      cdf.close();
+   }
 
    //Pull each value out of the frame and store it in the appropriate CDF.
    private void writeData() throws CDFException{
-      //create a holder for the current CDF and Variable
-      CDF cur_cdf;
-      Variable cur_var;
-
       System.out.println(
          "Creating Level Two... (" + data.getSize("1Hz") + " frames)"
       );
@@ -485,385 +943,12 @@ public class LevelTwo{
       doGpsCdf();
       doPpsCdf();
       doMagCdf();
+      doHkpgCdf();   
+      doFspcCdf();   
+      doMspcCdf();   
+      doSspcCdf();   
+      doRcntCdf();   
          
-         
-      //HKPG
-         System.out.println("\nSaving HKPG...");
-         cur_cdf = CDF_Gen.openCDF( 
-            outputPath + "bar1" + flt + "_" + id + "_" + stn +
-            "_l2_hkpg_20" + date +  "_v" + revNum + ".cdf"
-         );
-            
-         for(int var_i = 0; var_i < 36; var_i++){
-            cur_var = cur_cdf.getVariable(data.hkpg_label[var_i]);
-            System.out.println(data.hkpg_label[var_i] + "...");
-            cur_var.putHyperData(
-               0, (data.getSize("mod40")), 1, 
-               new long[] {0}, 
-               new long[] {1}, 
-               new long[] {1}, 
-               data.hkpg_raw[var_i]
-            );
-         }
-
-         cur_var = cur_cdf.getVariable("numOfSats");
-         System.out.println("numOfSats...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod40")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.sats
-         );
-
-         cur_var = cur_cdf.getVariable("timeOffset");
-         System.out.println("timeOffset...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod40")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.offset
-         );
-         
-         cur_var = cur_cdf.getVariable("termStatus");
-         System.out.println("termStatus...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod40")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.termStat
-         );
-
-         cur_var = cur_cdf.getVariable("cmdCounter");
-         System.out.println("cmdCounter...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod40")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.cmdCnt
-         );
-
-         cur_var = cur_cdf.getVariable("modemCounter");
-         System.out.println("modemCounter...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod40")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.modemCnt
-         );
-
-         cur_var = cur_cdf.getVariable("dcdCounter");
-         System.out.println("dcdCounter...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod40")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.dcdCnt
-         );
-
-         cur_var = cur_cdf.getVariable("weeks");
-         System.out.println("weeks...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod40")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.weeks
-         );
-
-         cur_var = cur_cdf.getVariable("FrameGroup");
-         System.out.println("FrameGroup...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod40")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.frame_mod40
-         );
-
-         cur_var = cur_cdf.getVariable("Epoch");
-         System.out.println("Epoch...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod40")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.epoch_mod40
-         );
-
-         cur_var = cur_cdf.getVariable("Q");
-         System.out.println("Q...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod40")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.hkpg_q
-         );
-
-         cur_cdf.close();
-         
-      //FSPC//
-         System.out.println("\nSaving FSPC...");
-         cur_cdf = CDF_Gen.openCDF( 
-            outputPath + "bar1" + flt + "_" + id + "_" + stn +
-            "_l2_fspc_20" + date +  "_v" + revNum + ".cdf"
-         );
-         
-         cur_var = cur_cdf.getVariable("LC1");
-         System.out.println("LC1...");
-         cur_var.putHyperData(
-            0, (data.getSize("20Hz")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.lc1_raw
-         );
-
-         cur_var = cur_cdf.getVariable("LC2");
-         System.out.println("LC2...");
-         cur_var.putHyperData(
-            0, (data.getSize("20Hz")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.lc2_raw
-         );
-
-         cur_var = cur_cdf.getVariable("LC3");
-         System.out.println("LC3...");
-         cur_var.putHyperData(
-            0, (data.getSize("20Hz")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.lc3_raw
-         );
-
-         cur_var = cur_cdf.getVariable("LC4");
-         System.out.println("LC4...");
-         cur_var.putHyperData(
-            0, (data.getSize("20Hz")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.lc4_raw
-         );
-
-         cur_var = cur_cdf.getVariable("FrameGroup");
-         System.out.println("FrameGroup...");
-         cur_var.putHyperData(
-            0, (data.getSize("20Hz")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.frame_20Hz
-         );
-
-         cur_var = cur_cdf.getVariable("Epoch");
-         System.out.println("Epoch...");
-         cur_var.putHyperData(
-            0, (data.getSize("20Hz")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.epoch_20Hz
-         );
-
-         cur_var = cur_cdf.getVariable("Q");
-         System.out.println("Q...");
-         cur_var.putHyperData(
-            0, (data.getSize("20Hz")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.fspc_q
-         );
-
-         cur_cdf.close();
-         
-      //MSPC//
-         System.out.println("\nSaving MSPC...");
-         cur_cdf = CDF_Gen.openCDF( 
-            outputPath + "bar1" + flt + "_" + id + "_" + stn +
-            "_l2_mspc_20" + date +  "_v" + revNum + ".cdf"
-         );
-
-         cur_var = cur_cdf.getVariable("MSPC");
-         System.out.println("Spectrum Arrays...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod4")), 1, 
-            new long[] {0, 0}, 
-            new long[] {48, 1}, 
-            new long[] {1, 1}, 
-            data.mspc_raw
-         );
-
-         cur_var = cur_cdf.getVariable("FrameGroup");
-         System.out.println("FrameGroup...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod4")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.frame_mod4
-         );
-
-         cur_var = cur_cdf.getVariable("Epoch");
-         System.out.println("Epoch...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod4")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.epoch_mod4
-         );
-
-         cur_var = cur_cdf.getVariable("Q");
-         System.out.println("Q...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod4")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.mspc_q
-         );
-
-         cur_cdf.close();
-         
-      //SSPC//
-         System.out.println("\nSaving SSPC...");
-         cur_cdf = CDF_Gen.openCDF( 
-            outputPath + "bar1" + flt + "_" + id + "_" + stn +
-            "_l2_sspc_20" + date +  "_v" + revNum + ".cdf"
-         );
-
-         cur_var = cur_cdf.getVariable("SSPC");
-         System.out.println("Spectrum Arrays...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod32")), 1, 
-            new long[] {0}, 
-            new long[] {256, 1}, 
-            new long[] {1}, 
-            data.sspc_raw
-         );
-
-         cur_var = cur_cdf.getVariable("FrameGroup");
-         System.out.println("FrameGroup...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod32")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.frame_mod32
-         );
-
-         cur_var = cur_cdf.getVariable("Epoch");
-         System.out.println("Epoch...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod32")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.epoch_mod32
-         );
-
-         cur_var = cur_cdf.getVariable("Q");
-         System.out.println("Q...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod32")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.sspc_q
-         );
-
-         cur_cdf.close();
-         
-      //RCNT
-         System.out.println("\nSaving RCNT...");
-         cur_cdf = CDF_Gen.openCDF( 
-            outputPath + "bar1" + flt + "_" + id + "_" + stn +
-            "_l2_rcnt_20" + date +  "_v" + revNum + ".cdf"
-         );
-
-         cur_var = cur_cdf.getVariable("Interrupt");
-         System.out.println("Interrupt...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod4")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.rcnt_raw[0]
-         );
-
-         cur_var = cur_cdf.getVariable("LowLevel");
-         System.out.println("LowLevel...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod4")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.rcnt_raw[1]
-         );
-
-         cur_var = cur_cdf.getVariable("PeakDet");
-         System.out.println("PeakDet...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod4")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.rcnt_raw[2]
-         );
-
-         cur_var = cur_cdf.getVariable("HighLevel");
-         System.out.println("HighLevel...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod4")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.rcnt_raw[3]
-         );
-
-         cur_var = cur_cdf.getVariable("FrameGroup");
-         System.out.println("FrameGroup...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod32")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.frame_mod4
-         );
-
-         cur_var = cur_cdf.getVariable("Epoch");
-         System.out.println("Epoch...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod32")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1},
-            data.epoch_mod4
-         );
-
-         cur_var = cur_cdf.getVariable("Q");
-         System.out.println("Q...");
-         cur_var.putHyperData(
-            0, (data.getSize("mod32")), 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            data.rcnt_q
-         );
-
-      cur_cdf.close();
-      
       System.out.println("Created Level Two.");
    }
  }
