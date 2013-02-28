@@ -7,6 +7,7 @@
 
     <path id="classpath">
         <fileset dir="${cdfjava.dir}" includes="**/*.jar"/>
+        <fileset dir="./" includes="**/*.jar"/>
     </path>
     
     <target name="clean">
