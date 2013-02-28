@@ -1,20 +1,44 @@
 package edu.ucsc.barrel.cdf_gen;
 
 /*
-SpectrumExtract.java v12.11.20
+SpectrumExtract.java v13.02.28
 
 Description:
    Creates energy bin edges and rebins spectra.
 
-v12.11.20
-   -Added this documentation
-   
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   This file is part of The BARREL CDF Generator.
+
+   The BARREL CDF Generator is free software: you can redistribute it and/or 
+   modify it under the terms of the GNU General Public License as published 
+   by the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   The BARREL CDF Generator is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License along with 
+   The BARREL CDF Generator.  If not, see <http://www.gnu.org/licenses/>.
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Change Log:
+   v13.02.28
+      -Updated bin edge creater, removed rebin routine for now. Added imports 
+         for Gaussian fit. 
+   v12.11.20
+      -Added this documentation
+      
 */
 
+import org.apache.commons.math3.fitting.GaussianFitter;
+import org.apache.commons.math3.optim.nonlinear.vector.
+          jacobian.LevenbergMarquardtOptimizer;
 
 public class SpectrumExtract {
    
-   public static double[][] newBinEdges(
+   public static double[][] createBinEdges(
       double xtal_temp, double dpu_temp, int bin_511
    ){
       //edge array index reference
@@ -76,151 +100,12 @@ public class SpectrumExtract {
       return edges;
    }
    
-   private static void scaleBinEdges(double[] edges, double factor){
-      for(int edge_i = 0; edge_i < edges.length; edge_i++){
-         //rational function to approximate energy non-linearity
-         edges[edge_i] *=
-            1 - (11.6 / (edges[edge_i] + 10.8)) + (0.000091 * edges[edge_i]);
-            
-         //scale based on temperature and 511 line
-         edges[edge_i] *= factor;
-      }
-   }
-   
-   public static double[][] getBinEdges(double scale){
-      //edge array index reference
-      final int SLOW = 0;
-      final int MED = 1;
-      final int FAST = 2;
-      
-      double[][] edges = new double[3][];
-      edges[SLOW] = new double[257]; //slow spectrum edges
-      edges[MED] = new double[49]; //medium
-      edges[FAST] = new double[5]; //fast
-      
-      int[] widths = {
-         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
-         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
-         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
-         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
-         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
-         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
-         4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 
-         4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 
-         8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
-         8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
-         16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16,
-         16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 
-         32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 
-         32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
-         64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 
-         64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64
-      };
-      
-      //convert bin widths to energy levels
-      for(int width_i = 0; width_i < widths.length; width_i++){
-         widths[width_i] *= scale;
-      }
-      
-      //fill edge array for slow spectrum
-      edges[SLOW][0] = 0.0;
-      for(int slow_i = 0; slow_i < 256; slow_i++){
-         edges[SLOW][slow_i+1] = edges[SLOW][slow_i] + widths[slow_i];
-      }
-      
-      //fill array for medium spectrum
-      edges[MED][0] = edges[SLOW][42];
-      int med_i = 0, next_med = 0;
-      for(int slow_i = 43; slow_i < 213; slow_i++){
-         
-         //calculate the next medium index based on the slow index
-         next_med = 9 * (slow_i - 42) / 32;
-         
-         //check to see if the next index is different from the first
-         if (med_i != next_med){
-            //if we have a new index, save it and copy the energy level
-            edges[MED][next_med] = edges[SLOW][slow_i];
-            med_i = next_med;
-         }
-      }
-      //set the last energy level
-      edges[MED][48] = edges[SLOW][213];
-      
-      //fill array for fast spectrum
-      edges[FAST][0] = 0.0;
-      edges[FAST][1] = scale * 75;
-      edges[FAST][2] = scale * 230;
-      edges[FAST][3] = scale * 350;
-      edges[FAST][4] = scale * 620;
-      
-      return edges;
-   }
-   
-   public static Double[] rebin(
-      Integer[] oldVals, double[] oldBins, double[] newBins, boolean flux
-   )throws NullPointerException{
-      Double[] result = new Double[(newBins.length - 1)];
-      
-      if (oldBins.length < 2 || newBins.length < 2){
-        System.out.println("Rebin array size error!");
-        return result;
-      }
-      
-      Double oldLo = oldBins[0];
-      Double oldHi = oldBins[1];
-      Double newLo = newBins[0];
-      Double newHi = newBins[1];
-      int newIndex = 0;
-      int oldIndex = 0;
-      Double total = 0.0;
+   public static void rebin(){
 
-      while(true){
-         if (oldHi <= newLo){
-            oldIndex++;
-            
-            if (oldIndex >= (oldBins.length)) return result;
-            
-            oldLo = oldHi;
-            oldHi = oldBins[oldIndex + 1];
-         }else if (newHi <= oldLo){
-            
-            if(flux) result[newIndex] = total/(newHi-newLo);
-            else result[newIndex] = total/(oldHi-oldLo);
-            
-            total = 0.0;
-            newIndex++;
-            
-            if (newIndex >= (newBins.length - 1)) return result;
-            
-            newLo = newHi;
-            newHi = newBins[newIndex + 1];
-            
-         }else if (newHi < oldHi){
-            total += (newHi - Math.max(oldLo, newLo)) * oldVals[oldIndex];
-            
-            if(flux) result[newIndex] = total / (newHi - newLo);
-            else result[newIndex] = total / (oldHi - oldLo);
-            
-            total = 0.0;
-            newIndex++;
-            
-            if(newIndex >= newBins.length - 1) return result;
-            
-            newLo = newHi;
-            newHi = newBins[newIndex + 1];
-         }else{
-            total += (oldHi - Math.max(oldLo, newLo)) * oldVals[oldIndex];
-            oldIndex++;
-            
-            if (oldIndex >= oldVals.length) {
-               if(flux) result[newIndex] = total/(newHi-newLo);
-               else result[newIndex]=total/(oldHi-oldLo);
-               
-               return result;
-            }
-            oldLo = oldHi;
-            oldHi = oldBins[oldIndex + 1];
-         }
-      }
+   }
+
+   private static void find511(){
+      GaussianFitter fitter = 
+         new GaussianFitter(new LevenbergMarquardtOptimizer());
    }
 }
