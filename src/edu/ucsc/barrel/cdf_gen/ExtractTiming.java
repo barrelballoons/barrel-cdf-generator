@@ -14,34 +14,52 @@ Description:
    Uses a block of gps time info to create a more exact time variable.
    Ported from MPM's C code.
 
-v13.01.04
-   -Changed the way epoch is calculated and fixed the "12h bug"
-   
-v12.12.31
-   -Removed redundant calculation of rec_i when 
-   checking if BarrelTimes array is full
-   
-   
-v12.11.28
-   -Fixed null pointer error caused by trying to 
-   process data without a linear model
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   This file is part of The BARREL CDF Generator.
 
-v12.11.27
-   -Grabs DataHolder object from CDF_Gen as a member 
-   rather than having it passed through all function
-   -Rewroked a number of routines to add ability to fill missing time 
-   
-v12.11.26
-   -Fixed lots and lots of bug.
-   -Changed offset to adjust the GPS start time to J2000.
-   -Uses Calendar date object to calculate time relative to GPS start time
-   -Writes values to DataHolder object now.
-   
-v12.11.20
-   -Changed references to Level_Generator to CDF_Gen
-   
-v12.10.15
-   -First Version
+   The BARREL CDF Generator is free software: you can redistribute it and/or 
+   modify it under the terms of the GNU General Public License as published 
+   by the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   The BARREL CDF Generator is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License along with 
+   The BARREL CDF Generator.  If not, see <http://www.gnu.org/licenses/>.
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Change Log:
+   v13.01.04
+      -Changed the way epoch is calculated and fixed the "12h bug"
+      
+   v12.12.31
+      -Removed redundant calculation of rec_i when 
+      checking if BarrelTimes array is full
+      
+      
+   v12.11.28
+      -Fixed null pointer error caused by trying to 
+      process data without a linear model
+
+   v12.11.27
+      -Grabs DataHolder object from CDF_Gen as a member 
+      rather than having it passed through all function
+      -Rewroked a number of routines to add ability to fill missing time 
+      
+   v12.11.26
+      -Fixed lots and lots of bug.
+      -Changed offset to adjust the GPS start time to J2000.
+      -Uses Calendar date object to calculate time relative to GPS start time
+      -Writes values to DataHolder object now.
+      
+   v12.11.20
+      -Changed references to Level_Generator to CDF_Gen
+      
+   v12.10.15
+      -First Version
 
 */
 

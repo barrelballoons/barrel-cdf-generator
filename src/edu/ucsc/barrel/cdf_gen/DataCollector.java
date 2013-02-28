@@ -1,41 +1,58 @@
 package edu.ucsc.barrel.cdf_gen;
 
 /*
-dataCollector.java v13.01.04
+dataCollector.java v13.01.18
 
 Description:
    Downloads files from each server listed in ini file.
    Saves all files to a directory tree as ./DATAROOT/payloadX/out/tlm/DATE
 
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   This file is part of The BARREL CDF Generator.
 
-v13.01.18
-   -Changed date input to accept string
+   The BARREL CDF Generator is free software: you can redistribute it and/or 
+   modify it under the terms of the GNU General Public License as published 
+   by the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-v13.01.04
-   -Fixed redundancy in output path
+   The BARREL CDF Generator is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-v12.11.21
-   -Downloads files from the soc-nas now
-   
-v12.11.20
-   -Changed references to Level_Generator to CDF_Gen
-   
-v12.10.11
-   -Changed version numbers to a date format
+   You should have received a copy of the GNU General Public License along with 
+   The BARREL CDF Generator.  If not, see <http://www.gnu.org/licenses/>.
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-v0.3
-   -Changed how output files are stored
+Change Log:
+   v13.01.18
+      -Changed date input to accept string
 
-v0.2
-	-updated class/filename and added proper package scheme
-	-fixed resource leak caused by output stream not being closed
-	-Uses a constructor to get information about output path, payload, servers 
-      and date rather than having the calling class set it directly
-   -No longer a static class
+   v13.01.04
+      -Fixed redundancy in output path
 
-v0.1
-   -Downloads all data files.
-   
+   v12.11.21
+      -Downloads files from the soc-nas now
+      
+   v12.11.20
+      -Changed references to Level_Generator to CDF_Gen
+      
+   v12.10.11
+      -Changed version numbers to a date format
+
+   v0.3
+      -Changed how output files are stored
+
+   v0.2
+      -updated class/filename and added proper package scheme
+      -fixed resource leak caused by output stream not being closed
+      -Uses a constructor to get information about output path, payload, servers 
+         and date rather than having the calling class set it directly
+      -No longer a static class
+
+   v0.1
+      -Downloads all data files.
+      
 Planned Changes:
    -Add logging
 */

@@ -15,12 +15,40 @@ import java.nio.channels.FileChannel;
 import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
+
 /*
+LevelTwo.java v13.02.28
+
+Description:
+   LevelTwo.java pulls data from the DataHolder.java object and processes it 
+   into physical units (when needed) and outputs CDF files in the L2 directory.
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   This file is part of The BARREL CDF Generator.
+
+   The BARREL CDF Generator is free software: you can redistribute it and/or 
+   modify it under the terms of the GNU General Public License as published 
+   by the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   The BARREL CDF Generator is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License along with 
+   The BARREL CDF Generator.  If not, see <http://www.gnu.org/licenses/>.
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Change Log:
+   v13.02.28
+      -Now outputs correct L2 values for all variables except spectra (Still
+         needs rebin)
    v13.02.15
-   -Updated to match the current version of Level One
+      -Updated to match the current version of Level One
    
    v13.02.06
-   -New version of Level Two. An exact copy of Level One for now...
+      -New version of Level Two. An exact copy of Level One for now...
 */
 
 
