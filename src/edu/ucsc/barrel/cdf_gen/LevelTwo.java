@@ -851,7 +851,7 @@ public class LevelTwo{
       //change all the units from cnts/4sec to cnts/sec
       for(int var_i = 0; var_i < 4; var_i++){
          for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
-            rc_timeScaled[var_i][rec_i] = rc_timeScaled[var_i][rec_i] / 4;
+            rc_timeScaled[var_i][rec_i] = data.rcnt_raw[var_i][rec_i] / 4;
          }
       }
 
