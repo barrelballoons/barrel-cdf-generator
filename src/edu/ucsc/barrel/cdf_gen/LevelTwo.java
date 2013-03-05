@@ -815,9 +815,11 @@ public class LevelTwo{
       //rebin the mspc spectra
       for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
          /* need to do something other than just copy the spectra*/
-         for(int val_i = 0; val_i < 48; val_i++){
+         for(int val_i = 0; val_i < 256; val_i++){
             sspc_rebin[rec_i][val_i] = data.sspc_raw[rec_i][val_i];
          }
+
+         SpectrumExtract.find511(sspc_rebin[rec_i], new double[25], 100);
       }
 
       System.out.println("\nSaving SSPC...");
