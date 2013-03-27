@@ -41,6 +41,8 @@ Description:
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Change Log:
+   v13.03.28
+      -Added rebin routines to MSPC and SSPC
    v13.02.28
       -Now outputs correct L2 values for all variables except spectra (Still
          needs rebin)

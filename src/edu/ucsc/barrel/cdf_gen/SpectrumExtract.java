@@ -24,6 +24,10 @@ Description:
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Change Log:
+   v13.03.28
+      -Implimented the peak fitting routine from Apache Commons Math
+      -Removed initial guess code from find511()
+      -Fixed the way edges_raw[][] is accessed by createBins()
    v13.02.28
       -Updated bin edge creater, removed rebin routine for now. Added imports 
          for Gaussian fit. 
