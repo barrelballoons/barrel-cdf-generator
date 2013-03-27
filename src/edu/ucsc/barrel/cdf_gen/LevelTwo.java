@@ -754,7 +754,7 @@ public class LevelTwo{
       int numOfRecs = data.getSize("mod8");
       double[][] mspc_rebin = new double[numOfRecs][48];
 
-      double[] new_edges = new double[257];
+      double[] new_edges = new double[49];
       
       //rebin the mspc spectra
       for(int mspc_rec = 0; mspc_rec < numOfRecs; mspc_rec++){
@@ -773,11 +773,11 @@ public class LevelTwo{
          //peak = spectrum.find511(mspc_rebin[mspc_rec], offset);
       
          //get the adjusted bin edges
-        // new_edges = spectrum.createBinEdges(1, scint_temp, dpu_temp, peak);
-        // mspc_rebin[mspc_rec] = spectrum.rebin(
-        //    mspc_rebin[mspc_rec], SpectrumExtract.edges_raw[1], new_edges, 
-        //    49, 49, true 
-        // );
+         new_edges = spectrum.createBinEdges(1, scint_temp, dpu_temp, peak);
+         mspc_rebin[mspc_rec] = spectrum.rebin(
+            mspc_rebin[mspc_rec], SpectrumExtract.edges_raw[1], new_edges, 
+            49, 49, true 
+         );
       }
 
       System.out.println("\nSaving MSPC...");

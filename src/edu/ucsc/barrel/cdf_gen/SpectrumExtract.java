@@ -79,7 +79,7 @@ public class SpectrumExtract {
 
    public SpectrumExtract(){
       //calculate the nominal slow spectrum bin widths and midpoints
-      slow_bin_widths =  new double[edges_raw[2].length - 1];     
+      slow_bin_widths = new double[edges_raw[2].length - 1];     
       for(int edge_i = 1; edge_i < edges_raw[2].length; edge_i++){
          slow_bin_widths[edge_i - 1] = 
             edges_raw[2][edge_i] - edges_raw[2][edge_i - 1];
@@ -96,7 +96,7 @@ public class SpectrumExtract {
       int spec_i, double xtal_temp, double dpu_temp, double peak511
    ){
       double factor1, factor2, temp, scale;
-      double[][] edges_cal = edges_raw;
+      double[] edges_cal = new double[edges_raw[spec_i].length];
 
       //quadratic function for crystal gain drift with temperature
       factor1 = 1;
@@ -121,19 +121,17 @@ public class SpectrumExtract {
 
       //apply corrections to energy bin edges
       temp = scale * factor1 / factor2;
-      for(int set_i = 0; set_i < 3; set_i++){
-         for(int edge_i = 0; edge_i < edges_cal[set_i].length; edge_i++){
-            edges_cal[set_i][edge_i] = 
-               temp * (
-                  edges_cal[set_i][edge_i] * (
-                     1 - 11.6 / (edges_cal[set_i][edge_i] + 10.8) 
-                     + Math.pow(9.1, -5) * edges_cal[set_i][edge_i]
-                  )
-               );
-         }
+      for(int edge_i = 0; edge_i < edges_cal.length; edge_i++){
+         edges_cal[edge_i] = 
+            temp * (
+               edges_raw[spec_i][edge_i] * (
+                  1 - 11.6 / (edges_raw[spec_i][edge_i] + 10.8) 
+                  + Math.pow(9.1, -5) * edges_raw[spec_i][edge_i]
+               )
+            );
       }
 
-      return edges_cal[spec_i];
+      return edges_cal;
    }
    
    public static double[] rebin(
