@@ -809,17 +809,39 @@ public class LevelTwo{
       CDF cdf;
       Variable var;
       
-      int numOfRecs = data.getSize("mod32");
-      double[][] sspc_rebin = new double[numOfRecs][256];
+      double peak = 0, scint_temp = 0, dpu_temp = 0;
+      int hkpg_rec = 0;
+      
+      SpectrumExtract spectrum = new SpectrumExtract();
+      int offset = 10;
 
-      //rebin the mspc spectra
-      for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
-         /* need to do something other than just copy the spectra*/
+      int numOfRecs = data.getSize("mod32");
+      double[] new_edges = new double[257];
+      double[][] sspc_rebin = new double[numOfRecs][257];
+      
+      //rebin the sspc spectra
+      for(int sspc_rec = 0; sspc_rec < numOfRecs; sspc_rec++){
+         //copy the int array into a double array
          for(int val_i = 0; val_i < 256; val_i++){
-            sspc_rebin[rec_i][val_i] = data.sspc_raw[rec_i][val_i];
+            sspc_rebin[sspc_rec][val_i] = data.sspc_raw[sspc_rec][val_i];
          }
 
-         SpectrumExtract.find511(sspc_rebin[rec_i], new double[25], 100);
+         //get temperatures
+         hkpg_rec = sspc_rec * 32 / 40; //convert from mod32 to mod40
+         scint_temp = 
+            data.hkpg_raw[data.T0][hkpg_rec] * data.hkpg_scale[data.T0];
+         dpu_temp = 
+            data.hkpg_raw[data.T5][hkpg_rec] * data.hkpg_scale[data.T5];
+
+         //find the bin that contains the 511 line
+         peak = spectrum.find511(sspc_rebin[sspc_rec], offset);
+      
+         //get the adjusted bin edges
+         new_edges = spectrum.createBinEdges(2, scint_temp, dpu_temp, peak);
+         sspc_rebin[sspc_rec] = spectrum.rebin(
+            sspc_rebin[sspc_rec], SpectrumExtract.edges_raw[2], new_edges, 
+            257, 257, true 
+         );
       }
 
       System.out.println("\nSaving SSPC...");

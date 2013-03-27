@@ -39,7 +39,7 @@ import org.apache.commons.math3.optim.nonlinear.vector.
 public class SpectrumExtract {
 
    //create uncalibrated bin edges
-   private static double[][] edges_raw = {
+   public static double[][] edges_raw = {
       {0, 75, 230, 350, 620},
       {
          42, 46, 50, 53, 57, 60, 64, 70, 78, 84, 92, 100, 
@@ -92,8 +92,8 @@ public class SpectrumExtract {
       }
    }
 
-   public static double[][] createBinEdges(
-      double xtal_temp, double dpu_temp, int peak511
+   public static double[] createBinEdges(
+      int spec_i, double xtal_temp, double dpu_temp, double peak511
    ){
       double factor1, factor2, temp, scale;
       double[][] edges_cal = edges_raw;
@@ -133,11 +133,11 @@ public class SpectrumExtract {
          }
       }
 
-      return edges_cal;
+      return edges_cal[spec_i];
    }
    
-   public static float[] rebin(
-      int[] oldVals, int[] oldBins, double[] newBins, 
+   public static double[] rebin(
+      double[] oldVals, double[] oldBins, double[] newBins, 
       int n, int m, boolean flux
    ){
 
@@ -148,9 +148,9 @@ public class SpectrumExtract {
          System.exit(1);
       }
      
-      float[] result = new float[m - 1];
-      int oldLo = oldBins[0];
-      int oldHi = oldBins[1];
+      double[] result = new double[m - 1];
+      double oldLo = oldBins[0];
+      double oldHi = oldBins[1];
       double newLo = newBins[0];
       double newHi = newBins[1];
       int newIndex = 0;
@@ -214,86 +214,29 @@ public class SpectrumExtract {
       }
    }
 
-   public static int find511(double[] slow, double[] err, int offset){
+   public static double find511(double[] slow, int offset){
       GaussianFitter fitter = 
          new GaussianFitter(new LevenbergMarquardtOptimizer());
       
       //nominal range for 511 line
       int width = 25;
       
-      //create array that lists the range of indicies 
-      //in which we expect to see the 511 line
-      //get a set of points to fit
-      double[] y = new double[width];
-      double[] x = new double[width];
-      double[] errors = new double[width];
+      //add points in the search range to the fitter object
+      double x = 0, y = 0;
       for(int pnt_i = 0; pnt_i < width; pnt_i++){
-         y[pnt_i] = slow[pnt_i + offset] / slow_bin_widths[pnt_i + offset];
-         x[pnt_i] = slow_bin_midpoints[pnt_i + offset];
-         errors[pnt_i] = err[pnt_i + offset] / slow_bin_widths[pnt_i + offset];
-      }
-
-      //describe a line through endpoints of the selected range
-      double y1 = y[0];
-      double y2 = y[width - 1];
-      double x1 = x[0];
-      double x2 = x[width - 1];
-      double m = (y2 - y1) / (x2 - x1);
-      double b = y1 - m * x1;
-
-      //find approximate peak location after subtracting linear bkgd
-      double[] peakregion = new double[width];
-      for(int pnt_i = 0; pnt_i < width; pnt_i++){
-         peakregion[pnt_i] = y[pnt_i] - (m * x[pnt_i] + b);
-      }
-      
-      //find the max of the peak region
-      double apex = 0;
-      for(int pnt_i = 0; pnt_i < width; pnt_i++){
-         if(peakregion[pnt_i] > apex){apex = y[pnt_i];}
-      }
-
-
-      //find the location of all points near the peak
-      //use high_i to keep track of the last element in the array
-      int[] higharea = new int[width];
-      int high_i = 0;
-      for(int peak_i = 0; peak_i < width; peak_i++){
-         if(peakregion[peak_i] > (0.5 * apex)){
-            //record the index of peak region with the high point
-            higharea[high_i] = peak_i;
-            high_i++;
-         }
-      }
-      if(high_i < 2){ return -1;}
-
-      //add all of the points in higharea to fitter, then do the fit
-      for(int pnt_i = 0; pnt_i < high_i; pnt_i++){
-         fitter.addObservedPoint(x[higharea[pnt_i]], y[higharea[pnt_i]]);
+         y = slow[pnt_i + offset] / slow_bin_widths[pnt_i + offset];
+         x = slow_bin_midpoints[pnt_i + offset];
+         fitter.addObservedPoint(x, y);
       }
       double[] fit_params = fitter.fit();
-System.out.println(fit_params[0] +" "+fit_params[0]+" "+fit_params[0]);
-/*     
-      //get a best guess of the peak location 
-      //taking the middle value of of higharea
-      int higharea_median = higharea[high_i / 2];
-      int peaklocation = (int) x[higharea_median];
 
-      guess = [1., peaklocation, 10., m, b];
-      yfit=curvefit(x,y,1./err^2,guess, $
-         chisq=chisq,sigma,function_name='mygauss',status=stat)
-      if (guess[2] gt 20 or guess[0] lt 0.2) then return, -1
+      if(
+         fit_params[1] < slow_bin_midpoints[offset] || 
+         fit_params[1] > slow_bin_midpoints[offset+width]
+      ){
+         return -1;
+      }
 
-;  some diagnostics (might need to adjust above tests)
-;
-;  print,guess
-;  plot,x,y,psym=8,yrange=[0,3]
-;  oplot,x,yfit
-;  oploterr,x,y,err
-
-  return,guess[1]
-  */
-
-     return 1;
+     return fit_params[1];
    }
 }
