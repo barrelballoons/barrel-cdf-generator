@@ -39,7 +39,7 @@ import org.apache.commons.math3.optim.nonlinear.vector.
 public class SpectrumExtract {
 
    //create uncalibrated bin edges
-   public static double[][] edges_raw = {
+   public final static double[][] edges_raw = {
       {0, 75, 230, 350, 620},
       {
          42, 46, 50, 53, 57, 60, 64, 70, 78, 84, 92, 100, 
@@ -114,7 +114,7 @@ public class SpectrumExtract {
       //set an overall scale factor to position 511keV line
       //this also helps compensate incorrect temperature values
       scale = 2.5; //nominal keV/bin
-      if(peak511 != 0){
+      if(peak511 != -1){
          scale = 511 * factor2 / factor1 / peak511 / 
             (1 - 11.6 / (peak511 + 10.8) + Math.pow(9.1, -5) * peak511);
       }

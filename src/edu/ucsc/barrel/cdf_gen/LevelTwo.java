@@ -745,15 +745,39 @@ public class LevelTwo{
       CDF cdf;
       Variable var;
       
+      double peak = -1, scint_temp = 0, dpu_temp = 0;
+      int hkpg_rec = 0;
+      
+      SpectrumExtract spectrum = new SpectrumExtract();
+      int offset = 10;
+
       int numOfRecs = data.getSize("mod8");
       double[][] mspc_rebin = new double[numOfRecs][48];
 
+      double[] new_edges = new double[257];
+      
       //rebin the mspc spectra
-      for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
-         /* need to do something other than just copy the spectra*/
+      for(int mspc_rec = 0; mspc_rec < numOfRecs; mspc_rec++){
+         //copy the int array into a double array and convert to cnts/sec
          for(int val_i = 0; val_i < 48; val_i++){
-            mspc_rebin[rec_i][val_i] = data.mspc_raw[rec_i][val_i];
+            mspc_rebin[mspc_rec][val_i] = data.mspc_raw[mspc_rec][val_i];
          }
+         //get temperatures
+         hkpg_rec = mspc_rec * 8 / 40; //convert from mod8 to mod40
+         scint_temp = 
+            data.hkpg_raw[data.T0][hkpg_rec] * data.hkpg_scale[data.T0];
+         dpu_temp = 
+            data.hkpg_raw[data.T5][hkpg_rec] * data.hkpg_scale[data.T5];
+
+         //find the bin that contains the 511 line
+         //peak = spectrum.find511(mspc_rebin[mspc_rec], offset);
+      
+         //get the adjusted bin edges
+        // new_edges = spectrum.createBinEdges(1, scint_temp, dpu_temp, peak);
+        // mspc_rebin[mspc_rec] = spectrum.rebin(
+        //    mspc_rebin[mspc_rec], SpectrumExtract.edges_raw[1], new_edges, 
+        //    49, 49, true 
+        // );
       }
 
       System.out.println("\nSaving MSPC...");
@@ -809,7 +833,7 @@ public class LevelTwo{
       CDF cdf;
       Variable var;
       
-      double peak = 0, scint_temp = 0, dpu_temp = 0;
+      double peak = -1, scint_temp = 0, dpu_temp = 0;
       int hkpg_rec = 0;
       
       SpectrumExtract spectrum = new SpectrumExtract();
@@ -821,7 +845,7 @@ public class LevelTwo{
       
       //rebin the sspc spectra
       for(int sspc_rec = 0; sspc_rec < numOfRecs; sspc_rec++){
-         //copy the int array into a double array
+         //copy the int array into a double array and convert to cnts/sec
          for(int val_i = 0; val_i < 256; val_i++){
             sspc_rebin[sspc_rec][val_i] = data.sspc_raw[sspc_rec][val_i];
          }
