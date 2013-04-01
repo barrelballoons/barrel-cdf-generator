@@ -3,35 +3,56 @@ package edu.ucsc.barrel.cdf_gen;
 import java.math.BigInteger;
 
 /*
-DataHolder.java 13.01.04
+DataHolder.java 13.02.28
 
 Description:
    Stores the data frames that are being processed
 
-v13.01.04
-   -Changed "ms_since_epoch" or "ms_since_sys_epoch" for clairity
-   
-v12.11.27
-   -Added members to hold time model info
-   -Added holder for quality flag
-   -Fixed fspc extraction
-   
-v12.11.22
-   -Saves ms_of_week variable when reading it when processing a gps time frame
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   This file is part of The BARREL CDF Generator.
 
-v12.11.20
-   -Changed references to Level_Generator to CDF_Gen
-   -Changed many of the objects to primitave types
-   -Changed raw_* to *_raw
-   
-v12.11.05
-   -Added a number of raw variables so the level 1 files could all
-   be int or long values
-   -Added static "constant" variables to index different mod values
+   The BARREL CDF Generator is free software: you can redistribute it and/or 
+   modify it under the terms of the GNU General Public License as published 
+   by the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-v12.10.11
-   -Takes a BigInteger frame as input, breaks the frame apart, and stores the 
-   different data types as public members
+   The BARREL CDF Generator is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License along with 
+   The BARREL CDF Generator.  If not, see <http://www.gnu.org/licenses/>.
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Change Log:
+   v13.02.28
+      -Reformatted the data structures to work better with putHyperData function
+
+   v13.01.04
+      -Changed "ms_since_epoch" or "ms_since_sys_epoch" for clairity
+      
+   v12.11.27
+      -Added members to hold time model info
+      -Added holder for quality flag
+      -Fixed fspc extraction
+      
+   v12.11.22
+      -Save ms_of_week variable when reading it when processing a gps time frame
+
+   v12.11.20
+      -Changed references to Level_Generator to CDF_Gen
+      -Changed many of the objects to primitave types
+      -Changed raw_* to *_raw
+      
+   v12.11.05
+      -Added a number of raw variables so the level 1 files could all
+      be int or long values
+      -Added static "constant" variables to index different mod values
+
+   v12.10.11
+      -Takes a BigInteger frame as input, breaks the frame apart, and stores the 
+      different data types as public members
 
 */
 
@@ -54,7 +75,17 @@ public class DataHolder{
       SATSOFF = 36, WEEK = 37, CMDCNT = 38, MDMCNT = 39,
       //rate counter index
       INTER = 0, LL = 1, PD = 2, HL = 3;
-   
+  
+   static public final float[] hkpg_scale = {
+      0.007629f, 0.007629f, 0.007629f, 0.007629f, 0.007629f, 0.007629f, 
+      0.007629f, 0.007629f, 0.007629f, 0.007629f, 0.007629f, 0.007629f, 
+      0.007629f, 0.0003052f, 0.0003052f, 0.0001526f, 0.0003052f, 0.0003052f, 
+      0.0006104f, 0.0001526f, 0.0001526f, 0.0003052f, -0.0001526f, -0.0001526f,
+      0.0001526f, 0.0006104f, 0.0006104f, 0.0006104f, 0.050863406f, 
+      0.061036087f, 0.061036087f, 0.010172681f, 0.0010172681f, 0.050863406f, 
+      -0.000126107f, -0.0010172681f
+   };
+
    static public final String[] hkpg_label = { 
       "V0_VoltAtLoad", "I0_TotalLoad", "V1_Battery", "I1_TotalSolar", 
       "V2_Solar1", "I2_Solar1", "V3_POS_DPU", "I3_POS_DPU", "V4_POS_XRayDet",

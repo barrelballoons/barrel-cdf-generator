@@ -11,67 +11,88 @@ import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
 /*
-LevelOne.java v12.11.28
+LevelOne.java v13.02.28
 
 Description:
-   Creates level one CDF files
+   Creates level one CDF files from DataHolder.java object.
 
-v13.01.18
-   -Updated the filename format
-   
-v12.11.28
-   -Modified terminal output to indicate payload and date
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   This file is part of The BARREL CDF Generator.
 
-v12.11.26
-   -Removed epoch calculations
-   -Does not add payload onto directory path 
+   The BARREL CDF Generator is free software: you can redistribute it and/or 
+   modify it under the terms of the GNU General Public License as published 
+   by the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-v12.11.20
-   -Changed references to Level_Generator to CDF_Gen
-   -Moved the declaration of frameGrp and mod variables outside the main loop. 
-   -Moved time calculation code to top of loop
-   -Changed epoch to being only stored in DataHolder instead of also being a 
-      local variable
-   -Removed ms_of_week from all files except GPS
-   -Uses DataHolder.rc_label to write rc CDF variables instead of the switch 
-      statment
-   -Wraps primitive variable types stored in DataHolded in proper objects before
-      writing to CDF
-   
-v12.11.05
-   -Saves ints (or longs) to cur_cdf.files. CDF's are now full of completely raw
-      variables (except EPOCH and ms_of_week)
-   -Changed "Time" CDF variable to "ms_of_week" to avoid TDAS namespace
-      collision
-   
-v12.10.11
-   -Changed version numbers to a date format
-   -No longer has any public members or methods other than the constructor.
-   -Constructor calls functions to process all data held in DataHolder object 
-      and produce CDF files.
-   -Removed HexToBit function
-   -Moved functions "copyFile()", "putData()" and "openCDF()" to 
-      Level_Generator.java
-   -Now gets output path from Level_Generator.L1_Dir
-   -Types of CDF files are now pulled from a public member of 
-      Level_Generator.java
+   The BARREL CDF Generator is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-v0.3
-   -Epoch is now calculated from "weeks" and "time" variables rather than 
-      filename
-   -Improved the way Epoch offsets are added to variables that come faster than 
-      1Hz
-   
-v0.2
-   -added CDF libraries
-   -copies the skeleton CDF files to date stamped files in constructor 
-   -extracts all data types and writes them to the correct CDF files
+   You should have received a copy of the GNU General Public License along with 
+   The BARREL CDF Generator.  If not, see <http://www.gnu.org/licenses/>.
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-v0.1
-   -added empty function that will convert the hex data eventually
+Change Log:
+   v13.02.28
+      -Uses new format of DataHolder.java object with putHyperdata() for 
+         increased speed in writing CDF files.
+   v13.01.18
+      -Updated the filename format
+      
+   v12.11.28
+      -Modified terminal output to indicate payload and date
 
-v0.0
-   -Does nothing, just an empty object for the main program to create
+   v12.11.26
+      -Removed epoch calculations
+      -Does not add payload onto directory path 
+
+   v12.11.20
+      -Changed references to Level_Generator to CDF_Gen
+      -Moved the declaration of frameGrp and mod variables outside the main loop
+      -Moved time calculation code to top of loop
+      -Changed epoch to being only stored in DataHolder instead of also being a 
+         local variable
+      -Removed ms_of_week from all files except GPS
+      -Uses DataHolder.rc_label to write rc CDF variables instead of the switch 
+         statment
+      -Wraps primitive variable types stored in DataHolded in proper objects before
+         writing to CDF
+      
+   v12.11.05
+      -Saves ints (or longs) to cur_cdf.files. CDF's are now full of completely raw
+         variables (except EPOCH and ms_of_week)
+      -Changed "Time" CDF variable to "ms_of_week" to avoid TDAS namespace
+         collision
+      
+   v12.10.11
+      -Changed version numbers to a date format
+      -No longer has any public members or methods other than the constructor.
+      -Constructor calls functions to process all data held in DataHolder object 
+         and produce CDF files.
+      -Removed HexToBit function
+      -Moved functions "copyFile()", "putData()" and "openCDF()" to 
+         Level_Generator.java
+      -Now gets output path from Level_Generator.L1_Dir
+      -Types of CDF files are now pulled from a public member of 
+         Level_Generator.java
+
+   v0.3
+      -Epoch is now calculated from "weeks" and "time" variables rather than 
+         filename
+      -Improved the way Epoch offsets are added to variables that come faster than 
+         1Hz
+      
+   v0.2
+      -added CDF libraries
+      -copies the skeleton CDF files to date stamped files in constructor 
+      -extracts all data types and writes them to the correct CDF files
+
+   v0.1
+      -added empty function that will convert the hex data eventually
+
+   v0.0
+      -Does nothing, just an empty object for the main program to create
 
 Planned Changes: 
    -Clean up/ Documentation
@@ -721,7 +742,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("FrameGroup");
          System.out.println("FrameGroup...");
          cur_var.putHyperData(
-            0, (data.getSize("mod32")), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -731,7 +752,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("Epoch");
          System.out.println("Epoch...");
          cur_var.putHyperData(
-            0, (data.getSize("mod32")), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1},
@@ -741,7 +762,7 @@ System.out.println("Done with GPS!");
          cur_var = cur_cdf.getVariable("Q");
          System.out.println("Q...");
          cur_var.putHyperData(
-            0, (data.getSize("mod32")), 1, 
+            0, (data.getSize("mod4")), 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 

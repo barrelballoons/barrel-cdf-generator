@@ -1,59 +1,77 @@
 package edu.ucsc.barrel.cdf_gen;
 
 /*
-LevelZero.java v12.11.26
+LevelZero.java v13.01.18
 
 Description:
    Copies each data file, byte by byte, to a day-long data file.
    Rejects short frames, long frames, and frames with bad checksums.
 
-v13.01.18
-   -Updated the filename format
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   This file is part of The BARREL CDF Generator.
 
-v12.11.26
-   -Does not set payload directory in outpath here.
+   The BARREL CDF Generator is free software: you can redistribute it and/or 
+   modify it under the terms of the GNU General Public License as published 
+   by the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-v12.11.20
-   -Changed references to Level_Generator to CDF_Gen
-   -changed text of output filename to lowercase
+   The BARREL CDF Generator is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-v12.11.05
-   -Now uses "getDataSet()" method of Level_Generator
-   to add frames to the correct set
+   You should have received a copy of the GNU General Public License along with 
+   The BARREL CDF Generator.  If not, see <http://www.gnu.org/licenses/>.
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-v12.10.11
-   -Changed version numbers to a date format
-   -No longer interacts with L1 objects
-   -Sends each frame as a BigInteger to the DatHolder static object. 
-   
-v0.6
-   -Changed how output files are stored
-   -Added error checking for short or long frames and bad checksums
-   -Sends data to Level One object
+Change Log:
+   v13.01.18
+      -Updated the filename format
 
-v0.5
-   -Fixed problem where the hex buffer would clear before using anything that 
-     was stored in it
+   v12.11.26
+      -Does not set payload directory in outpath here.
 
-v0.4
-   -Changed constructor to take in date and payload as well
-   -Creates files that are of BAR0_YYYYMMDD_SLL_PP_V++.TLM format
-   -Fixed incorrect byte counts introduced by buffered read
+   v12.11.20
+      -Changed references to Level_Generator to CDF_Gen
+      -changed text of output filename to lowercase
 
-v0.3
-   -Updated class/filename and added proper package scheme
-   -Added constructor so frame properties can be set in the ini file
-   -Constructor configures objects
-   -No longer static class
-   
-v0.2
-   -Added buffered and write for binary files.
-   -Output file is now sorted correctly.
-   -No longer copies the dailyManifest file into the output.
-   
-v0.1
-   -Just copies the files into a day-long file. 
-   -Does not check for valid frames.
+   v12.11.05
+      -Now uses "getDataSet()" method of Level_Generator
+      to add frames to the correct set
+
+   v12.10.11
+      -Changed version numbers to a date format
+      -No longer interacts with L1 objects
+      -Sends each frame as a BigInteger to the DatHolder static object. 
+      
+   v0.6
+      -Changed how output files are stored
+      -Added error checking for short or long frames and bad checksums
+      -Sends data to Level One object
+
+   v0.5
+      -Fixed problem where the hex buffer would clear before using anything that 
+        was stored in it
+
+   v0.4
+      -Changed constructor to take in date and payload as well
+      -Creates files that are of BAR0_YYYYMMDD_SLL_PP_V++.TLM format
+      -Fixed incorrect byte counts introduced by buffered read
+
+   v0.3
+      -Updated class/filename and added proper package scheme
+      -Added constructor so frame properties can be set in the ini file
+      -Constructor configures objects
+      -No longer static class
+      
+   v0.2
+      -Added buffered and write for binary files.
+      -Output file is now sorted correctly.
+      -No longer copies the dailyManifest file into the output.
+      
+   v0.1
+      -Just copies the files into a day-long file. 
+      -Does not check for valid frames.
 
 Future Plans: 
    -Read launch site/order data from downloaded file names. 
