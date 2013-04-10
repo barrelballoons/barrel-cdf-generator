@@ -839,7 +839,7 @@ public class LevelTwo{
       int hkpg_rec = 0;
       
       SpectrumExtract spectrum = new SpectrumExtract();
-      int offset = 10;
+      int offset = 90;
 
       int numOfRecs = data.getSize("mod32");
       double[] new_edges = new double[257];
@@ -868,6 +868,10 @@ public class LevelTwo{
             sspc_rebin[sspc_rec], SpectrumExtract.edges_raw[2], new_edges, 
             257, 257, true 
          );
+         //for(int val_i = 0; val_i < 256; val_i++){
+         //   CDF_Gen.log.write(sspc_rebin[sspc_rec][val_i] + " ");
+        // }
+        // CDF_Gen.log.newLine();
       }
 
       System.out.println("\nSaving SSPC...");
