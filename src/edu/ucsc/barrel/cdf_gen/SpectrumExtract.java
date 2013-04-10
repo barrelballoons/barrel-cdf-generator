@@ -99,7 +99,7 @@ public class SpectrumExtract {
    public static double[] createBinEdges(
       int spec_i, double xtal_temp, double dpu_temp, double peak511
    ){
-      double factor1, factor2, temp, scale;
+      double factor1, factor2, scale;
       double[] edges_cal = new double[edges_raw[spec_i].length];
 
       //quadratic function for crystal gain drift with temperature
@@ -124,17 +124,21 @@ public class SpectrumExtract {
       }
 
       //apply corrections to energy bin edges
-      temp = scale * factor1 / factor2;
+      scale = scale * factor1 / factor2;
       for(int edge_i = 0; edge_i < edges_cal.length; edge_i++){
          edges_cal[edge_i] = 
-            temp * (
+            scale * (
                edges_raw[spec_i][edge_i] * (
                   1 - 11.6 / (edges_raw[spec_i][edge_i] + 10.8) 
                   + Math.pow(9.1, -5) * edges_raw[spec_i][edge_i]
                )
             );
       }
-
+if(spec_i==2){
+for(int i=1; i<edges_cal.length; i++){
+CDF_Gen.log.write(edges_cal[i-1] + ((edges_cal[i] - edges_cal[i-1]) / 2) + " ");
+}
+}
       return edges_cal;
    }
    
