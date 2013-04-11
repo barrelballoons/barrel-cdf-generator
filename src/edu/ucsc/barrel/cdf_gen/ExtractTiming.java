@@ -149,9 +149,9 @@ public class ExtractTiming {
       }
    }
    
-   //set initial time model
+   //declare initial time model
    private Model time_model;
-   //set an array of time pairs
+   //declare an array of time pairs
    private TimePair[] time_pairs;
    
    //holder for BarrelTime objects
@@ -184,21 +184,21 @@ public class ExtractTiming {
       
       //data set index reference
       int FC = 0, DAY = 1, WEEK = 2, MS = 3, PPS = 4;
-      int rec_i = 0, data_i = 0;
+      int rec_i = 0, frame_i = 0;
       
       //loop through all of the frames and generate time models
-      for(data_i = 0; data_i < data.getSize("1Hz"); data_i++){
+      for(frame_i = 0; frame_i < data.getSize("1Hz"); frame_i++){
          //Figure out which record in the set of MAX_RECS this is 
-         rec_i = data_i % MAX_RECS;
+         rec_i = frame_i % MAX_RECS;
 
          //figure out the mod4 and mod40 values
-         mod4 = data.frame_1Hz[data_i] % 4;
-         mod40 = data.frame_1Hz[data_i] % 40;
+         mod4 = data.frame_1Hz[frame_i] % 4;
+         mod40 = data.frame_1Hz[frame_i] % 40;
 
          //check if the BarrelTimes array is full
-         if(rec_i == 0 && data_i > 1){
+         if(rec_i == 0 && frame_i > 1){
             //generate a model and fill BarrelTime array
-            fillTime(data_i, MAX_RECS);
+            fillTime(frame_i, MAX_RECS);
            
             timeRecs = new BarrelTime[MAX_RECS];
          }
@@ -207,23 +207,23 @@ public class ExtractTiming {
          timeRecs[rec_i] = new BarrelTime();
          
          //fill a BarrelTime object with data values
-         timeRecs[rec_i].setFrame(data.frame_1Hz[data_i]);
-         timeRecs[rec_i].setWeek(data.weeks[data_i / 40]);
+         timeRecs[rec_i].setFrame(data.frame_1Hz[frame_i]);
+         timeRecs[rec_i].setWeek(data.weeks[frame_i / 40]);
          
          //set the ms_of_week to a fill value if mod4!=1 or the saved value is 0
          if(
             (mod4 != 1) || 
-            (data.ms_of_week[data_i / 4] == 0)
+            (data.ms_of_week[frame_i / 4] == 0)
          ){ 
             timeRecs[rec_i].setMS_of_week(MSFILL);
          }else{
-            timeRecs[rec_i].setMS_of_week(data.ms_of_week[data_i / 4]);
+            timeRecs[rec_i].setMS_of_week(data.ms_of_week[frame_i / 4]);
          }
-         timeRecs[rec_i].setPPS(data.pps[data_i]);
+         timeRecs[rec_i].setPPS(data.pps[frame_i]);
       }
       
       //process any remaining records
-      fillTime(data_i, (rec_i + 1));
+      fillTime(frame_i, (rec_i + 1));
       
       backFillModels();
       
