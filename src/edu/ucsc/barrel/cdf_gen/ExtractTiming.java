@@ -502,10 +502,10 @@ public class ExtractTiming {
          //save epoch to the various time scales
          //fill the >1Hz times 
          for(int fill_i = 0; fill_i < 4; fill_i++){
-            data.epoch_4Hz[data_i + fill_i] = data.epoch_1Hz[data_i];
+            data.epoch_4Hz[(data_i * 4) + fill_i] = data.epoch_1Hz[data_i];
          }
          for(int fill_i = 0; fill_i < 20; fill_i++){
-            data.epoch_20Hz[data_i + fill_i] = data.epoch_1Hz[data_i];
+            data.epoch_20Hz[(data_i * 20) + fill_i] = data.epoch_1Hz[data_i];
          }
          //save the time if it has not been set for this group yet
          if(data.epoch_mod4[data_i / 4] == 0){
