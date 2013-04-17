@@ -744,7 +744,7 @@ public class LevelTwo{
       CDF cdf;
       Variable var;
       
-      int numOfRecs = data.getSize("mod8");
+      int numOfRecs = data.getSize("mod4");
       double[][] mspc_rebin = new double[numOfRecs][48];
 
       //rebin the mspc spectra
