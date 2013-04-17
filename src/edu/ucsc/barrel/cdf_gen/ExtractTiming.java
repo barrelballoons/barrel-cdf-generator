@@ -115,7 +115,7 @@ public class ExtractTiming {
    }
    
    private class TimePair{
-      private double ms;// frame time; ms after GPS 00:00:00 6 Jan 1980
+      private double ms;// frame time; ms since system epoch
       private long fc;//frame counter
 
       public void setMS(double t){ms = t;}
@@ -126,13 +126,13 @@ public class ExtractTiming {
    }
    
    private class BarrelTime{
-      private double ms = -1.;//frame time; ms after GPS 00:00:00 1 Jan 2010
-      private long fc = -1;//frame counter
-      private double ms_of_week = -1.;// ms since 00:00 on Sunday
-      private short week = -1;//weeks since 6-Jan-1980
-      private short pps = -1;//ms into frame when GPS pps comes
+      private double ms;//frame time; ms after GPS 00:00:00 1 Jan 2010
+      private long fc = FCFILL;//frame counter
+      private double ms_of_week = MSFILL;// ms since 00:00 on Sunday
+      private short week = WKFILL;//weeks since 6-Jan-1980
+      private short pps = PPSFILL;//ms into frame when GPS pps comes
       private short quality = 0;//quality of recovered time
-      private long flag = -1;//unused for now
+      private long flag = 0;//unused for now
      
       public void setMS(double t){ms = t;}
       public void setFrame(long f){
@@ -327,14 +327,14 @@ public class ExtractTiming {
          date.setTimeInMillis(GPS_START_TIME);
          date.add(Calendar.WEEK_OF_YEAR, week);
          
-         //correct ms of week based on pps
+         //add ms of week to the date object and correct for pps
          if (pps < 241) {
             date.add(Calendar.MILLISECOND, (int)(ms - pps));
          } else {
             date.add(Calendar.MILLISECOND, (int)(ms + 1000 - pps));
          }
          
-         //save the ms since gps start time in ms since system epoch
+         //save the ms since system epoch
          time_pairs[goodcnt].setMS(date.getTimeInMillis());
          time_pairs[goodcnt].setFrame(timeRecs[rec_i].getFrame());
          goodcnt++;
@@ -359,10 +359,9 @@ public class ExtractTiming {
       
       med = median(offsets);
       
+      //reject any points more than 200ms off the median offset value
       for (int pair_i = 0; pair_i < m; pair_i++) {
-         //check if the value is within 200 ms of the median
-         if(Math.abs(offsets[pair_i] - med) > 200.0){
-            //reject points too far from the median
+         if(Math.abs(offsets[pair_i] - med) > 200){
             time_pairs[pair_i] = null;
          }else{
             //move the accepted pair up in the array
@@ -500,7 +499,6 @@ public class ExtractTiming {
          //convert from "ms since system epoch" to "ns since J2000"
          data.epoch_1Hz[data_i] =
             (long)((data.ms_since_sys_epoch[data_i] - J2000) * 1000000);
-         
          //save epoch to the various time scales
          //fill the >1Hz times 
          for(int fill_i = 0; fill_i < 4; fill_i++){
