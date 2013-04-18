@@ -494,29 +494,45 @@ public class ExtractTiming {
    
    public void fillEpoch(){
       Calendar date = Calendar.getInstance();
-      
+      int 
+         fc_mod4 = 0, fc_mod32 = 0, fc_mod40 = 0, 
+         last_fc_mod4 = -1, last_fc_mod32 = -1, last_fc_mod40 = -1,
+         rec_num_mod4 = -1, rec_num_mod32 = -1, rec_num_mod40 = -1;
+
       for(int data_i = 0; data_i < data.getSize("1Hz"); data_i++){
+         fc_mod4 = 
+            data.frame_1Hz[data_i] - (data.frame_1Hz[data_i] % 4);
+         fc_mod32 = 
+            data.frame_1Hz[data_i] - (data.frame_1Hz[data_i] % 32);
+         fc_mod40 = 
+            data.frame_1Hz[data_i] - (data.frame_1Hz[data_i] % 40);
+         
+         //increment the record number for the <1Hz cadence data types
+         if(fc_mod4 != last_fc_mod4){rec_num_mod4++;}
+         if(fc_mod32 != last_fc_mod32){rec_num_mod32++;}
+         if(fc_mod40 != last_fc_mod40){rec_num_mod40++;}
+
          //convert from "ms since system epoch" to "ns since J2000"
          data.epoch_1Hz[data_i] =
             (long)((data.ms_since_sys_epoch[data_i] - J2000) * 1000000);
          //save epoch to the various time scales
          //fill the >1Hz times 
          for(int fill_i = 0; fill_i < 4; fill_i++){
-            data.epoch_4Hz[(data_i * 4) + fill_i] = data.epoch_1Hz[data_i];
+            data.epoch_4Hz[(data_i * 4) + fill_i] = 
+               data.epoch_1Hz[data_i] + (fill_i * 250000000);
          }
          for(int fill_i = 0; fill_i < 20; fill_i++){
-            data.epoch_20Hz[(data_i * 20) + fill_i] = data.epoch_1Hz[data_i];
+            data.epoch_20Hz[(data_i * 20) + fill_i] = 
+               data.epoch_1Hz[data_i] + (fill_i * 50000000);
          }
-         //save the time if it has not been set for this group yet
-         if(data.epoch_mod4[data_i / 4] == 0){
-            data.epoch_mod4[data_i / 4] = data.epoch_1Hz[data_i];
-         }
-         if(data.epoch_mod32[data_i / 32] == 0){
-            data.epoch_mod32[data_i / 32] = data.epoch_1Hz[data_i];
-         }
-         if(data.epoch_mod40[data_i / 40] == 0){
-            data.epoch_mod40[data_i / 40] = data.epoch_1Hz[data_i];
-         }
+         //fill the <1Hz times
+         data.epoch_mod4[rec_num_mod4] = data.epoch_1Hz[data_i];   
+         data.epoch_mod32[rec_num_mod32] = data.epoch_1Hz[data_i];
+         data.epoch_mod40[rec_num_mod40] = data.epoch_1Hz[data_i];
+
+         last_fc_mod4 = fc_mod4;
+         last_fc_mod32 = fc_mod32;
+         last_fc_mod40 = fc_mod40;
       }
    }
 }

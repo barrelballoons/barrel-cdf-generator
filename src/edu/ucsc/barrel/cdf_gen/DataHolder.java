@@ -215,14 +215,16 @@ public class DataHolder{
       rec_num_1Hz++;
       rec_num_4Hz = (rec_num_1Hz + 1) * 4;
       rec_num_20Hz = (rec_num_1Hz + 1) * 20;
-      rec_num_mod4 = (int) rec_num_1Hz / 4;
-      rec_num_mod32 = (int) rec_num_1Hz / 32;
-      rec_num_mod40 = (int) rec_num_1Hz / 40;
-      /*
-      if((tmpFC - mod4) != frame_mod4[rec_num_mod4]){rec_num_mod4++;}
-      if((tmpFC - mod32) != frame_mod32[rec_num_mod32]){rec_num_mod32++;}
-      if((tmpFC - mod40) != frame_mod40[rec_num_mod40]){rec_num_mod40++;}
-      */
+      try{
+         if((tmpFC - mod4) != frame_mod4[rec_num_mod4]){rec_num_mod4++;}
+         if((tmpFC - mod32) != frame_mod32[rec_num_mod32]){rec_num_mod32++;}
+         if((tmpFC - mod40) != frame_mod40[rec_num_mod40]){rec_num_mod40++;}
+      }catch(ArrayIndexOutOfBoundsException ex){
+         rec_num_mod4 = 0;
+         rec_num_mod32 = 0;
+         rec_num_mod40 = 0;
+      }
+
       //save the info from the frame counter word
       ver[rec_num_1Hz] = tmpVer;
       payID[rec_num_1Hz] = tmpPayID;
@@ -341,7 +343,7 @@ public class DataHolder{
                   .and(BigInteger.valueOf(65535)).intValue();
       }
       mspc_q[rec_num_mod4] = 0;
-    
+
       //slow spectra: 8 channels per frame, 16 bits/channels
       for(int sspc_i = 0; sspc_i < 8; sspc_i++){
          sspc_raw[rec_num_mod32][(mod32 * 8) + sspc_i] =
