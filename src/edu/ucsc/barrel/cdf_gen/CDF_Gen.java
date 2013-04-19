@@ -156,7 +156,7 @@ public class CDF_Gen implements CDFConstants{
       //ensure there is some user input
       if(args.length == 0){
          System.out.println(
-            "Usage: java -jar cdf_gen.jar ini=<ini file> [date=<date>]"
+            "Usage: java -jar cdf_gen.jar ini=<ini file> date=<date>"
          );
          System.exit(0);
       }
