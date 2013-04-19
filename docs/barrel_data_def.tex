@@ -17,7 +17,7 @@ This document will outline the different types of data products by BARREL. There
 Level 1 files are the first level of CDF files. they contain the exact integer numbers for each data type that is transmitted by the payload. That means that for digital values such as GPS\_TIME and X-Ray counts, the actual values are transmitted. However, with analog values such as housekeeping data, the data must be scaled before use. This means that much of the L1 data are not in physical units. Level 2 files are the same data from the L1 files, but with some additional processing. All analog values have been scaled, all accumulated values are converted to have /second units, spectral values are rebinned, and magnetometer values are gain corrected.
 
 \section{File Name Conventions}
-Raw Data Files, Level 0, and Level 1 and 2 files all have slightly different file name formats:
+BARREL data file names all lower case and vary slightly depending if the file type is Raw Data File, Level 0, or Level 1/2 file all have slightly different file name formats:
 
 Raw Data Files: bar\_YYMMDD\_HHMMSS\_PP\_GG.pkt
 
@@ -49,10 +49,23 @@ VV = Version Number
 
 TTTT = Data Type (sspc, mspc, fspc, gps-, pps-, magn, hkgn)
 
+\subsection{Data Types}
+The six data types available are the follow:
+
+SSPC, MSPC, FSPC = Slow, Medium, or Fast Spectra. These are the spectral products returned by scintillator. SSPC returns 256 samples every 32 seconds, MSPC is 48 samples every 4 seconds, and FSPC is 20Hz data.
+
+GPS- = GPS coordinate and time (ms of week in GPS Time) data. 
+
+PPS = Pulse per second. This data type tells us how many milliseconds into the frame we receive the timing pulse from the GPS satellites.
+
+MAGN = 3-axis, 4Hz Magnetometer data.
+
+HKPG = Housekeeping data. These data have 40 multiplexed values (one returned each second) in each record. Voltages, currents, temperatures, and other diagnostics are kept here.
+
 \section{Raw Telemetry and Level 0 Files}
 Data are transmitted from the payloads to the ground station via Iridium modems. When a call between the two modems is connected a raw telemetry file is created. As data are received at the ground station, they are written, byte-by-byte to the data file with no integrity checks. Data are written to the file until the modem link fails and the call is dropped. When the call resumes, a new file is created.
 
-These files are stored in a network accessible location and are downloaded daily by the CDF Generator. The data frame format for these files is described in the ''BARREL Telemetry Interface Control Document'' located at http://www.datmouth.edu/\~{}barrel/documents.html.
+These files are stored in a network accessible location and are downloaded daily by the CDF Generator. The data frame format for these files is described in the ''BARREL Telemetry Interface Control Document'' located at http://www.dartmouth.edu/\~{}barrel/documents.html.
 
 After the CDF Generator has downloaded the .pkt files, its first output is a L0 file. This file is produced by checking the integrity of each frame in the raw data files and saving the good frames to the L0 file and rejecting the corrupt ones. Frames are flagged as being corrupt if they have a bad checksum, are too long or too short. 
 
@@ -144,7 +157,7 @@ LC4\_ERROR&DOUBLE&cnts/keV/sec&~\\
 \end{table}
 
 \subsubsection{MSPC}
-MSPC is 48 channel, medium spectra data which is an accumulation of counts over 4 seconds. Each record contains all 48 channels and is comprised of 4 frames. Unlike the FSPC spectra, all of the channels in the record are stored in an array who's indices are the channel number. A description of the nominal energy binning scheme can be found  in the ''BARREL Telemetry Interface Control Document'' located at http://www.datmouth.edu/\~{}barrel/documents.html\\\\
+MSPC is 48 channel, medium spectra data which is an accumulation of counts over 4 seconds. Each record contains all 48 channels and is comprised of 4 frames. Unlike the FSPC spectra, all of the channels in the record are stored in an array who's indices are the channel number. A description of the nominal energy binning scheme can be found  in the ''BARREL Telemetry Interface Control Document'' located at http://www.dartmouth.edu/\~{}barrel/documents.html\\\\
 The differences between L1 and L2 MSPC files are outlined in Tables 5 and 6.
 
 \begin{table}[H]
@@ -161,7 +174,7 @@ ch&UINT[48]&NA&Values 1-48 used by the CDF for\\
 \end{table}
 
 \begin{table}[H]
-\caption{L1 MSPC Variables}
+\caption{L2 MSPC Variables}
 \begin{tabular}{|c|c|c|c|}
 \hline
 Variable Name&Variable Type&Units&Description\\ \hline
@@ -175,7 +188,7 @@ ch&UINT[48]&NA&Values 1-48 used by the CDF for\\
 \end{table}
 
 \subsubsection{SSPC}
-SSPC is very similar to MSPC with the main difference that counts are accumulated over 32 seconds and split into 256 channels. Again, a description of the nominal energy binning scheme can be found  in the ''BARREL Telemetry Interface Control Document'' located at http://www.datmouth.edu/\~{}barrel/documents.html\\\\
+SSPC is very similar to MSPC with the main difference that counts are accumulated over 32 seconds and split into 256 channels. Again, a description of the nominal energy binning scheme can be found  in the ''BARREL Telemetry Interface Control Document'' located at http://www.dartmouth.edu/\~{}barrel/documents.html\\\\
 The differences between L1 and L2 SSPC files are outlined in Tables 7 and 8.
 
 \begin{table}[H]
@@ -192,7 +205,7 @@ ch&UINT[256]&NA&Values 1-256 used by the CDF for\\
 \end{table}
 
 \begin{table}[H]
-\caption{L1 SSPC Variables}
+\caption{L2 SSPC Variables}
 \begin{tabular}{|c|c|c|c|}
 \hline
 Variable Name&Variable Type&Units&Description\\ \hline
@@ -223,7 +236,7 @@ MAG\_Z&INT8&uT&Digital word from magnetometer ADC Z axis.\\
 \end{table}
 
 \begin{table}[H]
-\caption{L1 Magnetometer Variables}
+\caption{L2 Magnetometer Variables}
 \begin{tabular}{|c|c|c|c|}
 \hline
 Variable Name&Variable Type&Units&Description\\ \hline
