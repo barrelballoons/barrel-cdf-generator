@@ -405,65 +405,6 @@ public class LevelTwo{
          magTot 
       );
 
-      //do gain correction on nominal values
-      for(int mag_rec = 0; mag_rec < numOfRecs; mag_rec++){
-         int hkpg_rec = mag_rec / 160; //convert from 4Hz to mod40
-         float magTemp = data.hkpg_raw[data.T1][hkpg_rec];
-
-         magTemp = (magTemp != 0) ? magTemp * data.hkpg_scale[data.T1] : 20;
-         magx[mag_rec] = magx[mag_rec] * (slopex * (magTemp - 20) + 1);
-         magy[mag_rec] = magy[mag_rec] * (slopey * (magTemp - 20) + 1);
-         magz[mag_rec] = magz[mag_rec] * (slopez * (magTemp - 20) + 1);
-         magTot[mag_rec] = 
-            Math.sqrt(
-               (magx[mag_rec] * magx[mag_rec]) + 
-               (magy[mag_rec] * magy[mag_rec]) +
-               (magz[mag_rec] * magz[mag_rec]) 
-            );
-      }
-
-      //store the gain adjusted values
-      var = cdf.getVariable("MAG_X_ADJ");
-      System.out.println("Gain Adjusted MAG_X... ");
-      var.putHyperData(
-         0, numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         magx 
-      );
-
-      var = cdf.getVariable("MAG_Y_ADJ");
-      System.out.println("Gain Adjusted MAG_Y...");
-      var.putHyperData(
-         0, numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         magy
-      );
-
-      var = cdf.getVariable("MAG_Z_ADJ");
-      System.out.println("Gain Adjusted MAG_Z...");
-      var.putHyperData(
-         0, numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         magz
-      );
-
-      var = cdf.getVariable("Total_ADJ");
-      System.out.println("Gain Adjusted Field Magnitude...");
-      var.putHyperData(
-         0, numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         magTot 
-      );
-
-
       //save the rest of the file
       var = cdf.getVariable("FrameGroup");
       System.out.println("FrameGroup...");
