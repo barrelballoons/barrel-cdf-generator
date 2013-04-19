@@ -138,6 +138,7 @@ public class CDF_Gen implements CDFConstants{
 	public static String L0_Dir;
    public static String L1_Dir;
    public static String L2_Dir;
+   public static Logger log;
    
    //List of types of CDF files
    public static String[] fileTypes = 
@@ -149,10 +150,13 @@ public class CDF_Gen implements CDFConstants{
       //array to hold payload id, lauch order, and launch site
 		String[] payload = new String[3];
 		
+      //create a log file
+      log = new Logger("log.txt");
+
       //ensure there is some user input
       if(args.length == 0){
          System.out.println(
-            "Usage: java -jar cdf_gen.jar ini=<ini file> [date=<date>]"
+            "Usage: java -jar cdf_gen.jar ini=<ini file> date=<date>"
          );
          System.exit(0);
       }
@@ -269,6 +273,9 @@ public class CDF_Gen implements CDFConstants{
             );
          }
       }
+
+      //close the log file
+      log.close();
    }
    
    public static byte[] hexToByte(String s) {

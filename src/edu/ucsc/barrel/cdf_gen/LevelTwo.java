@@ -250,7 +250,7 @@ public class LevelTwo{
       var = cdf.getVariable("GPS_PPS");
       System.out.println("GPS_PPS...");
       var.putHyperData(
-         0, data.getSize("1Hz"), 1, 
+         0L, numOfRecs, 1L, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
@@ -260,7 +260,7 @@ public class LevelTwo{
       var = cdf.getVariable("Version");
       System.out.println("Version...");
       var.putHyperData(
-         0, data.getSize("1Hz"), 1, 
+         0L, numOfRecs, 1L, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
@@ -270,7 +270,7 @@ public class LevelTwo{
       var = cdf.getVariable("Payload_ID");
       System.out.println("Payload_ID...");
       var.putHyperData(
-         0, data.getSize("1Hz"), 1, 
+         0L, numOfRecs, 1L, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
@@ -280,17 +280,16 @@ public class LevelTwo{
       var = cdf.getVariable("FrameGroup");
       System.out.println("FrameGroup...");
       var.putHyperData(
-         0, data.getSize("1Hz"), 1, 
+         0L, numOfRecs, 1L, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
          data.frame_1Hz
       );
-
       var = cdf.getVariable("Epoch");
       System.out.println("Epoch...");
       var.putHyperData(
-         0, data.getSize("1Hz"), 1, 
+         0L, numOfRecs, 1L,
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
@@ -300,7 +299,7 @@ public class LevelTwo{
       var = cdf.getVariable("Q");
       System.out.println("Q...");
       var.putHyperData(
-         0, data.getSize("1Hz"), 1, 
+         0L, numOfRecs, 1L, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
@@ -311,7 +310,7 @@ public class LevelTwo{
    }
    
    public void doMagCdf() throws CDFException{
-      int numOfRecs = data.getSize("1Hz");
+      int numOfRecs = data.getSize("4Hz");
 
       CDF cdf;
       Variable var;
@@ -745,7 +744,7 @@ public class LevelTwo{
       CDF cdf;
       Variable var;
       
-      int numOfRecs = data.getSize("mod8");
+      int numOfRecs = data.getSize("mod4");
       double[][] mspc_rebin = new double[numOfRecs][48];
 
       //rebin the mspc spectra
@@ -812,10 +811,10 @@ public class LevelTwo{
       int numOfRecs = data.getSize("mod32");
       double[][] sspc_rebin = new double[numOfRecs][256];
 
-      //rebin the mspc spectra
+      //rebin the sspc spectra
       for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
          /* need to do something other than just copy the spectra*/
-         for(int val_i = 0; val_i < 48; val_i++){
+         for(int val_i = 0; val_i < 256; val_i++){
             sspc_rebin[rec_i][val_i] = data.sspc_raw[rec_i][val_i];
          }
       }

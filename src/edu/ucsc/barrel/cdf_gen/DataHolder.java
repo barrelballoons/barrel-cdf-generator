@@ -128,7 +128,7 @@ public class DataHolder{
    public double[]
       time_model_rate = new double[MAX_FRAMES],
       time_model_offset = new double[MAX_FRAMES],
-      ms_since_sys_epoch = new double[MAX_FRAMES];
+      ms_since_j2000 = new double[MAX_FRAMES];
    public double[][]
       hkpg = new double[36][MAX_FRAMES / 40],
       gps = new double[4][MAX_FRAMES / 4];
@@ -165,12 +165,10 @@ public class DataHolder{
       lc3_raw = new int[MAX_FRAMES * 20],
       lc4_raw = new int[MAX_FRAMES * 20];
    public int 
-      //Hz record numbers are incrimented on the first record so
-      //they start at 0
-      rec_num_1Hz = 0, rec_num_4Hz = 0, rec_num_20Hz = 0,
-      //mod record numbers are not incrimented by default so
-      //they must start at 1
-      rec_num_mod4 = 1, rec_num_mod32 = 1, rec_num_mod40 = 1;
+      //record numbers are incrimented on the first record so
+      //they start at -1
+      rec_num_1Hz = -1, rec_num_4Hz = -1, rec_num_20Hz = -1,
+      rec_num_mod4 = -1, rec_num_mod32 = -1, rec_num_mod40 = -1;
    public long firstFC = 0;
 
    public int 
@@ -179,17 +177,17 @@ public class DataHolder{
 
    public int getSize(String cadence){
       if(cadence == "1Hz"){
-         return size_1Hz;
+         return rec_num_1Hz + 1;
       }else if(cadence == "4Hz"){
-         return size_4Hz;
+         return rec_num_4Hz;
       }else if(cadence == "20Hz"){
-         return size_20Hz;
+         return rec_num_20Hz;
       }else if(cadence == "mod4"){
-         return size_mod4;
+         return rec_num_mod4;
       }else if(cadence == "mod32"){
-         return size_mod32;
+         return rec_num_mod32;
       }else{
-         return size_mod40;
+         return rec_num_mod40;
       }
    }
    
@@ -208,30 +206,34 @@ public class DataHolder{
          frame.shiftRight(1685).and(BigInteger.valueOf(63)).shortValue();
       tmpFC = 
          frame.shiftRight(1664).and(BigInteger.valueOf(2097151)).intValue();
-
       //get multiplex info
       mod4 = (int)tmpFC % 4;
       mod32 = (int)tmpFC % 32;
       mod40 = (int)tmpFC % 40;
-      
+
       //sets the current record number
       rec_num_1Hz++;
-      rec_num_4Hz = rec_num_4Hz + 4;
-      rec_num_20Hz = rec_num_20Hz + 20;
-      if((tmpFC - mod4) != frame_mod4[rec_num_mod4]){rec_num_mod4++;}
-      if((tmpFC - mod32) != frame_mod32[rec_num_mod32]){rec_num_mod32++;}
-      if((tmpFC - mod40) != frame_mod40[rec_num_mod40]){rec_num_mod40++;}
+      rec_num_4Hz = (rec_num_1Hz + 1) * 4;
+      rec_num_20Hz = (rec_num_1Hz + 1) * 20;
+      try{
+         if((tmpFC - mod4) != frame_mod4[rec_num_mod4]){rec_num_mod4++;}
+         if((tmpFC - mod32) != frame_mod32[rec_num_mod32]){rec_num_mod32++;}
+         if((tmpFC - mod40) != frame_mod40[rec_num_mod40]){rec_num_mod40++;}
+      }catch(ArrayIndexOutOfBoundsException ex){
+         rec_num_mod4 = 0;
+         rec_num_mod32 = 0;
+         rec_num_mod40 = 0;
+      }
 
       //save the info from the frame counter word
       ver[rec_num_1Hz] = tmpVer;
       payID[rec_num_1Hz] = tmpPayID;
       frame_1Hz[rec_num_1Hz] = (int)tmpFC;
-
       //figure out the other time scale frame counters
-      for(int rec_i = rec_num_4Hz; rec_i < (rec_num_4Hz + 4); rec_i++){
+      for(int rec_i = rec_num_4Hz - 4; rec_i < rec_num_4Hz; rec_i++){
          frame_4Hz[rec_i] = frame_1Hz[rec_num_1Hz];
       }
-      for(int rec_i = rec_num_20Hz; rec_i < (rec_num_20Hz + 20); rec_i++){
+      for(int rec_i = rec_num_20Hz - 20; rec_i < rec_num_20Hz; rec_i++){
          frame_20Hz[rec_i] = frame_1Hz[rec_num_1Hz];
       }
      
@@ -341,7 +343,7 @@ public class DataHolder{
                   .and(BigInteger.valueOf(65535)).intValue();
       }
       mspc_q[rec_num_mod4] = 0;
-    
+
       //slow spectra: 8 channels per frame, 16 bits/channels
       for(int sspc_i = 0; sspc_i < 8; sspc_i++){
          sspc_raw[rec_num_mod32][(mod32 * 8) + sspc_i] =
