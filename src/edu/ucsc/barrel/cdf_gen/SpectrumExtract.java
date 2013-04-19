@@ -100,43 +100,47 @@ public class SpectrumExtract {
       int spec_i, double xtal_temp, double dpu_temp, double peak511
    ){
       double factor1, factor2, scale;
+      double[] edges_nonlin = new double[edges_raw[spec_i].length];
       double[] edges_cal = new double[edges_raw[spec_i].length];
+
+      //a rational function approximates energy non-linearity
+      for(int edge_i = 0; edge_i < edges_nonlin.length; edge_i++){
+         edges_nonlin[edge_i] = 
+            edges_raw[spec_i][edge_i] * (
+               1 - 11.6 / (edges_raw[spec_i][edge_i] + 10.8) + 
+               0.000091 * edges_raw[spec_i][edge_i]
+            );
+      }
 
       //quadratic function for crystal gain drift with temperature
       factor1 = 1;
       if(xtal_temp != 0){
-         factor1 += 
-            (Math.pow(1.4, -4) * xtal_temp - Math.pow(6.8, -3)) * xtal_temp;
+         factor1 += (0.00014 * xtal_temp - 0.0068) * xtal_temp;
       }
 
       //linear function for peak detect gain drift with temperature
       factor2 = 1;
       if(dpu_temp != 0){
-         factor2 += (23 - dpu_temp) * Math.pow(3.4, -4);
+         factor2 += (23 - dpu_temp) * 0.00034;
       }
 
       //set an overall scale factor to position 511keV line
       //this also helps compensate incorrect temperature values
       scale = 2.5; //nominal keV/bin
       if(peak511 != -1){
-         scale = 511 * factor2 / factor1 / peak511 / 
-            (1 - 11.6 / (peak511 + 10.8) + Math.pow(9.1, -5) * peak511);
+         scale = 
+            511. * factor2 / factor1 / peak511 / 
+            (1.0 - 11.6 / (peak511 + 10.8) + 0.000091 * peak511);
       }
 
       //apply corrections to energy bin edges
       scale = scale * factor1 / factor2;
       for(int edge_i = 0; edge_i < edges_cal.length; edge_i++){
-         edges_cal[edge_i] = 
-            scale * (
-               edges_raw[spec_i][edge_i] * (
-                  1 - 11.6 / (edges_raw[spec_i][edge_i] + 10.8) 
-                  + Math.pow(9.1, -5) * edges_raw[spec_i][edge_i]
-               )
-            );
+         edges_cal[edge_i] = scale * (edges_nonlin[edge_i]);
       }
 if(spec_i==2){
 for(int i=1; i<edges_cal.length; i++){
-CDF_Gen.log.write(edges_cal[i-1] + ((edges_cal[i] - edges_cal[i-1]) / 2) + " ");
+CDF_Gen.log.writeln(edges_cal[i-1] + ((edges_cal[i] - edges_cal[i-1]) / 2) + " ");
 }
 }
       return edges_cal;
