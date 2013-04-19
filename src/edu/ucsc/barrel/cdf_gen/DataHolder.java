@@ -128,7 +128,7 @@ public class DataHolder{
    public double[]
       time_model_rate = new double[MAX_FRAMES],
       time_model_offset = new double[MAX_FRAMES],
-      ms_since_sys_epoch = new double[MAX_FRAMES];
+      ms_since_j2000 = new double[MAX_FRAMES];
    public double[][]
       hkpg = new double[36][MAX_FRAMES / 40],
       gps = new double[4][MAX_FRAMES / 4];
