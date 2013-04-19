@@ -412,7 +412,14 @@ public class LevelTwo{
          int hkpg_rec = mag_rec / 160; //convert from 4Hz to mod40
          float magTemp = data.hkpg_raw[data.T1][hkpg_rec];
 
-         magTemp = (magTemp != 0) ? magTemp * data.hkpg_scale[data.T1] : 20;
+        
+
+         if(magTemp != 0){ 
+            magTemp = 
+               (magTemp * data.hkpg_scale[data.T1])+data.hkpg_offset[data.T1];
+         }else{
+            magTemp = 20;
+         }
          magx[mag_rec] = magx[mag_rec] * (slopex * (magTemp - 20) + 1);
          magy[mag_rec] = magy[mag_rec] * (slopey * (magTemp - 20) + 1);
          magz[mag_rec] = magz[mag_rec] * (slopez * (magTemp - 20) + 1);
@@ -518,7 +525,8 @@ public class LevelTwo{
          double[] hkpg_scaled = new double[numOfRecs];
          for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
             hkpg_scaled[rec_i] = 
-               data.hkpg_raw[var_i][rec_i] * data.hkpg_scale[var_i];
+               (data.hkpg_raw[var_i][rec_i] * data.hkpg_scale[var_i]) + 
+               data.hkpg_offset[var_i];
          }
 
          var = cdf.getVariable(data.hkpg_label[var_i]);
@@ -750,7 +758,7 @@ public class LevelTwo{
       int hkpg_rec = 0;
       
       SpectrumExtract spectrum = new SpectrumExtract();
-      int offset = 10;
+      int offset = 90;
 
       int numOfRecs = data.getSize("mod4");
 
@@ -765,21 +773,31 @@ public class LevelTwo{
             mspc_rebin[mspc_rec][val_i] = data.mspc_raw[mspc_rec][val_i];
          }
          //get temperatures
-         hkpg_rec = mspc_rec * 8 / 40; //convert from mod8 to mod40
-         scint_temp = 
-            data.hkpg_raw[data.T0][hkpg_rec] * data.hkpg_scale[data.T0];
-         dpu_temp = 
-            data.hkpg_raw[data.T5][hkpg_rec] * data.hkpg_scale[data.T5];
+         hkpg_rec = mspc_rec * 4 / 40; //convert from mod4 to mod40
+         if(data.hkpg_raw[data.T0][hkpg_rec] != 0){
+            scint_temp = 
+               (data.hkpg_raw[data.T0][hkpg_rec] * data.hkpg_scale[data.T0]) + 
+               data.hkpg_offset[data.T0];
+         }else{
+            scint_temp = 20;
+         }
+         if(data.hkpg_raw[data.T5][hkpg_rec] != 0){
+            dpu_temp = 
+               (data.hkpg_raw[data.T5][hkpg_rec] * data.hkpg_scale[data.T5]) + 
+               data.hkpg_offset[data.T5];
+         }else{
+            dpu_temp = 20;
+         }
 
          //find the bin that contains the 511 line
          //peak = spectrum.find511(mspc_rebin[mspc_rec], offset);
       
          //get the adjusted bin edges
-         new_edges = spectrum.createBinEdges(1, scint_temp, dpu_temp, peak);
-         mspc_rebin[mspc_rec] = spectrum.rebin(
-            mspc_rebin[mspc_rec], SpectrumExtract.edges_raw[1], new_edges, 
-            49, 49, true 
-         );
+         //new_edges = spectrum.createBinEdges(1, scint_temp, dpu_temp, peak);
+         //mspc_rebin[mspc_rec] = spectrum.rebin(
+         //   mspc_rebin[mspc_rec], SpectrumExtract.edges_raw[1], new_edges, 
+         //   49, 49, true 
+         //);
       }
 
       System.out.println("\nSaving MSPC...");
@@ -843,7 +861,7 @@ public class LevelTwo{
 
       int numOfRecs = data.getSize("mod32");
       double[] new_edges = new double[257];
-      double[][] sspc_rebin = new double[numOfRecs][257];
+      double[][] sspc_rebin = new double[numOfRecs][256];
       
       //rebin the sspc spectra
       for(int sspc_rec = 0; sspc_rec < numOfRecs; sspc_rec++){
@@ -854,13 +872,23 @@ public class LevelTwo{
 
          //get temperatures
          hkpg_rec = sspc_rec * 32 / 40; //convert from mod32 to mod40
-         scint_temp = 
-            data.hkpg_raw[data.T0][hkpg_rec] * data.hkpg_scale[data.T0];
-         dpu_temp = 
-            data.hkpg_raw[data.T5][hkpg_rec] * data.hkpg_scale[data.T5];
+         if(data.hkpg_raw[data.T0][hkpg_rec] != 0){
+            scint_temp = 
+               (data.hkpg_raw[data.T0][hkpg_rec] * data.hkpg_scale[data.T0]) + 
+               data.hkpg_offset[data.T0];
+         }else{
+            scint_temp = 20;
+         }
+         if(data.hkpg_raw[data.T5][hkpg_rec] != 0){
+            dpu_temp = 
+               (data.hkpg_raw[data.T5][hkpg_rec] * data.hkpg_scale[data.T5]) + 
+               data.hkpg_offset[data.T5];
+         }else{
+            dpu_temp = 20;
+         }
 
          //find the bin that contains the 511 line
-         peak = spectrum.find511(sspc_rebin[sspc_rec], offset);
+         //peak = spectrum.find511(sspc_rebin[sspc_rec], offset);
       
          //get the adjusted bin edges
          new_edges = spectrum.createBinEdges(2, scint_temp, dpu_temp, peak);
@@ -868,7 +896,7 @@ public class LevelTwo{
             sspc_rebin[sspc_rec], SpectrumExtract.edges_raw[2], new_edges, 
             257, 257, true 
          );
-         //for(int val_i = 0; val_i < 256; val_i++){
+        // for(int val_i = 0; val_i < 256; val_i++){
          //   CDF_Gen.log.write(sspc_rebin[sspc_rec][val_i] + " ");
         // }
         // CDF_Gen.log.newLine();
