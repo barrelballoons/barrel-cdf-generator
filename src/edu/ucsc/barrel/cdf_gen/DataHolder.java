@@ -132,12 +132,7 @@ public class DataHolder{
       time_model_offset = new double[MAX_FRAMES],
       ms_since_j2000 = new double[MAX_FRAMES];
    public double[][]
-      hkpg = new double[36][MAX_FRAMES / 40],
-      gps = new double[4][MAX_FRAMES / 4];
-   public Double[]
-      magx = new Double[MAX_FRAMES * 4],
-      magy = new Double[MAX_FRAMES * 4],
-      magz = new Double[MAX_FRAMES * 4];
+      hkpg = new double[36][MAX_FRAMES / 40];
    public int[]
       frame_1Hz = new int[MAX_FRAMES],
       frame_4Hz = new int[MAX_FRAMES * 4],
