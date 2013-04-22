@@ -139,16 +139,10 @@ public class LevelTwo{
 
         //convert lat and lon to physical units
         lat[rec_i] = (float)data.gps_raw[2][rec_i];
-        if((data.gps_raw[2][rec_i] >> 31) > 0){
-           lat[rec_i] -=  0x100000000L;
-        }
         lat[rec_i] *= 
            Float.intBitsToFloat(Integer.valueOf("33B40000",16).intValue());
 
         lon[rec_i] = (float)data.gps_raw[3][rec_i];
-        if((data.gps_raw[3][rec_i] >> 31) > 0){
-           lon[rec_i] -=  0x100000000L;
-        }
         lon[rec_i] *= 
            Float.intBitsToFloat(Integer.valueOf("33B40000",16).intValue());
       }
@@ -315,13 +309,11 @@ public class LevelTwo{
       CDF cdf;
       Variable var;
       
-      double[] 
-         magx = new double[numOfRecs],
-         magy = new double[numOfRecs],
-         magz = new double[numOfRecs],
-         magTot = new double[numOfRecs];
-
-      float slopex = 0.0f, slopey = 0.0f, slopez = 0.0f;
+      float[] 
+         magx = new float[numOfRecs],
+         magy = new float[numOfRecs],
+         magz = new float[numOfRecs],
+         magTot = new float[numOfRecs];
 
       System.out.println("\nSaving Magnetometer Level Two CDF...");
       cdf = CDF_Gen.openCDF( 
@@ -329,35 +321,14 @@ public class LevelTwo{
          "_l2_magn_20" + date +  "_v" + revNum + ".cdf"
       );
      
-      //get gain correction slope for this payload
-	   try{
-         FileReader fr = new FileReader("magGain.cal");
-         BufferedReader iniFile = new BufferedReader(fr);
-         String line;
-
-         while((line = iniFile.readLine()) != null){
-            String[] fields = line.split(",");
-            if(fields[0].equals(mag_id)){
-               slopex = Float.parseFloat(fields[1]);
-               slopey = Float.parseFloat(fields[2]);
-               slopez = Float.parseFloat(fields[3]);
-               break;
-            }
-         }      
-      }catch(IOException ex){
-         System.out.println(
-            "Could not read config file: " + ex.getMessage()
-         );
-      }
-
       //extract the nominal magnetometer value and calculate |B|
       for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
-         magx[rec_i] = (data.magx_raw[rec_i] - 8388608.0) / 83886.070;
-         magy[rec_i] = (data.magy_raw[rec_i] - 8388608.0) / 83886.070;
-         magz[rec_i] = (data.magz_raw[rec_i] - 8388608.0) / 83886.070;
+         magx[rec_i] = (data.magx_raw[rec_i] - 8388608.0f) / 83886.070f;
+         magy[rec_i] = (data.magy_raw[rec_i] - 8388608.0f) / 83886.070f;
+         magz[rec_i] = (data.magz_raw[rec_i] - 8388608.0f) / 83886.070f;
 
          magTot[rec_i] = 
-            Math.sqrt(
+            (float)Math.sqrt(
                (magx[rec_i] * magx[rec_i]) + 
                (magy[rec_i] * magy[rec_i]) +
                (magz[rec_i] * magz[rec_i]) 
