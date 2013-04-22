@@ -98,27 +98,24 @@ public class DataHolder{
       epoch_20Hz = new long[MAX_FRAMES * 20],
       epoch_mod4 = new long[MAX_FRAMES / 4],
       epoch_mod32 = new long[MAX_FRAMES / 32],
-      epoch_mod40 = new long[MAX_FRAMES / 40],
-      ms_of_week = new long[MAX_FRAMES / 4];
+      epoch_mod40 = new long[MAX_FRAMES / 40];
+  public int[]
+      ms_of_week = new int[MAX_FRAMES / 4];
    public long[][]
       hkpg_raw = new long[40][MAX_FRAMES / 40],
-      rcnt_raw = new long[4][MAX_FRAMES / 4],
-      gps_raw = new long[4][MAX_FRAMES / 4];
-   public long[]
-      magx_raw = new long[MAX_FRAMES * 4],
-      magy_raw = new long[MAX_FRAMES * 4],
-      magz_raw = new long[MAX_FRAMES * 4];
+      rcnt_raw = new long[4][MAX_FRAMES / 4];
+   public int[][]
+      gps_raw = new int[4][MAX_FRAMES / 4];
+   public int[]
+      magx_raw = new int[MAX_FRAMES * 4],
+      magy_raw = new int[MAX_FRAMES * 4],
+      magz_raw = new int[MAX_FRAMES * 4];
    public double[]
       time_model_rate = new double[MAX_FRAMES],
       time_model_offset = new double[MAX_FRAMES],
       ms_since_j2000 = new double[MAX_FRAMES];
    public double[][]
-      hkpg = new double[36][MAX_FRAMES / 40],
-      gps = new double[4][MAX_FRAMES / 4];
-   public Double[]
-      magx = new Double[MAX_FRAMES * 4],
-      magy = new Double[MAX_FRAMES * 4],
-      magz = new Double[MAX_FRAMES * 4];
+      hkpg = new double[36][MAX_FRAMES / 40];
    public int[]
       frame_1Hz = new int[MAX_FRAMES],
       frame_4Hz = new int[MAX_FRAMES * 4],
@@ -267,7 +264,7 @@ public class DataHolder{
    
    public void addFrame(BigInteger frame){
       int mod4 = 0, mod32 = 0, mod40 = 0;
-      long tmpFC = 0, tmpGPS = 0;
+      long tmpFC = 0;
       short tmpVer = 0, tmpPayID = 0;
       
       //Breakdown frame counter words: 
@@ -319,7 +316,7 @@ public class DataHolder{
       //get gps info: 32 bits of mod4 gps data followed by 16 bits of pps data
       gps_raw[mod4][rec_num_mod4] =
          frame.shiftRight(1632).and(BigInteger.valueOf(4294967295L)).
-            longValue();
+            intValue();
 
       //save the time variable separately for the epoch calculation 
       if(mod4 == 1){
@@ -336,29 +333,29 @@ public class DataHolder{
       
       //mag data 4 sets of xyz vectors. 24 bits/component
       magx_raw[rec_num_4Hz] = 
-         frame.shiftRight(1592).and(BigInteger.valueOf(16777215)).longValue();
+         frame.shiftRight(1592).and(BigInteger.valueOf(16777215)).intValue();
       magy_raw[rec_num_4Hz] = 
-         frame.shiftRight(1568).and(BigInteger.valueOf(16777215)).longValue();
+         frame.shiftRight(1568).and(BigInteger.valueOf(16777215)).intValue();
       magz_raw[rec_num_4Hz] = 
-         frame.shiftRight(1544).and(BigInteger.valueOf(16777215)).longValue();
+         frame.shiftRight(1544).and(BigInteger.valueOf(16777215)).intValue();
       magx_raw[rec_num_4Hz + 1] = 
-         frame.shiftRight(1520).and(BigInteger.valueOf(16777215)).longValue();
+         frame.shiftRight(1520).and(BigInteger.valueOf(16777215)).intValue();
       magy_raw[rec_num_4Hz + 1] = 
-         frame.shiftRight(1496).and(BigInteger.valueOf(16777215)).longValue();
+         frame.shiftRight(1496).and(BigInteger.valueOf(16777215)).intValue();
       magz_raw[rec_num_4Hz + 1] = 
-         frame.shiftRight(1472).and(BigInteger.valueOf(16777215)).longValue();
+         frame.shiftRight(1472).and(BigInteger.valueOf(16777215)).intValue();
       magx_raw[rec_num_4Hz + 2] = 
-         frame.shiftRight(1448).and(BigInteger.valueOf(16777215)).longValue();
+         frame.shiftRight(1448).and(BigInteger.valueOf(16777215)).intValue();
       magy_raw[rec_num_4Hz + 2] = 
-         frame.shiftRight(1424).and(BigInteger.valueOf(16777215)).longValue();
+         frame.shiftRight(1424).and(BigInteger.valueOf(16777215)).intValue();
       magz_raw[rec_num_4Hz + 2] = 
-         frame.shiftRight(1400).and(BigInteger.valueOf(16777215)).longValue();
+         frame.shiftRight(1400).and(BigInteger.valueOf(16777215)).intValue();
       magx_raw[rec_num_4Hz + 3] = 
-         frame.shiftRight(1376).and(BigInteger.valueOf(16777215)).longValue();
+         frame.shiftRight(1376).and(BigInteger.valueOf(16777215)).intValue();
       magy_raw[rec_num_4Hz + 3] = 
-         frame.shiftRight(1352).and(BigInteger.valueOf(16777215)).longValue();
+         frame.shiftRight(1352).and(BigInteger.valueOf(16777215)).intValue();
       magz_raw[rec_num_4Hz + 3] = 
-         frame.shiftRight(1328).and(BigInteger.valueOf(16777215)).longValue();
+         frame.shiftRight(1328).and(BigInteger.valueOf(16777215)).intValue();
       magn_q[rec_num_1Hz] = 0;
       
       //mod40 housekeeping data: 16bits
@@ -467,11 +464,11 @@ public class DataHolder{
             frame_4Hz[new_i] = frame_4Hz[old_i];
             frame_4Hz[old_i] = 0;
             magx_raw[new_i] = magx_raw[old_i];
-            magx_raw[old_i] = 0L;
+            magx_raw[old_i] = 0;
             magy_raw[new_i] = magy_raw[old_i];
-            magy_raw[old_i] = 0L;
+            magy_raw[old_i] = 0;
             magz_raw[new_i] = magz_raw[old_i];
-            magz_raw[old_i] = 0L;
+            magz_raw[old_i] = 0;
             magn_q[new_i] = magn_q[old_i];
             magn_q[old_i] = 0;
             new_i++;
