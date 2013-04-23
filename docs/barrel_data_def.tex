@@ -143,11 +143,11 @@ LC4&INT4&cnts/.05sec&Bin Range:351-620, Energy Range:842.4-1488keV\\
 \begin{tabular}{|c|c|c|c|}
 \hline
 Variable Name&Variable Type&Units&Description\\ \hline
-LC1&DOUBLE&cnts/sec&Counts are rebinned based on scintilator\\
+LC1&DOUBLE&cnts/keV/sec&Counts are rebinned based on scintilator\\
 ~&~&~&and DPU temperature, and 511 line location \\
-LC2&DOUBLE&cnts/sec &  ~\\ 
-LC3&DOUBLE&cnts/sec & ~\\ 
-LC4&DOUBLE&cnts/sec & ~\\
+LC2&DOUBLE&cnts/keV/sec &  ~\\ 
+LC3&DOUBLE&cnts/keV/sec & ~\\ 
+LC4&DOUBLE&cnts/keV/sec & ~\\
 LC1\_ERROR&DOUBLE&cnts/keV/sec&Square root of counts in each channel\\ 
 LC2\_ERROR&DOUBLE&cnts/keV/sec&~\\ 
 LC3\_ERROR&DOUBLE&cnts/keV/sec&~\\ 
@@ -220,7 +220,9 @@ ch&UINT[256]&NA&Values 1-256 used by\\
 
 \subsection{Magnetometer}
 The analog magnetometer data is encoded by a stand alone ADC. The data are collected from the X, Y, and Z axes at 4Hz and are transmitted in each frame. Each frame is split into 4 records. The digital word transmitted by the payload can be decoded with the following formula: $B_{analog} = \frac{B_{digital} - 8388608.0}{83886.070}$.\\\\
-Gain correction is done based on temperature calibrations done preflight.\\\\
+
+The magnetometor data has not been "unspun", so there are fluctuations due to payload motion.
+
 Tables 9 and 10 give info on L1 and L2 magnetometer files
 
 \begin{table}[H]
@@ -228,9 +230,9 @@ Tables 9 and 10 give info on L1 and L2 magnetometer files
 \begin{tabular}{|c|c|c|c|}
 \hline
 Variable Name&Variable Type&Units&Description\\ \hline
-MAG\_X&INT8&uT&Digital word from magnetometer ADC X axis.\\ 
-MAG\_Y&INT8&uT&Digital word from magnetometer ADC Y axis.\\ 
-MAG\_Z&INT8&uT&Digital word from magnetometer ADC Z axis.\\ 
+MAG\_X&INT8&$\mu{}T$&Digital word from magnetometer ADC X axis.\\ 
+MAG\_Y&INT8&$\mu{}T$&Digital word from magnetometer ADC Y axis.\\ 
+MAG\_Z&INT8&$\mu{}T$&Digital word from magnetometer ADC Z axis.\\ 
 \hline
 \end{tabular}
 \end{table}
@@ -240,14 +242,10 @@ MAG\_Z&INT8&uT&Digital word from magnetometer ADC Z axis.\\
 \begin{tabular}{|c|c|c|c|}
 \hline
 Variable Name&Variable Type&Units&Description\\ \hline
-MAG\_X&DOUBLE&uT&Nominal conversion of magnetometer X axis.\\ 
-MAG\_Y&DOUBLE&uT&Nominal conversion of magnetometer Y axis.\\ 
-MAG\_Z&DOUBLE&uT&Nominal conversion of magnetometer Z axis.\\ 
-Total&DOUBLE&uT&Magnitude of B under nominal conversion.\\ 
-MAG\_X\_ADJ&DOUBLE&uT&Gain corrected value of magnetometer X axis.\\ 
-MAG\_Y\_ADJ&DOUBLE&uT&Gain corrected value of magnetometer Y axis.\\ 
-MAG\_Z\_ADJ&DOUBLE&uT&Gain corrected value of magnetometer Z axis.\\ 
-Total\_ADJ&DOUBLE&uT&Gain corrected magnitude of B.\\ 
+MAG\_X&DOUBLE&$\mu{}T$&Nominal conversion of magnetometer X axis.\\
+MAG\_Y&DOUBLE&$\mu{}T$&Nominal conversion of magnetometer Y axis.\\
+MAG\_Z&DOUBLE&$\mu{}T$&Nominal conversion of magnetometer Z axis.\\
+Total&DOUBLE&$\mu{}T$&Magnitude of B under nominal conversion.\\
 \hline
 \end{tabular}
 \end{table}

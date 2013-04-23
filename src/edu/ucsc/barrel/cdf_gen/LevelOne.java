@@ -252,7 +252,7 @@ public class LevelOne{
             new long[] {1}, 
             data.gps_q
          );
-System.out.println("Done with GPS!");
+
          //close current cdf
          cur_cdf.close();
 

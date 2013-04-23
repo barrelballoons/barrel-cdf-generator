@@ -141,16 +141,10 @@ public class LevelTwo{
 
         //convert lat and lon to physical units
         lat[rec_i] = (float)data.gps_raw[2][rec_i];
-        if((data.gps_raw[2][rec_i] >> 31) > 0){
-           lat[rec_i] -=  0x100000000L;
-        }
         lat[rec_i] *= 
            Float.intBitsToFloat(Integer.valueOf("33B40000",16).intValue());
 
         lon[rec_i] = (float)data.gps_raw[3][rec_i];
-        if((data.gps_raw[3][rec_i] >> 31) > 0){
-           lon[rec_i] -=  0x100000000L;
-        }
         lon[rec_i] *= 
            Float.intBitsToFloat(Integer.valueOf("33B40000",16).intValue());
       }
@@ -317,13 +311,11 @@ public class LevelTwo{
       CDF cdf;
       Variable var;
       
-      double[] 
-         magx = new double[numOfRecs],
-         magy = new double[numOfRecs],
-         magz = new double[numOfRecs],
-         magTot = new double[numOfRecs];
-
-      float slopex = 0.0f, slopey = 0.0f, slopez = 0.0f;
+      float[] 
+         magx = new float[numOfRecs],
+         magy = new float[numOfRecs],
+         magz = new float[numOfRecs],
+         magTot = new float[numOfRecs];
 
       System.out.println("\nSaving Magnetometer Level Two CDF...");
       cdf = CDF_Gen.openCDF( 
@@ -331,35 +323,14 @@ public class LevelTwo{
          "_l2_magn_20" + date +  "_v" + revNum + ".cdf"
       );
      
-      //get gain correction slope for this payload
-	   try{
-         FileReader fr = new FileReader("magGain.cal");
-         BufferedReader iniFile = new BufferedReader(fr);
-         String line;
-
-         while((line = iniFile.readLine()) != null){
-            String[] fields = line.split(",");
-            if(fields[0].equals(mag_id)){
-               slopex = Float.parseFloat(fields[1]);
-               slopey = Float.parseFloat(fields[2]);
-               slopez = Float.parseFloat(fields[3]);
-               break;
-            }
-         }      
-      }catch(IOException ex){
-         System.out.println(
-            "Could not read config file: " + ex.getMessage()
-         );
-      }
-
       //extract the nominal magnetometer value and calculate |B|
       for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
-         magx[rec_i] = (data.magx_raw[rec_i] - 8388608.0) / 83886.070;
-         magy[rec_i] = (data.magy_raw[rec_i] - 8388608.0) / 83886.070;
-         magz[rec_i] = (data.magz_raw[rec_i] - 8388608.0) / 83886.070;
+         magx[rec_i] = (data.magx_raw[rec_i] - 8388608.0f) / 83886.070f;
+         magy[rec_i] = (data.magy_raw[rec_i] - 8388608.0f) / 83886.070f;
+         magz[rec_i] = (data.magz_raw[rec_i] - 8388608.0f) / 83886.070f;
 
          magTot[rec_i] = 
-            Math.sqrt(
+            (float)Math.sqrt(
                (magx[rec_i] * magx[rec_i]) + 
                (magy[rec_i] * magy[rec_i]) +
                (magz[rec_i] * magz[rec_i]) 
@@ -407,73 +378,6 @@ public class LevelTwo{
          magTot 
       );
 
-      //do gain correction on nominal values
-      for(int mag_rec = 0; mag_rec < numOfRecs; mag_rec++){
-         int hkpg_rec = mag_rec / 160; //convert from 4Hz to mod40
-         float magTemp = data.hkpg_raw[data.T1][hkpg_rec];
-
-        
-
-         if(magTemp != 0){ 
-            magTemp = 
-               (magTemp * data.hkpg_scale[data.T1])+data.hkpg_offset[data.T1];
-         }else{
-            magTemp = 20;
-         }
-         magx[mag_rec] = magx[mag_rec] * (slopex * (magTemp - 20) + 1);
-         magy[mag_rec] = magy[mag_rec] * (slopey * (magTemp - 20) + 1);
-         magz[mag_rec] = magz[mag_rec] * (slopez * (magTemp - 20) + 1);
-         magTot[mag_rec] = 
-            Math.sqrt(
-               (magx[mag_rec] * magx[mag_rec]) + 
-               (magy[mag_rec] * magy[mag_rec]) +
-               (magz[mag_rec] * magz[mag_rec]) 
-            );
-      }
-
-      //store the gain adjusted values
-      var = cdf.getVariable("MAG_X_ADJ");
-      System.out.println("Gain Adjusted MAG_X... ");
-      var.putHyperData(
-         0, numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         magx 
-      );
-
-      var = cdf.getVariable("MAG_Y_ADJ");
-      System.out.println("Gain Adjusted MAG_Y...");
-      var.putHyperData(
-         0, numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         magy
-      );
-
-      var = cdf.getVariable("MAG_Z_ADJ");
-      System.out.println("Gain Adjusted MAG_Z...");
-      var.putHyperData(
-         0, numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         magz
-      );
-
-      var = cdf.getVariable("Total_ADJ");
-      System.out.println("Gain Adjusted Field Magnitude...");
-      var.putHyperData(
-         0, numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         magTot 
-      );
-
-
-      //save the rest of the file
       var = cdf.getVariable("FrameGroup");
       System.out.println("FrameGroup...");
       var.putHyperData(
@@ -648,33 +552,35 @@ public class LevelTwo{
       Variable var;
       int numOfRecs = data.getSize("20Hz");
       double[][] lc_rebin = new double[4][numOfRecs];
+      double[] new_edges = SpectrumExtract.scaleEdges(0, 2.4);
+      int[] tempLC = new int[20];
 
       System.out.println("\nSaving FSPC...");
       cdf = CDF_Gen.openCDF( 
          outputPath + "bar1" + flt + "_" + id + "_" + stn +
          "_l2_fspc_20" + date +  "_v" + revNum + ".cdf"
       );
-    
+      
+       
       //rebin and save the light curves
       for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
-         //rebin each spectra created from the 4 light curves
+         //rebin each spectrum created from the 4 light curves
          for(int spc_i = 0; spc_i < 20; spc_i++){
             //create the spectrum
-            float[] lc_spec = {
-               data.lc1_raw[rec_i],
-               data.lc2_raw[rec_i],
-               data.lc3_raw[rec_i],
-               data.lc4_raw[rec_i]
-            };
-
-            /* do something to actually rebin the spectrum here...*/
+            tempLC[0] = data.lc1_raw[rec_i];
+            tempLC[1] = data.lc2_raw[rec_i];
+            tempLC[2] = data.lc3_raw[rec_i];
+            tempLC[3] = data.lc4_raw[rec_i];
+                        
+            double[] lc_spec = 
+               SpectrumExtract.convertCnts(20.0, new_edges, tempLC);
 
             //write the spectrum to the new array
             lc_rebin[0][rec_i] = lc_spec[0];
             lc_rebin[1][rec_i] = lc_spec[1];
             lc_rebin[2][rec_i] = lc_spec[2];
             lc_rebin[3][rec_i] = lc_spec[3];
-         }
+         }   
       }
       var = cdf.getVariable("LC1");
       System.out.println("LC1...");
@@ -768,6 +674,7 @@ public class LevelTwo{
       
       //rebin the mspc spectra
       for(int mspc_rec = 0; mspc_rec < numOfRecs; mspc_rec++){
+         /*
          //copy the int array into a double array and convert to cnts/sec
          for(int val_i = 0; val_i < 48; val_i++){
             mspc_rebin[mspc_rec][val_i] = data.mspc_raw[mspc_rec][val_i];
@@ -788,7 +695,7 @@ public class LevelTwo{
          }else{
             dpu_temp = 20;
          }
-
+         */ 
          //find the bin that contains the 511 line
          //peak = spectrum.find511(mspc_rebin[mspc_rec], offset);
       
@@ -798,6 +705,13 @@ public class LevelTwo{
          //   mspc_rebin[mspc_rec], SpectrumExtract.edges_raw[1], new_edges, 
          //   49, 49, true 
          //);
+
+         //copy the int array into a double array and convert to cnts/keV/sec
+         new_edges = SpectrumExtract.scaleEdges(1, 2.4);
+            
+         mspc_rebin[mspc_rec] = SpectrumExtract.convertCnts(
+           0.25, new_edges, data.mspc_raw[mspc_rec]
+         );
       }
 
       System.out.println("\nSaving MSPC...");
@@ -865,11 +779,14 @@ public class LevelTwo{
       
       //rebin the sspc spectra
       for(int sspc_rec = 0; sspc_rec < numOfRecs; sspc_rec++){
-         //copy the int array into a double array and convert to cnts/sec
-         for(int val_i = 0; val_i < 256; val_i++){
-            sspc_rebin[sspc_rec][val_i] = data.sspc_raw[sspc_rec][val_i];
-         }
-
+         //copy the int array into a double array and convert to cnts/keV/sec
+         new_edges = SpectrumExtract.scaleEdges(2, 2.4);
+            
+         sspc_rebin[sspc_rec] = SpectrumExtract.convertCnts(
+           0.03125, new_edges, data.sspc_raw[sspc_rec]
+         );
+         
+         /*
          //get temperatures
          hkpg_rec = sspc_rec * 32 / 40; //convert from mod32 to mod40
          if(data.hkpg_raw[data.T0][hkpg_rec] != 0){
@@ -896,6 +813,7 @@ public class LevelTwo{
             sspc_rebin[sspc_rec], SpectrumExtract.edges_raw[2], new_edges, 
             257, 257, true 
          );
+         */
         // for(int val_i = 0; val_i < 256; val_i++){
          //   CDF_Gen.log.write(sspc_rebin[sspc_rec][val_i] + " ");
         // }
