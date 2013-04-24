@@ -95,29 +95,13 @@ public class SpectrumExtract {
             (slow_bin_widths[bin_i] / 2) + edges_raw[2][bin_i];
       }
    }
-
-   //does a simple linear scaling on the data
-   public static double[] scaleEdges(int spec_i, double scale){
-      double[] result = new double[edges_raw[spec_i].length];
-      
-      for(int edge_i = 0; edge_i < edges_raw[spec_i].length; edge_i++){
-         result[edge_i] = edges_raw[spec_i][edge_i] * scale;
-      }
-      return result;
-   }
    
-   //converts from counts in native time scale cnts/keV/sec
-   //sps is the number of samples per second
-   //edges are the bin edges in energies
-   //cnts is the array of counts
-   public static double[] convertCnts(double sps, double[] edges, int[] cnts){
-      double[] result = new double[cnts.length];
+   public static double[] stdEdges(int spec_i, double scale){
+      int length = edges_raw[spec_i].length;
+      double[] result = new double[length];
 
-      for(int cnt_i = 0, edge_i = 0; cnt_i < cnts.length; cnt_i++){
-         //convert time scale
-         result[cnt_i] = cnts[cnt_i] * sps;
-         //convert to cnts/kev
-         result[cnt_i] = result[cnt_i] / (edges[edge_i + 1] - edges[edge_i]);
+      for(int edge_i = 0; edge_i < length; edge_i++){
+         result[edge_i] = scale * edges_raw[spec_i][edge_i];
       }
 
       return result;
@@ -165,16 +149,12 @@ public class SpectrumExtract {
       for(int edge_i = 0; edge_i < edges_cal.length; edge_i++){
          edges_cal[edge_i] = scale * (edges_nonlin[edge_i]);
       }
-if(spec_i==2){
-for(int i=1; i<edges_cal.length; i++){
-CDF_Gen.log.writeln(edges_cal[i-1] + ((edges_cal[i] - edges_cal[i-1]) / 2) + " ");
-}
-}
+
       return edges_cal;
    }
    
    public static double[] rebin(
-      double[] oldVals, double[] oldBins, double[] newBins, 
+      int[] oldVals, double[] oldBins, double[] newBins, 
       int n, int m, boolean flux
    ){
 

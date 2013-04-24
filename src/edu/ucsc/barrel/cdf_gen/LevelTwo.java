@@ -552,7 +552,7 @@ public class LevelTwo{
       Variable var;
       int numOfRecs = data.getSize("20Hz");
       double[][] lc_rebin = new double[4][numOfRecs];
-      double[] new_edges = SpectrumExtract.scaleEdges(0, 2.4);
+      double[] new_edges = SpectrumExtract.stdEdges(0, 2.4);
       int[] tempLC = new int[20];
 
       System.out.println("\nSaving FSPC...");
@@ -572,8 +572,7 @@ public class LevelTwo{
             tempLC[2] = data.lc3_raw[rec_i];
             tempLC[3] = data.lc4_raw[rec_i];
                         
-            double[] lc_spec = 
-               SpectrumExtract.convertCnts(20.0, new_edges, tempLC);
+            double[] lc_spec = new double[4]; 
 
             //write the spectrum to the new array
             lc_rebin[0][rec_i] = lc_spec[0];
@@ -707,11 +706,9 @@ public class LevelTwo{
          //);
 
          //copy the int array into a double array and convert to cnts/keV/sec
-         new_edges = SpectrumExtract.scaleEdges(1, 2.4);
+         new_edges = SpectrumExtract.stdEdges(1, 2.4);
             
-         mspc_rebin[mspc_rec] = SpectrumExtract.convertCnts(
-           0.25, new_edges, data.mspc_raw[mspc_rec]
-         );
+         mspc_rebin[mspc_rec] = new double[48];
       }
 
       System.out.println("\nSaving MSPC...");
@@ -774,19 +771,12 @@ public class LevelTwo{
       int offset = 90;
 
       int numOfRecs = data.getSize("mod32");
-      double[] new_edges = new double[257];
       double[][] sspc_rebin = new double[numOfRecs][256];
+      double[] old_edges = new double[257];
+      double[] std_edges = SpectrumExtract.stdEdges(2, 2.4);
       
       //rebin the sspc spectra
       for(int sspc_rec = 0; sspc_rec < numOfRecs; sspc_rec++){
-         //copy the int array into a double array and convert to cnts/keV/sec
-         new_edges = SpectrumExtract.scaleEdges(2, 2.4);
-            
-         sspc_rebin[sspc_rec] = SpectrumExtract.convertCnts(
-           0.03125, new_edges, data.sspc_raw[sspc_rec]
-         );
-         
-         /*
          //get temperatures
          hkpg_rec = sspc_rec * 32 / 40; //convert from mod32 to mod40
          if(data.hkpg_raw[data.T0][hkpg_rec] != 0){
@@ -808,16 +798,10 @@ public class LevelTwo{
          //peak = spectrum.find511(sspc_rebin[sspc_rec], offset);
       
          //get the adjusted bin edges
-         new_edges = spectrum.createBinEdges(2, scint_temp, dpu_temp, peak);
+         old_edges = spectrum.createBinEdges(2, scint_temp, dpu_temp, peak);
          sspc_rebin[sspc_rec] = spectrum.rebin(
-            sspc_rebin[sspc_rec], SpectrumExtract.edges_raw[2], new_edges, 
-            257, 257, true 
+            data.sspc_raw[sspc_rec], old_edges, std_edges, 257, 257, true 
          );
-         */
-        // for(int val_i = 0; val_i < 256; val_i++){
-         //   CDF_Gen.log.write(sspc_rebin[sspc_rec][val_i] + " ");
-        // }
-        // CDF_Gen.log.newLine();
       }
 
       System.out.println("\nSaving SSPC...");
