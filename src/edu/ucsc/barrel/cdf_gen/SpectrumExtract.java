@@ -157,14 +157,6 @@ public class SpectrumExtract {
       int[] oldVals, double[] oldBins, double[] newBins, 
       int n, int m, boolean flux
    ){
-
-      if ((n < 2) || (m < 2)){
-         System.out.println(
-            "length(s) violation: SpectraExtract.rebin(): " + n + ", " + m
-         );
-         System.exit(1);
-      }
-     
       double[] result = new double[m - 1];
       double oldLo = oldBins[0];
       double oldHi = oldBins[1];

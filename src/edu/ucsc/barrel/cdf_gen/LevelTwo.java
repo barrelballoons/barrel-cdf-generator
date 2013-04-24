@@ -799,9 +799,17 @@ public class LevelTwo{
       
          //get the adjusted bin edges
          old_edges = spectrum.createBinEdges(2, scint_temp, dpu_temp, peak);
+         
+         //rebin the spectum
          sspc_rebin[sspc_rec] = spectrum.rebin(
-            data.sspc_raw[sspc_rec], old_edges, std_edges, 257, 257, true 
+            data.sspc_raw[sspc_rec], old_edges, std_edges, 257, 257, false
          );
+
+         //divide counts by bin width
+         for(int bin_i = 0; bin_i < sspc_rebin[sspc_rec].length; bin_i++){
+            sspc_rebin[sspc_rec][bin_i] /= 
+               std_edges[bin_i + 1] - std_edges[bin_i];
+         }
       }
 
       System.out.println("\nSaving SSPC...");
