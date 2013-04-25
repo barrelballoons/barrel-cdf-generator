@@ -668,12 +668,13 @@ public class LevelTwo{
       int numOfRecs = data.getSize("mod4");
 
       double[][] mspc_rebin = new double[numOfRecs][48];
+      double[] old_edges = new double[48];
+      double[] std_edges = SpectrumExtract.stdEdges(1, 2.4);
 
-      double[] new_edges = new double[49];
       
       //rebin the mspc spectra
       for(int mspc_rec = 0; mspc_rec < numOfRecs; mspc_rec++){
-         /*
+         
          //copy the int array into a double array and convert to cnts/sec
          for(int val_i = 0; val_i < 48; val_i++){
             mspc_rebin[mspc_rec][val_i] = data.mspc_raw[mspc_rec][val_i];
@@ -694,21 +695,25 @@ public class LevelTwo{
          }else{
             dpu_temp = 20;
          }
-         */ 
+         
          //find the bin that contains the 511 line
          //peak = spectrum.find511(mspc_rebin[mspc_rec], offset);
       
          //get the adjusted bin edges
-         //new_edges = spectrum.createBinEdges(1, scint_temp, dpu_temp, peak);
-         //mspc_rebin[mspc_rec] = spectrum.rebin(
-         //   mspc_rebin[mspc_rec], SpectrumExtract.edges_raw[1], new_edges, 
-         //   49, 49, true 
-         //);
+         old_edges = spectrum.createBinEdges(1, scint_temp, dpu_temp, peak);
 
-         //copy the int array into a double array and convert to cnts/keV/sec
-         new_edges = SpectrumExtract.stdEdges(1, 2.4);
-            
-         mspc_rebin[mspc_rec] = new double[48];
+         //rebin the spectrum
+         mspc_rebin[mspc_rec] = spectrum.rebin(
+            data.mspc_raw[mspc_rec], old_edges, std_edges, 49, 49, true 
+         );
+
+         //divide counts by bin width and adjust the time scale
+         for(int bin_i = 0; bin_i < mspc_rebin[mspc_rec].length; bin_i++){
+            mspc_rebin[mspc_rec][bin_i] /= 
+               std_edges[bin_i + 1] - std_edges[bin_i];
+
+            mspc_rebin[mspc_rec][bin_i] /= 4;
+         }
       }
 
       System.out.println("\nSaving MSPC...");
@@ -805,10 +810,11 @@ public class LevelTwo{
             data.sspc_raw[sspc_rec], old_edges, std_edges, 257, 257, false
          );
 
-         //divide counts by bin width
+         //divide counts by bin width and convert the time scale to /sec
          for(int bin_i = 0; bin_i < sspc_rebin[sspc_rec].length; bin_i++){
             sspc_rebin[sspc_rec][bin_i] /= 
                std_edges[bin_i + 1] - std_edges[bin_i];
+            sspc_rebin[sspc_rec][bin_i] /= 32;
          }
       }
 
