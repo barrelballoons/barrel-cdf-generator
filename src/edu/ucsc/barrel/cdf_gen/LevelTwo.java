@@ -72,6 +72,8 @@ public class LevelTwo{
       mag_id = "";
    Calendar dateObj = Calendar.getInstance();
    
+   SpectrumExtract spectrum;
+   
    short INCOMPLETE_GROUP = 8196;
    
    private DataHolder data;
@@ -95,7 +97,10 @@ public class LevelTwo{
 
       //get the data storage object
       data = CDF_Gen.getDataSet();
-      
+     
+      //create the spectrum rebinning object
+      spectrum = new SpectrumExtract();
+     
       //set output path
       outputPath = CDF_Gen.L2_Dir;
       File outDir = new File(outputPath);
@@ -551,9 +556,10 @@ public class LevelTwo{
       CDF cdf;
       Variable var;
       int numOfRecs = data.getSize("20Hz");
-      double[][] lc_rebin = new double[4][numOfRecs];
-      double[] new_edges = SpectrumExtract.stdEdges(0, 2.4);
-      int[] tempLC = new int[20];
+      double[][] chan_edges = new double[numOfRecs][5];
+      double[][] lc_scaled = new double[4][numOfRecs];
+      int[] tempLC = new int[4];
+      double scint_temp = 20, dpu_temp = 20, peak = -1;
 
       System.out.println("\nSaving FSPC...");
       cdf = CDF_Gen.openCDF( 
@@ -561,26 +567,41 @@ public class LevelTwo{
          "_l2_fspc_20" + date +  "_v" + revNum + ".cdf"
       );
       
-       
-      //rebin and save the light curves
-      for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
-         //rebin each spectrum created from the 4 light curves
-         for(int spc_i = 0; spc_i < 20; spc_i++){
-            //create the spectrum
-            tempLC[0] = data.lc1_raw[rec_i];
-            tempLC[1] = data.lc2_raw[rec_i];
-            tempLC[2] = data.lc3_raw[rec_i];
-            tempLC[3] = data.lc4_raw[rec_i];
-                        
-            double[] lc_spec = new double[4]; 
+      //convert the light curves counts to cnts/sec and 
+      //figure out the channel width
+      for(int lc_rec = 0, hkpg_rec = 0; lc_rec < numOfRecs; lc_rec++){
 
-            //write the spectrum to the new array
-            lc_rebin[0][rec_i] = lc_spec[0];
-            lc_rebin[1][rec_i] = lc_spec[1];
-            lc_rebin[2][rec_i] = lc_spec[2];
-            lc_rebin[3][rec_i] = lc_spec[3];
-         }   
+         //get temperatures
+         hkpg_rec = lc_rec / 20 / 40; //convert from 20Hz to mod40
+         if(data.hkpg_raw[data.T0][hkpg_rec] != 0){
+            scint_temp = 
+               (data.hkpg_raw[data.T0][hkpg_rec] * data.hkpg_scale[data.T0]) + 
+               data.hkpg_offset[data.T0];
+         }else{
+            scint_temp = 20;
+         }
+         if(data.hkpg_raw[data.T5][hkpg_rec] != 0){
+            dpu_temp = 
+               (data.hkpg_raw[data.T5][hkpg_rec] * data.hkpg_scale[data.T5]) + 
+               data.hkpg_offset[data.T5];
+         }else{
+            dpu_temp = 20;
+         }
+         
+         //find the bin that contains the 511 line
+         //peak = spectrum.find511(mspc_rebin[mspc_rec], offset);
+
+         //get the adjusted bin edges
+         chan_edges[lc_rec] = 
+            spectrum.createBinEdges(0, scint_temp, dpu_temp, peak);
+
+         //write the spectrum to the new array
+         lc_scaled[0][lc_rec] = data.lc1_raw[lc_rec] * 20;
+         lc_scaled[1][lc_rec] = data.lc2_raw[lc_rec] * 20;
+         lc_scaled[2][lc_rec] = data.lc3_raw[lc_rec] * 20;
+         lc_scaled[3][lc_rec] = data.lc4_raw[lc_rec] * 20;
       }
+
       var = cdf.getVariable("LC1");
       System.out.println("LC1...");
       var.putHyperData(
@@ -588,7 +609,7 @@ public class LevelTwo{
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         lc_rebin[0]
+         lc_scaled[0]
       );
       
       var = cdf.getVariable("LC2");
@@ -598,7 +619,7 @@ public class LevelTwo{
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         lc_rebin[1]
+         lc_scaled[1]
       );
 
       var = cdf.getVariable("LC3");
@@ -608,7 +629,7 @@ public class LevelTwo{
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         lc_rebin[2]
+         lc_scaled[2]
       );
 
       var = cdf.getVariable("LC4");
@@ -618,7 +639,7 @@ public class LevelTwo{
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         lc_rebin[3]
+         lc_scaled[3]
       );
 
       var = cdf.getVariable("FrameGroup");
@@ -660,9 +681,7 @@ public class LevelTwo{
       Variable var;
       
       double peak = -1, scint_temp = 0, dpu_temp = 0;
-      int hkpg_rec = 0;
       
-      SpectrumExtract spectrum = new SpectrumExtract();
       int offset = 90;
 
       int numOfRecs = data.getSize("mod4");
@@ -673,12 +692,8 @@ public class LevelTwo{
 
       
       //rebin the mspc spectra
-      for(int mspc_rec = 0; mspc_rec < numOfRecs; mspc_rec++){
+      for(int mspc_rec = 0, hkpg_rec = 0; mspc_rec < numOfRecs; mspc_rec++){
          
-         //copy the int array into a double array and convert to cnts/sec
-         for(int val_i = 0; val_i < 48; val_i++){
-            mspc_rebin[mspc_rec][val_i] = data.mspc_raw[mspc_rec][val_i];
-         }
          //get temperatures
          hkpg_rec = mspc_rec * 4 / 40; //convert from mod4 to mod40
          if(data.hkpg_raw[data.T0][hkpg_rec] != 0){
@@ -770,9 +785,7 @@ public class LevelTwo{
       Variable var;
       
       double peak = -1, scint_temp = 0, dpu_temp = 0;
-      int hkpg_rec = 0;
       
-      SpectrumExtract spectrum = new SpectrumExtract();
       int offset = 90;
 
       int numOfRecs = data.getSize("mod32");
@@ -781,7 +794,7 @@ public class LevelTwo{
       double[] std_edges = SpectrumExtract.stdEdges(2, 2.4);
       
       //rebin the sspc spectra
-      for(int sspc_rec = 0; sspc_rec < numOfRecs; sspc_rec++){
+      for(int sspc_rec = 0, hkpg_rec = 0; sspc_rec < numOfRecs; sspc_rec++){
          //get temperatures
          hkpg_rec = sspc_rec * 32 / 40; //convert from mod32 to mod40
          if(data.hkpg_raw[data.T0][hkpg_rec] != 0){
