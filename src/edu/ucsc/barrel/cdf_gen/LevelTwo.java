@@ -41,6 +41,8 @@ Description:
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Change Log:
+   v13.03.28
+      -Added rebin routines to MSPC and SSPC
    v13.02.28
       -Now outputs correct L2 values for all variables except spectra (Still
          needs rebin)
@@ -70,6 +72,8 @@ public class LevelTwo{
       mag_id = "";
    Calendar dateObj = Calendar.getInstance();
    
+   SpectrumExtract spectrum;
+   
    short INCOMPLETE_GROUP = 8196;
    
    private DataHolder data;
@@ -93,7 +97,10 @@ public class LevelTwo{
 
       //get the data storage object
       data = CDF_Gen.getDataSet();
-      
+     
+      //create the spectrum rebinning object
+      spectrum = new SpectrumExtract();
+     
       //set output path
       outputPath = CDF_Gen.L2_Dir;
       File outDir = new File(outputPath);
@@ -139,16 +146,10 @@ public class LevelTwo{
 
         //convert lat and lon to physical units
         lat[rec_i] = (float)data.gps_raw[2][rec_i];
-        if((data.gps_raw[2][rec_i] >> 31) > 0){
-           lat[rec_i] -=  0x100000000L;
-        }
         lat[rec_i] *= 
            Float.intBitsToFloat(Integer.valueOf("33B40000",16).intValue());
 
         lon[rec_i] = (float)data.gps_raw[3][rec_i];
-        if((data.gps_raw[3][rec_i] >> 31) > 0){
-           lon[rec_i] -=  0x100000000L;
-        }
         lon[rec_i] *= 
            Float.intBitsToFloat(Integer.valueOf("33B40000",16).intValue());
       }
@@ -315,13 +316,11 @@ public class LevelTwo{
       CDF cdf;
       Variable var;
       
-      double[] 
-         magx = new double[numOfRecs],
-         magy = new double[numOfRecs],
-         magz = new double[numOfRecs],
-         magTot = new double[numOfRecs];
-
-      float slopex = 0.0f, slopey = 0.0f, slopez = 0.0f;
+      float[] 
+         magx = new float[numOfRecs],
+         magy = new float[numOfRecs],
+         magz = new float[numOfRecs],
+         magTot = new float[numOfRecs];
 
       System.out.println("\nSaving Magnetometer Level Two CDF...");
       cdf = CDF_Gen.openCDF( 
@@ -329,35 +328,14 @@ public class LevelTwo{
          "_l2_magn_20" + date +  "_v" + revNum + ".cdf"
       );
      
-      //get gain correction slope for this payload
-	   try{
-         FileReader fr = new FileReader("magGain.cal");
-         BufferedReader iniFile = new BufferedReader(fr);
-         String line;
-
-         while((line = iniFile.readLine()) != null){
-            String[] fields = line.split(",");
-            if(fields[0].equals(mag_id)){
-               slopex = Float.parseFloat(fields[1]);
-               slopey = Float.parseFloat(fields[2]);
-               slopez = Float.parseFloat(fields[3]);
-               break;
-            }
-         }      
-      }catch(IOException ex){
-         System.out.println(
-            "Could not read config file: " + ex.getMessage()
-         );
-      }
-
       //extract the nominal magnetometer value and calculate |B|
       for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
-         magx[rec_i] = (data.magx_raw[rec_i] - 8388608.0) / 83886.070;
-         magy[rec_i] = (data.magy_raw[rec_i] - 8388608.0) / 83886.070;
-         magz[rec_i] = (data.magz_raw[rec_i] - 8388608.0) / 83886.070;
+         magx[rec_i] = (data.magx_raw[rec_i] - 8388608.0f) / 83886.070f;
+         magy[rec_i] = (data.magy_raw[rec_i] - 8388608.0f) / 83886.070f;
+         magz[rec_i] = (data.magz_raw[rec_i] - 8388608.0f) / 83886.070f;
 
          magTot[rec_i] = 
-            Math.sqrt(
+            (float)Math.sqrt(
                (magx[rec_i] * magx[rec_i]) + 
                (magy[rec_i] * magy[rec_i]) +
                (magz[rec_i] * magz[rec_i]) 
@@ -405,7 +383,6 @@ public class LevelTwo{
          magTot 
       );
 
-      //save the rest of the file
       var = cdf.getVariable("FrameGroup");
       System.out.println("FrameGroup...");
       var.putHyperData(
@@ -457,7 +434,8 @@ public class LevelTwo{
          double[] hkpg_scaled = new double[numOfRecs];
          for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
             hkpg_scaled[rec_i] = 
-               data.hkpg_raw[var_i][rec_i] * data.hkpg_scale[var_i];
+               (data.hkpg_raw[var_i][rec_i] * data.hkpg_scale[var_i]) + 
+               data.hkpg_offset[var_i];
          }
 
          var = cdf.getVariable(data.hkpg_label[var_i]);
@@ -578,35 +556,52 @@ public class LevelTwo{
       CDF cdf;
       Variable var;
       int numOfRecs = data.getSize("20Hz");
-      double[][] lc_rebin = new double[4][numOfRecs];
+      double[][] chan_edges = new double[numOfRecs][5];
+      double[][] lc_scaled = new double[4][numOfRecs];
+      int[] tempLC = new int[4];
+      double scint_temp = 20, dpu_temp = 20, peak = -1;
 
       System.out.println("\nSaving FSPC...");
       cdf = CDF_Gen.openCDF( 
          outputPath + "bar1" + flt + "_" + id + "_" + stn +
          "_l2_fspc_20" + date +  "_v" + revNum + ".cdf"
       );
-    
-      //rebin and save the light curves
-      for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
-         //rebin each spectra created from the 4 light curves
-         for(int spc_i = 0; spc_i < 20; spc_i++){
-            //create the spectrum
-            float[] lc_spec = {
-               data.lc1_raw[rec_i],
-               data.lc2_raw[rec_i],
-               data.lc3_raw[rec_i],
-               data.lc4_raw[rec_i]
-            };
+      
+      //convert the light curves counts to cnts/sec and 
+      //figure out the channel width
+      for(int lc_rec = 0, hkpg_rec = 0; lc_rec < numOfRecs; lc_rec++){
 
-            /* do something to actually rebin the spectrum here...*/
-
-            //write the spectrum to the new array
-            lc_rebin[0][rec_i] = lc_spec[0];
-            lc_rebin[1][rec_i] = lc_spec[1];
-            lc_rebin[2][rec_i] = lc_spec[2];
-            lc_rebin[3][rec_i] = lc_spec[3];
+         //get temperatures
+         hkpg_rec = lc_rec / 20 / 40; //convert from 20Hz to mod40
+         if(data.hkpg_raw[data.T0][hkpg_rec] != 0){
+            scint_temp = 
+               (data.hkpg_raw[data.T0][hkpg_rec] * data.hkpg_scale[data.T0]) + 
+               data.hkpg_offset[data.T0];
+         }else{
+            scint_temp = 20;
          }
+         if(data.hkpg_raw[data.T5][hkpg_rec] != 0){
+            dpu_temp = 
+               (data.hkpg_raw[data.T5][hkpg_rec] * data.hkpg_scale[data.T5]) + 
+               data.hkpg_offset[data.T5];
+         }else{
+            dpu_temp = 20;
+         }
+         
+         //find the bin that contains the 511 line
+         //peak = spectrum.find511(mspc_rebin[mspc_rec], offset);
+
+         //get the adjusted bin edges
+         chan_edges[lc_rec] = 
+            spectrum.createBinEdges(0, scint_temp, dpu_temp, peak);
+
+         //write the spectrum to the new array
+         lc_scaled[0][lc_rec] = data.lc1_raw[lc_rec] * 20;
+         lc_scaled[1][lc_rec] = data.lc2_raw[lc_rec] * 20;
+         lc_scaled[2][lc_rec] = data.lc3_raw[lc_rec] * 20;
+         lc_scaled[3][lc_rec] = data.lc4_raw[lc_rec] * 20;
       }
+
       var = cdf.getVariable("LC1");
       System.out.println("LC1...");
       var.putHyperData(
@@ -614,7 +609,7 @@ public class LevelTwo{
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         lc_rebin[0]
+         lc_scaled[0]
       );
       
       var = cdf.getVariable("LC2");
@@ -624,7 +619,7 @@ public class LevelTwo{
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         lc_rebin[1]
+         lc_scaled[1]
       );
 
       var = cdf.getVariable("LC3");
@@ -634,7 +629,7 @@ public class LevelTwo{
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         lc_rebin[2]
+         lc_scaled[2]
       );
 
       var = cdf.getVariable("LC4");
@@ -644,7 +639,7 @@ public class LevelTwo{
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         lc_rebin[3]
+         lc_scaled[3]
       );
 
       var = cdf.getVariable("FrameGroup");
@@ -685,14 +680,54 @@ public class LevelTwo{
       CDF cdf;
       Variable var;
       
-      int numOfRecs = data.getSize("mod4");
-      double[][] mspc_rebin = new double[numOfRecs][48];
+      double peak = -1, scint_temp = 0, dpu_temp = 0;
+      
+      int offset = 90;
 
+      int numOfRecs = data.getSize("mod4");
+
+      double[][] mspc_rebin = new double[numOfRecs][48];
+      double[] old_edges = new double[48];
+      double[] std_edges = SpectrumExtract.stdEdges(1, 2.4414);
+
+      
       //rebin the mspc spectra
-      for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
-         /* need to do something other than just copy the spectra*/
-         for(int val_i = 0; val_i < 48; val_i++){
-            mspc_rebin[rec_i][val_i] = data.mspc_raw[rec_i][val_i];
+      for(int mspc_rec = 0, hkpg_rec = 0; mspc_rec < numOfRecs; mspc_rec++){
+         
+         //get temperatures
+         hkpg_rec = mspc_rec * 4 / 40; //convert from mod4 to mod40
+         if(data.hkpg_raw[data.T0][hkpg_rec] != 0){
+            scint_temp = 
+               (data.hkpg_raw[data.T0][hkpg_rec] * data.hkpg_scale[data.T0]) + 
+               data.hkpg_offset[data.T0];
+         }else{
+            scint_temp = 20;
+         }
+         if(data.hkpg_raw[data.T5][hkpg_rec] != 0){
+            dpu_temp = 
+               (data.hkpg_raw[data.T5][hkpg_rec] * data.hkpg_scale[data.T5]) + 
+               data.hkpg_offset[data.T5];
+         }else{
+            dpu_temp = 20;
+         }
+         
+         //find the bin that contains the 511 line
+         //peak = spectrum.find511(mspc_rebin[mspc_rec], offset);
+      
+         //get the adjusted bin edges
+         old_edges = spectrum.createBinEdges(1, scint_temp, dpu_temp, peak);
+
+         //rebin the spectrum
+         mspc_rebin[mspc_rec] = spectrum.rebin(
+            data.mspc_raw[mspc_rec], old_edges, std_edges, 49, 49, true 
+         );
+
+         //divide counts by bin width and adjust the time scale
+         for(int bin_i = 0; bin_i < mspc_rebin[mspc_rec].length; bin_i++){
+            mspc_rebin[mspc_rec][bin_i] /= 
+               std_edges[bin_i + 1] - std_edges[bin_i];
+
+            mspc_rebin[mspc_rec][bin_i] /= 4;
          }
       }
 
@@ -749,14 +784,50 @@ public class LevelTwo{
       CDF cdf;
       Variable var;
       
+      double peak = -1, scint_temp = 0, dpu_temp = 0;
+      
+      int offset = 90;
+
       int numOfRecs = data.getSize("mod32");
       double[][] sspc_rebin = new double[numOfRecs][256];
-
+      double[] old_edges = new double[257];
+      double[] std_edges = SpectrumExtract.stdEdges(2, 2.4414);
+      
       //rebin the sspc spectra
-      for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
-         /* need to do something other than just copy the spectra*/
-         for(int val_i = 0; val_i < 256; val_i++){
-            sspc_rebin[rec_i][val_i] = data.sspc_raw[rec_i][val_i];
+      for(int sspc_rec = 0, hkpg_rec = 0; sspc_rec < numOfRecs; sspc_rec++){
+         //get temperatures
+         hkpg_rec = sspc_rec * 32 / 40; //convert from mod32 to mod40
+         if(data.hkpg_raw[data.T0][hkpg_rec] != 0){
+            scint_temp = 
+               (data.hkpg_raw[data.T0][hkpg_rec] * data.hkpg_scale[data.T0]) + 
+               data.hkpg_offset[data.T0];
+         }else{
+            scint_temp = 20;
+         }
+         if(data.hkpg_raw[data.T5][hkpg_rec] != 0){
+            dpu_temp = 
+               (data.hkpg_raw[data.T5][hkpg_rec] * data.hkpg_scale[data.T5]) + 
+               data.hkpg_offset[data.T5];
+         }else{
+            dpu_temp = 20;
+         }
+
+         //find the bin that contains the 511 line
+         //peak = spectrum.find511(sspc_rebin[sspc_rec], offset);
+      
+         //get the adjusted bin edges
+         old_edges = spectrum.createBinEdges(2, scint_temp, dpu_temp, peak);
+         
+         //rebin the spectum
+         sspc_rebin[sspc_rec] = spectrum.rebin(
+            data.sspc_raw[sspc_rec], old_edges, std_edges, 257, 257, false
+         );
+
+         //divide counts by bin width and convert the time scale to /sec
+         for(int bin_i = 0; bin_i < sspc_rebin[sspc_rec].length; bin_i++){
+            sspc_rebin[sspc_rec][bin_i] /= 
+               std_edges[bin_i + 1] - std_edges[bin_i];
+            sspc_rebin[sspc_rec][bin_i] /= 32;
          }
       }
 

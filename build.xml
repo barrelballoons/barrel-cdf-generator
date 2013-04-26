@@ -1,13 +1,13 @@
 <project name="cdf_gen" basedir="." default="clean-build">
-    
-    <property name="cdfjava.dir"     value="/usr/local/cdf/cdfjava/classes"/>
+    <property name="lib.dir"     value="lib"/>    
+    <property name="cdfjava.dir" value="/usr/local/cdf/cdfjava/classes"/>
     <property name="src.dir"     value="src/"/>
-    <property name="build.dir"     value="build/"/>
-    <property name="main-class"     value="edu.ucsc.barrel.cdf_gen.CDF_Gen"/>
+    <property name="build.dir"   value="build/"/>
+    <property name="runtime.dir" value="runtime_files"/>
+    <property name="main-class"  value="edu.ucsc.barrel.cdf_gen.CDF_Gen"/>
 
     <path id="classpath">
-        <fileset dir="${cdfjava.dir}" includes="**/*.jar"/>
-        <fileset dir="./" includes="**/*.jar"/>
+        <fileset dir="${lib.dir}" includes="**/*.jar"/>
     </path>
     
     <target name="clean">
@@ -18,7 +18,7 @@
         <mkdir dir="build/classes"/>
         <javac 
     		debug="true" 
-    	    debuglevel="lines,vars,source"
+    	   debuglevel="lines,vars,source"
     		srcdir="${src.dir}" 
     		destdir="${build.dir}/classes" 
         	classpathref="classpath"
@@ -30,17 +30,21 @@
         <jar 
         	destfile="${build.dir}/jar/cdf_gen.jar" 
         	basedir="${build.dir}/classes"
-    	>
+        >
             <manifest>
-                <attribute name="Main-Class" value="${main-class}"/>
-                <attribute name="Class-Path" value="cdfjava.jar"/>
+                <attribute name="Main-Class" 
+                           value="${main-class}"
+                />
+                <attribute name="Class-Path" 
+                           value="lib/commons-math3-3.1.1.jar lib/cdfjava.jar"
+                />
             </manifest>
         </jar>
     </target>
     
     <target name="copy">
         <copy todir="build/jar">
-            <fileset dir="runtime_files"/>
+            <fileset dir="${runtime.dir}"/>
         </copy>
     </target>
 

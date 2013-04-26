@@ -76,26 +76,9 @@ public class DataHolder{
       //rate counter index
       INTER = 0, LL = 1, PD = 2, HL = 3;
   
-   static public final float[] hkpg_scale = {
-      0.007629f, 0.007629f, 0.007629f, 0.007629f, 0.007629f, 0.007629f, 
-      0.007629f, 0.007629f, 0.007629f, 0.007629f, 0.007629f, 0.007629f, 
-      0.007629f, 0.0003052f, 0.0003052f, 0.0001526f, 0.0003052f, 0.0003052f, 
-      0.0006104f, 0.0001526f, 0.0001526f, 0.0003052f, -0.0001526f, -0.0001526f,
-      0.0001526f, 0.0006104f, 0.0006104f, 0.0006104f, 0.050863406f, 
-      0.061036087f, 0.061036087f, 0.010172681f, 0.0010172681f, 0.050863406f, 
-      -0.000126107f, -0.0010172681f
-   };
-
-   static public final String[] hkpg_label = { 
-      "V0_VoltAtLoad", "I0_TotalLoad", "V1_Battery", "I1_TotalSolar", 
-      "V2_Solar1", "I2_Solar1", "V3_POS_DPU", "I3_POS_DPU", "V4_POS_XRayDet",
-      "I4_POS_XRayDet","V5_Modem", "I5_Modem", "V6_NEG_XRayDet", 
-      "I6_NEG_XRayDet", "V7_NEG_DPU", "I7_NEG_DPU", "T0_Scint", "T8_Solar1",
-      "T1_Mag", "T9_Solar2", "T2_ChargeCont", "T10_Solar3", "T3_Battery", 
-      "T11_Solar4", "T4_PowerConv", "T12_TermTemp", "T5_DPU", "T13_TermBatt",
-      "T6_Modem", "T14_TermCap", "T7_Structure", "T15_CCStat", "V8_Mag", 
-      "V9_Solar2", "V10_Solar3", "V11_Solar4" 
-   };
+   static public float[] hkpg_scale = new float[36];
+   static public float[] hkpg_offset = new float[36];
+   static public String[] hkpg_label = new String[36];
    
    static public final String[] rc_label = {
 	   "Interrupt", "LowLevel", "PeakDet", "HighLevel"
@@ -115,27 +98,24 @@ public class DataHolder{
       epoch_20Hz = new long[MAX_FRAMES * 20],
       epoch_mod4 = new long[MAX_FRAMES / 4],
       epoch_mod32 = new long[MAX_FRAMES / 32],
-      epoch_mod40 = new long[MAX_FRAMES / 40],
-      ms_of_week = new long[MAX_FRAMES / 4];
+      epoch_mod40 = new long[MAX_FRAMES / 40];
+  public int[]
+      ms_of_week = new int[MAX_FRAMES / 4];
    public long[][]
       hkpg_raw = new long[40][MAX_FRAMES / 40],
-      rcnt_raw = new long[4][MAX_FRAMES / 4],
-      gps_raw = new long[4][MAX_FRAMES / 4];
-   public long[]
-      magx_raw = new long[MAX_FRAMES * 4],
-      magy_raw = new long[MAX_FRAMES * 4],
-      magz_raw = new long[MAX_FRAMES * 4];
+      rcnt_raw = new long[4][MAX_FRAMES / 4];
+   public int[][]
+      gps_raw = new int[4][MAX_FRAMES / 4];
+   public int[]
+      magx_raw = new int[MAX_FRAMES * 4],
+      magy_raw = new int[MAX_FRAMES * 4],
+      magz_raw = new int[MAX_FRAMES * 4];
    public double[]
       time_model_rate = new double[MAX_FRAMES],
       time_model_offset = new double[MAX_FRAMES],
       ms_since_j2000 = new double[MAX_FRAMES];
    public double[][]
-      hkpg = new double[36][MAX_FRAMES / 40],
-      gps = new double[4][MAX_FRAMES / 4];
-   public Double[]
-      magx = new Double[MAX_FRAMES * 4],
-      magy = new Double[MAX_FRAMES * 4],
-      magz = new Double[MAX_FRAMES * 4];
+      hkpg = new double[36][MAX_FRAMES / 40];
    public int[]
       frame_1Hz = new int[MAX_FRAMES],
       frame_4Hz = new int[MAX_FRAMES * 4],
@@ -175,6 +155,97 @@ public class DataHolder{
       size_1Hz = 0, size_4Hz = 0, size_20Hz = 0, 
       size_mod4 = 0, size_mod32 = 0, size_mod40 = 0;
 
+   public DataHolder(){
+      //fill the housekeeping reference arrays
+      hkpg_scale[V0] = 0.0003052f;
+      hkpg_scale[V1] = 0.0003052f;
+      hkpg_scale[V2] = 0.0006104f;
+      hkpg_scale[V3] = 0.0001526f;
+      hkpg_scale[V4] = 0.0001526f;
+      hkpg_scale[V5] = 0.0003052f;
+      hkpg_scale[V6] = -0.0001526f;
+      hkpg_scale[V7] = -0.0001526f;
+      hkpg_scale[V8] = 0.0001526f;
+      hkpg_scale[V9] = 0.0006104f;
+      hkpg_scale[V10] = 0.0006104f;
+      hkpg_scale[V11] = 0.0006104f;
+      hkpg_scale[I0] = 0.00005086f;
+      hkpg_scale[I1] = 0.00006104f;
+      hkpg_scale[I2] = 0.00006104f;
+      hkpg_scale[I3] = 0.00001017f;
+      hkpg_scale[I4] = 0.000001017f;
+      hkpg_scale[I5] = 0.00005086f;
+      hkpg_scale[I6] = -0.0000001261f;
+      hkpg_scale[I7] = -0.000001017f;
+      hkpg_scale[T0] = 0.007629f;
+      hkpg_scale[T1] = 0.007629f;
+      hkpg_scale[T2] = 0.007629f;
+      hkpg_scale[T3] = 0.007629f;
+      hkpg_scale[T4] = 0.007629f;
+      hkpg_scale[T5] = 0.007629f;
+      hkpg_scale[T6] = 0.007629f;
+      hkpg_scale[T7] = 0.007629f;
+      hkpg_scale[T8] = 0.007629f;
+      hkpg_scale[T9] = 0.007629f;
+      hkpg_scale[T10] = 0.007629f;
+      hkpg_scale[T11] = 0.007629f;
+      hkpg_scale[T12] = 0.007629f;
+      hkpg_scale[T13] = 0.0003052f;
+      hkpg_scale[T14] = 0.0003052f;
+      hkpg_scale[T15] = 0.0001526f;
+
+      hkpg_offset[T0] = -273.15f;
+      hkpg_offset[T1] = -273.15f;
+      hkpg_offset[T2] = -273.15f;
+      hkpg_offset[T3] = -273.15f;
+      hkpg_offset[T4] = -273.15f;
+      hkpg_offset[T5] = -273.15f;
+      hkpg_offset[T6] = -273.15f;
+      hkpg_offset[T7] = -273.15f;
+      hkpg_offset[T8] = -273.15f;
+      hkpg_offset[T9] = -273.15f;
+      hkpg_offset[T10] = -273.15f;
+      hkpg_offset[T11] = -273.15f;
+      hkpg_offset[T12] = -273.15f;
+
+      hkpg_label[V0] = "V0_VoltAtLoad";
+      hkpg_label[V1] = "V1_Battery";
+      hkpg_label[V2] = "V2_Solar1";
+      hkpg_label[V3] = "V3_POS_DPU";
+      hkpg_label[V4] = "V4_POS_XRayDet";
+      hkpg_label[V5] = "V5_Modem";
+      hkpg_label[V6] = "V6_NEG_XRayDet";
+      hkpg_label[V7] = "V7_NEG_DPU";
+      hkpg_label[V8] = "V8_Mag";
+      hkpg_label[V9] = "V9_Solar2";
+      hkpg_label[V10] = "V10_Solar3";
+      hkpg_label[V11] = "V11_Solar4";
+      hkpg_label[I0] = "I0_TotalLoad";
+      hkpg_label[I1] = "I1_TotalSolar";
+      hkpg_label[I2] = "I2_Solar1";
+      hkpg_label[I3] = "I3_POS_DPU";
+      hkpg_label[I4] = "I4_POS_XRayDet";
+      hkpg_label[I5] = "I5_Modem";
+      hkpg_label[I6] = "I6_NEG_XRayDet";
+      hkpg_label[I7] = "I7_NEG_DPU";
+      hkpg_label[T0] = "T0_Scint";
+      hkpg_label[T1] = "T1_Mag";
+      hkpg_label[T2] = "T2_ChargeCont";
+      hkpg_label[T3] = "T3_Battery";
+      hkpg_label[T4] = "T4_PowerConv";
+      hkpg_label[T5] = "T5_DPU";
+      hkpg_label[T6] = "T6_Modem";
+      hkpg_label[T7] = "T7_Structure";
+      hkpg_label[T8] = "T8_Solar1";
+      hkpg_label[T9] = "T9_Solar2";
+      hkpg_label[T10] = "T10_Solar3";
+      hkpg_label[T11] = "T11_Solar4";
+      hkpg_label[T12] = "T12_TermTemp";
+      hkpg_label[T13] = "T13_TermBatt";
+      hkpg_label[T14] = "T14_TermCap";
+      hkpg_label[T15] = "T15_CCStat";
+   }
+
    public int getSize(String cadence){
       if(cadence == "1Hz"){
          return rec_num_1Hz + 1;
@@ -193,7 +264,7 @@ public class DataHolder{
    
    public void addFrame(BigInteger frame){
       int mod4 = 0, mod32 = 0, mod40 = 0;
-      long tmpFC = 0, tmpGPS = 0;
+      long tmpFC = 0;
       short tmpVer = 0, tmpPayID = 0;
       
       //Breakdown frame counter words: 
@@ -245,7 +316,7 @@ public class DataHolder{
       //get gps info: 32 bits of mod4 gps data followed by 16 bits of pps data
       gps_raw[mod4][rec_num_mod4] =
          frame.shiftRight(1632).and(BigInteger.valueOf(4294967295L)).
-            longValue();
+            intValue();
 
       //save the time variable separately for the epoch calculation 
       if(mod4 == 1){
@@ -262,29 +333,29 @@ public class DataHolder{
       
       //mag data 4 sets of xyz vectors. 24 bits/component
       magx_raw[rec_num_4Hz] = 
-         frame.shiftRight(1592).and(BigInteger.valueOf(16777215)).longValue();
+         frame.shiftRight(1592).and(BigInteger.valueOf(16777215)).intValue();
       magy_raw[rec_num_4Hz] = 
-         frame.shiftRight(1568).and(BigInteger.valueOf(16777215)).longValue();
+         frame.shiftRight(1568).and(BigInteger.valueOf(16777215)).intValue();
       magz_raw[rec_num_4Hz] = 
-         frame.shiftRight(1544).and(BigInteger.valueOf(16777215)).longValue();
+         frame.shiftRight(1544).and(BigInteger.valueOf(16777215)).intValue();
       magx_raw[rec_num_4Hz + 1] = 
-         frame.shiftRight(1520).and(BigInteger.valueOf(16777215)).longValue();
+         frame.shiftRight(1520).and(BigInteger.valueOf(16777215)).intValue();
       magy_raw[rec_num_4Hz + 1] = 
-         frame.shiftRight(1496).and(BigInteger.valueOf(16777215)).longValue();
+         frame.shiftRight(1496).and(BigInteger.valueOf(16777215)).intValue();
       magz_raw[rec_num_4Hz + 1] = 
-         frame.shiftRight(1472).and(BigInteger.valueOf(16777215)).longValue();
+         frame.shiftRight(1472).and(BigInteger.valueOf(16777215)).intValue();
       magx_raw[rec_num_4Hz + 2] = 
-         frame.shiftRight(1448).and(BigInteger.valueOf(16777215)).longValue();
+         frame.shiftRight(1448).and(BigInteger.valueOf(16777215)).intValue();
       magy_raw[rec_num_4Hz + 2] = 
-         frame.shiftRight(1424).and(BigInteger.valueOf(16777215)).longValue();
+         frame.shiftRight(1424).and(BigInteger.valueOf(16777215)).intValue();
       magz_raw[rec_num_4Hz + 2] = 
-         frame.shiftRight(1400).and(BigInteger.valueOf(16777215)).longValue();
+         frame.shiftRight(1400).and(BigInteger.valueOf(16777215)).intValue();
       magx_raw[rec_num_4Hz + 3] = 
-         frame.shiftRight(1376).and(BigInteger.valueOf(16777215)).longValue();
+         frame.shiftRight(1376).and(BigInteger.valueOf(16777215)).intValue();
       magy_raw[rec_num_4Hz + 3] = 
-         frame.shiftRight(1352).and(BigInteger.valueOf(16777215)).longValue();
+         frame.shiftRight(1352).and(BigInteger.valueOf(16777215)).intValue();
       magz_raw[rec_num_4Hz + 3] = 
-         frame.shiftRight(1328).and(BigInteger.valueOf(16777215)).longValue();
+         frame.shiftRight(1328).and(BigInteger.valueOf(16777215)).intValue();
       magn_q[rec_num_1Hz] = 0;
       
       //mod40 housekeeping data: 16bits
@@ -393,11 +464,11 @@ public class DataHolder{
             frame_4Hz[new_i] = frame_4Hz[old_i];
             frame_4Hz[old_i] = 0;
             magx_raw[new_i] = magx_raw[old_i];
-            magx_raw[old_i] = 0L;
+            magx_raw[old_i] = 0;
             magy_raw[new_i] = magy_raw[old_i];
-            magy_raw[old_i] = 0L;
+            magy_raw[old_i] = 0;
             magz_raw[new_i] = magz_raw[old_i];
-            magz_raw[old_i] = 0L;
+            magz_raw[old_i] = 0;
             magn_q[new_i] = magn_q[old_i];
             magn_q[old_i] = 0;
             new_i++;
