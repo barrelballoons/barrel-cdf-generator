@@ -330,7 +330,7 @@ public class ExtractTiming {
          time_pairs[goodcnt] = new TimePair();
         
          //get ms since Jan 6, 1980
-         ms += ((((3 + 7 * week) * 86400) - LEAPSEC) * 1000);
+         ms += ((((7 * week) * 86400) - LEAPSEC) * 1000);
          
          //convert to ms since J2000
          ms -= J2000_OFFSET;
