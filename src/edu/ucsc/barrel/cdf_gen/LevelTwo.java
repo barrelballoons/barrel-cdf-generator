@@ -688,7 +688,7 @@ public class LevelTwo{
 
       double[][] mspc_rebin = new double[numOfRecs][48];
       double[] old_edges = new double[48];
-      double[] std_edges = SpectrumExtract.stdEdges(1, 2.4);
+      double[] std_edges = SpectrumExtract.stdEdges(1, 2.4414);
 
       
       //rebin the mspc spectra
@@ -791,7 +791,7 @@ public class LevelTwo{
       int numOfRecs = data.getSize("mod32");
       double[][] sspc_rebin = new double[numOfRecs][256];
       double[] old_edges = new double[257];
-      double[] std_edges = SpectrumExtract.stdEdges(2, 2.4);
+      double[] std_edges = SpectrumExtract.stdEdges(2, 2.4414);
       
       //rebin the sspc spectra
       for(int sspc_rec = 0, hkpg_rec = 0; sspc_rec < numOfRecs; sspc_rec++){
