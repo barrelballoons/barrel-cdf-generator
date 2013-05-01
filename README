@@ -1,0 +1,12 @@
+barrel-cdf-generator
+====================
+
+The BARREL CDF Generator is meant to run daily to produce L1 and L2 BARREL CDF Files. 
+
+syntax:
+java -jar cdf_gen.jar date=yymmdd ini=xxxx L=ll
+yymmdd is the day of data to process.
+xxxx lists the location of an ini file that contains server information and list of payloads to process.
+ll is a list of comma delimited CDF levels to produce (e.g. L=1,2).
+
+A description of the data format for the output files is located in the docs/ directory.
