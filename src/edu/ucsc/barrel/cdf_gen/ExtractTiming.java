@@ -76,9 +76,9 @@ public class ExtractTiming {
    private static final short BADMS = 1024;// quality bit---bad msofweek
    private static final short BADPPS = 2048;// quality bit---bad PPS
    private static final short NOINFO = 4096;// quality bit---not enough info
-   private static final short PPSFILL = -32768;// fill value for ms_of_week
+   private static final short PPSFILL = -32768;// fill value for PPS
    private static final int MSFILL = -2147483648;// fill value for ms_of_week
-   private static final int FCFILL = -2147483648;// fill value for ms_of_week
+   private static final int FCFILL = -2147483648;// fill value for frame counter 
    private static final short WKFILL = -32768;// fill value for week
    private static final short MINWEEK = 1200;
    private static final byte MINPPS = 0;
@@ -268,7 +268,7 @@ public class ExtractTiming {
       fillTime(frame_i, (rec_i + 1));
       
       backFillModels();
-      
+      fixWeekOffset(); 
       //calculate epoch data for the DataHolder object
       fillEpoch();
             
@@ -500,6 +500,33 @@ public class ExtractTiming {
       }
    }
    
+   public void fixWeekOffset(){
+      /*
+      Because the each "day" of data most likely contains some portion of a 
+      call that started before 00:00 and/or lasted until after 23:59 of the 
+      current day, we might have a data set that spans the Sat/Sun week boundry.
+      The week variable is only transmitted once every 40 frames, so there is 
+      the potential for the epoch variable to jump back when the ms_of_week 
+      rolls over.
+      */
+      
+      int diff;
+
+      //start looking for rollover
+      for(int ms_i = 1; ms_i < data.getSize("mod4"); ms_i++){
+         diff = data.ms_of_week[ms_i] - data.ms_of_week[ms_i - 1];
+         
+         //check to see if the ms_of_week rolled over
+         //the value given by the gps might jump around a bit, so make sure 
+         //the roll back is significant (>1min)
+         if(diff < -60000){
+            System.out.println(
+               data.ms_of_week[ms_i - 1] + ", " + data.ms_of_week[ms_i] + ", " + diff
+            );
+         }
+      }
+   }
+
    public void fillEpoch(){
       Calendar date = Calendar.getInstance();
       int 
