@@ -284,8 +284,8 @@ public class DataHolder{
 
       //sets the current record number
       rec_num_1Hz++;
-      rec_num_4Hz = (rec_num_1Hz + 1) * 4;
-      rec_num_20Hz = (rec_num_1Hz + 1) * 20;
+      rec_num_4Hz = (rec_num_1Hz) * 4;
+      rec_num_20Hz = (rec_num_1Hz) * 20;
       try{
          if((tmpFC - mod4) != frame_mod4[rec_num_mod4]){rec_num_mod4++;}
          if((tmpFC - mod32) != frame_mod32[rec_num_mod32]){rec_num_mod32++;}
@@ -301,10 +301,10 @@ public class DataHolder{
       payID[rec_num_1Hz] = tmpPayID;
       frame_1Hz[rec_num_1Hz] = (int)tmpFC;
       //figure out the other time scale frame counters
-      for(int rec_i = rec_num_4Hz - 4; rec_i < rec_num_4Hz; rec_i++){
+      for(int rec_i = rec_num_4Hz; rec_i < rec_num_4Hz + 4; rec_i++){
          frame_4Hz[rec_i] = frame_1Hz[rec_num_1Hz];
       }
-      for(int rec_i = rec_num_20Hz - 20; rec_i < rec_num_20Hz; rec_i++){
+      for(int rec_i = rec_num_20Hz; rec_i < rec_num_20Hz + 20; rec_i++){
          frame_20Hz[rec_i] = frame_1Hz[rec_num_1Hz];
       }
      
