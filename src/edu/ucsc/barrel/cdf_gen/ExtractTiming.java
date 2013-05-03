@@ -513,13 +513,13 @@ public class ExtractTiming {
       int diff;
 
       //start looking for rollover
-      for(int ms_i = 1; ms_i < data.getSize("mod4"); ms_i++){
-         diff = data.ms_of_week[ms_i] - data.ms_of_week[ms_i - 1];
+      for(int ms_i = 2; ms_i < data.getSize("mod4"); ms_i++){
+         diff = data.ms_of_week[ms_i] - data.ms_of_week[ms_i - 2];
          
          //check to see if the ms_of_week rolled over
          //the value given by the gps might jump around a bit, so make sure 
          //the roll back is significant (>1min)
-         if(diff < -60000){
+         if(data.ms_of_week[ms_i] != 0 && diff < -60000){
             System.out.println(
                data.ms_of_week[ms_i - 1] + ", " + data.ms_of_week[ms_i] + ", " + diff
             );
