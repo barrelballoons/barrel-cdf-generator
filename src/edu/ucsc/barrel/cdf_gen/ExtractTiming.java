@@ -171,8 +171,13 @@ public class ExtractTiming {
             pps = p;
          }
          else{
-            pps = PPSFILL;
-            setQuality(BADPPS);
+            //check to see if this is just a reaction to a super early PPS
+            if(p == 0xFFFF){
+               pps = 0;
+            }else{
+               pps = PPSFILL;
+               setQuality(BADPPS);
+            }
          }
       }
       public void setQuality(short q){quality |= q;}
