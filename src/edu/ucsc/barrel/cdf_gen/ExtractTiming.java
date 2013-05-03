@@ -231,6 +231,10 @@ public class ExtractTiming {
       
       timeRecs = new BarrelTime[MAX_RECS];
 
+      //check for any ms_of_week roll overs that are 
+      //not matched with a week advance
+      fixWeekOffset(); 
+
       //loop through all of the frames and generate time models
       for(frame_i = 0; frame_i < data.getSize("1Hz"); frame_i++){
          //Figure out which record in the set of MAX_RECS this is 
@@ -268,7 +272,7 @@ public class ExtractTiming {
       fillTime(frame_i, (rec_i + 1));
       
       backFillModels();
-      fixWeekOffset(); 
+
       //calculate epoch data for the DataHolder object
       fillEpoch();
             
@@ -510,19 +514,24 @@ public class ExtractTiming {
       rolls over.
       */
       
-      int diff;
-
+      int initial_week = 0, initial_ms = 0;
+      
       //start looking for rollover
-      for(int ms_i = 2; ms_i < data.getSize("mod4"); ms_i++){
-         diff = data.ms_of_week[ms_i] - data.ms_of_week[ms_i - 2];
-         
+      for(int ms_i = 0; ms_i < data.getSize("mod4"); ms_i++){
+         //try to find and initial set of 
+         //timestamps and week variables if needed.
+         if(initial_week == 0){initial_week = data.weeks[ms_i];}
+         if(initial_ms == 0){initial_ms = data.ms_of_week[ms_i/10];}
+
          //check to see if the ms_of_week rolled over
          //the value given by the gps might jump around a bit, so make sure 
          //the roll back is significant (>1min)
-         if(data.ms_of_week[ms_i] != 0 && diff < -60000){
-            System.out.println(
-               data.ms_of_week[ms_i - 1] + ", " + data.ms_of_week[ms_i] + ", " + diff
-            );
+         if((data.ms_of_week[ms_i] - initial_ms) < -60000){
+            //check if the week variable was updated
+            if(data.weeks[ms_i/10] != 0 && data.weeks[ms_i/10] == initial_week){
+               //add an extra week if needed
+               data.weeks[ms_i/10] += 1;
+            }
          }
       }
    }
