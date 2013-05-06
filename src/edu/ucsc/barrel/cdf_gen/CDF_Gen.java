@@ -249,7 +249,8 @@ public class CDF_Gen implements CDFConstants{
    			   );
             
                //Fill the time variable
-               ExtractTiming barrel_time = new ExtractTiming();
+               ExtractTiming barrel_time = 
+                  new ExtractTiming(getSetting("date"));
                barrel_time = null;
                
                if(getSetting("L").indexOf("1") > -1){

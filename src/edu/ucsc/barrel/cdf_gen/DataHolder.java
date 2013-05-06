@@ -144,6 +144,13 @@ public class DataHolder{
       lc2_raw = new int[MAX_FRAMES * 20],
       lc3_raw = new int[MAX_FRAMES * 20],
       lc4_raw = new int[MAX_FRAMES * 20];
+
+   //keep track of rollover points for up to 3 days
+   public int[]
+      day_rollovers = {-1, -1, -1};
+   static public final int
+      YESTERDAY = 0, TODAY = 1, TOMORROW = 2;
+
    public int 
       //record numbers are incrimented on the first record so
       //they start at -1
