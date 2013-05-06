@@ -534,8 +534,9 @@ public class ExtractTiming {
          if((data.ms_of_week[ms_i] - initial_ms) < -60000){
             //check if the week variable was updated
             if(data.weeks[ms_i/10] != 0 && data.weeks[ms_i/10] == initial_week){
-               //add an extra week if needed
-               data.weeks[ms_i/10] += 1;
+               //the week variable has not yet updated,
+               // add 1 week of ms to the ms_of_week variable
+               data.ms_of_week[ms_i] += 604800000;
             }
          }
       }
