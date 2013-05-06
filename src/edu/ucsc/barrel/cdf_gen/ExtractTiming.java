@@ -78,7 +78,7 @@ public class ExtractTiming {
    private static final short NOINFO = 4096;// quality bit---not enough info
    private static final short PPSFILL = -32768;// fill value for PPS
    private static final int MSFILL = -2147483648;// fill value for ms_of_week
-   private static final int FCFILL = -2147483648;// fill value for frame counter 
+   private static final int FCFILL = -2147483648;// fill value for frame counter
    private static final short WKFILL = -32768;// fill value for week
    private static final short MINWEEK = 1200;
    private static final byte MINPPS = 0;
@@ -562,7 +562,7 @@ public class ExtractTiming {
          if(fc_mod32 != last_fc_mod32){rec_num_mod32++;}
          if(fc_mod40 != last_fc_mod40){rec_num_mod40++;}
 
-         //convert from "ms since system epoch" to "ns since J2000"
+         //convert from "ms since j2000" to "ns since J2000"
          data.epoch_1Hz[data_i] =
             (long)(data.ms_since_j2000[data_i] * 1000000);
          //save epoch to the various time scales
