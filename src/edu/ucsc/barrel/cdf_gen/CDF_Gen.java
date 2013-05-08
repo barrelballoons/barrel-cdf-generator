@@ -343,9 +343,13 @@ public class CDF_Gen implements CDFConstants{
       else return "";
    }
    
-   public static void copyFile(File sourceFile, File destFile){
+   public static void copyFile(File sourceFile, File destFile, boolean clobber){
       try{
-         if(!destFile.exists()) {
+         if(destFile.exists() && !clobber){
+            return;
+         }
+
+         if(!destFile.exists()){
             //create the output directory and file if needed
             new File(destFile.getParent()).mkdirs();
             destFile.createNewFile();
@@ -373,7 +377,7 @@ public class CDF_Gen implements CDFConstants{
          );
       }
    }
-   
+
    public static CDF openCDF(String fileName){
 
       CDF cdf = null;
