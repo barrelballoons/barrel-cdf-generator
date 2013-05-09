@@ -92,7 +92,7 @@ public class LevelTwo{
       id = p;
       flt = f;
       stn = s;
-      date = d;
+      today = d;
       mag_id = m;
 
       //get the data storage object
@@ -116,30 +116,40 @@ public class LevelTwo{
    
    //Convert the GPS data and save it to CDF files
    public void doGpsCdf(int first, int last, int date) throws CDFException{
-      int numOfRecs = last - first;
       CDF cdf;
       Variable var;
-      
+      int numOfRecs = last - first;
       float[] 
          lat = new float[numOfRecs], 
          lon = new float[numOfRecs], 
          alt = new float[numOfRecs];
-      
+      int [] 
+         ms = new int[numOfRecs],
+         frameGroup = new int[numOfRecs];
+         q = new int[numOfRecs]; 
+      long[] epoch = new long[numOfRecs];
+
       System.out.println("\nSaving GPS Level 2 CDF...");
 
-      //convert lat, lon, and alt values
-      for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
+      //convert lat, lon, and alt values and select values for this date
+      for(int rec_i = 0, data_i = first; rec_i < last; rec_i++, data_i++){
         //convert mm to km
-        alt[rec_i] = (float)data.gps_raw[0][rec_i] / 1000000;
+        alt[rec_i] = (float)data.gps_raw[0][data_i] / 1000000;
 
         //convert lat and lon to physical units
-        lat[rec_i] = (float)data.gps_raw[2][rec_i];
+        lat[rec_i] = (float)data.gps_raw[2][data_i];
         lat[rec_i] *= 
            Float.intBitsToFloat(Integer.valueOf("33B40000",16).intValue());
 
-        lon[rec_i] = (float)data.gps_raw[3][rec_i];
+        lon[rec_i] = (float)data.gps_raw[3][data_i];
         lon[rec_i] *= 
            Float.intBitsToFloat(Integer.valueOf("33B40000",16).intValue());
+
+        //save the values from the other variables
+        ms[rec_i] = data.gps[1][data_i];
+        frameGroup[rec_i] = data.frame_mod4[data_i];
+        epoch[rec_i] = data.epoch_mod4[data_i];
+        q[rec_i] = data.gps_q[data_i];
       }
 
       //make sure there is a CDF file to open
@@ -154,11 +164,12 @@ public class LevelTwo{
 
       //open GPS CDF and save the reference in the cdf variable
       cdf = CDF_Gen.openCDF(destName);
-
+      
+      
       var = cdf.getVariable("GPS_Alt");
       System.out.println("GPS_Alt...");
       var.putHyperData(
-         0, numOfRecs, 1,
+         var.getNumWrittenRecords(), numOfRecs, 1,
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
@@ -168,17 +179,17 @@ public class LevelTwo{
       var = cdf.getVariable("ms_of_week");
       System.out.println("ms_of_week...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.gps_raw[1]
+         ms
       );
 
       var = cdf.getVariable("GPS_Lat");
       System.out.println("GPS_Lat...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
@@ -188,7 +199,7 @@ public class LevelTwo{
       var = cdf.getVariable("GPS_Lon");
       System.out.println("GPS_Lon...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
@@ -198,31 +209,31 @@ public class LevelTwo{
       var = cdf.getVariable("FrameGroup");
       System.out.println("FrameGroup...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.frame_mod4
+         frameGroup
       );
 
       var = cdf.getVariable("Epoch");
       System.out.println("Epoch...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.epoch_mod4
+         epoch
       );
       
       var = cdf.getVariable("Q");
       System.out.println("Q...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.gps_q
+         q
       );
 
       System.out.println("Done with GPS!");
@@ -232,11 +243,28 @@ public class LevelTwo{
    
    //write the pps file, no processing needed
    public void doPpsCdf(int first, int last, int date) throws CDFException{
-      int numOfRecs = last - first;
       CDF cdf;
       Variable var;
       
+      int numOfRecs = last - first;
+      short[] 
+         version = new short[numOfRecs];
+         payID = new short[numOfRecs];
+      int[] 
+         frameGroup = new int[numOfRecs],
+         q = new int[numOfRecs],
+         pps = new int[numOfRecs];
+      long[] epoch = new long[numOfRecs];
+
       System.out.println("\nSaving PPS Level Two CDF...");
+
+      for(int rec_i = 0, data_i = first; rec_i < last; rec_i++, data_i++){
+        version[rec_i] = data.ver[data_i];
+        payID[rec_i] = data.payID[data_i];
+        frameGroup[rec_i] = data.frame_1Hz[data_i];
+        epoch[rec_i] = data.epoch_1Hz[data_i];
+        q[rec_i] = data.pps_q[data_i];
+      }
 
       String srcName = 
          "cdf_skels/l2/barCLL_PP_S_l2_pps-_YYYYMMDD_v++.cdf";
@@ -255,7 +283,7 @@ public class LevelTwo{
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.pps
+         pps
       );
 
       var = cdf.getVariable("Version");
@@ -265,7 +293,7 @@ public class LevelTwo{
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.ver
+         version
       );
 
       var = cdf.getVariable("Payload_ID");
@@ -275,7 +303,7 @@ public class LevelTwo{
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.payID
+         payID
       );
 
       var = cdf.getVariable("FrameGroup");
@@ -285,7 +313,7 @@ public class LevelTwo{
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.frame_1Hz
+         frameGroup 
       );
       var = cdf.getVariable("Epoch");
       System.out.println("Epoch...");
@@ -294,7 +322,7 @@ public class LevelTwo{
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.epoch_1Hz
+         epoch
       );
 
       var = cdf.getVariable("Q");
@@ -304,18 +332,22 @@ public class LevelTwo{
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.pps_q
+         q
       );
 
       cdf.close();
    }
    
    public void doMagCdf(int first, int last, int date) throws CDFException{
-      int numOfRecs = last - first;
-
       CDF cdf;
       Variable var;
       
+      int numOfRecs = last - first;
+      int[] 
+         frameGroup = new int[numOfRecs],
+         q = new int[numOfRecs]; 
+      long[] epoch = new long[numOfRecs];
+
       float[] 
          magx = new float[numOfRecs],
          magy = new float[numOfRecs],
@@ -335,10 +367,10 @@ public class LevelTwo{
       cdf = CDF_Gen.openCDF(destName);
      
       //extract the nominal magnetometer value and calculate |B|
-      for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
-         magx[rec_i] = (data.magx_raw[rec_i] - 8388608.0f) / 83886.070f;
-         magy[rec_i] = (data.magy_raw[rec_i] - 8388608.0f) / 83886.070f;
-         magz[rec_i] = (data.magz_raw[rec_i] - 8388608.0f) / 83886.070f;
+      for(int rec_i = 0, data_i = first; rec_i < last; rec_i++, data_i++){
+         magx[rec_i] = (data.magx_raw[data_i] - 8388608.0f) / 83886.070f;
+         magy[rec_i] = (data.magy_raw[data_i] - 8388608.0f) / 83886.070f;
+         magz[rec_i] = (data.magz_raw[data_i] - 8388608.0f) / 83886.070f;
 
          magTot[rec_i] = 
             (float)Math.sqrt(
@@ -346,13 +378,17 @@ public class LevelTwo{
                (magy[rec_i] * magy[rec_i]) +
                (magz[rec_i] * magz[rec_i]) 
             );
+
+         frameGroup[rec_i] = data.frame_4Hz[data_i];
+         epoch[rec_i] = data.epoch_4Hz[data_i];
+         q[rec_i] = data.magn_q[data_i];
       }
 
       //store the nominal mag values
       var = cdf.getVariable("MAG_X");
       System.out.println("MAG_X... ");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
@@ -362,7 +398,7 @@ public class LevelTwo{
       var = cdf.getVariable("MAG_Y");
       System.out.println("MAG_Y...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
@@ -372,7 +408,7 @@ public class LevelTwo{
       var = cdf.getVariable("MAG_Z");
       System.out.println("MAG_Z...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
@@ -382,7 +418,7 @@ public class LevelTwo{
       var = cdf.getVariable("Total");
       System.out.println("Field Magnitude...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
@@ -392,31 +428,31 @@ public class LevelTwo{
       var = cdf.getVariable("FrameGroup");
       System.out.println("FrameGroup...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.frame_4Hz
+         frameGroup
       );
 
       var = cdf.getVariable("Epoch");
       System.out.println("Epoch...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.epoch_4Hz
+         epoch
       );
 
       var = cdf.getVariable("Q");
       System.out.println("Q...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.magn_q
+         q
       );
 
       cdf.close();
@@ -428,6 +464,18 @@ public class LevelTwo{
       Variable var;
       
       int numOfRecs = last - first;
+      short []
+         sats = new short[numOfRecs],
+         offset = new short[numOfRecs],
+         termStat = new short[numOfRecs],
+         modemCnt = new short[numOfRecs],
+         dcdCnt = new short[numOfRecs];
+      int[] 
+         frameGroup = new int[numOfRecs],
+         q = new int[numOfRecs],
+         cmdCnt = new int[numOfRecs],
+         weeks = new int[numOfRecs];
+      long[] epoch = new long[numOfRecs];
 
       System.out.println("\nSaving HKPG...");
 
@@ -453,7 +501,7 @@ public class LevelTwo{
          var = cdf.getVariable(data.hkpg_label[var_i]);
          System.out.println(data.hkpg_label[var_i] + "...");
          var.putHyperData(
-            0, numOfRecs, 1, 
+            var.getNumWrittenRecords(), numOfRecs, 1, 
             new long[] {0}, 
             new long[] {1}, 
             new long[] {1}, 
@@ -461,104 +509,116 @@ public class LevelTwo{
          );
       }
 
+      for(int rec_i = 0, data_i = first; rec_i < last; rec_i++, data_i++){
+         sats[rec_i] = data.sats[data_i];
+         offset[rec_i] = data.offset[data_i];
+         termStat[rec_i] = data.termStat[data_i];
+         modemCnt[rec_i] = data.modemCnt[data_i];
+         dcdCnt[rec_i] = data.dcdCnt[data_i];
+         cmdCnt[rec_i] = data.cmdCnt[data_i];
+         weeks[rec_i] = data.weeks[data_i];
+         epoch[rec_i] = data.epoch_mod40[data_i];
+         q[rec_i] = datah.hkpg_q[data_i];
+      }
+
       var = cdf.getVariable("numOfSats");
       System.out.println("numOfSats...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.sats
+         sats
       );
 
       var = cdf.getVariable("timeOffset");
       System.out.println("timeOffset...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.offset
+         offset
       );
       
       var = cdf.getVariable("termStatus");
       System.out.println("termStatus...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.termStat
+         termStat
       );
 
       var = cdf.getVariable("cmdCounter");
       System.out.println("cmdCounter...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.cmdCnt
+         cmdCnt
       );
 
       var = cdf.getVariable("modemCounter");
       System.out.println("modemCounter...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.modemCnt
+         modemCnt
       );
 
       var = cdf.getVariable("dcdCounter");
       System.out.println("dcdCounter...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.dcdCnt
+         dcdCnt
       );
 
       var = cdf.getVariable("weeks");
       System.out.println("weeks...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.weeks
+         weeks
       );
 
       var = cdf.getVariable("FrameGroup");
       System.out.println("FrameGroup...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.frame_mod40
+         frameGroup
       );
 
       var = cdf.getVariable("Epoch");
       System.out.println("Epoch...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.epoch_mod40
+         epoch
       );
 
       var = cdf.getVariable("Q");
       System.out.println("Q...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.hkpg_q
+         q
       );
 
       cdf.close();
@@ -568,10 +628,16 @@ public class LevelTwo{
       CDF cdf;
       Variable var;
       int numOfRecs = last - first;
+
       double[][] chan_edges = new double[numOfRecs][5];
       double[][] lc_scaled = new double[4][numOfRecs];
       int[] tempLC = new int[4];
       double scint_temp = 20, dpu_temp = 20, peak = -1;
+      
+      int[] 
+         frameGroup = new int[numOfRecs],
+         q = new int[numOfRecs];
+      long[] epoch = new long[numOfRecs];
 
       System.out.println("\nSaving FSPC...");
 
@@ -620,6 +686,12 @@ public class LevelTwo{
          lc_scaled[3][lc_rec] = data.lc4_raw[lc_rec] * 20;
       }
 
+      for(int rec_i = 0, data_i = first; rec_i < last; rec_i++, data_i++){
+         frameGroup[rec_i] = data.frame_20Hz[data_i];
+         epoch[rec_i] = data.epoch_20Hz[data_i];
+         q[rec_i] = data.fspc_q[data_i];
+      }
+
       var = cdf.getVariable("LC1");
       System.out.println("LC1...");
       var.putHyperData(
@@ -633,7 +705,7 @@ public class LevelTwo{
       var = cdf.getVariable("LC2");
       System.out.println("LC2...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
@@ -643,7 +715,7 @@ public class LevelTwo{
       var = cdf.getVariable("LC3");
       System.out.println("LC3...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
@@ -653,7 +725,7 @@ public class LevelTwo{
       var = cdf.getVariable("LC4");
       System.out.println("LC4...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
@@ -663,31 +735,31 @@ public class LevelTwo{
       var = cdf.getVariable("FrameGroup");
       System.out.println("FrameGroup...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.frame_20Hz
+         frameGroup
       );
 
       var = cdf.getVariable("Epoch");
       System.out.println("Epoch...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.epoch_20Hz
+         epoch
       );
 
       var = cdf.getVariable("Q");
       System.out.println("Q...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.fspc_q
+         q
       );
 
       cdf.close();
@@ -703,6 +775,10 @@ public class LevelTwo{
       int offset = 90;
 
       int numOfRecs = last - first;
+      int[] 
+         frameGroup = new int[numOfRecs],
+         q = new int[numOfRecs];
+      long[] epoch = new long[numOfRecs];
 
       double[][] mspc_rebin = new double[numOfRecs][48];
       double[] old_edges = new double[48];
@@ -749,6 +825,12 @@ public class LevelTwo{
          }
       }
 
+      for(int rec_i = 0, data_i = first; rec_i < last; rec_i++, data_i++){
+         frameGroup[rec_i] = data.frame_mod4[data_i];
+         epoch[rec_i] = data.epoch_mod4[data_i];
+         q[rec_i] = data.mspc_q[data_i];
+      }
+
       System.out.println("\nSaving MSPC...");
 
       String srcName = 
@@ -764,7 +846,7 @@ public class LevelTwo{
       var = cdf.getVariable("MSPC");
       System.out.println("Spectrum Arrays...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0, 0}, 
          new long[] {48, 1}, 
          new long[] {1, 1}, 
@@ -774,31 +856,31 @@ public class LevelTwo{
       var = cdf.getVariable("FrameGroup");
       System.out.println("FrameGroup...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.frame_mod4
+         frameGroup
       );
 
       var = cdf.getVariable("Epoch");
       System.out.println("Epoch...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.epoch_mod4
+         epoch
       );
 
       var = cdf.getVariable("Q");
       System.out.println("Q...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.mspc_q
+         q
       );
 
       cdf.close();
@@ -817,6 +899,11 @@ public class LevelTwo{
       double[] old_edges = new double[257];
       double[] std_edges = SpectrumExtract.stdEdges(2, 2.4414);
       
+      int[] 
+         frameGroup = new int[numOfRecs],
+         q = new int[numOfRecs];
+      long[] epoch = new long[numOfRecs];
+
       //rebin the sspc spectra
       for(int sspc_rec = 0, hkpg_rec = 0; sspc_rec < numOfRecs; sspc_rec++){
          //get temperatures
@@ -855,6 +942,12 @@ public class LevelTwo{
          }
       }
 
+      for(int rec_i = 0, data_i = first; rec_i < last; rec_i++, data_i++){
+         frameGroup[rec_i] = data.frame_mod32[data_i];
+         epoch[rec_i] = data.epoch_mod32[data_i];
+         q[rec_i] = data.sspc_q[data_i];
+      }
+
       System.out.println("\nSaving SSPC...");
 
       String srcName = 
@@ -870,7 +963,7 @@ public class LevelTwo{
       var = cdf.getVariable("SSPC");
       System.out.println("Spectrum Arrays...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {256, 1}, 
          new long[] {1}, 
@@ -880,31 +973,31 @@ public class LevelTwo{
       var = cdf.getVariable("FrameGroup");
       System.out.println("FrameGroup...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.frame_mod32
+         frameGroup
       );
 
       var = cdf.getVariable("Epoch");
       System.out.println("Epoch...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.epoch_mod32
+         epoch
       );
 
       var = cdf.getVariable("Q");
       System.out.println("Q...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.sspc_q
+         q
       );
 
       cdf.close();
@@ -916,6 +1009,10 @@ public class LevelTwo{
       
       int numOfRecs = last - first;
       double[][] rc_timeScaled = new double[4][numOfRecs];
+      int[] 
+         frameGroup = new int[numOfRecs],
+         q = new int[numOfRecs];
+      long[] epoch = new long[numOfRecs];
 
       //change all the units from cnts/4sec to cnts/sec
       for(int var_i = 0; var_i < 4; var_i++){
@@ -924,6 +1021,12 @@ public class LevelTwo{
          }
       }
 
+      for(int rec_i = 0, data_i = first; rec_i < last; rec_i++, data_i++){
+         frameGroup[rec_i] = data.frame_mod4[data_i];
+         epoch[rec_i] = data.epoch_mod4[data_i];
+         q[rec_i] = data.rcnt_q[data_i];
+      }
+         
       System.out.println("\nSaving RCNT...");
 
       String srcName = 
@@ -939,7 +1042,7 @@ public class LevelTwo{
       var = cdf.getVariable("Interrupt");
       System.out.println("Interrupt...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
@@ -949,7 +1052,7 @@ public class LevelTwo{
       var = cdf.getVariable("LowLevel");
       System.out.println("LowLevel...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
@@ -959,7 +1062,7 @@ public class LevelTwo{
       var = cdf.getVariable("PeakDet");
       System.out.println("PeakDet...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
@@ -969,7 +1072,7 @@ public class LevelTwo{
       var = cdf.getVariable("HighLevel");
       System.out.println("HighLevel...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
@@ -979,31 +1082,31 @@ public class LevelTwo{
       var = cdf.getVariable("FrameGroup");
       System.out.println("FrameGroup...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.frame_mod4
+         frameGroup
       );
 
       var = cdf.getVariable("Epoch");
       System.out.println("Epoch...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1},
-         data.epoch_mod4
+         epoch
       );
 
       var = cdf.getVariable("Q");
       System.out.println("Q...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         data.rcnt_q
+         q
       );
 
       cdf.close();
@@ -1011,25 +1114,51 @@ public class LevelTwo{
 
    //Pull each value out of the frame and store it in the appropriate CDF.
    private void writeData() throws CDFException{
+      int first_rec, last_rec;
+      
       System.out.println(
          "Creating Level Two... (" + data.getSize("1Hz") + " frames)"
       );
       
-      //write data to the  CDF files for yesterday, today and tomorrow
-      for(int day_i = 0; day_i < 3; day_i++){
-         //get the offset of the data to process reletive to "today"
-         int day_offset = day_i - 1;
-         int first = ;
-         int last = ;
-         doGpsCdf(first, last, (today + day_i));
-         doPpsCdf(first, last, (today + day_i));
-         doMagCdf(first, last, (today + day_i));
-         doHkpgCdf(first, last, (today + day_i));   
-         doFspcCdf(first, last, (today + day_i));   
-         doMspcCdf(first, last, (today + day_i));   
-         doSspcCdf(first, last, (today + day_i));   
-         doRcntCdf(,,(today + day_i));   
-      }   
+      //dave data to yesterday, today, and tomorrow's CDF files  
+      last_rec = data.day_rollovers[DataHolder.YESTERDAY];
+      if(last_rec != -1){
+         first_rec = 0;
+         doAllCdf(first_rec, last_rec, (today - 1));
+      }
+
+      last_rec = data.day_rollovers[DataHolder.TODAY];
+      if(last_rec != -1){
+         //first index of today is the last index of yesterday
+         first_rec = data.day_rollovers[DataHolder.YESTERDAY];
+         
+         //make sure that the yesterday actually had an index set
+         if(first_rec == -1){first_rec = 0;}
+
+         doAllCdf(first_rec, last_rec, today);
+      }
+
+      last_rec = data.day_rollovers[DataHolder.TOMORROW];
+      if(last_rec != -1){
+         first_rec = data.day_rollovers[DataHolder.TODAY];
+         
+         if(first_rec == -1){first_rec = 0;}
+
+         doAllCdf(first_rec, last_rec, today + 1);
+      }
+
+
       System.out.println("Created Level Two.");
+   }
+
+   private void doAllCdf(int first, int last, int date){
+      doGpsCdf((first / 4), (last / 4), date);
+      doPpsCdf(first, last, date);
+      doMagCdf((first * 4), (last * 4), date);
+      doHkpgCdf((first / 40), (last / 40), date);  
+      doFspcCdf((first * 20), (last * 20), date);  
+      doMspcCdf((first / 4), (last / 4), date);  
+      doSspcCdf((first / 32), (last / 32), date);  
+      doRcntCdf((first / 4), (last / 4), date);  
    }
  }
