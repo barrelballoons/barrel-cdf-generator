@@ -192,9 +192,9 @@ public class CDF_Gen implements CDFConstants{
          L0_Dir = 
             output_Dir + "/l0/" + id + "/" + getSetting("date") + "/";
          L1_Dir = 
-            output_Dir + "/l1/" + id + "/" + getSetting("date") + "/";
+            output_Dir + "/l1/" + id + "/";
          L2_Dir = 
-            output_Dir + "/l2/" + id + "/" + getSetting("date") + "/";
+            output_Dir + "/l2/" + id + "/";
          
          //set working payload
          settings.put("currentPayload", payload_i);
