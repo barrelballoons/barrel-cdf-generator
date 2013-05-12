@@ -1110,62 +1110,161 @@ public class LevelTwo{
 
    //Pull each value out of the frame and store it in the appropriate CDF.
    private void writeData() throws CDFException{
-      int first_rec, last_rec;
-      
+      File outDir;
+
       System.out.println(
          "Creating Level Two... (" + data.getSize("1Hz") + " frames)"
       );
       
-      //dave data to yesterday, today, and tomorrow's CDF files  
-      last_rec = data.day_rollovers[DataHolder.YESTERDAY];
-      if(last_rec != -1){
-         first_rec = 0;
-         
-         //make sure the output directory exists
-         File outDir = new File(outputPath + "/" + (today - 1));
-         if(!outDir.exists()){outDir.mkdirs();}
+      //make sure the needed output directories exist
+      outDir = new File(outputPath + "/" + (today - 1));
+      if(!outDir.exists()){outDir.mkdirs();}
+      outDir = new File(outputPath + "/" + today);
+      if(!outDir.exists()){outDir.mkdirs();}
+      outDir = new File(outputPath + "/" + (today + 1));
+      if(!outDir.exists()){outDir.mkdirs();}
 
-         doAllCdf(first_rec, last_rec, (today - 1));
-      }
-
-      last_rec = data.day_rollovers[DataHolder.TODAY];
-      if(last_rec != -1){
-         //first index of today is the last index of yesterday
-         first_rec = data.day_rollovers[DataHolder.YESTERDAY];
-         
-         File outDir = new File(outputPath + "/" + today);
-         if(!outDir.exists()){outDir.mkdirs();}
-
-         //make sure that the yesterday actually had an index set
-         if(first_rec == -1){first_rec = 0;}
-
-         doAllCdf(first_rec, last_rec, today);
-      }
-
-      last_rec = data.day_rollovers[DataHolder.TOMORROW];
-      if(last_rec != -1){
-         first_rec = data.day_rollovers[DataHolder.TODAY];
-         
-         File outDir = new File(outputPath + "/" + (today + 1));
-         if(!outDir.exists()){outDir.mkdirs();}
-
-         if(first_rec == -1){first_rec = 0;}
-
-         doAllCdf(first_rec, last_rec, today + 1);
-      }
-
+      //fill CDF files for yesterday, today, and tomorrow
+      doAllCdf(today - 1);
+      doAllCdf(today);
+      doAllCdf(today + 1);
 
       System.out.println("Created Level Two.");
    }
 
-   private void doAllCdf(int first, int last, int date) throws CDFException{
-      doGpsCdf((first / 4), (last / 4), date);
-      doPpsCdf(first, last, date);
-      doMagCdf((first * 4), (last * 4), date);
-      doHkpgCdf((first / 40), (last / 40), date);  
-      doFspcCdf((first * 20), (last * 20), date);  
-      doMspcCdf((first / 4), (last / 4), date);  
-      doSspcCdf((first / 32), (last / 32), date);  
-      doRcntCdf((first / 4), (last / 4), date);  
+   private void doAllCdf(int date) throws CDFException{
+      int first_i, last_i;
+      long rec_date = 0;
+      long[] tt2000_parts; 
+
+      //find the first and last indicies for this day for the 1Hz file
+      first_i = -1;
+      for(last_i = 0; last_i < data.getSize("1Hz"); last_i++){
+         tt2000_parts = CDFTT2000.breakdown(data.epoch_1Hz[last_i]);
+         rec_date = 
+            tt2000_parts[2] + //day
+            (100 * tt2000_parts[1]) + //month
+            (10000 * (tt2000_parts[0] - 2000)); //year
+         if(first_i == -1) {
+            if(rec_date == date){
+               //found the first_i index
+               System.out.println("boom!");
+               first_i = last_i;
+            }
+         }else if(rec_date > date){
+            break;
+         }
+      }
+      //make sure we have a valid start and stop index
+      if(first_i != -1){
+         doPpsCdf(first_i, last_i, date);
+      }
+
+      //...for the mod4 file
+      first_i = -1;
+      for(last_i = 0; last_i < data.getSize("mod4"); last_i++){
+         tt2000_parts = CDFTT2000.breakdown(data.epoch_mod4[last_i]);
+         rec_date = 
+            tt2000_parts[2] + //day
+            (100 * tt2000_parts[1]) + //month
+            (10000 * (tt2000_parts[0] - 2000)); //year
+         if(first_i == -1) {
+            if(rec_date == date){
+               //found the first_i index
+               first_i = last_i;
+            }
+         }else if(rec_date > date){
+            break;
+         }
+      }
+      if(first_i != -1){
+         doGpsCdf(first_i, last_i, date);
+         doMspcCdf(first_i, last_i, date);
+         doRcntCdf(first_i, last_i, date);  
+      }
+
+      //...for the mod32 file
+      first_i = -1;
+      for(last_i = 0; last_i < data.getSize("mod32"); last_i++){
+         tt2000_parts = CDFTT2000.breakdown(data.epoch_mod32[last_i]);
+         rec_date = 
+            tt2000_parts[2] + //day
+            (100 * tt2000_parts[1]) + //month
+            (10000 * (tt2000_parts[0] - 2000)); //year
+         if(first_i == -1) {
+            if(rec_date == date){
+               //found the first_i index
+               first_i = last_i;
+            }
+         }else if(rec_date > date){
+            break;
+         }
+      }
+      if(first_i != -1){
+         doSspcCdf(first_i, last_i, date);  
+      }
+
+      //...for the mod40 file
+      first_i = -1;
+      for(last_i = 0; last_i < data.getSize("mod40"); last_i++){
+         tt2000_parts = CDFTT2000.breakdown(data.epoch_mod40[last_i]);
+         rec_date = 
+            tt2000_parts[2] + //day
+            (100 * tt2000_parts[1]) + //month
+            (10000 * (tt2000_parts[0] - 2000)); //year
+         if(first_i == -1) {
+            if(rec_date == date){
+               //found the first_i index
+               first_i = last_i;
+            }
+         }else if(rec_date > date){
+            break;
+         }
+      }
+      if(first_i != -1){
+         doHkpgCdf(first_i, last_i, date);  
+      }
+
+      //...for the 4Hz file
+      first_i = -1;
+      for(last_i = 0; last_i < data.getSize("4Hz"); last_i++){
+         tt2000_parts = CDFTT2000.breakdown(data.epoch_4Hz[last_i]);
+         rec_date = 
+            tt2000_parts[2] + //day
+            (100 * tt2000_parts[1]) + //month
+            (10000 * (tt2000_parts[0] - 2000)); //year
+         if(first_i == -1) {
+            if(rec_date == date){
+               //found the first_i index
+               first_i = last_i;
+            }
+         }else if(rec_date > date){
+            break;
+         }
+      }
+      if(first_i != -1){
+         doMagCdf(first_i, last_i, date);
+      }
+
+      //...for the 20Hz file
+      first_i = -1;
+      for(last_i = 0; last_i < data.getSize("20Hz"); last_i++){
+         tt2000_parts = CDFTT2000.breakdown(data.epoch_20Hz[last_i]);
+         rec_date = 
+            tt2000_parts[2] + //day
+            (100 * tt2000_parts[1]) + //month
+            (10000 * (tt2000_parts[0] - 2000)); //year
+         if(first_i == -1) {
+            if(rec_date == date){
+               //found the first_i index
+               first_i = last_i;
+            }
+         }else if(rec_date > date){
+            break;
+         }
+      }
+      if(first_i != -1){
+         doFspcCdf(first_i, last_i, date); 
+      }
    }
  }
