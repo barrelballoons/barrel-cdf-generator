@@ -55,10 +55,6 @@ Change Log:
 
 
 public class LevelTwo{
-   File cdfFile;
-   CDF mag_cdf, rcnt_cdf, fspc_cdf, 
-      mspc_cdf, sspc_cdf, hkpg_cdf, pps_cdf;
-   
    String outputPath;
    int lastFrame = -1;
    long ms_of_week = 0;
@@ -127,7 +123,7 @@ public class LevelTwo{
          q = new int[numOfRecs]; 
       long[] epoch = new long[numOfRecs];
 
-      System.out.println("\nSaving GPS Level 2 CDF...");
+      System.out.println("\nSaving GPS Level Two CDF...");
 
       //convert lat, lon, and alt values and select values for this date
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
@@ -162,7 +158,6 @@ public class LevelTwo{
 
       //open GPS CDF and save the reference in the cdf variable
       cdf = CDF_Gen.openCDF(destName);
-      
       
       var = cdf.getVariable("GPS_Alt");
       System.out.println("GPS_Alt...");
@@ -257,6 +252,7 @@ public class LevelTwo{
       System.out.println("\nSaving PPS Level Two CDF...");
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
+        pps[rec_i] = data.pps[data_i];
         version[rec_i] = data.ver[data_i];
         payID[rec_i] = data.payID[data_i];
         frameGroup[rec_i] = data.frame_1Hz[data_i];
@@ -1108,7 +1104,6 @@ public class LevelTwo{
       cdf.close();
    }
 
-   //Pull each value out of the frame and store it in the appropriate CDF.
    private void writeData() throws CDFException{
       File outDir;
 
