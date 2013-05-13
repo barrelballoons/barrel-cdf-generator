@@ -146,7 +146,6 @@ public class LevelTwo{
       d.set(Calendar.MONTH, month - 1);
       d.set(Calendar.DAY_OF_MONTH, day);
       day_of_year = d.get(Calendar.DAY_OF_YEAR);
-      System.out.println(day_of_year);
 
       //convert lat, lon, and alt values and select values for this date
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
@@ -258,6 +257,26 @@ public class LevelTwo{
          new long[] {1}, 
          new long[] {1}, 
          lon
+      );
+
+      var = cdf.getVariable("L");
+      System.out.println("ms_of_week...");
+      var.putHyperData(
+         var.getNumWrittenRecords(), numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         l
+      );
+
+      var = cdf.getVariable("MLT");
+      System.out.println("ms_of_week...");
+      var.putHyperData(
+         var.getNumWrittenRecords(), numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         mlt
       );
 
       var = cdf.getVariable("FrameGroup");
