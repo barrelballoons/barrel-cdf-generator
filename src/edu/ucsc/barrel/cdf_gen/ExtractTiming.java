@@ -78,7 +78,7 @@ public class ExtractTiming {
    private static final short NOINFO = 4096;// quality bit---not enough info
    private static final short PPSFILL = -32768;// fill value for PPS
    private static final int MSFILL = -2147483648;// fill value for ms_of_week
-   private static final int FCFILL = -2147483648;// fill value for frame counter 
+   private static final int FCFILL = -2147483648;// fill value for frame counter
    private static final short WKFILL = -32768;// fill value for week
    private static final short MINWEEK = 1200;
    private static final byte MINPPS = 0;
@@ -90,6 +90,8 @@ public class ExtractTiming {
    private static final int MAXFC = 2097152;
    private static final long LEAPSEC = 16;
    
+   private long today;
+
    //date offset info
    //Offset in ms from system epoch to gps start time (00:00:00 1980-01-60 UTC) 
    private static long GPS_START_TIME; 
@@ -171,8 +173,13 @@ public class ExtractTiming {
             pps = p;
          }
          else{
-            pps = PPSFILL;
-            setQuality(BADPPS);
+            //check to see if this is just a reaction to a super early PPS
+            if(p == 0xFFFF){
+               pps = 0;
+            }else{
+               pps = PPSFILL;
+               setQuality(BADPPS);
+            }
          }
       }
       public void setQuality(short q){quality |= q;}
@@ -203,7 +210,10 @@ public class ExtractTiming {
    
    private DataHolder data;
    
-   public ExtractTiming(){
+   public ExtractTiming(String d){
+      //save today's date
+      today = Long.valueOf(d);
+      
       //get DataHolder storage object
       data = CDF_Gen.getDataSet();
       
@@ -529,8 +539,9 @@ public class ExtractTiming {
          if((data.ms_of_week[ms_i] - initial_ms) < -60000){
             //check if the week variable was updated
             if(data.weeks[ms_i/10] != 0 && data.weeks[ms_i/10] == initial_week){
-               //add an extra week if needed
-               data.weeks[ms_i/10] += 1;
+               //the week variable has not yet updated,
+               // add 1 week of ms to the ms_of_week variable
+               data.ms_of_week[ms_i] += 604800000;
             }
          }
       }
@@ -542,6 +553,10 @@ public class ExtractTiming {
          fc_mod4 = 0, fc_mod32 = 0, fc_mod40 = 0, 
          last_fc_mod4 = -1, last_fc_mod32 = -1, last_fc_mod40 = -1,
          rec_num_mod4 = -1, rec_num_mod32 = -1, rec_num_mod40 = -1;
+      
+      long[] tt2000_parts;
+      long rec_date;
+      int date_offset;
 
       for(int data_i = 0; data_i < data.getSize("1Hz"); data_i++){
          fc_mod4 = 
@@ -556,9 +571,10 @@ public class ExtractTiming {
          if(fc_mod32 != last_fc_mod32){rec_num_mod32++;}
          if(fc_mod40 != last_fc_mod40){rec_num_mod40++;}
 
-         //convert from "ms since system epoch" to "ns since J2000"
+         //convert from "ms since j2000" to "ns since J2000"
          data.epoch_1Hz[data_i] =
             (long)(data.ms_since_j2000[data_i] * 1000000);
+            
          //save epoch to the various time scales
          //fill the >1Hz times 
          for(int fill_i = 0; fill_i < 4; fill_i++){
@@ -569,6 +585,7 @@ public class ExtractTiming {
             data.epoch_20Hz[(data_i * 20) + fill_i] = 
                data.epoch_1Hz[data_i] + (fill_i * 50000000);
          }
+
          //fill the <1Hz times. 
          //These time stamps are for the begining of the accumulation period
          data.epoch_mod4[rec_num_mod4] = 
@@ -580,6 +597,23 @@ public class ExtractTiming {
          data.epoch_mod40[rec_num_mod40] = 
             (long)(data.epoch_1Hz[data_i] - 
                ((data.frame_1Hz[data_i] % 40) - 40) * NOM_RATE * 1000000);
+
+         //check for date rollover
+         tt2000_parts = CDFTT2000.breakdown(data.epoch_1Hz[data_i]);
+         rec_date = 
+            tt2000_parts[2] + //day
+            (100 * tt2000_parts[1]) + //month
+            (10000 * (tt2000_parts[0] - 2000)); //year
+
+         /*
+         Save the current record number to the 
+         correct spot in the day_rollovers array.
+         This indicates the last record for each day.
+         The +1 is needed to have the indicies match the 
+         constants set in DataHolder(.YESTERDAY/TODAY/TOMORROW)
+         */
+         date_offset = (int)(rec_date - today + 1);
+         data.day_rollovers[date_offset] = data_i;
 
          last_fc_mod4 = fc_mod4;
          last_fc_mod32 = fc_mod32;
