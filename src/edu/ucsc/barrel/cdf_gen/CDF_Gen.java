@@ -192,9 +192,9 @@ public class CDF_Gen implements CDFConstants{
          L0_Dir = 
             output_Dir + "/l0/" + id + "/" + getSetting("date") + "/";
          L1_Dir = 
-            output_Dir + "/l1/" + id + "/" + getSetting("date") + "/";
+            output_Dir + "/l1/" + id + "/";
          L2_Dir = 
-            output_Dir + "/l2/" + id + "/" + getSetting("date") + "/";
+            output_Dir + "/l2/" + id + "/";
          
          //set working payload
          settings.put("currentPayload", payload_i);
@@ -249,7 +249,8 @@ public class CDF_Gen implements CDFConstants{
    			   );
             
                //Fill the time variable
-               ExtractTiming barrel_time = new ExtractTiming();
+               ExtractTiming barrel_time = 
+                  new ExtractTiming(getSetting("date"));
                barrel_time = null;
                
                if(getSetting("L").indexOf("1") > -1){
@@ -342,9 +343,13 @@ public class CDF_Gen implements CDFConstants{
       else return "";
    }
    
-   public static void copyFile(File sourceFile, File destFile){
+   public static void copyFile(File sourceFile, File destFile, boolean clobber){
       try{
-         if(!destFile.exists()) {
+         if(destFile.exists() && !clobber){
+            return;
+         }
+
+         if(!destFile.exists()){
             //create the output directory and file if needed
             new File(destFile.getParent()).mkdirs();
             destFile.createNewFile();
@@ -372,7 +377,7 @@ public class CDF_Gen implements CDFConstants{
          );
       }
    }
-   
+
    public static CDF openCDF(String fileName){
 
       CDF cdf = null;
