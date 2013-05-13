@@ -112,11 +112,15 @@ public class LevelTwo{
    public void doGpsCdf(int first, int last, int date) throws CDFException{
       CDF cdf;
       Variable var;
-      int numOfRecs = last - first;
+      int 
+         dayOfYear,
+         numOfRecs = last - first;
       float[] 
          lat = new float[numOfRecs], 
          lon = new float[numOfRecs], 
          alt = new float[numOfRecs];
+         mlt = new float[numOfRecs];
+         l = new float[numOfRecs];
       int[] 
          ms = new int[numOfRecs],
          frameGroup = new int[numOfRecs],
@@ -124,6 +128,9 @@ public class LevelTwo{
       long[] epoch = new long[numOfRecs];
 
       System.out.println("\nSaving GPS Level Two CDF...");
+
+      //calculate the day of year
+      Date d = new Date
 
       //convert lat, lon, and alt values and select values for this date
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
@@ -144,6 +151,24 @@ public class LevelTwo{
         frameGroup[rec_i] = data.frame_mod4[data_i];
         epoch[rec_i] = data.epoch_mod4[data_i];
         q[rec_i] = data.gps_q[data_i];
+
+        //get the magnetic field info for this location
+        try {
+           String command = 
+              "./print_l_mlt " + 
+              frameGroup[rec_i] + " " + alt[rec_i] + " " + lat[rec_i] + " " + 
+              lon[rec_i] + " 2013 " + "";
+           Process p = Runtime.getRuntime().exec(command);
+           BufferedReader input = 
+              new BufferedReader(new InputStreamReader(p.getInputStream()));
+           while ((String line = input.readLine()) != null) {
+              System.out.println(line + "\n");
+           }
+           input.close();
+        }
+        catch (Exception ex) {
+           ex.printStackTrace();
+        }
       }
 
       //make sure there is a CDF file to open
