@@ -65,7 +65,7 @@ public class LevelTwo{
       flt = "00",
       stn = "0",
       revNum = "00",
-      mag_id = "";
+      mag_gen_program = "";
    int today = 0;
    Calendar dateObj = Calendar.getInstance();
    
@@ -90,7 +90,7 @@ public class LevelTwo{
       flt = f;
       stn = s;
       today = Integer.valueOf(d);
-      mag_id = m;
+      mag_gen_program = m;
 
       //get the data storage object
       data = CDF_Gen.getDataSet();
@@ -186,7 +186,7 @@ public class LevelTwo{
 
                //get the magnetic field info for this location
                String command = 
-                  "./print_l_mlt " + 
+                  mag_gen_program + " " + 
                   frameGroup[rec_i] +" "+ 
                   alt[rec_i] +" "+ lat[rec_i] +" "+ lon[rec_i] +" "+ 
                   (year + 2000)  +" "+  day_of_year +" "+ sec_of_day;
