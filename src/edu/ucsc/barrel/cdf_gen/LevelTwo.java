@@ -120,6 +120,8 @@ public class LevelTwo{
          numOfRecs = last - first;
       double
          sec_of_day = 0;
+      float
+         east_lon = 0;
       String[] 
          mag_coords = new String[3];
       float[] 
@@ -155,7 +157,7 @@ public class LevelTwo{
          //convert lat and lon to physical units
          lat[rec_i] = (float)data.gps_raw[2][data_i];
          lat[rec_i] *= 
-            Float.intBitsToFloat(Integer.valueOf("33B40000",16).intValue());
+            Float.intBitsToFloat(Integer.valueOf("33B40000", 16).intValue());
 
          lon[rec_i] = (float)data.gps_raw[3][data_i];
          lon[rec_i] *= 
@@ -176,9 +178,11 @@ public class LevelTwo{
                   (epoch_parts[3] * 3600) + // hours
                   (epoch_parts[4] * 60) + //minutes
                   epoch_parts[5] + //seconds
-                  (epoch_parts[6] / 0.001) + //ms
-                  (epoch_parts[7] / 0.000001) + //us
-                  (epoch_parts[8] / 0.000000001); //ns
+                  (epoch_parts[6] * 0.001) + //ms
+                  (epoch_parts[7] * 0.000001) + //us
+                  (epoch_parts[8] * 0.000000001); //ns
+               //convert signed longitude to east longitude
+               east_lon = (lon[rec_i] > 0) ? lon[rec_i] : lon[rec_i] + 360;
 
                //get the magnetic field info for this location
                String command = 
@@ -186,6 +190,7 @@ public class LevelTwo{
                   frameGroup[rec_i] +" "+ 
                   alt[rec_i] +" "+ lat[rec_i] +" "+ lon[rec_i] +" "+ 
                   (year + 2000)  +" "+  day_of_year +" "+ sec_of_day;
+
                Process p = Runtime.getRuntime().exec(command);
                BufferedReader input = 
                   new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -193,9 +198,8 @@ public class LevelTwo{
                //read and save the mag coords
                line = input.readLine();
                mag_coords = line.split("\\s+");
-               l[rec_i] = Float.parseFloat(mag_coords[1]);
-               mlt[rec_i] = Float.parseFloat(mag_coords[2]);
-
+               l[rec_i] = Math.abs(Float.parseFloat(mag_coords[2]));
+               mlt[rec_i] = Float.parseFloat(mag_coords[3]);
                input.close();
             }catch(Exception ex){
                //something went wrong, so dont save any coords for this record
@@ -389,7 +393,6 @@ public class LevelTwo{
          frameGroup 
       );
       var = cdf.getVariable("Epoch");
-      System.out.println(date + ": " + var.getNumWrittenRecords());
       System.out.println("Epoch...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1L,
@@ -1223,7 +1226,6 @@ public class LevelTwo{
          if(first_i == -1) {
             if(rec_date == date){
                //found the first_i index
-               System.out.println("boom!");
                first_i = last_i;
             }
          }else if(rec_date > date){
