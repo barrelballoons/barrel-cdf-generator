@@ -5,6 +5,7 @@ import gsfc.nssdc.cdf.CDFException;
 import gsfc.nssdc.cdf.util.CDFTT2000;
 import gsfc.nssdc.cdf.Variable;
 
+import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -64,7 +65,7 @@ public class LevelTwo{
       flt = "00",
       stn = "0",
       revNum = "00",
-      mag_id = "";
+      mag_gen_program = "";
    int today = 0;
    Calendar dateObj = Calendar.getInstance();
    
@@ -89,7 +90,7 @@ public class LevelTwo{
       flt = f;
       stn = s;
       today = Integer.valueOf(d);
-      mag_id = m;
+      mag_gen_program = m;
 
       //get the data storage object
       data = CDF_Gen.getDataSet();
@@ -112,38 +113,101 @@ public class LevelTwo{
    public void doGpsCdf(int first, int last, int date) throws CDFException{
       CDF cdf;
       Variable var;
-      int numOfRecs = last - first;
+      Calendar d = Calendar.getInstance();
+      String line;
+      int 
+         year, month, day, day_of_year,
+         numOfRecs = last - first;
+      double
+         sec_of_day = 0;
+      float
+         east_lon = 0;
+      String[] 
+         mag_coords = new String[3];
       float[] 
          lat = new float[numOfRecs], 
          lon = new float[numOfRecs], 
-         alt = new float[numOfRecs];
+         alt = new float[numOfRecs],
+         mlt = new float[numOfRecs],
+         l = new float[numOfRecs];
       int[] 
          ms = new int[numOfRecs],
          frameGroup = new int[numOfRecs],
          q = new int[numOfRecs]; 
-      long[] epoch = new long[numOfRecs];
+      long[] 
+         epoch_parts = new long[9],
+         epoch = new long[numOfRecs];
 
       System.out.println("\nSaving GPS Level Two CDF...");
 
+      //calculate the day of year
+      year = date / 10000;
+      month = (date - (year * 10000)) / 100;
+      day = date - (year * 10000) - (month * 100);
+      d.set(Calendar.YEAR, year + 2000);
+      d.set(Calendar.MONTH, month - 1);
+      d.set(Calendar.DAY_OF_MONTH, day);
+      day_of_year = d.get(Calendar.DAY_OF_YEAR);
+
       //convert lat, lon, and alt values and select values for this date
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-        //convert mm to km
-        alt[rec_i] = (float)data.gps_raw[0][data_i] / 1000000;
+         //convert mm to km
+         alt[rec_i] = (float)data.gps_raw[0][data_i] / 1000000;
 
-        //convert lat and lon to physical units
-        lat[rec_i] = (float)data.gps_raw[2][data_i];
-        lat[rec_i] *= 
-           Float.intBitsToFloat(Integer.valueOf("33B40000",16).intValue());
+         //convert lat and lon to physical units
+         lat[rec_i] = (float)data.gps_raw[2][data_i];
+         lat[rec_i] *= 
+            Float.intBitsToFloat(Integer.valueOf("33B40000", 16).intValue());
 
-        lon[rec_i] = (float)data.gps_raw[3][data_i];
-        lon[rec_i] *= 
-           Float.intBitsToFloat(Integer.valueOf("33B40000",16).intValue());
+         lon[rec_i] = (float)data.gps_raw[3][data_i];
+         lon[rec_i] *= 
+            Float.intBitsToFloat(Integer.valueOf("33B40000", 16).intValue());
 
-        //save the values from the other variables
-        ms[rec_i] = data.gps_raw[1][data_i];
-        frameGroup[rec_i] = data.frame_mod4[data_i];
-        epoch[rec_i] = data.epoch_mod4[data_i];
-        q[rec_i] = data.gps_q[data_i];
+         //save the values from the other variables
+         ms[rec_i] = data.gps_raw[1][data_i];
+         frameGroup[rec_i] = data.frame_mod4[data_i];
+         epoch[rec_i] = data.epoch_mod4[data_i];
+         q[rec_i] = data.gps_q[data_i];
+
+         //make sure we have a complete gps record before generating mag coords
+         if((alt[rec_i] != 0) && (lat[rec_i] != 0) && (lon[rec_i] != 0)){
+            try{
+               //calculate the current time in seconds of day
+               epoch_parts = CDFTT2000.breakdown(epoch[rec_i]);
+               sec_of_day = 
+                  (epoch_parts[3] * 3600) + // hours
+                  (epoch_parts[4] * 60) + //minutes
+                  epoch_parts[5] + //seconds
+                  (epoch_parts[6] * 0.001) + //ms
+                  (epoch_parts[7] * 0.000001) + //us
+                  (epoch_parts[8] * 0.000000001); //ns
+               //convert signed longitude to east longitude
+               east_lon = (lon[rec_i] > 0) ? lon[rec_i] : lon[rec_i] + 360;
+
+               //get the magnetic field info for this location
+               String command = 
+                  mag_gen_program + " " + 
+                  frameGroup[rec_i] +" "+ 
+                  alt[rec_i] +" "+ lat[rec_i] +" "+ lon[rec_i] +" "+ 
+                  (year + 2000)  +" "+  day_of_year +" "+ sec_of_day;
+
+               Process p = Runtime.getRuntime().exec(command);
+               BufferedReader input = 
+                  new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+               //read and save the mag coords
+               line = input.readLine();
+               mag_coords = line.split("\\s+");
+               l[rec_i] = Math.abs(Float.parseFloat(mag_coords[2]));
+               mlt[rec_i] = Float.parseFloat(mag_coords[3]);
+               input.close();
+            }catch(Exception ex){
+               //something went wrong, so dont save any coords for this record
+               System.out.println("Could not generate mag coords:");
+               System.out.println(ex.getMessage());
+               continue;
+            }
+         }
       }
 
       //make sure there is a CDF file to open
@@ -197,6 +261,26 @@ public class LevelTwo{
          new long[] {1}, 
          new long[] {1}, 
          lon
+      );
+
+      var = cdf.getVariable("L");
+      System.out.println("ms_of_week...");
+      var.putHyperData(
+         var.getNumWrittenRecords(), numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         l
+      );
+
+      var = cdf.getVariable("MLT");
+      System.out.println("ms_of_week...");
+      var.putHyperData(
+         var.getNumWrittenRecords(), numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         mlt
       );
 
       var = cdf.getVariable("FrameGroup");
@@ -309,7 +393,6 @@ public class LevelTwo{
          frameGroup 
       );
       var = cdf.getVariable("Epoch");
-      System.out.println(date + ": " + var.getNumWrittenRecords());
       System.out.println("Epoch...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1L,
@@ -1143,7 +1226,6 @@ public class LevelTwo{
          if(first_i == -1) {
             if(rec_date == date){
                //found the first_i index
-               System.out.println("boom!");
                first_i = last_i;
             }
          }else if(rec_date > date){
