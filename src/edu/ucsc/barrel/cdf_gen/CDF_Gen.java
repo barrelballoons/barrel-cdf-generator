@@ -263,7 +263,9 @@ public class CDF_Gen implements CDFConstants{
                if(getSetting("L").indexOf("2") > -1){
                   //create Level Two
                   LevelTwo L2 =
-						   new LevelTwo(getSetting("date"), id, flt, stn, mag);
+						   new LevelTwo(
+                        getSetting("date"), id, flt, stn, getSetting("mag_gen")
+                     );
                   
                   L2 = null;
                }
