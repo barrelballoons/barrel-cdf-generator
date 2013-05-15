@@ -340,7 +340,6 @@ public class LevelOne{
          frameGroup 
       );
       var = cdf.getVariable("Epoch");
-      System.out.println(date + ": " + var.getNumWrittenRecords());
       System.out.println("Epoch...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1L,
@@ -1020,7 +1019,6 @@ public class LevelOne{
          if(first_i == -1) {
             if(rec_date == date){
                //found the first_i index
-               System.out.println("boom!");
                first_i = last_i;
             }
          }else if(rec_date > date){
