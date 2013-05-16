@@ -109,7 +109,7 @@ public class LevelTwo{
       }
    }
    
-   //Convert the GPS data and save it to CDF files
+   //Convert the EPHM data and save it to CDF files
    public void doGpsCdf(int first, int last, int date) throws CDFException{
       CDF cdf;
       Variable var;
@@ -138,7 +138,7 @@ public class LevelTwo{
          epoch_parts = new long[9],
          epoch = new long[numOfRecs];
 
-      System.out.println("\nSaving GPS Level Two CDF...");
+      System.out.println("\nSaving EPHM Level Two CDF...");
 
       //calculate the day of year
       year = date / 10000;
@@ -213,18 +213,18 @@ public class LevelTwo{
       //make sure there is a CDF file to open
       //(CDF_Gen.copyFile will not clobber an existing file)
       String srcName = 
-         "cdf_skels/l2/barCLL_PP_S_l2_gps-_YYYYMMDD_v++.cdf";
+         "cdf_skels/l2/barCLL_PP_S_l2_ephm-_YYYYMMDD_v++.cdf";
       String destName = 
          outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
-         "_l2_" + "gps-" + "_20" + date +  "_v" + revNum + ".cdf";
+         "_l2_" + "ephm-" + "_20" + date +  "_v" + revNum + ".cdf";
 
       CDF_Gen.copyFile(new File(srcName), new File(destName), false);
 
-      //open GPS CDF and save the reference in the cdf variable
+      //open EPHM CDF and save the reference in the cdf variable
       cdf = CDF_Gen.openCDF(destName);
       
-      var = cdf.getVariable("GPS_Alt");
-      System.out.println("GPS_Alt...");
+      var = cdf.getVariable("EPHM_Alt");
+      System.out.println("EPHM_Alt...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1,
          new long[] {0}, 
@@ -243,8 +243,8 @@ public class LevelTwo{
          ms
       );
 
-      var = cdf.getVariable("GPS_Lat");
-      System.out.println("GPS_Lat...");
+      var = cdf.getVariable("EPHM_Lat");
+      System.out.println("EPHM_Lat...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -253,8 +253,8 @@ public class LevelTwo{
          lat 
       );
 
-      var = cdf.getVariable("GPS_Lon");
-      System.out.println("GPS_Lon...");
+      var = cdf.getVariable("EPHM_Lon");
+      System.out.println("EPHM_Lon...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -313,7 +313,7 @@ public class LevelTwo{
          q
       );
 
-      System.out.println("Done with GPS!");
+      System.out.println("Done with EPHM!");
       //close current cdf
       cdf.close();
    }
@@ -353,8 +353,8 @@ public class LevelTwo{
 
       cdf = CDF_Gen.openCDF(destName);
       
-      var = cdf.getVariable("GPS_PPS");
-      System.out.println("GPS_PPS...");
+      var = cdf.getVariable("EPHM_PPS");
+      System.out.println("EPHM_PPS...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1L, 
          new long[] {0}, 
