@@ -53,7 +53,7 @@ Change Log:
       -Moved time calculation code to top of loop
       -Changed epoch to being only stored in DataHolder instead of also being a 
          local variable
-      -Removed ms_of_week from all files except GPS
+      -Removed ms_of_week from all files except EPHM
       -Uses DataHolder.rc_label to write rc CDF variables instead of the switch 
          statment
       -Wraps primitive variable types stored in DataHolded in proper objects before
@@ -152,7 +152,7 @@ public class LevelOne{
       }
    }
    
-   //Saveve the GPS data to CDF the file
+   //Saveve the EPHM data to CDF the file
    public void doGpsCdf(int first, int last, int date) throws CDFException{
       CDF cdf;
       Variable var;
@@ -163,7 +163,7 @@ public class LevelOne{
       long[] epoch = new long[numOfRecs];
       int[][] gps = new int[4][numOfRecs];
 
-      System.out.println("\nSaving GPS Level One CDF...");
+      System.out.println("\nSaving EPHM Level One CDF...");
 
       //select values for this date
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
@@ -180,18 +180,18 @@ public class LevelOne{
       //make sure there is a CDF file to open
       //(CDF_Gen.copyFile will not clobber an existing file)
       String srcName = 
-         "cdf_skels/l1/barCLL_PP_S_l1_gps-_YYYYMMDD_v++.cdf";
+         "cdf_skels/l1/barCLL_PP_S_l1_ephm-_YYYYMMDD_v++.cdf";
       String destName = 
          outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
-         "_l1_" + "gps-" + "_20" + date +  "_v" + revNum + ".cdf";
+         "_l1_" + "ephm-" + "_20" + date +  "_v" + revNum + ".cdf";
 
       CDF_Gen.copyFile(new File(srcName), new File(destName), false);
 
-      //open GPS CDF and save the reference in the cdf variable
+      //open EPHM CDF and save the reference in the cdf variable
       cdf = CDF_Gen.openCDF(destName);
       
-      var = cdf.getVariable("GPS_Alt");
-      System.out.println("GPS_Alt...");
+      var = cdf.getVariable("EPHM_Alt");
+      System.out.println("EPHM_Alt...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1,
          new long[] {0}, 
@@ -210,8 +210,8 @@ public class LevelOne{
          gps[1]
       );
 
-      var = cdf.getVariable("GPS_Lat");
-      System.out.println("GPS_Lat...");
+      var = cdf.getVariable("EPHM_Lat");
+      System.out.println("EPHM_Lat...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -220,8 +220,8 @@ public class LevelOne{
          gps[2] 
       );
 
-      var = cdf.getVariable("GPS_Lon");
-      System.out.println("GPS_Lon...");
+      var = cdf.getVariable("EPHM_Lon");
+      System.out.println("EPHM_Lon...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -260,7 +260,7 @@ public class LevelOne{
          q
       );
 
-      System.out.println("Done with GPS!");
+      System.out.println("Done with EPHM!");
       //close current cdf
       cdf.close();
    }
@@ -300,8 +300,8 @@ public class LevelOne{
 
       cdf = CDF_Gen.openCDF(destName);
       
-      var = cdf.getVariable("GPS_PPS");
-      System.out.println("GPS_PPS...");
+      var = cdf.getVariable("EPHM_PPS");
+      System.out.println("EPHM_PPS...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1L, 
          new long[] {0}, 
