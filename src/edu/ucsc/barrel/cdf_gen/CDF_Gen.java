@@ -142,7 +142,7 @@ public class CDF_Gen implements CDFConstants{
    
    //List of types of CDF files
    public static String[] fileTypes = 
-      {"magn","rcnt","gps-","fspc","mspc","sspc","hkpg","pps-"};
+      {"magn","rcnt","ephm-","fspc","mspc","sspc","hkpg","pps-"};
    
    public static DataHolder getDataSet(){return data;}
    
