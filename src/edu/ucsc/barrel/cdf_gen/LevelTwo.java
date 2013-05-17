@@ -115,6 +115,7 @@ public class LevelTwo{
       Variable var;
       Calendar d = Calendar.getInstance();
       String line;
+      Logger coord_file = new Logger("geo_coords.txt");
       int 
          year, month, day, day_of_year,
          numOfRecs = last - first;
@@ -184,6 +185,14 @@ public class LevelTwo{
                //convert signed longitude to east longitude
                east_lon = (lon[rec_i] > 0) ? lon[rec_i] : lon[rec_i] + 360;
 
+               coord_file.writeln(
+                  String.format(
+                     "%07d %02.6f %03.6f %03.6f %04d %03d %02.3f", 
+                     frameGroup[rec_i], alt[rec_i], lat[rec_i], lon[rec_i],
+                     (year + 2000), day_of_year, sec_of_day
+                  )
+               );
+/*
                //get the magnetic field info for this location
                String command = 
                   mag_gen_program + " " + 
@@ -201,30 +210,35 @@ public class LevelTwo{
                l[rec_i] = Math.abs(Float.parseFloat(mag_coords[2]));
                mlt[rec_i] = Float.parseFloat(mag_coords[3]);
                input.close();
+*/  
             }catch(Exception ex){
                //something went wrong, so dont save any coords for this record
                System.out.println("Could not generate mag coords:");
                System.out.println(ex.getMessage());
+               ex.printStackTrace();
+               System.exit(1);
                continue;
             }
          }
       }
+      
+      coord_file.close();
 
       //make sure there is a CDF file to open
       //(CDF_Gen.copyFile will not clobber an existing file)
       String srcName = 
-         "cdf_skels/l2/barCLL_PP_S_l2_ephm-_YYYYMMDD_v++.cdf";
+         "cdf_skels/l2/barCLL_PP_S_l2_ephm_YYYYMMDD_v++.cdf";
       String destName = 
          outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
-         "_l2_" + "ephm-" + "_20" + date +  "_v" + revNum + ".cdf";
+         "_l2_" + "ephm" + "_20" + date +  "_v" + revNum + ".cdf";
 
       CDF_Gen.copyFile(new File(srcName), new File(destName), false);
 
       //open EPHM CDF and save the reference in the cdf variable
       cdf = CDF_Gen.openCDF(destName);
       
-      var = cdf.getVariable("EPHM_Alt");
-      System.out.println("EPHM_Alt...");
+      var = cdf.getVariable("GPS_Alt");
+      System.out.println("GPS_Alt...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1,
          new long[] {0}, 
@@ -243,8 +257,8 @@ public class LevelTwo{
          ms
       );
 
-      var = cdf.getVariable("EPHM_Lat");
-      System.out.println("EPHM_Lat...");
+      var = cdf.getVariable("GPS_Lat");
+      System.out.println("GPS_Lat...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -253,8 +267,8 @@ public class LevelTwo{
          lat 
       );
 
-      var = cdf.getVariable("EPHM_Lon");
-      System.out.println("EPHM_Lon...");
+      var = cdf.getVariable("GPS_Lon");
+      System.out.println("GPS_Lon...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -353,8 +367,8 @@ public class LevelTwo{
 
       cdf = CDF_Gen.openCDF(destName);
       
-      var = cdf.getVariable("EPHM_PPS");
-      System.out.println("EPHM_PPS...");
+      var = cdf.getVariable("GPS_PPS");
+      System.out.println("GPS_PPS...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1L, 
          new long[] {0}, 

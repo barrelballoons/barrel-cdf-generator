@@ -180,18 +180,18 @@ public class LevelOne{
       //make sure there is a CDF file to open
       //(CDF_Gen.copyFile will not clobber an existing file)
       String srcName = 
-         "cdf_skels/l1/barCLL_PP_S_l1_ephm-_YYYYMMDD_v++.cdf";
+         "cdf_skels/l1/barCLL_PP_S_l1_ephm_YYYYMMDD_v++.cdf";
       String destName = 
          outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
-         "_l1_" + "ephm-" + "_20" + date +  "_v" + revNum + ".cdf";
+         "_l1_" + "ephm" + "_20" + date +  "_v" + revNum + ".cdf";
 
       CDF_Gen.copyFile(new File(srcName), new File(destName), false);
 
       //open EPHM CDF and save the reference in the cdf variable
       cdf = CDF_Gen.openCDF(destName);
       
-      var = cdf.getVariable("EPHM_Alt");
-      System.out.println("EPHM_Alt...");
+      var = cdf.getVariable("GPS_Alt");
+      System.out.println("GPS_Alt...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1,
          new long[] {0}, 
@@ -210,8 +210,8 @@ public class LevelOne{
          gps[1]
       );
 
-      var = cdf.getVariable("EPHM_Lat");
-      System.out.println("EPHM_Lat...");
+      var = cdf.getVariable("GPS_Lat");
+      System.out.println("GPS_Lat...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -220,8 +220,8 @@ public class LevelOne{
          gps[2] 
       );
 
-      var = cdf.getVariable("EPHM_Lon");
-      System.out.println("EPHM_Lon...");
+      var = cdf.getVariable("GPS_Lon");
+      System.out.println("GPS_Lon...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -300,8 +300,8 @@ public class LevelOne{
 
       cdf = CDF_Gen.openCDF(destName);
       
-      var = cdf.getVariable("EPHM_PPS");
-      System.out.println("EPHM_PPS...");
+      var = cdf.getVariable("GPS_PPS");
+      System.out.println("GPS_PPS...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1L, 
          new long[] {0}, 
