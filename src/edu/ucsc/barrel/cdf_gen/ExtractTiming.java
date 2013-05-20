@@ -574,7 +574,10 @@ public class ExtractTiming {
          //convert from "ms since j2000" to "ns since J2000"
          data.epoch_1Hz[data_i] =
             (long)(data.ms_since_j2000[data_i] * 1000000);
-            
+         CDF_Gen.timeStamps.writeln(
+            data.frame_1Hz[data_i] + " " + (CDFTT2000.encode(data.epoch_1Hz[data_i]))
+         );
+
          //save epoch to the various time scales
          //fill the >1Hz times 
          for(int fill_i = 0; fill_i < 4; fill_i++){

@@ -139,6 +139,7 @@ public class CDF_Gen implements CDFConstants{
    public static String L1_Dir;
    public static String L2_Dir;
    public static Logger log;
+   public static Logger timeStamps;
    
    //List of types of CDF files
    public static String[] fileTypes = 
@@ -230,7 +231,9 @@ public class CDF_Gen implements CDFConstants{
 					stn,
                getSetting("date")
             );
+            timeStamps = new Logger("gps_times.txt");
             L0.processRawFiles();
+            timeStamps.close();
             L0.finish();
             System.out.println(
                "Completed Level 0 for payload " + getSetting("currentPayload")
@@ -249,10 +252,12 @@ public class CDF_Gen implements CDFConstants{
    			   );
             
                //Fill the time variable
+               timeStamps = new Logger("epoch_times.txt");
                ExtractTiming barrel_time = 
                   new ExtractTiming(getSetting("date"));
                barrel_time = null;
-               
+               timeStamps.close();
+
                if(getSetting("L").indexOf("1") > -1){
                   //create Level One 
                   LevelOne L1 =

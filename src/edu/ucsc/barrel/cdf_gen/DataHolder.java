@@ -144,7 +144,7 @@ public class DataHolder{
       lc2_raw = new int[MAX_FRAMES * 20],
       lc3_raw = new int[MAX_FRAMES * 20],
       lc4_raw = new int[MAX_FRAMES * 20];
-
+   
    //keep track of rollover points for up to 3 days
    public int[]
       day_rollovers = {-1, -1, -1};
@@ -273,7 +273,8 @@ public class DataHolder{
       int mod4 = 0, mod32 = 0, mod40 = 0;
       long tmpFC = 0;
       short tmpVer = 0, tmpPayID = 0;
-      
+      int hour =0, min =0, sec = 0;
+
       //Breakdown frame counter words: 
       //save the frame counter parts as temp variables,
       //they will be written to the main structure once rec_num is calculated.
@@ -307,6 +308,7 @@ public class DataHolder{
       ver[rec_num_1Hz] = tmpVer;
       payID[rec_num_1Hz] = tmpPayID;
       frame_1Hz[rec_num_1Hz] = (int)tmpFC;
+
       //figure out the other time scale frame counters
       for(int rec_i = rec_num_4Hz; rec_i < rec_num_4Hz + 4; rec_i++){
          frame_4Hz[rec_i] = frame_1Hz[rec_num_1Hz];
@@ -328,6 +330,16 @@ public class DataHolder{
       //save the time variable separately for the epoch calculation 
       if(mod4 == 1){
          ms_of_week[rec_num_mod4] = gps_raw[mod4][rec_num_mod4];
+
+         sec = ms_of_week[rec_num_mod4] / 1000; //convert ms to sec
+         sec %= 86400; //remove any complete days
+         hour = sec / 3600;
+         sec %= 3600;
+         min = sec / 60;
+         sec %= 60;
+         CDF_Gen.timeStamps.writeln(
+            frame_1Hz[rec_num_1Hz] + " " + hour + ":" + min + ":" + sec + ", " + (sec-16)
+         );
       }
 
       //fill the quality flag with a 0 for now
