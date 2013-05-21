@@ -117,7 +117,7 @@ public class LevelTwo{
       String line;
       Logger coord_file = new Logger("geo_coords.txt");
       int 
-         year, month, day, day_of_year,
+         year, month, day, day_of_year, hour, min, sec,
          numOfRecs = last - first;
       double
          sec_of_day = 0;
@@ -132,12 +132,12 @@ public class LevelTwo{
          mlt = new float[numOfRecs],
          l = new float[numOfRecs];
       int[] 
-         ms = new int[numOfRecs],
          frameGroup = new int[numOfRecs],
          q = new int[numOfRecs]; 
       long[] 
          epoch_parts = new long[9],
-         epoch = new long[numOfRecs];
+         epoch = new long[numOfRecs],
+         gps_time = new long[numOfRecs];
 
       System.out.println("\nSaving EPHM Level Two CDF...");
 
@@ -164,8 +164,24 @@ public class LevelTwo{
          lon[rec_i] *= 
             Float.intBitsToFloat(Integer.valueOf("33B40000", 16).intValue());
 
+         //calculate the GPS time
+         sec = data.gps_raw[1][data_i] / 1000; //convert ms to sec
+         sec %= 86400; //remove any complete days
+         hour = sec / 3600;
+         sec %= 3600;
+         min = sec / 60;
+         sec %= 60;
+         gps_time[rec_i] = CDFTT2000.compute(
+            (long)(year + 2000), (long)(month - 1), (long)day, (long)hour, 
+            (long)min, (long)sec, 0L, 0L, 0L
+         );  
+         
+         CDF_Gen.timeStamps.writeln(
+            (data.frame_mod4[rec_i] + " " + 
+            (data.epoch_mod4[rec_i] - gps_time[rec_i]) / 1000000000)
+         );
+
          //save the values from the other variables
-         ms[rec_i] = data.gps_raw[1][data_i];
          frameGroup[rec_i] = data.frame_mod4[data_i];
          epoch[rec_i] = data.epoch_mod4[data_i];
          q[rec_i] = data.gps_q[data_i];
@@ -247,14 +263,14 @@ public class LevelTwo{
          alt
       );
 
-      var = cdf.getVariable("ms_of_week");
-      System.out.println("ms_of_week...");
+      var = cdf.getVariable("GPS_Time");
+      System.out.println("GPS_Time");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         ms
+         gps_time
       );
 
       var = cdf.getVariable("GPS_Lat");

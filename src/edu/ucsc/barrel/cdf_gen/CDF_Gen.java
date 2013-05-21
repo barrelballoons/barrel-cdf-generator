@@ -266,12 +266,14 @@ public class CDF_Gen implements CDFConstants{
                }
                
                if(getSetting("L").indexOf("2") > -1){
+                  timeStamps = new Logger("time_diff.txt");
                   //create Level Two
                   LevelTwo L2 =
 						   new LevelTwo(
                         getSetting("date"), id, flt, stn, getSetting("mag_gen")
                      );
-                  
+                  timeStamps.close();
+
                   L2 = null;
                }
             }
