@@ -111,9 +111,8 @@ public class DataHolder{
       magy_raw = new int[MAX_FRAMES * 4],
       magz_raw = new int[MAX_FRAMES * 4];
    public double[]
-      time_model_rate = new double[MAX_FRAMES],
-      time_model_offset = new double[MAX_FRAMES],
-      ms_since_j2000 = new double[MAX_FRAMES];
+      time_model_slope = new double[MAX_FRAMES],
+      time_model_intercept = new double[MAX_FRAMES];
    public double[][]
       hkpg = new double[36][MAX_FRAMES / 40];
    public int[]
@@ -254,21 +253,80 @@ public class DataHolder{
    }
 
    public int getSize(String cadence){
-      if(cadence == "1Hz"){
+      if(cadence.equals("1Hz")){
          return rec_num_1Hz + 1;
-      }else if(cadence == "4Hz"){
+      }else if(cadence.equals("4Hz")){
          return rec_num_4Hz;
-      }else if(cadence == "20Hz"){
+      }else if(cadence.equals("20Hz")){
          return rec_num_20Hz;
-      }else if(cadence == "mod4"){
+      }else if(cadence.equals("mod4")){
          return rec_num_mod4;
-      }else if(cadence == "mod32"){
+      }else if(cadence.equals("mod32")){
          return rec_num_mod32;
       }else{
          return rec_num_mod40;
       }
    }
-   
+  
+   public int convertIndex(int old_i, long fc, String old_cad, String new_cad){
+      long target_fc;
+      int fc_offset = 0, new_i;
+      double multiplier;
+      int[] frames;
+
+      //figure out the index multiplier, fc_offset, and 
+      //get the new frameset based on input cadence
+      if(new_cad.equals("mod40")){
+         multiplier = 0.025;
+         frames = frame_mod40;
+         fc_offset = (int)fc % 40;
+      }
+      else if(new_cad.equals("mod32")){
+         multiplier = 0.03125;
+         frames = frame_mod32;
+         fc_offset = (int)fc % 32;
+      }
+      else if(new_cad.equals("mod4")){
+         multiplier = 0.25;
+         frames = frame_mod4;
+         fc_offset = (int)fc % 4;
+      }
+      else if(new_cad.equals("1Hz")){
+         multiplier = 1;
+         frames = frame_1Hz;
+      }
+      else if(new_cad.equals("4Hz")){
+         multiplier = 4;
+         frames = frame_4Hz;
+      }
+      else{
+         multiplier = 20;
+         frames = frame_20Hz;
+      }
+      if(old_cad.equals("mod40")){multiplier /= 0.025;}
+      else if(old_cad.equals("mod32")){multiplier /= 0.03125;}
+      else if(old_cad.equals("mod4")){multiplier /= 0.25;}
+      else if(old_cad.equals("4Hz")){multiplier /= 4;}
+      else{multiplier /= 20;}
+
+      //figure out the target frame number 
+      //this will determine the first frame number of a multiplexed group
+      target_fc = fc - fc_offset;
+
+      //get initial guess for the new index
+      new_i = (int)(old_i * multiplier);
+
+      //correct new_i based on frame number
+      while((frames[new_i] < target_fc) && (new_i < frames.length)){
+         new_i++;
+      }
+      while((frames[new_i] > target_fc) && (new_i > 0)){
+         new_i--;
+      }
+
+      return new_i;
+   }
+
    public void addFrame(BigInteger frame){
       int mod4 = 0, mod32 = 0, mod40 = 0;
       long tmpFC = 0;

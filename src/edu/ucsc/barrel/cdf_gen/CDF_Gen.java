@@ -143,11 +143,12 @@ public class CDF_Gen implements CDFConstants{
    
    //List of types of CDF files
    public static String[] fileTypes = 
-      {"magn","rcnt","ephm-","fspc","mspc","sspc","hkpg","pps-"};
+      {"magn","rcnt","ephm","fspc","mspc","sspc","hkpg","pps-"};
    
    public static DataHolder getDataSet(){return data;}
    
    public static void main(String[] args){
+      int time_cnt = 0;
       //array to hold payload id, lauch order, and launch site
 		String[] payload = new String[3];
 		
@@ -255,6 +256,10 @@ public class CDF_Gen implements CDFConstants{
                timeStamps = new Logger("epoch_times.txt");
                ExtractTiming barrel_time = 
                   new ExtractTiming(getSetting("date"));
+               barrel_time.fixWeekOffset();
+               barrel_time.getTimeRecs();
+               barrel_time.fillModels();
+               barrel_time.fillEpoch();
                barrel_time = null;
                timeStamps.close();
 
