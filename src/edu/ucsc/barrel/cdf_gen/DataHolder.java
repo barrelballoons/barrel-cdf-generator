@@ -396,7 +396,7 @@ public class DataHolder{
          min = sec / 60;
          sec %= 60;
          CDF_Gen.timeStamps.writeln(
-            frame_1Hz[rec_num_1Hz] + " " + hour + ":" + min + ":" + sec + ", " + (sec-16)
+            frame_1Hz[rec_num_1Hz] + ", " + ms_of_week[rec_num_mod4] + ", " + hour + ":" + min + ":" + sec + ", " + (sec-16)
          );
       }
 

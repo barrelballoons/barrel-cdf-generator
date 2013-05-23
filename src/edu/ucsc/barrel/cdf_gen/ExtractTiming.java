@@ -163,10 +163,7 @@ public class ExtractTiming {
          if((fc < MINFC) || (fc > MAXFC)){continue;}
 
          //figure out the offset from mod4 fc and 1Hz fc
-         fc_offset = (int)(fc % 4) - DataHolder.TIME; 
-         
-         //correct fc
-         fc -= fc_offset;
+         fc -= ((fc % 4) - DataHolder.TIME); 
          
          //get the indices of other cadence data
          rec_1Hz_i = data.convertIndex(rec_mod4_i, fc, "mod4", "1Hz");
@@ -179,6 +176,8 @@ public class ExtractTiming {
          //get number of weeks since GPS_START_TIME
          week = (short)data.weeks[rec_mod40_i];
          if((week < MINWK) || (week > MAXWK)){continue;}
+         
+         System.out.println(fc + ",  " + ms);
 
          time_recs[time_rec_cnt] = new TimeRec(fc, ms, week, pps);
          time_rec_cnt++;
@@ -205,7 +204,14 @@ public class ExtractTiming {
          new_fit = genModel(first_rec, last_rec);
          
          //Need to add better criteria than this for accepting a new model
-         if(new_fit != null){fit = new_fit;}
+         if(new_fit != null){
+            fit = new_fit;
+            System.out.println(
+               "Frames " + time_recs[first_rec].getFrame() + " - " +
+               time_recs[last_rec].getFrame() + " \n" +
+               "\tm = " + fit.getSlope() + ", b = " + fit.getIntercept()
+            );
+         }
          
          //fill each 1Hz record with the current model
          if(fit != null){
@@ -220,6 +226,13 @@ public class ExtractTiming {
             }
          }
       }
+
+      //fill any remaining 1Hz records with the last model
+      while(frame_i < size_1Hz){
+            data.time_model_slope[frame_i] = fit.getSlope(); 
+            data.time_model_intercept[frame_i] = fit.getIntercept(); 
+            frame_i++;
+      }
    }
 
    public void fillEpoch(){
@@ -229,17 +242,18 @@ public class ExtractTiming {
          rec_num_mod4 = -1, rec_num_mod32 = -1, rec_num_mod40 = -1;
       
       long[] tt2000_parts;
-      long rec_date;
-      int date_offset;
+      long rec_date, current_frame;
+      int date_offset, size;
 
-      for(int data_i = 0; data_i < data.getSize("1Hz"); data_i++){
+      size = data.getSize("1Hz");
+      for(int data_i = 0; data_i < size; data_i++){
          fc_mod4 = 
             data.frame_1Hz[data_i] - (data.frame_1Hz[data_i] % 4);
          fc_mod32 = 
             data.frame_1Hz[data_i] - (data.frame_1Hz[data_i] % 32);
          fc_mod40 = 
             data.frame_1Hz[data_i] - (data.frame_1Hz[data_i] % 40);
-         
+
          //increment the record number for the <1Hz cadence data types
          if(fc_mod4 != last_fc_mod4){rec_num_mod4++;}
          if(fc_mod32 != last_fc_mod32){rec_num_mod32++;}
@@ -251,6 +265,7 @@ public class ExtractTiming {
             data.time_model_intercept[data_i]) * 
             1000000
          );
+
          //save epoch to the various time scales
          //fill the >1Hz times 
          for(int fill_i = 0; fill_i < 4; fill_i++){
@@ -264,17 +279,10 @@ public class ExtractTiming {
 
          //fill the <1Hz times. 
          //These time stamps are for the begining of the accumulation period
-/*
-         data.epoch_mod4[rec_num_mod4] = 
-            (long)(data.epoch_1Hz[data_i] - 
-               ((data.frame_1Hz[data_i] % 4) - 4) * NOM_RATE * 1000000);
-         data.epoch_mod32[rec_num_mod32] =
-            (long)(data.epoch_1Hz[data_i] - 
-               ((data.frame_1Hz[data_i] % 32) - 32) * NOM_RATE * 1000000);
-         data.epoch_mod40[rec_num_mod40] = 
-            (long)(data.epoch_1Hz[data_i] - 
-               ((data.frame_1Hz[data_i] % 40) - 40) * NOM_RATE * 1000000);
-*/
+         data.epoch_mod4[rec_num_mod4] = (long)data.epoch_1Hz[data_i];
+         data.epoch_mod32[rec_num_mod32] = (long)data.epoch_1Hz[data_i];
+         data.epoch_mod40[rec_num_mod40] = (long)data.epoch_1Hz[data_i];
+
          //make sure we have a valid epoch value
          if(data.epoch_1Hz[data_i] > 0){
             //check for date rollover
@@ -346,8 +354,8 @@ public class ExtractTiming {
       //get offsets from set of time pairs
       //"offsets" are the difference between the nominal time guess and
       //the time that was transmitted
-      for(int rec_i = first; rec_i < last; rec_i++){
-         offsets[rec_i] = 
+      for(int rec_i = first, offset_i = 0; rec_i < last; rec_i++, offset_i++){
+         offsets[offset_i] = 
             time_recs[rec_i].getMS() - 
             (NOM_RATE * time_recs[rec_i].getFrame());
       }
