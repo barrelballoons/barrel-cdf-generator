@@ -64,8 +64,6 @@ public class ExtractTiming {
    private static final short BADPPS = 64;
 
    private long today;
-   private int time_rec_cnt = 0;
-   private SimpleRegression time_model;
 
    //date offset info
    //Offset in ms from system epoch to gps start time (00:00:00 1980-01-60 UTC) 
@@ -106,8 +104,8 @@ public class ExtractTiming {
 
       public void setFirst(long fc){first_frame = fc;}
       public void setLast(long fc){last_frame = fc;}
-      public void setSlope(long s){slope = s;}
-      public void setIntercept(long i){intercept = i;}
+      public void setSlope(double s){slope = s;}
+      public void setIntercept(double i){intercept = i;}
 
       public long getFirst(){return first_frame;}
       public long getLast(){return last_frame;}
@@ -117,6 +115,12 @@ public class ExtractTiming {
 
    //declare an array of time pairs
    private TimeRec[] time_recs;
+   private int time_rec_cnt = 0;
+
+   //declare array of linear models
+   private LinModel[] models;
+   private int model_cnt = 0;
+
    //holder for external data set
    private DataHolder data;
    
@@ -145,6 +149,7 @@ public class ExtractTiming {
       int rec_i = 0, frame_i = 0;
       
       time_recs = new TimeRec[data.getSize("mod4")];
+      models = new LinModel[(data.getSize("1Hz")/MAX_RECS) + 1];
    }
 
    public void getTimeRecs(){
@@ -192,11 +197,7 @@ public class ExtractTiming {
       size_1Hz = data.getSize("1Hz");
 
       //create a model for each batch of time records
-      for(
-         int first_rec = 0; 
-         first_rec < time_rec_cnt; 
-         first_rec = last_rec + 1
-      ){
+      for(int first_rec = 0; first_rec < time_rec_cnt; first_rec = last_rec+1){
          //incriment the last_rec by the max, or however many recs are left
          last_rec += Math.min(MAX_RECS, (time_rec_cnt - first_rec));
          
@@ -206,6 +207,13 @@ public class ExtractTiming {
          //Need to add better criteria than this for accepting a new model
          if(new_fit != null){
             fit = new_fit;
+            models[model_cnt] = new LinModel();
+            models[model_cnt].setSlope(fit.getSlope()); 
+            models[model_cnt].setIntercept(fit.getIntercept()); 
+            models[model_cnt].setFirst(time_recs[first_rec].getFrame()); 
+            models[model_cnt].setLast(time_recs[last_rec].getFrame()); 
+            model_cnt++;
+
             System.out.println(
                "Frames " + time_recs[first_rec].getFrame() + " - " +
                time_recs[last_rec].getFrame() + " \n" +
@@ -236,35 +244,38 @@ public class ExtractTiming {
    }
 
    public void fillEpoch(){
-      int 
-         fc_mod4 = 0, fc_mod32 = 0, fc_mod40 = 0, 
-         last_fc_mod4 = -1, last_fc_mod32 = -1, last_fc_mod40 = -1,
+      long 
+         rec_date,
+         fc, fc_mod4 = 0, fc_mod32 = 0, fc_mod40 = 0, 
+         last_fc_mod4 = -1, last_fc_mod32 = -1, last_fc_mod40 = -1;
+      int
+         date_offset, size,
          rec_num_mod4 = -1, rec_num_mod32 = -1, rec_num_mod40 = -1;
-      
       long[] tt2000_parts;
-      long rec_date, current_frame;
-      int date_offset, size;
-
+      double m, b;
+      
+      //fill the 1Hz and faster timestamps
       size = data.getSize("1Hz");
-      for(int data_i = 0; data_i < size; data_i++){
-         fc_mod4 = 
-            data.frame_1Hz[data_i] - (data.frame_1Hz[data_i] % 4);
-         fc_mod32 = 
-            data.frame_1Hz[data_i] - (data.frame_1Hz[data_i] % 32);
-         fc_mod40 = 
-            data.frame_1Hz[data_i] - (data.frame_1Hz[data_i] % 40);
+      for(int data_i = 0, model_i = 0; data_i < size; data_i++){
+         fc = data.frame_1Hz[data_i];
 
-         //increment the record number for the <1Hz cadence data types
-         if(fc_mod4 != last_fc_mod4){rec_num_mod4++;}
-         if(fc_mod32 != last_fc_mod32){rec_num_mod32++;}
-         if(fc_mod40 != last_fc_mod40){rec_num_mod40++;}
+         //select a model for this frame
+         if(fc > models[model_i].getLast()){
+            //frame came after the last valid fc for the current model
+            for(int new_i = 0; new_i < model_cnt; new_i++){
+               //loop through the remaining models
+               if(fc <= models[new_i].getLast()){
+                  //stop looping when we find a model that has a 
+                  //fc range containing this frame
+                  model_i = new_i;
+                  break;
+               }
+            }
+         }
 
-         //convert from "ms since J2000" to "ns since J2000"
-         data.epoch_1Hz[data_i] = (long)(
-            ((data.frame_1Hz[data_i] * data.time_model_slope[data_i]) + 
-            data.time_model_intercept[data_i]) * 
-            1000000
-         );
+         m = models[model_i].getSlope();
+         b = models[model_i].getIntercept();
+         data.epoch_1Hz[data_i] = (long)((m * fc) + b) * 1000000L;
 
          //save epoch to the various time scales
          //fill the >1Hz times 
@@ -276,13 +287,80 @@ public class ExtractTiming {
             data.epoch_20Hz[(data_i * 20) + fill_i] = 
                data.epoch_1Hz[data_i] + (fill_i * 50000000);
          }
+      }
 
-         //fill the <1Hz times. 
-         //These time stamps are for the begining of the accumulation period
-         data.epoch_mod4[rec_num_mod4] = (long)data.epoch_1Hz[data_i];
-         data.epoch_mod32[rec_num_mod32] = (long)data.epoch_1Hz[data_i];
-         data.epoch_mod40[rec_num_mod40] = (long)data.epoch_1Hz[data_i];
+      //fill mod4 timestamps
+      size = data.getSize("mod4");
+      for(int data_i = 0, model_i = 0; data_i < size; data_i++){
+         fc = data.frame_mod4[data_i];
 
+         //select a model for this frame
+         if(fc > models[model_i].getLast()){
+            //frame came after the last valid fc for the current model
+            for(int new_i = 0; new_i < model_cnt; new_i++){
+               //loop through the remaining models
+               if(fc <= models[new_i].getLast()){
+                  //stop looping when we find a model that has a 
+                  //fc range containing this frame
+                  model_i = new_i;
+                  break;
+               }
+            }
+         }
+
+         m = models[model_i].getSlope();
+         b = models[model_i].getIntercept();
+         data.epoch_mod4[data_i] = (long)((m * fc) + b) * 1000000L;
+      }
+
+      //fill mod32 timestamps
+      size = data.getSize("mod32");
+      for(int data_i = 0, model_i = 0; data_i < size; data_i++){
+         fc = data.frame_mod32[data_i];
+
+         //select a model for this frame
+         if(fc > models[model_i].getLast()){
+            //frame came after the last valid fc for the current model
+            for(int new_i = 0; new_i < model_cnt; new_i++){
+               //loop through the remaining models
+               if(fc <= models[new_i].getLast()){
+                  //stop looping when we find a model that has a 
+                  //fc range containing this frame
+                  model_i = new_i;
+                  break;
+               }
+            }
+         }
+
+         m = models[model_i].getSlope();
+         b = models[model_i].getIntercept();
+         data.epoch_mod32[data_i] = (long)((m * fc) + b) * 1000000L;
+      }
+
+      //fill mod40 timestamps
+      size = data.getSize("mod40");
+      for(int data_i = 0, model_i = 0; data_i < size; data_i++){
+         fc = data.frame_mod40[data_i];
+
+         //select a model for this frame
+         if(fc > models[model_i].getLast()){
+            //frame came after the last valid fc for the current model
+            for(int new_i = 0; new_i < model_cnt; new_i++){
+               //loop through the remaining models
+               if(fc <= models[new_i].getLast()){
+                  //stop looping when we find a model that has a 
+                  //fc range containing this frame
+                  model_i = new_i;
+                  break;
+               }
+            }
+         }
+
+         m = models[model_i].getSlope();
+         b = models[model_i].getIntercept();
+         data.epoch_mod40[data_i] = (long)((m * fc) + b) * 1000000L;
+      }
+/*
          //make sure we have a valid epoch value
          if(data.epoch_1Hz[data_i] > 0){
             //check for date rollover
@@ -298,15 +376,12 @@ public class ExtractTiming {
             This indicates the last record for each day.
             The +1 is needed to have the indicies match the 
             constants set in DataHolder.YESTERDAY/TODAY/TOMORROW
-            */
+            
             date_offset = (int)(rec_date - today + 1);
             data.day_rollovers[date_offset] = data_i;
          }
-
-         last_fc_mod4 = fc_mod4;
-         last_fc_mod32 = fc_mod32;
-         last_fc_mod40 = fc_mod40;
-      }
+*/
+      
    }
 
    public void fixWeekOffset(){
