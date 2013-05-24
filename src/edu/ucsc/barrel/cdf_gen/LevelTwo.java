@@ -66,7 +66,7 @@ public class LevelTwo{
       stn = "0",
       revNum = "00",
       mag_gen_program = "";
-   int today = 0;
+   int today, yesterday, tomorrow;
    Calendar dateObj = Calendar.getInstance();
    
    SpectrumExtract spectrum;
@@ -91,6 +91,27 @@ public class LevelTwo{
       stn = s;
       today = Integer.valueOf(d);
       mag_gen_program = m;
+
+      //calculate yesterday and tomorrow from today's date
+      int year, month, day;
+      year = today/10000;
+      month = (today - (year * 10000)) / 100;
+      day = today - (year * 10000) - (month * 100);
+      dateObj.clear();
+      dateObj.set(year, month - 1, day);
+      dateObj.add(Calendar.DATE, -1);
+
+      yesterday = 
+         (dateObj.get(Calendar.YEAR) * 10000) + 
+         ((dateObj.get(Calendar.MONTH) + 1) * 100) + 
+         dateObj.get(Calendar.DATE);
+
+      dateObj.add(Calendar.DATE, 2);
+
+      tomorrow = 
+         (dateObj.get(Calendar.YEAR) * 10000) + 
+         ((dateObj.get(Calendar.MONTH) + 1) * 100) + 
+         dateObj.get(Calendar.DATE);
 
       //get the data storage object
       data = CDF_Gen.getDataSet();
@@ -1233,21 +1254,22 @@ public class LevelTwo{
       if(!outDir.exists()){outDir.mkdirs();}
 
       //fill CDF files for yesterday, today, and tomorrow
-      doAllCdf(today - 1);
+      doAllCdf(yesterday);
       doAllCdf(today);
-      doAllCdf(today + 1);
+      doAllCdf(tomorrow);
 
       System.out.println("Created Level Two.");
    }
 
    private void doAllCdf(int date) throws CDFException{
-      int first_i, last_i;
+      int first_i, last_i, size;
       long rec_date = 0;
       long[] tt2000_parts; 
 
       //find the first and last indicies for this day for the 1Hz file
       first_i = -1;
-      for(last_i = 0; last_i < data.getSize("1Hz"); last_i++){
+      size = data.getSize("1Hz");
+      for(last_i = 0; last_i < size; last_i++){
          tt2000_parts = CDFTT2000.breakdown(data.epoch_1Hz[last_i]);
          rec_date = 
             tt2000_parts[2] + //day
@@ -1269,7 +1291,8 @@ public class LevelTwo{
 
       //...for the mod4 file
       first_i = -1;
-      for(last_i = 0; last_i < data.getSize("mod4"); last_i++){
+      size = data.getSize("mod4");
+      for(last_i = 0; last_i < size; last_i++){
          tt2000_parts = CDFTT2000.breakdown(data.epoch_mod4[last_i]);
          rec_date = 
             tt2000_parts[2] + //day
@@ -1292,7 +1315,8 @@ public class LevelTwo{
 
       //...for the mod32 file
       first_i = -1;
-      for(last_i = 0; last_i < data.getSize("mod32"); last_i++){
+      size = data.getSize("mod32");
+      for(last_i = 0; last_i < size; last_i++){
          tt2000_parts = CDFTT2000.breakdown(data.epoch_mod32[last_i]);
          rec_date = 
             tt2000_parts[2] + //day
@@ -1313,7 +1337,8 @@ public class LevelTwo{
 
       //...for the mod40 file
       first_i = -1;
-      for(last_i = 0; last_i < data.getSize("mod40"); last_i++){
+      size = data.getSize("mod4");
+      for(last_i = 0; last_i < size; last_i++){
          tt2000_parts = CDFTT2000.breakdown(data.epoch_mod40[last_i]);
          rec_date = 
             tt2000_parts[2] + //day
@@ -1334,7 +1359,8 @@ public class LevelTwo{
 
       //...for the 4Hz file
       first_i = -1;
-      for(last_i = 0; last_i < data.getSize("4Hz"); last_i++){
+      size = data.getSize("4Hz");
+      for(last_i = 0; last_i < size; last_i++){
          tt2000_parts = CDFTT2000.breakdown(data.epoch_4Hz[last_i]);
          rec_date = 
             tt2000_parts[2] + //day
@@ -1350,12 +1376,17 @@ public class LevelTwo{
          }
       }
       if(first_i != -1){
+         //make sure the first and last records are not mid-frame
+         first_i = Math.max(0, (first_i - (first_i % 4)));
+         last_i = Math.min(size, (last_i + 4 - (last_i % 4)));
+
          doMagCdf(first_i, last_i, date);
       }
 
       //...for the 20Hz file
       first_i = -1;
-      for(last_i = 0; last_i < data.getSize("20Hz"); last_i++){
+      size = data.getSize("20Hz");
+      for(last_i = 0; last_i < size; last_i++){
          tt2000_parts = CDFTT2000.breakdown(data.epoch_20Hz[last_i]);
          rec_date = 
             tt2000_parts[2] + //day
@@ -1371,6 +1402,10 @@ public class LevelTwo{
          }
       }
       if(first_i != -1){
+         //make sure the first and last records are not mid-frame
+         first_i = Math.max(0, (first_i - (first_i % 20)));
+         last_i = Math.min(size, (last_i + 20 - (last_i % 20)));
+
          doFspcCdf(first_i, last_i, date); 
       }
    }
