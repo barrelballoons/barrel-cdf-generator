@@ -26,11 +26,7 @@ Description:
 
 package edu.ucsc.barrel.cdf_gen;
 
-import gsfc.nssdc.cdf.CDFException;
-import gsfc.nssdc.cdf.util.CDFTT2000;
-
 import org.apache.commons.math3.stat.regression.SimpleRegression;
-
 import java.util.Arrays;
 
 public class ExtractTiming {
