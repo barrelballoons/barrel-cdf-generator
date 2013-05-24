@@ -244,38 +244,15 @@ public class ExtractTiming {
    }
 
    public void fillEpoch(){
-      long 
-         rec_date,
-         fc, fc_mod4 = 0, fc_mod32 = 0, fc_mod40 = 0, 
-         last_fc_mod4 = -1, last_fc_mod32 = -1, last_fc_mod40 = -1;
-      int
-         date_offset, size,
-         rec_num_mod4 = -1, rec_num_mod32 = -1, rec_num_mod40 = -1;
-      long[] tt2000_parts;
+      long fc; 
+      int date_offset, size;
       double m, b;
       
       //fill the 1Hz and faster timestamps
       size = data.getSize("1Hz");
       for(int data_i = 0, model_i = 0; data_i < size; data_i++){
          fc = data.frame_1Hz[data_i];
-
-         //select a model for this frame
-         if(fc > models[model_i].getLast()){
-            //frame came after the last valid fc for the current model
-            for(int new_i = 0; new_i < model_cnt; new_i++){
-               //loop through the remaining models
-               if(fc <= models[new_i].getLast()){
-                  //stop looping when we find a model that has a 
-                  //fc range containing this frame
-                  model_i = new_i;
-                  break;
-               }
-            }
-         }
-
-         m = models[model_i].getSlope();
-         b = models[model_i].getIntercept();
-         data.epoch_1Hz[data_i] = (long)((m * fc) + b) * 1000000L;
+         data.epoch_1Hz[data_i] = calcEpoch(fc, model_i);
 
          //save epoch to the various time scales
          //fill the >1Hz times 
@@ -293,95 +270,22 @@ public class ExtractTiming {
       size = data.getSize("mod4");
       for(int data_i = 0, model_i = 0; data_i < size; data_i++){
          fc = data.frame_mod4[data_i];
-
-         //select a model for this frame
-         if(fc > models[model_i].getLast()){
-            //frame came after the last valid fc for the current model
-            for(int new_i = 0; new_i < model_cnt; new_i++){
-               //loop through the remaining models
-               if(fc <= models[new_i].getLast()){
-                  //stop looping when we find a model that has a 
-                  //fc range containing this frame
-                  model_i = new_i;
-                  break;
-               }
-            }
-         }
-
-         m = models[model_i].getSlope();
-         b = models[model_i].getIntercept();
-         data.epoch_mod4[data_i] = (long)((m * fc) + b) * 1000000L;
+         data.epoch_mod4[data_i] = calcEpoch(fc, model_i);
       }
 
       //fill mod32 timestamps
       size = data.getSize("mod32");
       for(int data_i = 0, model_i = 0; data_i < size; data_i++){
          fc = data.frame_mod32[data_i];
-
-         //select a model for this frame
-         if(fc > models[model_i].getLast()){
-            //frame came after the last valid fc for the current model
-            for(int new_i = 0; new_i < model_cnt; new_i++){
-               //loop through the remaining models
-               if(fc <= models[new_i].getLast()){
-                  //stop looping when we find a model that has a 
-                  //fc range containing this frame
-                  model_i = new_i;
-                  break;
-               }
-            }
-         }
-
-         m = models[model_i].getSlope();
-         b = models[model_i].getIntercept();
-         data.epoch_mod32[data_i] = (long)((m * fc) + b) * 1000000L;
+         data.epoch_mod32[data_i] = calcEpoch(fc, model_i);
       }
 
       //fill mod40 timestamps
       size = data.getSize("mod40");
       for(int data_i = 0, model_i = 0; data_i < size; data_i++){
          fc = data.frame_mod40[data_i];
-
-         //select a model for this frame
-         if(fc > models[model_i].getLast()){
-            //frame came after the last valid fc for the current model
-            for(int new_i = 0; new_i < model_cnt; new_i++){
-               //loop through the remaining models
-               if(fc <= models[new_i].getLast()){
-                  //stop looping when we find a model that has a 
-                  //fc range containing this frame
-                  model_i = new_i;
-                  break;
-               }
-            }
-         }
-
-         m = models[model_i].getSlope();
-         b = models[model_i].getIntercept();
-         data.epoch_mod40[data_i] = (long)((m * fc) + b) * 1000000L;
+         data.epoch_mod40[data_i] = calcEpoch(fc, model_i);
       }
-/*
-         //make sure we have a valid epoch value
-         if(data.epoch_1Hz[data_i] > 0){
-            //check for date rollover
-            tt2000_parts = CDFTT2000.breakdown(data.epoch_1Hz[data_i]);
-            rec_date = 
-               tt2000_parts[2] + //day
-               (100 * tt2000_parts[1]) + //month
-               (10000 * (tt2000_parts[0] - 2000)); //year
-
-            /*
-            Save the current record number to the 
-            correct spot in the day_rollovers array.
-            This indicates the last record for each day.
-            The +1 is needed to have the indicies match the 
-            constants set in DataHolder.YESTERDAY/TODAY/TOMORROW
-            
-            date_offset = (int)(rec_date - today + 1);
-            data.day_rollovers[date_offset] = data_i;
-         }
-*/
-      
    }
 
    public void fixWeekOffset(){
@@ -416,7 +320,28 @@ public class ExtractTiming {
          }
       }
    }
+   
+   private long calcEpoch(long fc, int model_i){
+      double m, b;
+      //select a model for this frame
+      if(fc > models[model_i].getLast()){
+         //frame came after the last valid fc for the current model
+         for(int new_i = 0; new_i < model_cnt; new_i++){
+            //loop through the remaining models
+            if(fc <= models[new_i].getLast()){
+               //stop looping when we find a model that has a 
+               //fc range containing this frame
+               model_i = new_i;
+               break;
+            }
+         }
+      }
 
+      m = models[model_i].getSlope();
+      b = models[model_i].getIntercept();
+      
+      return (long)((m * fc) + b) * 1000000L;
+   }
    private SimpleRegression genModel(int first, int last){
       int cnt = last - first;
       double[] offsets = new double[cnt];
