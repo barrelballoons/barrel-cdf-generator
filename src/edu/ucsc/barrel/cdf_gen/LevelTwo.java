@@ -136,7 +136,8 @@ public class LevelTwo{
       Variable var;
       Calendar d = Calendar.getInstance();
       String line;
-      Logger coord_file = new Logger("geo_coords.txt");
+      Logger coord_file = new Logger("pay" + id + "_" + date + "_gps.txt");
+
       int 
          year, month, day, day_of_year, hour, min, sec,
          numOfRecs = last - first;
@@ -229,37 +230,41 @@ public class LevelTwo{
                      (year + 2000), day_of_year, sec_of_day
                   )
                );
-/*
-               //get the magnetic field info for this location
-               String command = 
-                  mag_gen_program + " " + 
-                  frameGroup[rec_i] +" "+ 
-                  alt[rec_i] +" "+ lat[rec_i] +" "+ lon[rec_i] +" "+ 
-                  (year + 2000)  +" "+  day_of_year +" "+ sec_of_day;
 
-               Process p = Runtime.getRuntime().exec(command);
-               BufferedReader input = 
-                  new BufferedReader(new InputStreamReader(p.getInputStream()));
-
-               //read and save the mag coords
-               line = input.readLine();
-               mag_coords = line.split("\\s+");
-               l[rec_i] = Math.abs(Float.parseFloat(mag_coords[2]));
-               mlt[rec_i] = Float.parseFloat(mag_coords[3]);
-               input.close();
-*/  
+  
             }catch(Exception ex){
                //something went wrong, so dont save any coords for this record
-               System.out.println("Could not generate mag coords:");
+               System.out.println("Could not save coords for rec: " + rec_i);
                System.out.println(ex.getMessage());
                ex.printStackTrace();
-               System.exit(1);
                continue;
             }
          }
       }
-      
       coord_file.close();
+
+      //get the magnetic field info for this location
+      try{
+         String command = 
+            mag_gen_program + " " + "pay" + id + "_" + date + "_gps.txt";
+
+         Process p = Runtime.getRuntime().exec(command);
+      }catch(IOException ex){
+         System.out.println("Could not read gps coordinate file:");
+         System.out.println(ex.getMessage());
+      }
+
+      /*
+      BufferedReader input = 
+         new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+      //read and save the mag coords
+      line = input.readLine();
+      mag_coords = line.split("\\s+");
+      l[rec_i] = Math.abs(Float.parseFloat(mag_coords[2]));
+      mlt[rec_i] = Float.parseFloat(mag_coords[3]);
+      input.close();
+      */
 
       //make sure there is a CDF file to open
       //(CDF_Gen.copyFile will not clobber an existing file)
