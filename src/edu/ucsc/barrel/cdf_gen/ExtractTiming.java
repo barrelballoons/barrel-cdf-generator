@@ -32,8 +32,6 @@ import gsfc.nssdc.cdf.util.CDFTT2000;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.TimeZone;
 
 public class ExtractTiming {
    //Set some constant values
@@ -52,7 +50,6 @@ public class ExtractTiming {
    private static final short MAXPPS = 1000;
    private static final int MAXMS = 604800000;
    private static final int MAXFC = 2097152;
-   private static final long LEAPMS = 16000;
    
    //quality flags
    private static final short FILLED = 1;
@@ -65,19 +62,10 @@ public class ExtractTiming {
 
    private long today;
 
-   //date offset info
-   //Offset in ms from system epoch to gps start time (00:00:00 1980-01-60 UTC) 
-   private static long GPS_START_TIME; 
-   
-   //ms from system epoch to J2000 (11:58:55.816 2000-01-01 UTC)
-   private static long J2000; 
-   
-   //ms from GPS_START_TIME to J2000
-   private static long J2000_OFFSET;
-      
    private class TimeRec{
-      private long ms;//frame time; ms since J2000
+      private long ms;//frame timestamp
       private long frame;//frame counter
+      private long GPS_EPOCH = -630763148816L;//number of ms from Jan 6, 1980 to J2000
 
       public TimeRec(long fc, long msw, short weeks, short pps){
          //figure out if we need to add an extra second based on the PPS
@@ -91,7 +79,7 @@ public class ExtractTiming {
 
          //calculate the number of milliseconds since J2000 
          ms = 
-            weeks_in_ms + msw + extra_ms - pps - LEAPMS - J2000_OFFSET;
+            weeks_in_ms + msw + extra_ms - pps + GPS_EPOCH;
       }
       
       public long getMS(){return ms;}
@@ -131,20 +119,6 @@ public class ExtractTiming {
       //get DataHolder storage object
       data = CDF_Gen.getDataSet();
       
-      //calculate GPS_START_TIME, J2000, and the offset between them
-      Calendar gps_start_cal = 
-         Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-      gps_start_cal.set(
-         1980, 00, 06, 00, 00, 00);
-      GPS_START_TIME = gps_start_cal.getTimeInMillis();
-      Calendar j2000_cal = 
-         Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-      j2000_cal.set(
-         2000, 00, 01, 11, 58, 55);
-      j2000_cal.add(Calendar.MILLISECOND, 816);
-      J2000 = j2000_cal.getTimeInMillis();
-      J2000_OFFSET = J2000 - GPS_START_TIME;
-
       int temp, day, fc, week, ms, pps, cnt, mod40;
       int rec_i = 0, frame_i = 0;
       
@@ -182,7 +156,7 @@ public class ExtractTiming {
          week = (short)data.weeks[rec_mod40_i];
          if((week < MINWK) || (week > MAXWK)){continue;}
          
-         System.out.println(fc + ",  " + ms);
+         //System.out.println(fc + ",  " + ms);
 
          time_recs[time_rec_cnt] = new TimeRec(fc, ms, week, pps);
          time_rec_cnt++;
@@ -216,7 +190,8 @@ public class ExtractTiming {
 
             System.out.println(
                "Frames " + time_recs[first_rec].getFrame() + " - " +
-               time_recs[last_rec].getFrame() + " \n" +
+               time_recs[last_rec].getFrame()); 
+            System.out.println(
                "\tm = " + fit.getSlope() + ", b = " + fit.getIntercept()
             );
          }
