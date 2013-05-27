@@ -58,7 +58,6 @@ Change Log:
 public class LevelTwo{
    String outputPath;
    int lastFrame = -1;
-   long ms_of_week = 0;
    int weeks = 0;
    String
       id = "00",
@@ -249,7 +248,6 @@ public class LevelTwo{
       }
       
       //Read the magnetic coordinates into a set of arrays
-      System.out.println("Mag Coords");
       try{
          BufferedReader mag_coord_file = 
             new BufferedReader(
@@ -265,7 +263,6 @@ public class LevelTwo{
             mlt2[rec_i] = Float.parseFloat(mag_coords[10]);
             l6[rec_i] = Math.abs(Float.parseFloat(mag_coords[12]));
             mlt6[rec_i] = Float.parseFloat(mag_coords[13]);
-            System.out.println(l2[rec_i] + " " +mlt2[rec_i] + " " +l6[rec_i] + " " +mlt6[rec_i]);
             rec_i++;
          }
 
@@ -329,7 +326,7 @@ public class LevelTwo{
       );
 
       var = cdf.getVariable("L_Kp2");
-      System.out.println("ms_of_week...");
+      System.out.println("L_Kp2...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -339,7 +336,7 @@ public class LevelTwo{
       );
 
       var = cdf.getVariable("MLT_Kp2");
-      System.out.println("ms_of_week...");
+      System.out.println("MLT_Kp2...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -349,7 +346,7 @@ public class LevelTwo{
       );
 
       var = cdf.getVariable("L_Kp6");
-      System.out.println("ms_of_week...");
+      System.out.println("L_Kp6...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -359,7 +356,7 @@ public class LevelTwo{
       );
 
       var = cdf.getVariable("MLT_Kp6");
-      System.out.println("ms_of_week...");
+      System.out.println("MLT_Kp6...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
