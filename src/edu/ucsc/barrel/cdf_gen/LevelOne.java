@@ -1,17 +1,5 @@
-package edu.ucsc.barrel.cdf_gen;
-
-import gsfc.nssdc.cdf.CDF;
-import gsfc.nssdc.cdf.CDFException;
-import gsfc.nssdc.cdf.util.CDFTT2000;
-import gsfc.nssdc.cdf.Variable;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.Vector;
-import java.util.Arrays;
 /*
-LevelOne.java v13.02.28
+LevelOne.java
 
 Description:
    Creates level one CDF files from DataHolder.java object.
@@ -32,73 +20,20 @@ Description:
    You should have received a copy of the GNU General Public License along with 
    The BARREL CDF Generator.  If not, see <http://www.gnu.org/licenses/>.
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Change Log:
-   v13.02.28
-      -Uses new format of DataHolder.java object with putHyperdata() for 
-         increased speed in writing CDF files.
-   v13.01.18
-      -Updated the filename format
-      
-   v12.11.28
-      -Modified terminal output to indicate payload and date
-
-   v12.11.26
-      -Removed epoch calculations
-      -Does not add payload onto directory path 
-
-   v12.11.20
-      -Changed references to Level_Generator to CDF_Gen
-      -Moved the declaration of frameGrp and mod variables outside the main loop
-      -Moved time calculation code to top of loop
-      -Changed epoch to being only stored in DataHolder instead of also being a 
-         local variable
-      -Removed ms_of_week from all files except EPHM
-      -Uses DataHolder.rc_label to write rc CDF variables instead of the switch 
-         statment
-      -Wraps primitive variable types stored in DataHolded in proper objects before
-         writing to CDF
-      
-   v12.11.05
-      -Saves ints (or longs) to cur_cdf.files. CDF's are now full of completely raw
-         variables (except EPOCH and ms_of_week)
-      -Changed "Time" CDF variable to "ms_of_week" to avoid TDAS namespace
-         collision
-      
-   v12.10.11
-      -Changed version numbers to a date format
-      -No longer has any public members or methods other than the constructor.
-      -Constructor calls functions to process all data held in DataHolder object 
-         and produce CDF files.
-      -Removed HexToBit function
-      -Moved functions "copyFile()", "putData()" and "openCDF()" to 
-         Level_Generator.java
-      -Now gets output path from Level_Generator.L1_Dir
-      -Types of CDF files are now pulled from a public member of 
-         Level_Generator.java
-
-   v0.3
-      -Epoch is now calculated from "weeks" and "time" variables rather than 
-         filename
-      -Improved the way Epoch offsets are added to variables that come faster than 
-         1Hz
-      
-   v0.2
-      -added CDF libraries
-      -copies the skeleton CDF files to date stamped files in constructor 
-      -extracts all data types and writes them to the correct CDF files
-
-   v0.1
-      -added empty function that will convert the hex data eventually
-
-   v0.0
-      -Does nothing, just an empty object for the main program to create
-
-Planned Changes: 
-   -Clean up/ Documentation
-   -Add logging
-   -Change the way frames are extracted
 */
+
+package edu.ucsc.barrel.cdf_gen;
+
+import gsfc.nssdc.cdf.CDF;
+import gsfc.nssdc.cdf.CDFException;
+import gsfc.nssdc.cdf.util.CDFTT2000;
+import gsfc.nssdc.cdf.Variable;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.Vector;
+import java.util.Arrays;
 
 public class LevelOne{
    String outputPath;
@@ -110,7 +45,7 @@ public class LevelOne{
       flt = "00",
       stn = "0",
       revNum = "00";
-   int today = 0;
+   int today, yesterday, tomorrow;
    Calendar dateObj = Calendar.getInstance();
    
    SpectrumExtract spectrum;
@@ -134,6 +69,27 @@ public class LevelOne{
       flt = f;
       stn = s;
       today = Integer.valueOf(d);
+
+      //calculate yesterday and tomorrow from today's date
+      int year, month, day;
+      year = today/10000;
+      month = (today - (year * 10000)) / 100;
+      day = today - (year * 10000) - (month * 100);
+      dateObj.clear();
+      dateObj.set(year, month - 1, day);
+      dateObj.add(Calendar.DATE, -1);
+
+      yesterday = 
+         (dateObj.get(Calendar.YEAR) * 10000) + 
+         ((dateObj.get(Calendar.MONTH) + 1) * 100) + 
+         dateObj.get(Calendar.DATE);
+
+      dateObj.add(Calendar.DATE, 2);
+
+      tomorrow = 
+         (dateObj.get(Calendar.YEAR) * 10000) + 
+         ((dateObj.get(Calendar.MONTH) + 1) * 100) + 
+         dateObj.get(Calendar.DATE);
 
       //get the data storage object
       data = CDF_Gen.getDataSet();
@@ -180,18 +136,18 @@ public class LevelOne{
       //make sure there is a CDF file to open
       //(CDF_Gen.copyFile will not clobber an existing file)
       String srcName = 
-         "cdf_skels/l1/barCLL_PP_S_l1_ephm-_YYYYMMDD_v++.cdf";
+         "cdf_skels/l1/barCLL_PP_S_l1_ephm_YYYYMMDD_v++.cdf";
       String destName = 
          outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
-         "_l1_" + "ephm-" + "_20" + date +  "_v" + revNum + ".cdf";
+         "_l1_" + "ephm" + "_20" + date +  "_v" + revNum + ".cdf";
 
       CDF_Gen.copyFile(new File(srcName), new File(destName), false);
 
       //open EPHM CDF and save the reference in the cdf variable
       cdf = CDF_Gen.openCDF(destName);
       
-      var = cdf.getVariable("EPHM_Alt");
-      System.out.println("EPHM_Alt...");
+      var = cdf.getVariable("GPS_Alt");
+      System.out.println("GPS_Alt...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1,
          new long[] {0}, 
@@ -210,8 +166,8 @@ public class LevelOne{
          gps[1]
       );
 
-      var = cdf.getVariable("EPHM_Lat");
-      System.out.println("EPHM_Lat...");
+      var = cdf.getVariable("GPS_Lat");
+      System.out.println("GPS_Lat...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -220,8 +176,8 @@ public class LevelOne{
          gps[2] 
       );
 
-      var = cdf.getVariable("EPHM_Lon");
-      System.out.println("EPHM_Lon...");
+      var = cdf.getVariable("GPS_Lon");
+      System.out.println("GPS_Lon...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -300,8 +256,8 @@ public class LevelOne{
 
       cdf = CDF_Gen.openCDF(destName);
       
-      var = cdf.getVariable("EPHM_PPS");
-      System.out.println("EPHM_PPS...");
+      var = cdf.getVariable("GPS_PPS");
+      System.out.println("GPS_PPS...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1L, 
          new long[] {0}, 
@@ -988,17 +944,17 @@ public class LevelOne{
       );
       
       //make sure the needed output directories exist
-      outDir = new File(outputPath + "/" + (today - 1));
+      outDir = new File(outputPath + "/" + yesterday);
       if(!outDir.exists()){outDir.mkdirs();}
       outDir = new File(outputPath + "/" + today);
       if(!outDir.exists()){outDir.mkdirs();}
-      outDir = new File(outputPath + "/" + (today + 1));
+      outDir = new File(outputPath + "/" + tomorrow);
       if(!outDir.exists()){outDir.mkdirs();}
 
       //fill CDF files for yesterday, today, and tomorrow
-      doAllCdf(today - 1);
+      doAllCdf(yesterday);
       doAllCdf(today);
-      doAllCdf(today + 1);
+      doAllCdf(tomorrow);
 
       System.out.println("Created Level One.");
    }
