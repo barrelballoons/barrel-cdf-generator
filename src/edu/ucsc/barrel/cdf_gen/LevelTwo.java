@@ -245,11 +245,16 @@ public class LevelTwo{
          String line;
          int rec_i = 0;
          while((line = mag_coord_file.readLine()) != null){
-            mag_coords = line.split("\\s+");
-            l2[rec_i] = Math.abs(Float.parseFloat(mag_coords[9]));
-            mlt2[rec_i] = Float.parseFloat(mag_coords[10]);
-            l6[rec_i] = Math.abs(Float.parseFloat(mag_coords[12]));
-            mlt6[rec_i] = Float.parseFloat(mag_coords[13]);
+            line = line.trim();
+
+            //make sure the mag coordinates were calculated correctly
+            if(line.indexOf("*") == -1){
+               mag_coords = line.split("\\s+");
+               l2[rec_i] = Math.abs(Float.parseFloat(mag_coords[8]));
+               mlt2[rec_i] = Float.parseFloat(mag_coords[9]);
+               l6[rec_i] = Math.abs(Float.parseFloat(mag_coords[11]));
+               mlt6[rec_i] = Float.parseFloat(mag_coords[12]);
+            }
             rec_i++;
          }
 
@@ -1355,7 +1360,7 @@ public class LevelTwo{
 
       //...for the mod40 file
       first_i = -1;
-      size = data.getSize("mod4");
+      size = data.getSize("mod40");
       for(last_i = 0; last_i < size; last_i++){
          tt2000_parts = CDFTT2000.breakdown(data.epoch_mod40[last_i]);
          rec_date = 
