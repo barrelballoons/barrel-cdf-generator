@@ -1,9 +1,5 @@
-package edu.ucsc.barrel.cdf_gen;
-
-import java.math.BigInteger;
-
 /*
-DataHolder.java 13.02.28
+DataHolder.java
 
 Description:
    Stores the data frames that are being processed
@@ -24,37 +20,11 @@ Description:
    You should have received a copy of the GNU General Public License along with 
    The BARREL CDF Generator.  If not, see <http://www.gnu.org/licenses/>.
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Change Log:
-   v13.02.28
-      -Reformatted the data structures to work better with putHyperData function
-
-   v13.01.04
-      -Changed "ms_since_epoch" or "ms_since_sys_epoch" for clairity
-      
-   v12.11.27
-      -Added members to hold time model info
-      -Added holder for quality flag
-      -Fixed fspc extraction
-      
-   v12.11.22
-      -Save ms_of_week variable when reading it when processing a gps time frame
-
-   v12.11.20
-      -Changed references to Level_Generator to CDF_Gen
-      -Changed many of the objects to primitave types
-      -Changed raw_* to *_raw
-      
-   v12.11.05
-      -Added a number of raw variables so the level 1 files could all
-      be int or long values
-      -Added static "constant" variables to index different mod values
-
-   v12.10.11
-      -Takes a BigInteger frame as input, breaks the frame apart, and stores the 
-      different data types as public members
-
 */
+
+package edu.ucsc.barrel.cdf_gen;
+
+import java.math.BigInteger;
 
 public class DataHolder{
    ///Largest number of frames we can store.

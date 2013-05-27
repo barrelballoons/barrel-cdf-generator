@@ -1,5 +1,5 @@
 /*
-ExactTiming.java v13.01.04
+ExactTiming.java
 
 Description:
    Uses a block of gps time info to create a more exact time variable.
@@ -21,7 +21,6 @@ Description:
    You should have received a copy of the GNU General Public License along with 
    The BARREL CDF Generator.  If not, see <http://www.gnu.org/licenses/>.
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 */
 
 package edu.ucsc.barrel.cdf_gen;
@@ -152,8 +151,6 @@ public class ExtractTiming {
          week = (short)data.weeks[rec_mod40_i];
          if((week < MINWK) || (week > MAXWK)){continue;}
          
-         //System.out.println(fc + ",  " + ms);
-
          time_recs[time_rec_cnt] = new TimeRec(fc, ms, week, pps);
          time_rec_cnt++;
       }

@@ -1,24 +1,5 @@
-package edu.ucsc.barrel.cdf_gen;
-
-import gsfc.nssdc.cdf.CDF;
-import gsfc.nssdc.cdf.CDFException;
-import gsfc.nssdc.cdf.util.CDFTT2000;
-import gsfc.nssdc.cdf.Variable;
-
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.File;
-import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.util.Calendar;
-import java.util.Vector;
-import java.util.Arrays;
-
 /*
-LevelTwo.java v13.02.28
+LevelTwo.java
 
 Description:
    LevelTwo.java pulls data from the DataHolder.java object and processes it 
@@ -40,20 +21,26 @@ Description:
    You should have received a copy of the GNU General Public License along with 
    The BARREL CDF Generator.  If not, see <http://www.gnu.org/licenses/>.
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Change Log:
-   v13.03.28
-      -Added rebin routines to MSPC and SSPC
-   v13.02.28
-      -Now outputs correct L2 values for all variables except spectra (Still
-         needs rebin)
-   v13.02.15
-      -Updated to match the current version of Level One
-   
-   v13.02.06
-      -New version of Level Two. An exact copy of Level One for now...
 */
 
+package edu.ucsc.barrel.cdf_gen;
+
+import gsfc.nssdc.cdf.CDF;
+import gsfc.nssdc.cdf.CDFException;
+import gsfc.nssdc.cdf.util.CDFTT2000;
+import gsfc.nssdc.cdf.Variable;
+
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.File;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.util.Calendar;
+import java.util.Vector;
+import java.util.Arrays;
 
 public class LevelTwo{
    String outputPath;

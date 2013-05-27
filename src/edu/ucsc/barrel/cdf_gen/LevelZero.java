@@ -1,7 +1,5 @@
-package edu.ucsc.barrel.cdf_gen;
-
 /*
-LevelZero.java v13.01.18
+LevelZero.java
 
 Description:
    Copies each data file, byte by byte, to a day-long data file.
@@ -23,63 +21,9 @@ Description:
    You should have received a copy of the GNU General Public License along with 
    The BARREL CDF Generator.  If not, see <http://www.gnu.org/licenses/>.
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Change Log:
-   v13.01.18
-      -Updated the filename format
-
-   v12.11.26
-      -Does not set payload directory in outpath here.
-
-   v12.11.20
-      -Changed references to Level_Generator to CDF_Gen
-      -changed text of output filename to lowercase
-
-   v12.11.05
-      -Now uses "getDataSet()" method of Level_Generator
-      to add frames to the correct set
-
-   v12.10.11
-      -Changed version numbers to a date format
-      -No longer interacts with L1 objects
-      -Sends each frame as a BigInteger to the DatHolder static object. 
-      
-   v0.6
-      -Changed how output files are stored
-      -Added error checking for short or long frames and bad checksums
-      -Sends data to Level One object
-
-   v0.5
-      -Fixed problem where the hex buffer would clear before using anything that 
-        was stored in it
-
-   v0.4
-      -Changed constructor to take in date and payload as well
-      -Creates files that are of BAR0_YYYYMMDD_SLL_PP_V++.TLM format
-      -Fixed incorrect byte counts introduced by buffered read
-
-   v0.3
-      -Updated class/filename and added proper package scheme
-      -Added constructor so frame properties can be set in the ini file
-      -Constructor configures objects
-      -No longer static class
-      
-   v0.2
-      -Added buffered and write for binary files.
-      -Output file is now sorted correctly.
-      -No longer copies the dailyManifest file into the output.
-      
-   v0.1
-      -Just copies the files into a day-long file. 
-      -Does not check for valid frames.
-
-Future Plans: 
-   -Read launch site/order data from downloaded file names. 
-      Can not do this until the original telemetry files start being saved with
-      the new file name format.
-   -Clean up/ Documentation
-   -Add logging
 */
+
+package edu.ucsc.barrel.cdf_gen;
 
 import java.io.File;
 import java.io.FileInputStream;

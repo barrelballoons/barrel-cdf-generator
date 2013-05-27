@@ -1,7 +1,5 @@
-package edu.ucsc.barrel.cdf_gen;
-
 /*
-SpectrumExtract.java v13.02.28
+SpectrumExtract.java
 
 Description:
    Creates energy bin edges and rebins spectra.
@@ -22,19 +20,9 @@ Description:
    You should have received a copy of the GNU General Public License along with 
    The BARREL CDF Generator.  If not, see <http://www.gnu.org/licenses/>.
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Change Log:
-   v13.03.28
-      -Implimented the peak fitting routine from Apache Commons Math
-      -Removed initial guess code from find511()
-      -Fixed the way edges_raw[][] is accessed by createBins()
-   v13.02.28
-      -Updated bin edge creater, removed rebin routine for now. Added imports 
-         for Gaussian fit. 
-   v12.11.20
-      -Added this documentation
-      
 */
+
+package edu.ucsc.barrel.cdf_gen;
 
 import org.apache.commons.math3.fitting.GaussianFitter;
 import org.apache.commons.math3.optim.nonlinear.vector.
