@@ -287,10 +287,11 @@ public class DataHolder{
       new_i = (int)(old_i * multiplier);
 
       //correct new_i based on frame number
-      while((frames[new_i] < target_fc) && (new_i < frames.length)){
+      while((new_i < frames.length) && (frames[new_i] < target_fc)){
          new_i++;
       }
-      while((frames[new_i] > target_fc) && (new_i > 0)){
+      if(new_i == frames.length){new_i--;}
+      while((new_i > 0) && (frames[new_i] > target_fc)){
          new_i--;
       }
 
