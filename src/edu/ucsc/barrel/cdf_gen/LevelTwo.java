@@ -7,10 +7,10 @@ import gsfc.nssdc.cdf.Variable;
 
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.File;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.util.Calendar;
@@ -135,8 +135,7 @@ public class LevelTwo{
       CDF cdf;
       Variable var;
       Calendar d = Calendar.getInstance();
-      String line;
-      Logger coord_file = new Logger("pay" + id + "_" + date + "_gps.txt");
+      Logger geo_coord_file = new Logger("pay" + id + "_" + date + "_gps.txt");
 
       int 
          year, month, day, day_of_year, hour, min, sec,
@@ -145,14 +144,15 @@ public class LevelTwo{
          sec_of_day = 0;
       float
          east_lon = 0;
-      String[] 
-         mag_coords = new String[3];
+      String[] mag_coords;
       float[] 
          lat = new float[numOfRecs], 
          lon = new float[numOfRecs], 
          alt = new float[numOfRecs],
-         mlt = new float[numOfRecs],
-         l = new float[numOfRecs];
+         mlt2 = new float[numOfRecs],
+         mlt6 = new float[numOfRecs],
+         l2 = new float[numOfRecs],
+         l6 = new float[numOfRecs];
       int[] 
          frameGroup = new int[numOfRecs],
          q = new int[numOfRecs]; 
@@ -210,38 +210,29 @@ public class LevelTwo{
 
          //make sure we have a complete gps record before generating mag coords
          if((alt[rec_i] != 0) && (lat[rec_i] != 0) && (lon[rec_i] != 0)){
-            try{
-               //calculate the current time in seconds of day
-               epoch_parts = CDFTT2000.breakdown(epoch[rec_i]);
-               sec_of_day = 
-                  (epoch_parts[3] * 3600) + // hours
-                  (epoch_parts[4] * 60) + //minutes
-                  epoch_parts[5] + //seconds
-                  (epoch_parts[6] * 0.001) + //ms
-                  (epoch_parts[7] * 0.000001) + //us
-                  (epoch_parts[8] * 0.000000001); //ns
-               //convert signed longitude to east longitude
-               east_lon = (lon[rec_i] > 0) ? lon[rec_i] : lon[rec_i] + 360;
+         
+            //calculate the current time in seconds of day
+            epoch_parts = CDFTT2000.breakdown(epoch[rec_i]);
+            sec_of_day = 
+               (epoch_parts[3] * 3600) + // hours
+               (epoch_parts[4] * 60) + //minutes
+               epoch_parts[5] + //seconds
+               (epoch_parts[6] * 0.001) + //ms
+               (epoch_parts[7] * 0.000001) + //us
+               (epoch_parts[8] * 0.000000001); //ns
+            //convert signed longitude to east longitude
+            east_lon = (lon[rec_i] > 0) ? lon[rec_i] : lon[rec_i] + 360;
 
-               coord_file.writeln(
-                  String.format(
-                     "%07d %02.6f %03.6f %03.6f %04d %03d %02.3f", 
-                     frameGroup[rec_i], alt[rec_i], lat[rec_i], lon[rec_i],
-                     (year + 2000), day_of_year, sec_of_day
-                  )
-               );
-
-  
-            }catch(Exception ex){
-               //something went wrong, so dont save any coords for this record
-               System.out.println("Could not save coords for rec: " + rec_i);
-               System.out.println(ex.getMessage());
-               ex.printStackTrace();
-               continue;
-            }
+            geo_coord_file.writeln(
+               String.format(
+                  "%07d %02.6f %03.6f %03.6f %04d %03d %02.3f", 
+                  frameGroup[rec_i], alt[rec_i], lat[rec_i], lon[rec_i],
+                  (year + 2000), day_of_year, sec_of_day
+               )
+            );
          }
       }
-      coord_file.close();
+      geo_coord_file.close();
 
       //get the magnetic field info for this location
       try{
@@ -249,22 +240,40 @@ public class LevelTwo{
             mag_gen_program + " " + "pay" + id + "_" + date + "_gps.txt";
 
          Process p = Runtime.getRuntime().exec(command);
+         BufferedReader input =                                           
+            new BufferedReader(new InputStreamReader(p.getInputStream()));
+         System.out.println(input.readLine()); 
       }catch(IOException ex){
          System.out.println("Could not read gps coordinate file:");
          System.out.println(ex.getMessage());
       }
+      
+      //Read the magnetic coordinates into a set of arrays
+      System.out.println("Mag Coords");
+      try{
+         BufferedReader mag_coord_file = 
+            new BufferedReader(
+               new FileReader(
+                  "pay" + id + "_" + date + "_gps_out.txt"
+               )
+            );
+         String line;
+         int rec_i = 0;
+         while((line = mag_coord_file.readLine()) != null){
+            mag_coords = line.split("\\s+");
+            l2[rec_i] = Math.abs(Float.parseFloat(mag_coords[9]));
+            mlt2[rec_i] = Float.parseFloat(mag_coords[10]);
+            l6[rec_i] = Math.abs(Float.parseFloat(mag_coords[12]));
+            mlt6[rec_i] = Float.parseFloat(mag_coords[13]);
+            System.out.println(l2[rec_i] + " " +mlt2[rec_i] + " " +l6[rec_i] + " " +mlt6[rec_i]);
+            rec_i++;
+         }
 
-      /*
-      BufferedReader input = 
-         new BufferedReader(new InputStreamReader(p.getInputStream()));
-
-      //read and save the mag coords
-      line = input.readLine();
-      mag_coords = line.split("\\s+");
-      l[rec_i] = Math.abs(Float.parseFloat(mag_coords[2]));
-      mlt[rec_i] = Float.parseFloat(mag_coords[3]);
-      input.close();
-      */
+         mag_coord_file.close();
+      }catch(IOException ex){
+         System.out.println("Could not read magnetic coordinate file:");
+         System.out.println(ex.getMessage());
+      }
 
       //make sure there is a CDF file to open
       //(CDF_Gen.copyFile will not clobber an existing file)
@@ -319,24 +328,44 @@ public class LevelTwo{
          lon
       );
 
-      var = cdf.getVariable("L");
+      var = cdf.getVariable("L_Kp2");
       System.out.println("ms_of_week...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         l
+         l2
       );
 
-      var = cdf.getVariable("MLT");
+      var = cdf.getVariable("MLT_Kp2");
       System.out.println("ms_of_week...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         mlt
+         mlt2
+      );
+
+      var = cdf.getVariable("L_Kp6");
+      System.out.println("ms_of_week...");
+      var.putHyperData(
+         var.getNumWrittenRecords(), numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         l6
+      );
+
+      var = cdf.getVariable("MLT_Kp6");
+      System.out.println("ms_of_week...");
+      var.putHyperData(
+         var.getNumWrittenRecords(), numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         mlt6
       );
 
       var = cdf.getVariable("FrameGroup");
