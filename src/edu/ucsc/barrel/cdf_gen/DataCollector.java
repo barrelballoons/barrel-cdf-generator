@@ -1,7 +1,5 @@
-package edu.ucsc.barrel.cdf_gen;
-
 /*
-dataCollector.java v13.01.18
+dataCollector.java
 
 Description:
    Downloads files from each server listed in ini file.
@@ -23,40 +21,9 @@ Description:
    You should have received a copy of the GNU General Public License along with 
    The BARREL CDF Generator.  If not, see <http://www.gnu.org/licenses/>.
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Change Log:
-   v13.01.18
-      -Changed date input to accept string
-
-   v13.01.04
-      -Fixed redundancy in output path
-
-   v12.11.21
-      -Downloads files from the soc-nas now
-      
-   v12.11.20
-      -Changed references to Level_Generator to CDF_Gen
-      
-   v12.10.11
-      -Changed version numbers to a date format
-
-   v0.3
-      -Changed how output files are stored
-
-   v0.2
-      -updated class/filename and added proper package scheme
-      -fixed resource leak caused by output stream not being closed
-      -Uses a constructor to get information about output path, payload, servers 
-         and date rather than having the calling class set it directly
-      -No longer a static class
-
-   v0.1
-      -Downloads all data files.
-      
-Planned Changes:
-   -Add logging
 */
 
+package edu.ucsc.barrel.cdf_gen;
 
 import java.io.BufferedReader;
 import java.io.File;

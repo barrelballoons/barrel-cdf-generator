@@ -1,7 +1,5 @@
-package edu.ucsc.barrel.cdf_gen;
-
 /*
-CDF_Gen.java v12.02.28
+CDF_Gen.java
 
 Description:
    Entry point for .jar file.
@@ -24,84 +22,9 @@ Description:
    You should have received a copy of the GNU General Public License along with 
    The BARREL CDF Generator.  If not, see <http://www.gnu.org/licenses/>.
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Change Log:
-v13.02.28
-   -Mag ID is read from the ini file and passed to LevelTwo.java object.
-
-v13.01.18
-   -Added ability to get launch site and launch order from ini file.
-   -Keeps track of file revision numnber in the constructor
-	
-v12.11.26
-   -Output directory is set in ini file.
-   -Output files are sorted into date subdirectories.
-   -Sets full output path in the payload loop
-   -Calls time extraction code after level zero is created. 
-   -Nulls out L1 and L2 objects after use.
-   
-v12.11.21
-   -Only produces the requested data levels as indicated by command line
-   -Changed names of multiple variables all named "data" but in different scopes
-   -Calculates and prints throughput after creating Level 0 files.
-
-v12.11.20
-   -Changed name to CDF_Gen.java
-   
-v12.11.05
-   -Now creates instances of DataHolder instead of using it as a static class
-   -Added a getter method "getDataSet" to pass the current instance of 
-    DataHolder
-   -Changed file names to all lowercase
-
-v12.10.11
-   -Changed version numbers to a date format
-   -Removed function "addHexFrame" and variable "hexDataStr" because they 
-   are unused.
-   -Creates L2 object
-   -Changes the way L1 CDF files are created
-   -Moved "Creating Level One" message to LevelOne.java
-   -Added functions "copyFile()", "putData()" and "opemCDF()" as public static 
-   methods
-   -Made directory settings public so they didn't need to be set in each 
-   object's constructor
-   -putData() does not print "INFO" messages from the cdf status
-   -moved CDF type list here
-
-v0.6
-   -Changed how output files are stored
-   -Changed how Level 1 files are created
-   -Changed how the frame data is transfered to Level 1 object
-   
-v0.5
-   -Created a place to store the hex string the level 1 and 2 
-      files will be created with
-
-v0.4
-   -Changed how the LevelZero object is created to match new constructor
-   
-v0.3
-   -Updated class/file name case and added proper package scheme
-   -Reads new ini file items
-   -Saves ini values to a map rather than individual variables
-   -removed many getter/setter programs in favor of the settings map
-   -Uses the new constructor for LevelZero and DataCollector classes
-      
-v0.2
-   -Changed name (previously dataProducts.java)
-   -Updated header documentation
-   -ini file now supports comments preceeded by a "#"
-   -server and payloads listed in the ini file are now one item per line
-   
-v0.1
-   -Downloads data from servers listed in ini file.
-   -Produces level 0 data with no error checking.
-
-Future Plans:
-   -Implement level 2 objects
-   -Clean up/ Documentation
-   -Add logging
 */
+
+package edu.ucsc.barrel.cdf_gen;
 
 import gsfc.nssdc.cdf.CDF;
 import gsfc.nssdc.cdf.CDFConstants;
@@ -139,14 +62,16 @@ public class CDF_Gen implements CDFConstants{
    public static String L1_Dir;
    public static String L2_Dir;
    public static Logger log;
+   public static Logger timeStamps;
    
    //List of types of CDF files
    public static String[] fileTypes = 
-      {"magn","rcnt","ephm-","fspc","mspc","sspc","hkpg","pps-"};
+      {"magn","rcnt","ephm","fspc","mspc","sspc","hkpg","pps-"};
    
    public static DataHolder getDataSet(){return data;}
    
    public static void main(String[] args){
+      int time_cnt = 0;
       //array to hold payload id, lauch order, and launch site
 		String[] payload = new String[3];
 		
@@ -230,7 +155,9 @@ public class CDF_Gen implements CDFConstants{
 					stn,
                getSetting("date")
             );
+            timeStamps = new Logger("gps_times.txt");
             L0.processRawFiles();
+            timeStamps.close();
             L0.finish();
             System.out.println(
                "Completed Level 0 for payload " + getSetting("currentPayload")
@@ -249,10 +176,16 @@ public class CDF_Gen implements CDFConstants{
    			   );
             
                //Fill the time variable
+               timeStamps = new Logger("epoch_times.txt");
                ExtractTiming barrel_time = 
                   new ExtractTiming(getSetting("date"));
+               barrel_time.fixWeekOffset();
+               barrel_time.getTimeRecs();
+               barrel_time.fillModels();
+               barrel_time.fillEpoch();
                barrel_time = null;
-               
+               timeStamps.close();
+
                if(getSetting("L").indexOf("1") > -1){
                   //create Level One 
                   LevelOne L1 =
@@ -261,12 +194,14 @@ public class CDF_Gen implements CDFConstants{
                }
                
                if(getSetting("L").indexOf("2") > -1){
+                  timeStamps = new Logger("time_diff.txt");
                   //create Level Two
                   LevelTwo L2 =
 						   new LevelTwo(
                         getSetting("date"), id, flt, stn, getSetting("mag_gen")
                      );
-                  
+                  timeStamps.close();
+
                   L2 = null;
                }
             }

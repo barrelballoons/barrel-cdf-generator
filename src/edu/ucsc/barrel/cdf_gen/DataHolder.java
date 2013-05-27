@@ -1,9 +1,5 @@
-package edu.ucsc.barrel.cdf_gen;
-
-import java.math.BigInteger;
-
 /*
-DataHolder.java 13.02.28
+DataHolder.java
 
 Description:
    Stores the data frames that are being processed
@@ -24,37 +20,11 @@ Description:
    You should have received a copy of the GNU General Public License along with 
    The BARREL CDF Generator.  If not, see <http://www.gnu.org/licenses/>.
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Change Log:
-   v13.02.28
-      -Reformatted the data structures to work better with putHyperData function
-
-   v13.01.04
-      -Changed "ms_since_epoch" or "ms_since_sys_epoch" for clairity
-      
-   v12.11.27
-      -Added members to hold time model info
-      -Added holder for quality flag
-      -Fixed fspc extraction
-      
-   v12.11.22
-      -Save ms_of_week variable when reading it when processing a gps time frame
-
-   v12.11.20
-      -Changed references to Level_Generator to CDF_Gen
-      -Changed many of the objects to primitave types
-      -Changed raw_* to *_raw
-      
-   v12.11.05
-      -Added a number of raw variables so the level 1 files could all
-      be int or long values
-      -Added static "constant" variables to index different mod values
-
-   v12.10.11
-      -Takes a BigInteger frame as input, breaks the frame apart, and stores the 
-      different data types as public members
-
 */
+
+package edu.ucsc.barrel.cdf_gen;
+
+import java.math.BigInteger;
 
 public class DataHolder{
    ///Largest number of frames we can store.
@@ -111,9 +81,8 @@ public class DataHolder{
       magy_raw = new int[MAX_FRAMES * 4],
       magz_raw = new int[MAX_FRAMES * 4];
    public double[]
-      time_model_rate = new double[MAX_FRAMES],
-      time_model_offset = new double[MAX_FRAMES],
-      ms_since_j2000 = new double[MAX_FRAMES];
+      time_model_slope = new double[MAX_FRAMES],
+      time_model_intercept = new double[MAX_FRAMES];
    public double[][]
       hkpg = new double[36][MAX_FRAMES / 40];
    public int[]
@@ -144,7 +113,7 @@ public class DataHolder{
       lc2_raw = new int[MAX_FRAMES * 20],
       lc3_raw = new int[MAX_FRAMES * 20],
       lc4_raw = new int[MAX_FRAMES * 20];
-
+   
    //keep track of rollover points for up to 3 days
    public int[]
       day_rollovers = {-1, -1, -1};
@@ -254,26 +223,87 @@ public class DataHolder{
    }
 
    public int getSize(String cadence){
-      if(cadence == "1Hz"){
+      if(cadence.equals("1Hz")){
          return rec_num_1Hz + 1;
-      }else if(cadence == "4Hz"){
+      }else if(cadence.equals("4Hz")){
          return rec_num_4Hz;
-      }else if(cadence == "20Hz"){
+      }else if(cadence.equals("20Hz")){
          return rec_num_20Hz;
-      }else if(cadence == "mod4"){
+      }else if(cadence.equals("mod4")){
          return rec_num_mod4;
-      }else if(cadence == "mod32"){
+      }else if(cadence.equals("mod32")){
          return rec_num_mod32;
       }else{
          return rec_num_mod40;
       }
    }
-   
+  
+   public int convertIndex(int old_i, long fc, String old_cad, String new_cad){
+      long target_fc;
+      int fc_offset = 0, new_i;
+      double multiplier;
+      int[] frames;
+
+      //figure out the index multiplier, fc_offset, and 
+      //get the new frameset based on input cadence
+      if(new_cad.equals("mod40")){
+         multiplier = 0.025;
+         frames = frame_mod40;
+         fc_offset = (int)fc % 40;
+      }
+      else if(new_cad.equals("mod32")){
+         multiplier = 0.03125;
+         frames = frame_mod32;
+         fc_offset = (int)fc % 32;
+      }
+      else if(new_cad.equals("mod4")){
+         multiplier = 0.25;
+         frames = frame_mod4;
+         fc_offset = (int)fc % 4;
+      }
+      else if(new_cad.equals("1Hz")){
+         multiplier = 1;
+         frames = frame_1Hz;
+      }
+      else if(new_cad.equals("4Hz")){
+         multiplier = 4;
+         frames = frame_4Hz;
+      }
+      else{
+         multiplier = 20;
+         frames = frame_20Hz;
+      }
+      if(old_cad.equals("mod40")){multiplier /= 0.025;}
+      else if(old_cad.equals("mod32")){multiplier /= 0.03125;}
+      else if(old_cad.equals("mod4")){multiplier /= 0.25;}
+      else if(old_cad.equals("4Hz")){multiplier /= 4;}
+      else{multiplier /= 20;}
+
+      //figure out the target frame number 
+      //this will determine the first frame number of a multiplexed group
+      target_fc = fc - fc_offset;
+
+      //get initial guess for the new index
+      new_i = (int)(old_i * multiplier);
+
+      //correct new_i based on frame number
+      while((new_i < frames.length) && (frames[new_i] < target_fc)){
+         new_i++;
+      }
+      if(new_i == frames.length){new_i--;}
+      while((new_i > 0) && (frames[new_i] > target_fc)){
+         new_i--;
+      }
+
+      return new_i;
+   }
+
    public void addFrame(BigInteger frame){
       int mod4 = 0, mod32 = 0, mod40 = 0;
       long tmpFC = 0;
       short tmpVer = 0, tmpPayID = 0;
-      
+      int hour =0, min =0, sec = 0;
+
       //Breakdown frame counter words: 
       //save the frame counter parts as temp variables,
       //they will be written to the main structure once rec_num is calculated.
@@ -307,6 +337,7 @@ public class DataHolder{
       ver[rec_num_1Hz] = tmpVer;
       payID[rec_num_1Hz] = tmpPayID;
       frame_1Hz[rec_num_1Hz] = (int)tmpFC;
+
       //figure out the other time scale frame counters
       for(int rec_i = rec_num_4Hz; rec_i < rec_num_4Hz + 4; rec_i++){
          frame_4Hz[rec_i] = frame_1Hz[rec_num_1Hz];
@@ -328,6 +359,16 @@ public class DataHolder{
       //save the time variable separately for the epoch calculation 
       if(mod4 == 1){
          ms_of_week[rec_num_mod4] = gps_raw[mod4][rec_num_mod4];
+
+         sec = ms_of_week[rec_num_mod4] / 1000; //convert ms to sec
+         sec %= 86400; //remove any complete days
+         hour = sec / 3600;
+         sec %= 3600;
+         min = sec / 60;
+         sec %= 60;
+         CDF_Gen.timeStamps.writeln(
+            frame_1Hz[rec_num_1Hz] + ", " + ms_of_week[rec_num_mod4] + ", " + hour + ":" + min + ":" + sec + ", " + (sec-16)
+         );
       }
 
       //fill the quality flag with a 0 for now
