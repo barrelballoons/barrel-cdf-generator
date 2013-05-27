@@ -1280,11 +1280,11 @@ public class LevelTwo{
       );
       
       //make sure the needed output directories exist
-      outDir = new File(outputPath + "/" + (today - 1));
+      outDir = new File(outputPath + "/" + yesterday);
       if(!outDir.exists()){outDir.mkdirs();}
       outDir = new File(outputPath + "/" + today);
       if(!outDir.exists()){outDir.mkdirs();}
-      outDir = new File(outputPath + "/" + (today + 1));
+      outDir = new File(outputPath + "/" + tomorrow);
       if(!outDir.exists()){outDir.mkdirs();}
 
       //fill CDF files for yesterday, today, and tomorrow

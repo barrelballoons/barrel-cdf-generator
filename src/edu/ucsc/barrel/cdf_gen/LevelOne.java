@@ -110,7 +110,7 @@ public class LevelOne{
       flt = "00",
       stn = "0",
       revNum = "00";
-   int today = 0;
+   int today, yesterday, tomorrow;
    Calendar dateObj = Calendar.getInstance();
    
    SpectrumExtract spectrum;
@@ -134,6 +134,27 @@ public class LevelOne{
       flt = f;
       stn = s;
       today = Integer.valueOf(d);
+
+      //calculate yesterday and tomorrow from today's date
+      int year, month, day;
+      year = today/10000;
+      month = (today - (year * 10000)) / 100;
+      day = today - (year * 10000) - (month * 100);
+      dateObj.clear();
+      dateObj.set(year, month - 1, day);
+      dateObj.add(Calendar.DATE, -1);
+
+      yesterday = 
+         (dateObj.get(Calendar.YEAR) * 10000) + 
+         ((dateObj.get(Calendar.MONTH) + 1) * 100) + 
+         dateObj.get(Calendar.DATE);
+
+      dateObj.add(Calendar.DATE, 2);
+
+      tomorrow = 
+         (dateObj.get(Calendar.YEAR) * 10000) + 
+         ((dateObj.get(Calendar.MONTH) + 1) * 100) + 
+         dateObj.get(Calendar.DATE);
 
       //get the data storage object
       data = CDF_Gen.getDataSet();
@@ -988,17 +1009,17 @@ public class LevelOne{
       );
       
       //make sure the needed output directories exist
-      outDir = new File(outputPath + "/" + (today - 1));
+      outDir = new File(outputPath + "/" + yesterday);
       if(!outDir.exists()){outDir.mkdirs();}
       outDir = new File(outputPath + "/" + today);
       if(!outDir.exists()){outDir.mkdirs();}
-      outDir = new File(outputPath + "/" + (today + 1));
+      outDir = new File(outputPath + "/" + tomorrow);
       if(!outDir.exists()){outDir.mkdirs();}
 
       //fill CDF files for yesterday, today, and tomorrow
-      doAllCdf(today - 1);
+      doAllCdf(yesterday);
       doAllCdf(today);
-      doAllCdf(today + 1);
+      doAllCdf(tomorrow);
 
       System.out.println("Created Level One.");
    }
