@@ -219,7 +219,7 @@ public class ExtractTiming {
       for(int data_i = 0, model_i = 0; data_i < size; data_i++){
          fc = data.frame_1Hz[data_i];
          data.epoch_1Hz[data_i] = calcEpoch(fc, model_i);
-System.out.println(data.epoch_1Hz[data_i]);
+
          //save epoch to the various time scales
          //fill the >1Hz times 
          for(int fill_i = 0; fill_i < 4; fill_i++){
