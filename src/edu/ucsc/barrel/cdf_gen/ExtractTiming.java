@@ -162,7 +162,6 @@ public class ExtractTiming {
       SimpleRegression fit = null, new_fit = null;
       
       size_1Hz = data.getSize("1Hz");
-
       //create a model for each batch of time records
       for(int first_rec = 0; first_rec < time_rec_cnt; first_rec = last_rec+1){
          //incriment the last_rec by the max, or however many recs are left
@@ -170,7 +169,7 @@ public class ExtractTiming {
          
          //try to generate a model
          new_fit = genModel(first_rec, last_rec);
-         
+
          //Need to add better criteria than this for accepting a new model
          if(new_fit != null){
             fit = new_fit;
@@ -188,27 +187,25 @@ public class ExtractTiming {
                "\tm = " + fit.getSlope() + ", b = " + fit.getIntercept() + 
                " slope error = " + fit.getSlopeStdErr() + " n = " + fit.getN()
             );
-         }
-         
-         //fill each 1Hz record with the current model
-         if(fit != null){
-            last_frame = time_recs[last_rec].getFrame();
-            while(
-               (data.frame_1Hz[frame_i] <= last_frame) && 
-               (frame_i < size_1Hz)
-            ){
-               data.time_model_slope[frame_i] = fit.getSlope(); 
-               data.time_model_intercept[frame_i] = fit.getIntercept(); 
-               frame_i++;
-            }
+         }else{
+            System.out.println(
+               "Failed to get model using " + (last_rec-first_rec) + "records"
+            );
          }
       }
 
-      //fill any remaining 1Hz records with the last model
-      while(frame_i < size_1Hz){
-            data.time_model_slope[frame_i] = fit.getSlope(); 
-            data.time_model_intercept[frame_i] = fit.getIntercept(); 
-            frame_i++;
+      if(fit == null){
+         //no timing model was ever created. 
+         //Use slope=1000 and intercept=0 to use frame number epoch.
+         //this will clearly not give a good result for time, but will
+         //allow the data to be plotted as a time series.
+         //This will be a place to add a quality flag
+         models[model_cnt] = new LinModel();
+         models[model_cnt].setSlope(1000); 
+         models[model_cnt].setIntercept(0); 
+         models[model_cnt].setFirst(0); 
+         models[model_cnt].setLast(data.frame_1Hz[size_1Hz]); 
+         model_cnt = 1;
       }
    }
 
@@ -222,7 +219,7 @@ public class ExtractTiming {
       for(int data_i = 0, model_i = 0; data_i < size; data_i++){
          fc = data.frame_1Hz[data_i];
          data.epoch_1Hz[data_i] = calcEpoch(fc, model_i);
-
+System.out.println(data.epoch_1Hz[data_i]);
          //save epoch to the various time scales
          //fill the >1Hz times 
          for(int fill_i = 0; fill_i < 4; fill_i++){
