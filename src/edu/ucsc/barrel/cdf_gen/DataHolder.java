@@ -366,9 +366,6 @@ public class DataHolder{
          sec %= 3600;
          min = sec / 60;
          sec %= 60;
-         CDF_Gen.timeStamps.writeln(
-            frame_1Hz[rec_num_1Hz] + ", " + ms_of_week[rec_num_mod4] + ", " + hour + ":" + min + ":" + sec + ", " + (sec-16)
-         );
       }
 
       //fill the quality flag with a 0 for now
@@ -378,7 +375,7 @@ public class DataHolder{
       pps[rec_num_1Hz] = 
          frame.shiftRight(1616).and(BigInteger.valueOf(65535)).intValue();
       pps_q[rec_num_1Hz] = 0;
-      
+
       //mag data 4 sets of xyz vectors. 24 bits/component
       magx_raw[rec_num_4Hz] = 
          frame.shiftRight(1592).and(BigInteger.valueOf(16777215)).intValue();

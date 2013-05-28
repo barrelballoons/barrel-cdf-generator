@@ -118,7 +118,7 @@ public class ExtractTiming {
       int rec_i = 0, frame_i = 0;
       
       time_recs = new TimeRec[data.getSize("mod4")];
-      models = new LinModel[(data.getSize("1Hz")/MAX_RECS) + 1];
+      models = new LinModel[(data.getSize("1Hz") / MAX_RECS) + 1];
    }
 
    public void getTimeRecs(){
@@ -130,11 +130,11 @@ public class ExtractTiming {
       for(int rec_mod4_i = 0; rec_mod4_i < time_recs.length; rec_mod4_i++){
          //make sure we have a valid ms
          ms = data.ms_of_week[rec_mod4_i];
-         if((ms < MINMS) || (ms > MAXMS)){continue;}
+         if((ms <= MINMS) || (ms >= MAXMS)){continue;}
          
          //get initial fc from the mod4 framegroup
          fc = data.frame_mod4[rec_mod4_i]; //last good fc from this mod4 group
-         if((fc < MINFC) || (fc > MAXFC)){continue;}
+         if((fc <= MINFC) || (fc >= MAXFC)){continue;}
 
          //figure out the offset from mod4 fc and 1Hz fc
          fc -= ((fc % 4) - DataHolder.TIME); 
@@ -143,13 +143,13 @@ public class ExtractTiming {
          rec_1Hz_i = data.convertIndex(rec_mod4_i, fc, "mod4", "1Hz");
          rec_mod40_i = data.convertIndex(rec_mod4_i, fc, "mod4", "mod40");
 
-         //figure out which pps to use
+         //figure out if pps is valid 
          pps = (short)data.pps[rec_1Hz_i];
-         if((pps < MINPPS) || (pps > MAXPPS)){continue;}
+         if((pps <= MINPPS) || (pps >= MAXPPS)){continue;}
 
          //get number of weeks since GPS_START_TIME
          week = (short)data.weeks[rec_mod40_i];
-         if((week < MINWK) || (week > MAXWK)){continue;}
+         if((week <= MINWK) || (week >= MAXWK)){continue;}
          
          time_recs[time_rec_cnt] = new TimeRec(fc, ms, week, pps);
          time_rec_cnt++;
@@ -185,7 +185,8 @@ public class ExtractTiming {
                "Frames " + time_recs[first_rec].getFrame() + " - " +
                time_recs[last_rec].getFrame()); 
             System.out.println(
-               "\tm = " + fit.getSlope() + ", b = " + fit.getIntercept()
+               "\tm = " + fit.getSlope() + ", b = " + fit.getIntercept() + 
+               " slope error = " + fit.getSlopeStdErr() + " n = " + fit.getN()
             );
          }
          

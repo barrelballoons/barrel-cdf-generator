@@ -184,11 +184,6 @@ public class LevelTwo{
             (long)min, (long)sec, 0L, 0L, 0L
          );  
          
-         CDF_Gen.timeStamps.writeln(
-            (data.frame_mod4[rec_i] + " " + 
-            (data.epoch_mod4[rec_i] - gps_time[rec_i]) / 1000000000)
-         );
-
          //save the values from the other variables
          frameGroup[rec_i] = data.frame_mod4[data_i];
          epoch[rec_i] = data.epoch_mod4[data_i];
