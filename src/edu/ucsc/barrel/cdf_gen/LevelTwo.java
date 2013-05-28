@@ -778,7 +778,6 @@ public class LevelTwo{
       double[][] 
          chan_edges = new double[numOfRecs][5],
          lc_scaled = new double[4][numOfRecs];
-      int[] tempLC = new int[4];
       double scint_temp = 20, dpu_temp = 20, peak = -1;
       
       int[] 
@@ -841,7 +840,7 @@ public class LevelTwo{
       var = cdf.getVariable("LC1");
       System.out.println("LC1...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 

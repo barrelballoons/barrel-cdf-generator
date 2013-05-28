@@ -615,7 +615,7 @@ public class LevelOne{
       var = cdf.getVariable("LC1");
       System.out.println("LC1...");
       var.putHyperData(
-         0, numOfRecs, 1, 
+         var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
