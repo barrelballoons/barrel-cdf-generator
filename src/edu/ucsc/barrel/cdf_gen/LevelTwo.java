@@ -661,6 +661,7 @@ public class LevelTwo{
          modemCnt[rec_i] = data.modemCnt[data_i];
          dcdCnt[rec_i] = data.dcdCnt[data_i];
          cmdCnt[rec_i] = data.cmdCnt[data_i];
+         frameGroup[rec_i] = data.frame_mod40[data_i];
          weeks[rec_i] = data.weeks[data_i];
          epoch[rec_i] = data.epoch_mod40[data_i];
          q[rec_i] = data.hkpg_q[data_i];
