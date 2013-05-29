@@ -270,8 +270,8 @@ public class ExtractTiming {
       for(int ms_i = 0; ms_i < data.getSize("mod4"); ms_i++){
          //try to find and initial set of 
          //timestamps and week variables if needed.
-         if(initial_week == 0){initial_week = data.weeks[ms_i];}
-         if(initial_ms == 0){initial_ms = data.ms_of_week[ms_i/10];}
+         if(initial_week == 0){initial_week = data.weeks[ms_i / 10];}
+         if(initial_ms == 0){initial_ms = data.ms_of_week[ms_i];}
 
          //check to see if the ms_of_week rolled over
          //the value given by the gps might jump around a bit, so make sure 
