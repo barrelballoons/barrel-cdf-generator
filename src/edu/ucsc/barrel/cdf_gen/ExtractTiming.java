@@ -219,7 +219,7 @@ public class ExtractTiming {
       for(int data_i = 0, model_i = 0; data_i < size; data_i++){
          fc = data.frame_1Hz[data_i];
          data.epoch_1Hz[data_i] = calcEpoch(fc, model_i);
-System.out.println(data.epoch_1Hz[data_i]);
+
          //save epoch to the various time scales
          //fill the >1Hz times 
          for(int fill_i = 0; fill_i < 4; fill_i++){
@@ -270,8 +270,8 @@ System.out.println(data.epoch_1Hz[data_i]);
       for(int ms_i = 0; ms_i < data.getSize("mod4"); ms_i++){
          //try to find and initial set of 
          //timestamps and week variables if needed.
-         if(initial_week == 0){initial_week = data.weeks[ms_i];}
-         if(initial_ms == 0){initial_ms = data.ms_of_week[ms_i/10];}
+         if(initial_week == 0){initial_week = data.weeks[ms_i / 10];}
+         if(initial_ms == 0){initial_ms = data.ms_of_week[ms_i];}
 
          //check to see if the ms_of_week rolled over
          //the value given by the gps might jump around a bit, so make sure 
