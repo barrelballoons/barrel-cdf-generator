@@ -243,13 +243,20 @@ public class LevelTwo{
             line = line.trim();
 
             //make sure the mag coordinates were calculated correctly
-            if(line.indexOf("*") == -1){
-               mag_coords = line.split("\\s+");
+            mag_coords = line.split("\\s+");
+            if(mag_coords[8].indexOf("*") == -1){
                l2[rec_i] = Math.abs(Float.parseFloat(mag_coords[8]));
+            }
+            if(mag_coords[9].indexOf("*") == -1){
                mlt2[rec_i] = Float.parseFloat(mag_coords[9]);
+            }
+            if(mag_coords[11].indexOf("*") == -1){
                l6[rec_i] = Math.abs(Float.parseFloat(mag_coords[11]));
+            }
+            if(mag_coords[12].indexOf("*") == -1){
                mlt6[rec_i] = Float.parseFloat(mag_coords[12]);
             }
+
             rec_i++;
          }
 
