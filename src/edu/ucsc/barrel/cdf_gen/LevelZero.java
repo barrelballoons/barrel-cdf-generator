@@ -44,6 +44,7 @@ public class LevelZero{
    private String[] fileList;
    private String revNum;
    private OutputStream outFile;
+   private int dpu_id;
    
    public LevelZero(
       DataHolder data,
@@ -54,6 +55,7 @@ public class LevelZero{
       final String p,
 		final String f,
 		final String s,
+      final String dpu,
 		final String d
    ){
 	   //set object properties
@@ -61,7 +63,8 @@ public class LevelZero{
       frameLength = length;
       inputPath = inputDir;
       outputPath = outputDir;
-      
+      dpu_id = Integer.parseInt(dpu);
+
 		//get file revision number
       if(CDF_Gen.getSetting("rev") != null){
          revNum = CDF_Gen.getSetting("rev");
@@ -209,7 +212,7 @@ public class LevelZero{
          outFile.write(CDF_Gen.hexToByte(frame));
          
          //add frame to data object
-         CDF_Gen.getDataSet().addFrame(binFrame);
+         CDF_Gen.getDataSet().addFrame(binFrame, dpu_id);
          
          //try{
          //   //save hex frame to the day-long string

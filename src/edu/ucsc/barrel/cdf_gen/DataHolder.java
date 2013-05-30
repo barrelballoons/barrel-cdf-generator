@@ -366,7 +366,7 @@ public class DataHolder{
       return new_i;
    }
 
-   public void addFrame(BigInteger frame){
+   public void addFrame(BigInteger frame, int dpu_id){
       int mod4 = 0, mod32 = 0, mod40 = 0;
       long tmpFC = 0;
       short tmpVer = 0, tmpPayID = 0;
@@ -382,6 +382,10 @@ public class DataHolder{
          frame.shiftRight(1685).and(BigInteger.valueOf(63)).shortValue();
       tmpFC = 
          frame.shiftRight(1664).and(BigInteger.valueOf(2097151)).intValue();
+
+      //check to make sure we have a frame from the correct payload
+      if(dpu_id != tmpPayID){return;}
+
       //get multiplex info
       mod4 = (int)tmpFC % 4;
       mod32 = (int)tmpFC % 32;
