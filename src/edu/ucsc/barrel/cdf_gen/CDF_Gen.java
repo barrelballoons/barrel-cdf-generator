@@ -97,7 +97,8 @@ public class CDF_Gen implements CDFConstants{
 				flt = "00",
 				stn = "0",
 				revNum = "00",
-            mag = "0000";
+            mag = "0000",
+            dpu = "00";
 			
 			//break payload apart into id, flight number and launch station
 			String[] payload_parts = payload_i.split(",");
@@ -105,6 +106,7 @@ public class CDF_Gen implements CDFConstants{
 			if(payload_parts[1] != null){flt = payload_parts[1];}
 			if(payload_parts[2] != null){stn = payload_parts[2];}
 			if(payload_parts[3] != null){mag = payload_parts[3];}
+			if(payload_parts[3] != null){dpu = payload_parts[4];}
 			
          //set output paths
          if(getSetting("outDir") != ""){
@@ -152,6 +154,7 @@ public class CDF_Gen implements CDFConstants{
                id,
 					flt,
 					stn,
+               dpu,
                getSetting("date")
             );
             L0.processRawFiles();
