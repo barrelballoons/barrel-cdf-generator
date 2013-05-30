@@ -1321,8 +1321,9 @@ public class LevelTwo{
             break;
          }
       }
-      //make sure we have a valid start and stop index
-      if(first_i != -1){
+      //make sure we have a valid start and stop index and 
+      //that there are some records to process
+      if(first_i != -1 && (last_i - first_i) > 0){
          doPpsCdf(first_i, last_i, date);
       }
 
@@ -1344,7 +1345,7 @@ public class LevelTwo{
             break;
          }
       }
-      if(first_i != -1){
+      if(first_i != -1 && (last_i - first_i) > 0){
          doGpsCdf(first_i, last_i, date);
          doMspcCdf(first_i, last_i, date);
          doRcntCdf(first_i, last_i, date);  
@@ -1368,7 +1369,7 @@ public class LevelTwo{
             break;
          }
       }
-      if(first_i != -1){
+      if(first_i != -1 && (last_i - first_i) > 0){
          doSspcCdf(first_i, last_i, date);  
       }
 
@@ -1390,7 +1391,7 @@ public class LevelTwo{
             break;
          }
       }
-      if(first_i != -1){
+      if(first_i != -1 && (last_i - first_i) > 0){
          doHkpgCdf(first_i, last_i, date);  
       }
 
@@ -1412,7 +1413,7 @@ public class LevelTwo{
             break;
          }
       }
-      if(first_i != -1){
+      if(first_i != -1 && (last_i - first_i) > 0){
          //make sure the first and last records are not mid-frame
          first_i = Math.max(0, (first_i - (first_i % 4)));
          last_i = Math.min(size, (last_i + 4 - (last_i % 4)));
@@ -1438,7 +1439,7 @@ public class LevelTwo{
             break;
          }
       }
-      if(first_i != -1){
+      if(first_i != -1 && (last_i - first_i) > 0){
          //make sure the first and last records are not mid-frame
          first_i = Math.max(0, (first_i - (first_i % 20)));
          last_i = Math.min(size, (last_i + 20 - (last_i % 20)));
