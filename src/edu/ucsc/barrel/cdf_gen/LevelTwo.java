@@ -80,7 +80,7 @@ public class LevelTwo{
 
       //calculate yesterday and tomorrow from today's date
       int year, month, day;
-      year = today/10000;
+      year = today / 10000;
       month = (today - (year * 10000)) / 100;
       day = today - (year * 10000) - (month * 100);
       dateObj.clear();

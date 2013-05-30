@@ -145,7 +145,12 @@ public class ExtractTiming {
 
          //figure out if pps is valid 
          pps = (short)data.pps[rec_1Hz_i];
-         if((pps <= MINPPS) || (pps >= MAXPPS)){continue;}
+         if((pps <= MINPPS) || (pps >= MAXPPS)){
+            //check if pps is high because it came super early so the
+            //dpu didnt have a chance to write "0"
+            if(pps == 65535){pps = 0;} 
+            else{continue;}
+         }
 
          //get number of weeks since GPS_START_TIME
          week = (short)data.weeks[rec_mod40_i];
