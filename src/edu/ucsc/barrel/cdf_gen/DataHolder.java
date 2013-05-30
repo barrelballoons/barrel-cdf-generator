@@ -45,7 +45,19 @@ public class DataHolder{
       SATSOFF = 36, WEEK = 37, CMDCNT = 38, MDMCNT = 39,
       //rate counter index
       INTER = 0, LL = 1, PD = 2, HL = 3;
-  
+   
+   //fill values for vaious CDF variable types
+   static public final int 
+      UINT1_FILL = 255,
+      UINT2_FILL = 65535,
+      INT1_FILL = -128,
+      INT2_FILL = -32768,
+      INT4_FILL = -2147483648;
+   static public final long
+      UINT4_FILL = 4294967295L;
+   static public final float 
+      FLOAT_FILL = -1E31f;
+
    static public float[] hkpg_scale = new float[36];
    static public float[] hkpg_offset = new float[36];
    static public String[] hkpg_label = new String[36];
@@ -54,7 +66,7 @@ public class DataHolder{
 	   "Interrupt", "LowLevel", "PeakDet", "HighLevel"
    };
       
-   public short[] 
+   public short[]  
       payID = new short[MAX_FRAMES], 
       ver = new short[MAX_FRAMES],
       sats = new short[MAX_FRAMES / 40],
@@ -69,13 +81,13 @@ public class DataHolder{
       epoch_mod4 = new long[MAX_FRAMES / 4],
       epoch_mod32 = new long[MAX_FRAMES / 32],
       epoch_mod40 = new long[MAX_FRAMES / 40];
-  public int[]
-      ms_of_week = new int[MAX_FRAMES / 4];
+  public int[] 
+      ms_of_week = new int[MAX_FRAMES / 4]; 
    public long[][]
       hkpg_raw = new long[40][MAX_FRAMES / 40],
       rcnt_raw = new long[4][MAX_FRAMES / 4];
    public int[][]
-      gps_raw = new int[4][MAX_FRAMES / 4];
+      gps_raw = new int[4][MAX_FRAMES / 4]; 
    public int[]
       magx_raw = new int[MAX_FRAMES * 4],
       magy_raw = new int[MAX_FRAMES * 4],
@@ -91,7 +103,8 @@ public class DataHolder{
       frame_20Hz = new int[MAX_FRAMES * 20],
       frame_mod4 = new int[MAX_FRAMES / 4],
       frame_mod32 = new int[MAX_FRAMES / 32],
-      frame_mod40 = new int[MAX_FRAMES / 40],
+      frame_mod40 = new int[MAX_FRAMES / 40];
+   public int[] 
       weeks = new int[MAX_FRAMES / 40],
       pps = new int[MAX_FRAMES],
       cmdCnt = new int[MAX_FRAMES / 40];
@@ -105,10 +118,10 @@ public class DataHolder{
       mspc_q = new int[MAX_FRAMES / 4],
       sspc_q = new int[MAX_FRAMES / 32],
       time_q = new int[MAX_FRAMES];
-   public int[][]
+   public int[][] 
       mspc_raw = new int[MAX_FRAMES / 4][48],
       sspc_raw = new int[MAX_FRAMES / 32][256];
-   public int[]
+   public int[] 
       lc1_raw = new int[MAX_FRAMES * 20],
       lc2_raw = new int[MAX_FRAMES * 20],
       lc3_raw = new int[MAX_FRAMES * 20],
@@ -220,6 +233,61 @@ public class DataHolder{
       hkpg_label[T13] = "T13_TermBatt";
       hkpg_label[T14] = "T14_TermCap";
       hkpg_label[T15] = "T15_CCStat";
+
+      //fill all of the storage arrays with fill values
+      for(int i = 0; i < MAX_FRAMES; i++){
+         payID[i] = INT2_FILL;
+         ver[i] = INT2_FILL;
+         frame_1Hz[i] = UINT2_FILL;
+         pps[i] = INT4_FILL;
+
+         for(int j = 0; j < 4; j++){
+            frame_4Hz[(i * 4) + j] = UINT2_FILL;
+            magx_raw[(i * 4) + j] = INT4_FILL;
+            magy_raw[(i * 4) + j] = INT4_FILL;
+            magz_raw[(i * 4) + j] = INT4_FILL;
+         }
+         for(int j = 0; j < 20; j++){
+            frame_20Hz[(i * 20) + j] = UINT2_FILL;
+            lc1_raw[(i * 20) + j] = INT4_FILL;
+            lc2_raw[(i * 20) + j] = INT4_FILL;
+            lc3_raw[(i * 20) + j] = INT4_FILL;
+            lc4_raw[(i * 20) + j] = INT4_FILL;
+         }
+      }
+      for(int i = 0; i < (MAX_FRAMES / 4); i++){
+         frame_mod4[i] = UINT2_FILL;
+         ms_of_week[i] = INT4_FILL;
+
+         for(int j = 0; j < 4; j++){
+            gps_raw[j][i] = INT4_FILL;
+            rcnt_raw[j][i] = UINT4_FILL;
+         }
+         for(int j = 0; j < 48; j++){
+            mspc_raw[i][j] = INT4_FILL;
+         }
+      }
+      for(int i = 0; i < (MAX_FRAMES / 32); i++){
+         frame_mod32[i] = UINT2_FILL;
+         for(int j = 0; j < 256; j++){
+            sspc_raw[i][j] = INT4_FILL;
+         }
+      }
+      for(int i = 0; i < (MAX_FRAMES / 40); i++){
+         frame_mod40[i] = UINT2_FILL;
+         sats[i] = INT2_FILL;
+         offset[i] = INT2_FILL;
+         termStat[i] = INT2_FILL;
+         modemCnt[i] = INT2_FILL;
+         dcdCnt[i] = INT2_FILL;
+         weeks[i] = INT4_FILL;
+         cmdCnt[i] = INT4_FILL;
+
+         for(int j = 0; j < 36; j++){
+            hkpg[j][i] = FLOAT_FILL;
+            hkpg_raw[j][i] = UINT4_FILL;
+         }
+      }
    }
 
    public int getSize(String cadence){

@@ -173,16 +173,20 @@ public class LevelTwo{
             Float.intBitsToFloat(Integer.valueOf("33B40000", 16).intValue());
 
          //calculate the GPS time
-         sec = data.gps_raw[1][data_i] / 1000; //convert ms to sec
-         sec %= 86400; //remove any complete days
-         hour = sec / 3600;
-         sec %= 3600;
-         min = sec / 60;
-         sec %= 60;
-         gps_time[rec_i] = CDFTT2000.compute(
-            (long)(year + 2000), (long)(month - 1), (long)day, (long)hour, 
-            (long)min, (long)sec, 0L, 0L, 0L
-         );  
+         if(data.ms_of_week[data_i] != DataHolder.INT4_FILL){
+            sec = data.ms_of_week[data_i] / 1000; //convert ms to sec
+            sec %= 86400; //remove any complete days
+            hour = sec / 3600;
+            sec %= 3600;
+            min = sec / 60;
+            sec %= 60;
+            gps_time[rec_i] = CDFTT2000.compute(
+               (long)(year + 2000), (long)(month - 1), (long)day, (long)hour, 
+               (long)min, (long)sec, 0L, 0L, 0L
+            );  
+         }else{
+            gps_time[rec_i] = 0;
+         }
          
          //save the values from the other variables
          frameGroup[rec_i] = data.frame_mod4[data_i];
@@ -246,15 +250,23 @@ public class LevelTwo{
             mag_coords = line.split("\\s+");
             if(mag_coords[8].indexOf("*") == -1){
                l2[rec_i] = Math.abs(Float.parseFloat(mag_coords[8]));
+            }else{
+               l2[rec_i] = DataHolder.FLOAT_FILL;
             }
             if(mag_coords[9].indexOf("*") == -1){
                mlt2[rec_i] = Float.parseFloat(mag_coords[9]);
+            }else{
+               mlt2[rec_i] = DataHolder.FLOAT_FILL;
             }
             if(mag_coords[11].indexOf("*") == -1){
                l6[rec_i] = Math.abs(Float.parseFloat(mag_coords[11]));
+            }else{
+               l6[rec_i] = DataHolder.FLOAT_FILL;
             }
             if(mag_coords[12].indexOf("*") == -1){
                mlt6[rec_i] = Float.parseFloat(mag_coords[12]);
+            }else{
+               mlt6[rec_i] = DataHolder.FLOAT_FILL;
             }
 
             rec_i++;
