@@ -56,7 +56,7 @@ public class DataHolder{
    static public final long
       UINT4_FILL = 4294967295L;
    static public final float 
-      FLOAT_FILL = -1E31f;
+      FLOAT_FILL = -1.0E31f;
 
    static public float[] hkpg_scale = new float[36];
    static public float[] hkpg_offset = new float[36];
@@ -127,9 +127,6 @@ public class DataHolder{
       lc3_raw = new int[MAX_FRAMES * 20],
       lc4_raw = new int[MAX_FRAMES * 20];
    
-   //keep track of rollover points for up to 3 days
-   public int[]
-      day_rollovers = {-1, -1, -1};
    static public final int
       YESTERDAY = 0, TODAY = 1, TOMORROW = 2;
 
