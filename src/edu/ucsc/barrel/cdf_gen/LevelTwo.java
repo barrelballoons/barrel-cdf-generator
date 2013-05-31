@@ -161,19 +161,32 @@ public class LevelTwo{
       //convert lat, lon, and alt values and select values for this date
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          //convert mm to km
-         alt[rec_i] = (float)data.gps_raw[Constants.ALT_I][data_i] / 1000000;
+         alt[rec_i] = (float)data.gps_raw[Constants.ALT_I][data_i];
+         if(alt[rec_i] != Constants.ALT_RAW_FILL){
+            alt[rec_i] /= 1000000;
+         }else{
+            alt[rec_i] = (float)Constants.ALT_FILL;
+         }
 
          //convert lat and lon to physical units
          lat[rec_i] = (float)data.gps_raw[Constants.LAT_I][data_i];
-         lat[rec_i] *= 
-            Float.intBitsToFloat(Integer.valueOf("33B40000", 16).intValue());
+         if(lat[rec_i] != Constants.LAT_RAW_FILL){
+            lat[rec_i] *= 
+               Float.intBitsToFloat(Integer.valueOf("33B40000", 16).intValue());
+         }else{
+            lat[rec_i] = (float)Constants.LAT_FILL;
+         }
 
          lon[rec_i] = (float)data.gps_raw[Constants.LON_I][data_i];
-         lon[rec_i] *= 
-            Float.intBitsToFloat(Integer.valueOf("33B40000", 16).intValue());
+         if(lon[rec_i] != Constants.LON_RAW_FILL){
+            lon[rec_i] *= 
+               Float.intBitsToFloat(Integer.valueOf("33B40000", 16).intValue());
+         }else{
+            lon[rec_i] = (float)Constants.LON_FILL;
+         }
 
          //calculate the GPS time
-         if(data.ms_of_week[data_i] != Constants.INT4_FILL){
+         if(data.ms_of_week[data_i] != Constants.MS_WEEK_FILL){
             sec = data.ms_of_week[data_i] / 1000; //convert ms to sec
             sec %= 86400; //remove any complete days
             hour = sec / 3600;
@@ -194,7 +207,11 @@ public class LevelTwo{
          q[rec_i] = data.gps_q[data_i];
 
          //make sure we have a complete gps record before generating mag coords
-         if((alt[rec_i] != 0) && (lat[rec_i] != 0) && (lon[rec_i] != 0)){
+         if(
+            (alt[rec_i] != Constants.ALT_FILL) && 
+            (lat[rec_i] != Constants.LAT_FILL) && 
+            (lon[rec_i] != Constants.LON_FILL)
+         ){
          
             //calculate the current time in seconds of day
             epoch_parts = CDFTT2000.breakdown(epoch[rec_i]);
@@ -532,16 +549,36 @@ public class LevelTwo{
      
       //extract the nominal magnetometer value and calculate |B|
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-         magx[rec_i] = (data.magx_raw[data_i] - 8388608.0f) / 83886.070f;
-         magy[rec_i] = (data.magy_raw[data_i] - 8388608.0f) / 83886.070f;
-         magz[rec_i] = (data.magz_raw[data_i] - 8388608.0f) / 83886.070f;
-
-         magTot[rec_i] = 
-            (float)Math.sqrt(
-               (magx[rec_i] * magx[rec_i]) + 
-               (magy[rec_i] * magy[rec_i]) +
-               (magz[rec_i] * magz[rec_i]) 
-            );
+         if(data.magx_raw[data_i] != Constants.FLOAT_FILL){
+            magx[rec_i] = (data.magx_raw[data_i] - 8388608.0f) / 83886.070f;
+         }else{
+            magx[rec_i] = Constants.FLOAT_FILL;
+         }
+         if(data.magy_raw[data_i] != Constants.FLOAT_FILL){
+            magy[rec_i] = (data.magy_raw[data_i] - 8388608.0f) / 83886.070f;
+         }else{
+            magx[rec_i] = Constants.FLOAT_FILL;
+         }
+         if(data.magz_raw[data_i] != Constants.FLOAT_FILL){
+            magz[rec_i] = (data.magz_raw[data_i] - 8388608.0f) / 83886.070f;
+         }else{
+            magx[rec_i] = Constants.FLOAT_FILL;
+         }
+         
+         if(
+            magx[rec_i] != Constants.FLOAT_FILL &&
+            magy[rec_i] != Constants.FLOAT_FILL &&
+            magz[rec_i] != Constants.FLOAT_FILL 
+         ){
+            magTot[rec_i] = 
+               (float)Math.sqrt(
+                  (magx[rec_i] * magx[rec_i]) + 
+                  (magy[rec_i] * magy[rec_i]) +
+                  (magz[rec_i] * magz[rec_i]) 
+               );
+         }else{
+            magTot[rec_i] = Constants.FLOAT_FILL;
+         }
 
          frameGroup[rec_i] = data.frame_4Hz[data_i];
          epoch[rec_i] = data.epoch_4Hz[data_i];
@@ -657,9 +694,13 @@ public class LevelTwo{
          //scale all the records for this variable
          double[] hkpg_scaled = new double[numOfRecs];
          for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
-            hkpg_scaled[rec_i] = 
-               (data.hkpg_raw[var_i][rec_i] * data.hkpg_scale[var_i]) + 
-               data.hkpg_offset[var_i];
+            if(data.hkpg_raw[var_i][rec_i] != Constants.HKPG_FILL){
+               hkpg_scaled[rec_i] = 
+                  (data.hkpg_raw[var_i][rec_i] * data.hkpg_scale[var_i]) + 
+                  data.hkpg_offset[var_i];
+            }else{
+               hkpg_scaled[rec_i] = Constants.FLOAT_FILL;
+            }
          }
 
          var = cdf.getVariable(data.hkpg_label[var_i]);
@@ -821,7 +862,7 @@ public class LevelTwo{
 
          //get temperatures
          hkpg_rec = lc_rec / 20 / 40; //convert from 20Hz to mod40
-         if(data.hkpg_raw[Constants.T0][hkpg_rec] != 0){
+         if(data.hkpg_raw[Constants.T0][hkpg_rec] != Constants.FLOAT_FILL){
             scint_temp = 
                (data.hkpg_raw[Constants.T0][hkpg_rec] * 
                data.hkpg_scale[Constants.T0]) + 
@@ -829,7 +870,7 @@ public class LevelTwo{
          }else{
             scint_temp = 20;
          }
-         if(data.hkpg_raw[Constants.T5][hkpg_rec] != 0){
+         if(data.hkpg_raw[Constants.T5][hkpg_rec] != Constants.FLOAT_FILL){
             dpu_temp = 
                (data.hkpg_raw[Constants.T5][hkpg_rec] * 
                data.hkpg_scale[Constants.T5]) + 
@@ -846,10 +887,26 @@ public class LevelTwo{
             spectrum.createBinEdges(0, scint_temp, dpu_temp, peak);
 
          //write the spectrum to the new array
-         lc_scaled[0][lc_rec] = data.lc1_raw[lc_rec] * 20;
-         lc_scaled[1][lc_rec] = data.lc2_raw[lc_rec] * 20;
-         lc_scaled[2][lc_rec] = data.lc3_raw[lc_rec] * 20;
-         lc_scaled[3][lc_rec] = data.lc4_raw[lc_rec] * 20;
+         if(data.lc1_raw[lc_rec] != Constants.FLOAT_FILL){
+            lc_scaled[0][lc_rec] = data.lc1_raw[lc_rec] * 20;
+         }else{
+            lc_scaled[0][lc_rec] = Constants.FLOAT_FILL;
+         }
+         if(data.lc2_raw[lc_rec] != Constants.FLOAT_FILL){
+            lc_scaled[1][lc_rec] = data.lc2_raw[lc_rec] * 20;
+         }else{
+            lc_scaled[1][lc_rec] = Constants.FLOAT_FILL;
+         }
+         if(data.lc3_raw[lc_rec] != Constants.FLOAT_FILL){
+            lc_scaled[2][lc_rec] = data.lc3_raw[lc_rec] * 20;
+         }else{
+            lc_scaled[2][lc_rec] = Constants.FLOAT_FILL;
+         }
+         if(data.lc4_raw[lc_rec] != Constants.FLOAT_FILL){
+            lc_scaled[3][lc_rec] = data.lc4_raw[lc_rec] * 20;
+         }else{
+            lc_scaled[3][lc_rec] = Constants.FLOAT_FILL;
+         }
       }
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
@@ -956,7 +1013,7 @@ public class LevelTwo{
          
          //get temperatures
          hkpg_rec = mspc_rec * 4 / 40; //convert from mod4 to mod40
-         if(data.hkpg_raw[Constants.T0][hkpg_rec] != 0){
+         if(data.hkpg_raw[Constants.T0][hkpg_rec] != Constants.FLOAT_FILL){
             scint_temp = 
                (data.hkpg_raw[Constants.T0][hkpg_rec] * 
                data.hkpg_scale[Constants.T0]) + 
@@ -964,7 +1021,7 @@ public class LevelTwo{
          }else{
             scint_temp = 20;
          }
-         if(data.hkpg_raw[Constants.T5][hkpg_rec] != 0){
+         if(data.hkpg_raw[Constants.T5][hkpg_rec] != Constants.FLOAT_FILL){
             dpu_temp = 
                (data.hkpg_raw[Constants.T5][hkpg_rec] * 
                data.hkpg_scale[Constants.T5]) + 
@@ -1186,7 +1243,11 @@ public class LevelTwo{
       //change all the units from cnts/4sec to cnts/sec
       for(int var_i = 0; var_i < 4; var_i++){
          for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
-            rc_timeScaled[var_i][rec_i] = data.rcnt_raw[var_i][rec_i] / 4;
+            if(data.rcnt_raw[var_i][rec_i] != Constants.RCNT_FILL){
+               rc_timeScaled[var_i][rec_i] = data.rcnt_raw[var_i][rec_i] / 4;
+            }else{
+               rc_timeScaled[var_i][rec_i] = Constants.FLOAT_FILL;
+            }
          }
       }
 
