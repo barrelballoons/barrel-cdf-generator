@@ -161,19 +161,19 @@ public class LevelTwo{
       //convert lat, lon, and alt values and select values for this date
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          //convert mm to km
-         alt[rec_i] = (float)data.gps_raw[0][data_i] / 1000000;
+         alt[rec_i] = (float)data.gps_raw[Constants.ALT_I][data_i] / 1000000;
 
          //convert lat and lon to physical units
-         lat[rec_i] = (float)data.gps_raw[2][data_i];
+         lat[rec_i] = (float)data.gps_raw[Constants.LAT_I][data_i];
          lat[rec_i] *= 
             Float.intBitsToFloat(Integer.valueOf("33B40000", 16).intValue());
 
-         lon[rec_i] = (float)data.gps_raw[3][data_i];
+         lon[rec_i] = (float)data.gps_raw[Constants.LON_I][data_i];
          lon[rec_i] *= 
             Float.intBitsToFloat(Integer.valueOf("33B40000", 16).intValue());
 
          //calculate the GPS time
-         if(data.ms_of_week[data_i] != DataHolder.INT4_FILL){
+         if(data.ms_of_week[data_i] != Constants.INT4_FILL){
             sec = data.ms_of_week[data_i] / 1000; //convert ms to sec
             sec %= 86400; //remove any complete days
             hour = sec / 3600;
@@ -251,22 +251,22 @@ public class LevelTwo{
             if(mag_coords[8].indexOf("*") == -1){
                l2[rec_i] = Math.abs(Float.parseFloat(mag_coords[8]));
             }else{
-               l2[rec_i] = DataHolder.FLOAT_FILL;
+               l2[rec_i] = Constants.FLOAT_FILL;
             }
             if(mag_coords[9].indexOf("*") == -1){
                mlt2[rec_i] = Float.parseFloat(mag_coords[9]);
             }else{
-               mlt2[rec_i] = DataHolder.FLOAT_FILL;
+               mlt2[rec_i] = Constants.FLOAT_FILL;
             }
             if(mag_coords[11].indexOf("*") == -1){
                l6[rec_i] = Math.abs(Float.parseFloat(mag_coords[11]));
             }else{
-               l6[rec_i] = DataHolder.FLOAT_FILL;
+               l6[rec_i] = Constants.FLOAT_FILL;
             }
             if(mag_coords[12].indexOf("*") == -1){
                mlt6[rec_i] = Float.parseFloat(mag_coords[12]);
             }else{
-               mlt6[rec_i] = DataHolder.FLOAT_FILL;
+               mlt6[rec_i] = Constants.FLOAT_FILL;
             }
 
             rec_i++;
@@ -821,17 +821,19 @@ public class LevelTwo{
 
          //get temperatures
          hkpg_rec = lc_rec / 20 / 40; //convert from 20Hz to mod40
-         if(data.hkpg_raw[data.T0][hkpg_rec] != 0){
+         if(data.hkpg_raw[Constants.T0][hkpg_rec] != 0){
             scint_temp = 
-               (data.hkpg_raw[data.T0][hkpg_rec] * data.hkpg_scale[data.T0]) + 
-               data.hkpg_offset[data.T0];
+               (data.hkpg_raw[Constants.T0][hkpg_rec] * 
+               data.hkpg_scale[Constants.T0]) + 
+               data.hkpg_offset[Constants.T0];
          }else{
             scint_temp = 20;
          }
-         if(data.hkpg_raw[data.T5][hkpg_rec] != 0){
+         if(data.hkpg_raw[Constants.T5][hkpg_rec] != 0){
             dpu_temp = 
-               (data.hkpg_raw[data.T5][hkpg_rec] * data.hkpg_scale[data.T5]) + 
-               data.hkpg_offset[data.T5];
+               (data.hkpg_raw[Constants.T5][hkpg_rec] * 
+               data.hkpg_scale[Constants.T5]) + 
+               data.hkpg_offset[Constants.T5];
          }else{
             dpu_temp = 20;
          }
@@ -954,17 +956,19 @@ public class LevelTwo{
          
          //get temperatures
          hkpg_rec = mspc_rec * 4 / 40; //convert from mod4 to mod40
-         if(data.hkpg_raw[data.T0][hkpg_rec] != 0){
+         if(data.hkpg_raw[Constants.T0][hkpg_rec] != 0){
             scint_temp = 
-               (data.hkpg_raw[data.T0][hkpg_rec] * data.hkpg_scale[data.T0]) + 
-               data.hkpg_offset[data.T0];
+               (data.hkpg_raw[Constants.T0][hkpg_rec] * 
+               data.hkpg_scale[Constants.T0]) + 
+               data.hkpg_offset[Constants.T0];
          }else{
             scint_temp = 20;
          }
-         if(data.hkpg_raw[data.T5][hkpg_rec] != 0){
+         if(data.hkpg_raw[Constants.T5][hkpg_rec] != 0){
             dpu_temp = 
-               (data.hkpg_raw[data.T5][hkpg_rec] * data.hkpg_scale[data.T5]) + 
-               data.hkpg_offset[data.T5];
+               (data.hkpg_raw[Constants.T5][hkpg_rec] * 
+               data.hkpg_scale[Constants.T5]) + 
+               data.hkpg_offset[Constants.T5];
          }else{
             dpu_temp = 20;
          }
@@ -1072,17 +1076,19 @@ public class LevelTwo{
       for(int sspc_rec = 0, hkpg_rec = 0; sspc_rec < numOfRecs; sspc_rec++){
          //get temperatures
          hkpg_rec = sspc_rec * 32 / 40; //convert from mod32 to mod40
-         if(data.hkpg_raw[data.T0][hkpg_rec] != 0){
+         if(data.hkpg_raw[Constants.T0][hkpg_rec] != 0){
             scint_temp = 
-               (data.hkpg_raw[data.T0][hkpg_rec] * data.hkpg_scale[data.T0]) + 
-               data.hkpg_offset[data.T0];
+               (data.hkpg_raw[Constants.T0][hkpg_rec] * 
+               data.hkpg_scale[Constants.T0]) + 
+               data.hkpg_offset[Constants.T0];
          }else{
             scint_temp = 20;
          }
-         if(data.hkpg_raw[data.T5][hkpg_rec] != 0){
+         if(data.hkpg_raw[Constants.T5][hkpg_rec] != 0){
             dpu_temp = 
-               (data.hkpg_raw[data.T5][hkpg_rec] * data.hkpg_scale[data.T5]) + 
-               data.hkpg_offset[data.T5];
+               (data.hkpg_raw[Constants.T5][hkpg_rec] * 
+               data.hkpg_scale[Constants.T5]) + 
+               data.hkpg_offset[Constants.T5];
          }else{
             dpu_temp = 20;
          }

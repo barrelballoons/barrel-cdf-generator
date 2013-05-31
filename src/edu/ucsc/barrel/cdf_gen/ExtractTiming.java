@@ -137,7 +137,7 @@ public class ExtractTiming {
          if((fc <= MINFC) || (fc >= MAXFC)){continue;}
 
          //figure out the offset from mod4 fc and 1Hz fc
-         fc -= ((fc % 4) - DataHolder.TIME); 
+         fc -= ((fc % 4) - Constants.TIME_I); 
          
          //get the indices of other cadence data
          rec_1Hz_i = data.convertIndex(rec_mod4_i, fc, "mod4", "1Hz");
