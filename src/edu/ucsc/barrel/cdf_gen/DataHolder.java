@@ -32,32 +32,6 @@ public class DataHolder{
    // the total amount of data never exceeds this
    final static int MAX_FRAMES = 172800;
    
-   //Index references for 2d arrays that hold different data types
-   static public final int 
-      //gps index
-      ALT = 0, TIME = 1, LAT = 2, LON = 3, 
-      //housekeeping index
-      V0 = 0, I0 = 1, V1 = 2, I1 = 3, V2 = 4, I2 = 5, V3 = 6, I3 = 7, V4 = 8, 
-      I4 = 9, V5 = 10, I5 = 11, V6 = 12, I6 = 13, V7 = 14, I7 = 15, T0 = 16, 
-      T8 = 17, T1 = 18, T9 = 19, T2 = 20, T10 = 21, T3 = 22, T11 = 23, T4 = 24, 
-      T12 = 25, T5 = 26, T13 = 27, T6 = 28, T14 = 29, T7 = 30, T15 = 31, 
-      V8 = 32, V9 = 33, V10 = 34, V11 = 35, 
-      SATSOFF = 36, WEEK = 37, CMDCNT = 38, MDMCNT = 39,
-      //rate counter index
-      INTER = 0, LL = 1, PD = 2, HL = 3;
-   
-   //fill values for vaious CDF variable types
-   static public final int 
-      UINT1_FILL = 255,
-      UINT2_FILL = 65535,
-      INT1_FILL = -128,
-      INT2_FILL = -32768,
-      INT4_FILL = -2147483648;
-   static public final long
-      UINT4_FILL = 4294967295L;
-   static public final float 
-      FLOAT_FILL = -1E31f;
-
    static public float[] hkpg_scale = new float[36];
    static public float[] hkpg_offset = new float[36];
    static public String[] hkpg_label = new String[36];
@@ -127,12 +101,6 @@ public class DataHolder{
       lc3_raw = new int[MAX_FRAMES * 20],
       lc4_raw = new int[MAX_FRAMES * 20];
    
-   //keep track of rollover points for up to 3 days
-   public int[]
-      day_rollovers = {-1, -1, -1};
-   static public final int
-      YESTERDAY = 0, TODAY = 1, TOMORROW = 2;
-
    public int 
       //record numbers are incrimented on the first record so
       //they start at -1
@@ -146,146 +114,148 @@ public class DataHolder{
 
    public DataHolder(){
       //fill the housekeeping reference arrays
-      hkpg_scale[V0] = 0.0003052f;
-      hkpg_scale[V1] = 0.0003052f;
-      hkpg_scale[V2] = 0.0006104f;
-      hkpg_scale[V3] = 0.0001526f;
-      hkpg_scale[V4] = 0.0001526f;
-      hkpg_scale[V5] = 0.0003052f;
-      hkpg_scale[V6] = -0.0001526f;
-      hkpg_scale[V7] = -0.0001526f;
-      hkpg_scale[V8] = 0.0001526f;
-      hkpg_scale[V9] = 0.0006104f;
-      hkpg_scale[V10] = 0.0006104f;
-      hkpg_scale[V11] = 0.0006104f;
-      hkpg_scale[I0] = 0.05086f;
-      hkpg_scale[I1] = 0.06104f;
-      hkpg_scale[I2] = 0.06104f;
-      hkpg_scale[I3] = 0.01017f;
-      hkpg_scale[I4] = 0.001017f;
-      hkpg_scale[I5] = 0.05086f;
-      hkpg_scale[I6] = -0.0001261f;
-      hkpg_scale[I7] = -0.001017f;
-      hkpg_scale[T0] = 0.007629f;
-      hkpg_scale[T1] = 0.007629f;
-      hkpg_scale[T2] = 0.007629f;
-      hkpg_scale[T3] = 0.007629f;
-      hkpg_scale[T4] = 0.007629f;
-      hkpg_scale[T5] = 0.007629f;
-      hkpg_scale[T6] = 0.007629f;
-      hkpg_scale[T7] = 0.007629f;
-      hkpg_scale[T8] = 0.007629f;
-      hkpg_scale[T9] = 0.007629f;
-      hkpg_scale[T10] = 0.007629f;
-      hkpg_scale[T11] = 0.007629f;
-      hkpg_scale[T12] = 0.007629f;
-      hkpg_scale[T13] = 0.0003052f;
-      hkpg_scale[T14] = 0.0003052f;
-      hkpg_scale[T15] = 0.0001526f;
+      hkpg_scale[Constants.V0] = 0.0003052f;
+      hkpg_scale[Constants.V1] = 0.0003052f;
+      hkpg_scale[Constants.V2] = 0.0006104f;
+      hkpg_scale[Constants.V3] = 0.0001526f;
+      hkpg_scale[Constants.V4] = 0.0001526f;
+      hkpg_scale[Constants.V5] = 0.0003052f;
+      hkpg_scale[Constants.V6] = -0.0001526f;
+      hkpg_scale[Constants.V7] = -0.0001526f;
+      hkpg_scale[Constants.V8] = 0.0001526f;
+      hkpg_scale[Constants.V9] = 0.0006104f;
+      hkpg_scale[Constants.V10] = 0.0006104f;
+      hkpg_scale[Constants.V11] = 0.0006104f;
+      hkpg_scale[Constants.I0] = 0.05086f;
+      hkpg_scale[Constants.I1] = 0.06104f;
+      hkpg_scale[Constants.I2] = 0.06104f;
+      hkpg_scale[Constants.I3] = 0.01017f;
+      hkpg_scale[Constants.I4] = 0.001017f;
+      hkpg_scale[Constants.I5] = 0.05086f;
+      hkpg_scale[Constants.I6] = -0.0001261f;
+      hkpg_scale[Constants.I7] = -0.001017f;
+      hkpg_scale[Constants.T0] = 0.007629f;
+      hkpg_scale[Constants.T1] = 0.007629f;
+      hkpg_scale[Constants.T2] = 0.007629f;
+      hkpg_scale[Constants.T3] = 0.007629f;
+      hkpg_scale[Constants.T4] = 0.007629f;
+      hkpg_scale[Constants.T5] = 0.007629f;
+      hkpg_scale[Constants.T6] = 0.007629f;
+      hkpg_scale[Constants.T7] = 0.007629f;
+      hkpg_scale[Constants.T8] = 0.007629f;
+      hkpg_scale[Constants.T9] = 0.007629f;
+      hkpg_scale[Constants.T10] = 0.007629f;
+      hkpg_scale[Constants.T11] = 0.007629f;
+      hkpg_scale[Constants.T12] = 0.007629f;
+      hkpg_scale[Constants.T13] = 0.0003052f;
+      hkpg_scale[Constants.T14] = 0.0003052f;
+      hkpg_scale[Constants.T15] = 0.0001526f;
 
-      hkpg_offset[T0] = -273.15f;
-      hkpg_offset[T1] = -273.15f;
-      hkpg_offset[T2] = -273.15f;
-      hkpg_offset[T3] = -273.15f;
-      hkpg_offset[T4] = -273.15f;
-      hkpg_offset[T5] = -273.15f;
-      hkpg_offset[T6] = -273.15f;
-      hkpg_offset[T7] = -273.15f;
-      hkpg_offset[T8] = -273.15f;
-      hkpg_offset[T9] = -273.15f;
-      hkpg_offset[T10] = -273.15f;
-      hkpg_offset[T11] = -273.15f;
-      hkpg_offset[T12] = -273.15f;
+      hkpg_offset[Constants.T0] = -273.15f;
+      hkpg_offset[Constants.T1] = -273.15f;
+      hkpg_offset[Constants.T2] = -273.15f;
+      hkpg_offset[Constants.T3] = -273.15f;
+      hkpg_offset[Constants.T4] = -273.15f;
+      hkpg_offset[Constants.T5] = -273.15f;
+      hkpg_offset[Constants.T6] = -273.15f;
+      hkpg_offset[Constants.T7] = -273.15f;
+      hkpg_offset[Constants.T8] = -273.15f;
+      hkpg_offset[Constants.T9] = -273.15f;
+      hkpg_offset[Constants.T10] = -273.15f;
+      hkpg_offset[Constants.T11] = -273.15f;
+      hkpg_offset[Constants.T12] = -273.15f;
 
-      hkpg_label[V0] = "V0_VoltAtLoad";
-      hkpg_label[V1] = "V1_Battery";
-      hkpg_label[V2] = "V2_Solar1";
-      hkpg_label[V3] = "V3_POS_DPU";
-      hkpg_label[V4] = "V4_POS_XRayDet";
-      hkpg_label[V5] = "V5_Modem";
-      hkpg_label[V6] = "V6_NEG_XRayDet";
-      hkpg_label[V7] = "V7_NEG_DPU";
-      hkpg_label[V8] = "V8_Mag";
-      hkpg_label[V9] = "V9_Solar2";
-      hkpg_label[V10] = "V10_Solar3";
-      hkpg_label[V11] = "V11_Solar4";
-      hkpg_label[I0] = "I0_TotalLoad";
-      hkpg_label[I1] = "I1_TotalSolar";
-      hkpg_label[I2] = "I2_Solar1";
-      hkpg_label[I3] = "I3_POS_DPU";
-      hkpg_label[I4] = "I4_POS_XRayDet";
-      hkpg_label[I5] = "I5_Modem";
-      hkpg_label[I6] = "I6_NEG_XRayDet";
-      hkpg_label[I7] = "I7_NEG_DPU";
-      hkpg_label[T0] = "T0_Scint";
-      hkpg_label[T1] = "T1_Mag";
-      hkpg_label[T2] = "T2_ChargeCont";
-      hkpg_label[T3] = "T3_Battery";
-      hkpg_label[T4] = "T4_PowerConv";
-      hkpg_label[T5] = "T5_DPU";
-      hkpg_label[T6] = "T6_Modem";
-      hkpg_label[T7] = "T7_Structure";
-      hkpg_label[T8] = "T8_Solar1";
-      hkpg_label[T9] = "T9_Solar2";
-      hkpg_label[T10] = "T10_Solar3";
-      hkpg_label[T11] = "T11_Solar4";
-      hkpg_label[T12] = "T12_TermTemp";
-      hkpg_label[T13] = "T13_TermBatt";
-      hkpg_label[T14] = "T14_TermCap";
-      hkpg_label[T15] = "T15_CCStat";
+      hkpg_label[Constants.V0] = "V0_VoltAtLoad";
+      hkpg_label[Constants.V1] = "V1_Battery";
+      hkpg_label[Constants.V2] = "V2_Solar1";
+      hkpg_label[Constants.V3] = "V3_POS_DPU";
+      hkpg_label[Constants.V4] = "V4_POS_XRayDet";
+      hkpg_label[Constants.V5] = "V5_Modem";
+      hkpg_label[Constants.V6] = "V6_NEG_XRayDet";
+      hkpg_label[Constants.V7] = "V7_NEG_DPU";
+      hkpg_label[Constants.V8] = "V8_Mag";
+      hkpg_label[Constants.V9] = "V9_Solar2";
+      hkpg_label[Constants.V10] = "V10_Solar3";
+      hkpg_label[Constants.V11] = "V11_Solar4";
+      hkpg_label[Constants.I0] = "I0_TotalLoad";
+      hkpg_label[Constants.I1] = "I1_TotalSolar";
+      hkpg_label[Constants.I2] = "I2_Solar1";
+      hkpg_label[Constants.I3] = "I3_POS_DPU";
+      hkpg_label[Constants.I4] = "I4_POS_XRayDet";
+      hkpg_label[Constants.I5] = "I5_Modem";
+      hkpg_label[Constants.I6] = "I6_NEG_XRayDet";
+      hkpg_label[Constants.I7] = "I7_NEG_DPU";
+      hkpg_label[Constants.T0] = "T0_Scint";
+      hkpg_label[Constants.T1] = "T1_Mag";
+      hkpg_label[Constants.T2] = "T2_ChargeCont";
+      hkpg_label[Constants.T3] = "T3_Battery";
+      hkpg_label[Constants.T4] = "T4_PowerConv";
+      hkpg_label[Constants.T5] = "T5_DPU";
+      hkpg_label[Constants.T6] = "T6_Modem";
+      hkpg_label[Constants.T7] = "T7_Structure";
+      hkpg_label[Constants.T8] = "T8_Solar1";
+      hkpg_label[Constants.T9] = "T9_Solar2";
+      hkpg_label[Constants.T10] = "T10_Solar3";
+      hkpg_label[Constants.T11] = "T11_Solar4";
+      hkpg_label[Constants.T12] = "T12_TermTemp";
+      hkpg_label[Constants.T13] = "T13_TermBatt";
+      hkpg_label[Constants.T14] = "T14_TermCap";
+      hkpg_label[Constants.T15] = "T15_CCStat";
 
       //fill all of the storage arrays with fill values
       for(int i = 0; i < MAX_FRAMES; i++){
-         payID[i] = INT2_FILL;
-         ver[i] = INT2_FILL;
-         frame_1Hz[i] = UINT2_FILL;
-         pps[i] = INT4_FILL;
+         payID[i] = Constants.PAYID_FILL;
+         ver[i] = Constants.VER_FILL;
+         frame_1Hz[i] = Constants.FC_FILL;
+         pps[i] = Constants.PPS_FILL;
 
          for(int j = 0; j < 4; j++){
-            frame_4Hz[(i * 4) + j] = UINT2_FILL;
-            magx_raw[(i * 4) + j] = INT4_FILL;
-            magy_raw[(i * 4) + j] = INT4_FILL;
-            magz_raw[(i * 4) + j] = INT4_FILL;
+            frame_4Hz[(i * 4) + j] = Constants.FC_FILL;
+            magx_raw[(i * 4) + j] = Constants.MAG_FILL;
+            magy_raw[(i * 4) + j] = Constants.MAG_FILL;
+            magz_raw[(i * 4) + j] = Constants.MAG_FILL;
          }
          for(int j = 0; j < 20; j++){
-            frame_20Hz[(i * 20) + j] = UINT2_FILL;
-            lc1_raw[(i * 20) + j] = INT4_FILL;
-            lc2_raw[(i * 20) + j] = INT4_FILL;
-            lc3_raw[(i * 20) + j] = INT4_FILL;
-            lc4_raw[(i * 20) + j] = INT4_FILL;
+            frame_20Hz[(i * 20) + j] = Constants.UINT2_FILL;
+            lc1_raw[(i * 20) + j] = Constants.FSPC_RAW_FILL;
+            lc2_raw[(i * 20) + j] = Constants.FSPC_RAW_FILL;
+            lc3_raw[(i * 20) + j] = Constants.FSPC_RAW_FILL;
+            lc4_raw[(i * 20) + j] = Constants.FSPC_RAW_FILL;
          }
       }
       for(int i = 0; i < (MAX_FRAMES / 4); i++){
-         frame_mod4[i] = UINT2_FILL;
-         ms_of_week[i] = INT4_FILL;
+         frame_mod4[i] = Constants.FC_FILL;
+         ms_of_week[i] = Constants.MS_WEEK_FILL;
+         gps_raw[Constants.LAT_I][i] = Constants.LAT_RAW_FILL;
+         gps_raw[Constants.LON_I][i] = Constants.LON_RAW_FILL;
+         gps_raw[Constants.ALT_I][i] = Constants.ALT_RAW_FILL;
 
          for(int j = 0; j < 4; j++){
-            gps_raw[j][i] = INT4_FILL;
-            rcnt_raw[j][i] = UINT4_FILL;
+            rcnt_raw[j][i] = Constants.RCNT_FILL;
          }
          for(int j = 0; j < 48; j++){
-            mspc_raw[i][j] = INT4_FILL;
+            mspc_raw[i][j] = Constants.MSPC_RAW_FILL;
          }
       }
       for(int i = 0; i < (MAX_FRAMES / 32); i++){
-         frame_mod32[i] = UINT2_FILL;
+         frame_mod32[i] = Constants.FC_FILL;
          for(int j = 0; j < 256; j++){
-            sspc_raw[i][j] = INT4_FILL;
+            sspc_raw[i][j] = Constants.SSPC_RAW_FILL;
          }
       }
       for(int i = 0; i < (MAX_FRAMES / 40); i++){
-         frame_mod40[i] = UINT2_FILL;
-         sats[i] = INT2_FILL;
-         offset[i] = INT2_FILL;
-         termStat[i] = INT2_FILL;
-         modemCnt[i] = INT2_FILL;
-         dcdCnt[i] = INT2_FILL;
-         weeks[i] = INT4_FILL;
-         cmdCnt[i] = INT4_FILL;
+         frame_mod40[i] = Constants.FC_FILL;
+         sats[i] = Constants.SATS_FILL;
+         offset[i] = Constants.LEAP_SEC_FILL;
+         termStat[i] = Constants.TERM_STAT_FILL;
+         modemCnt[i] = Constants.MODEM_CNT_FILL;
+         dcdCnt[i] = Constants.DCD_CNT_FILL;
+         weeks[i] = Constants.WEEKS_FILL;
+         cmdCnt[i] = Constants.CMD_CNT_FILL;
 
          for(int j = 0; j < 36; j++){
-            hkpg[j][i] = FLOAT_FILL;
-            hkpg_raw[j][i] = UINT4_FILL;
+            hkpg[j][i] = Constants.FLOAT_FILL;
+            hkpg_raw[j][i] = Constants.HKPG_FILL;
          }
       }
    }
@@ -370,7 +340,7 @@ public class DataHolder{
       int mod4 = 0, mod32 = 0, mod40 = 0;
       long tmpFC = 0;
       short tmpVer = 0, tmpPayID = 0;
-      int hour =0, min =0, sec = 0;
+      //int hour =0, min =0, sec = 0;
 
       //Breakdown frame counter words: 
       //save the frame counter parts as temp variables,
@@ -428,16 +398,53 @@ public class DataHolder{
          frame.shiftRight(1632).and(BigInteger.valueOf(4294967295L)).
             intValue();
 
-      //save the time variable separately for the epoch calculation 
-      if(mod4 == 1){
-         ms_of_week[rec_num_mod4] = gps_raw[mod4][rec_num_mod4];
+      switch(mod4){
+         case Constants.ALT_I: 
+            if(
+               (gps_raw[mod4][rec_num_mod4] < Constants.ALT_RAW_MIN) ||
+               (gps_raw[mod4][rec_num_mod4] > Constants.ALT_RAW_MAX)
+            ){
+               gps_raw[mod4][rec_num_mod4] = Constants.ALT_RAW_FILL;
+            }
+            break;
+         case Constants.TIME_I: 
+            if(
+               (gps_raw[mod4][rec_num_mod4] < Constants.MS_WEEK_MIN) ||
+               (gps_raw[mod4][rec_num_mod4] > Constants.MS_WEEK_MAX)
+            ){
+               gps_raw[mod4][rec_num_mod4] = Constants.MS_WEEK_FILL;
+            }
+            break;
+         case Constants.LAT_I: 
+            if(
+               (gps_raw[mod4][rec_num_mod4] < Constants.LAT_RAW_MIN) ||
+               (gps_raw[mod4][rec_num_mod4] > Constants.LAT_RAW_MAX)
+            ){
+               gps_raw[mod4][rec_num_mod4] = Constants.LAT_RAW_FILL;
+            }
+            break;
+         case Constants.LON_I: 
+            if(
+               (gps_raw[mod4][rec_num_mod4] < Constants.LON_RAW_MIN) ||
+               (gps_raw[mod4][rec_num_mod4] > Constants.LON_RAW_MAX)
+            ){
+               gps_raw[mod4][rec_num_mod4] = Constants.LON_RAW_FILL;
+            }
+            break;
+      }
 
+      //save the time variable separately for the epoch calculation 
+      if(mod4 == Constants.TIME_I){
+         ms_of_week[rec_num_mod4] = gps_raw[Constants.TIME_I][rec_num_mod4];
+
+         /*
          sec = ms_of_week[rec_num_mod4] / 1000; //convert ms to sec
          sec %= 86400; //remove any complete days
          hour = sec / 3600;
          sec %= 3600;
          min = sec / 60;
          sec %= 60;
+         */
       }
 
       //fill the quality flag with a 0 for now
@@ -446,60 +453,154 @@ public class DataHolder{
       //GPS PPS
       pps[rec_num_1Hz] = 
          frame.shiftRight(1616).and(BigInteger.valueOf(65535)).intValue();
+      if(
+         (pps[rec_num_1Hz] < Constants.PPS_MIN) ||
+         (pps[rec_num_1Hz] > Constants.PPS_MAX)
+      ){
+         //make sure the value is not out of range because of an early pps
+         if(pps[rec_num_1Hz] != 65535){
+            pps[rec_num_1Hz] = Constants.PPS_FILL;
+         }
+      }
       pps_q[rec_num_1Hz] = 0;
 
       //mag data 4 sets of xyz vectors. 24 bits/component
-      magx_raw[rec_num_4Hz] = 
-         frame.shiftRight(1592).and(BigInteger.valueOf(16777215)).intValue();
-      magy_raw[rec_num_4Hz] = 
-         frame.shiftRight(1568).and(BigInteger.valueOf(16777215)).intValue();
-      magz_raw[rec_num_4Hz] = 
-         frame.shiftRight(1544).and(BigInteger.valueOf(16777215)).intValue();
-      magx_raw[rec_num_4Hz + 1] = 
-         frame.shiftRight(1520).and(BigInteger.valueOf(16777215)).intValue();
-      magy_raw[rec_num_4Hz + 1] = 
-         frame.shiftRight(1496).and(BigInteger.valueOf(16777215)).intValue();
-      magz_raw[rec_num_4Hz + 1] = 
-         frame.shiftRight(1472).and(BigInteger.valueOf(16777215)).intValue();
-      magx_raw[rec_num_4Hz + 2] = 
-         frame.shiftRight(1448).and(BigInteger.valueOf(16777215)).intValue();
-      magy_raw[rec_num_4Hz + 2] = 
-         frame.shiftRight(1424).and(BigInteger.valueOf(16777215)).intValue();
-      magz_raw[rec_num_4Hz + 2] = 
-         frame.shiftRight(1400).and(BigInteger.valueOf(16777215)).intValue();
-      magx_raw[rec_num_4Hz + 3] = 
-         frame.shiftRight(1376).and(BigInteger.valueOf(16777215)).intValue();
-      magy_raw[rec_num_4Hz + 3] = 
-         frame.shiftRight(1352).and(BigInteger.valueOf(16777215)).intValue();
-      magz_raw[rec_num_4Hz + 3] = 
-         frame.shiftRight(1328).and(BigInteger.valueOf(16777215)).intValue();
-      magn_q[rec_num_1Hz] = 0;
+      for(int i = 0; i < 4; i++){
+         magx_raw[rec_num_4Hz + i] = 
+            frame.shiftRight(1592 - (72 * i)).
+            and(BigInteger.valueOf(16777215)).intValue();
+         magy_raw[rec_num_4Hz + i] = 
+            frame.shiftRight(1568 - (72 * i)).
+            and(BigInteger.valueOf(16777215)).intValue();
+         magz_raw[rec_num_4Hz] = 
+            frame.shiftRight(1544 - (72 * i)).
+            and(BigInteger.valueOf(16777215)).intValue();
+         magx_raw[rec_num_4Hz + i] = 
+            frame.shiftRight(1592 - (72 * i)).
+            and(BigInteger.valueOf(16777215)).intValue();
+         magy_raw[rec_num_4Hz + i] = 
+            frame.shiftRight(1568 - (72 * i)).
+            and(BigInteger.valueOf(16777215)).intValue();
+         magz_raw[rec_num_4Hz + i] = 
+            frame.shiftRight(1544 - (72 * i)).
+            and(BigInteger.valueOf(16777215)).intValue();
+         magx_raw[rec_num_4Hz + i] = 
+            frame.shiftRight(1592 - (72 * i)).
+            and(BigInteger.valueOf(16777215)).intValue();
+         magy_raw[rec_num_4Hz + i] = 
+            frame.shiftRight(1568 - (72 * i)).
+            and(BigInteger.valueOf(16777215)).intValue();
+         magz_raw[rec_num_4Hz + i] = 
+            frame.shiftRight(1544 - (72 * i)).
+            and(BigInteger.valueOf(16777215)).intValue();
+         magx_raw[rec_num_4Hz + i] = 
+            frame.shiftRight(1592 - (72 * i)).
+            and(BigInteger.valueOf(16777215)).intValue();
+         magy_raw[rec_num_4Hz + i] = 
+            frame.shiftRight(1568 - (72 * i)).
+            and(BigInteger.valueOf(16777215)).intValue();
+         magz_raw[rec_num_4Hz + i] = 
+            frame.shiftRight(1544 - (72 * i)).
+            and(BigInteger.valueOf(16777215)).intValue();
+         
+         if(
+            (magx_raw[rec_num_4Hz] < Constants.MAG_MIN) ||
+            (magx_raw[rec_num_4Hz] > Constants.MAG_MAX)
+         ){
+            magx_raw[rec_num_4Hz] = Constants.MAG_FILL;
+         }
+         if(
+            (magy_raw[rec_num_4Hz] < Constants.MAG_MIN) ||
+            (magy_raw[rec_num_4Hz] > Constants.MAG_MAX)
+         ){
+            magy_raw[rec_num_4Hz] = Constants.MAG_FILL;
+         }
+         if(
+            (magz_raw[rec_num_4Hz] < Constants.MAG_MIN) ||
+            (magz_raw[rec_num_4Hz] > Constants.MAG_MAX)
+         ){
+            magz_raw[rec_num_4Hz] = Constants.MAG_FILL;
+         }
+
+         magn_q[rec_num_1Hz] = 0;
+      }
+
       
       //mod40 housekeeping data: 16bits
       hkpg_raw[mod40][rec_num_mod40] = 
          frame.shiftRight(1312).and(BigInteger.valueOf(65535)).longValue();
+      if(
+         (hkpg_raw[mod40][rec_num_mod40] < Constants.HKPG_MIN) ||
+         (hkpg_raw[mod40][rec_num_mod40] > Constants.HKPG_MAX)
+      ){
+         hkpg_raw[mod40][rec_num_mod40] = Constants.HKPG_FILL;
+      }
+
       switch(mod40){
          case 36:
             sats[rec_num_mod40] = 
                (short)(hkpg_raw[mod40][rec_num_mod40] >> 8);
             offset[rec_num_mod40] = 
                (short)(hkpg_raw[mod40][rec_num_mod40] & 255);
+
+            if(
+               (sats[rec_num_mod40] < Constants.SATS_MIN) ||
+               (sats[rec_num_mod40] > Constants.SATS_MAX)
+            ){
+               sats[rec_num_mod40] = Constants.SATS_FILL;
+            }
+            if(
+               (offset[rec_num_mod40] < Constants.LEAP_SEC_MIN) ||
+               (offset[rec_num_mod40] > Constants.LEAP_SEC_MAX)
+            ){
+               offset[rec_num_mod40] = Constants.LEAP_SEC_FILL;
+            }
             break;
          case 37:
             weeks[rec_num_mod40] = 
                (int)hkpg_raw[mod40][rec_num_mod40];
+            if(
+               (weeks[rec_num_mod40] < Constants.WEEKS_MIN) ||
+               (weeks[rec_num_mod40] > Constants.WEEKS_MAX)
+            ){
+               weeks[rec_num_mod40] = Constants.WEEKS_FILL;
+            }
             break;
          case 38:
             termStat[rec_num_mod40] = 
                (short)(hkpg_raw[mod40][rec_num_mod40] >> 15);
             cmdCnt[rec_num_mod40] = 
                (int)(hkpg_raw[mod40][rec_num_mod40] & 32768);
+            if(
+               (termStat[rec_num_mod40] < Constants.TERM_STAT_MIN) ||
+               (termStat[rec_num_mod40] > Constants.TERM_STAT_MAX)
+            ){
+               termStat[rec_num_mod40] = Constants.TERM_STAT_FILL;
+            }
+            if(
+               (cmdCnt[rec_num_mod40] < Constants.CMD_CNT_MIN) ||
+               (cmdCnt[rec_num_mod40] > Constants.CMD_CNT_MAX)
+            ){
+               cmdCnt[rec_num_mod40] = Constants.CMD_CNT_FILL;
+            }
             break;
          case 39:
             dcdCnt[rec_num_mod40] = 
                (short)(hkpg_raw[mod40][rec_num_mod40] >> 8);
             modemCnt[rec_num_mod40] = 
                (short)(hkpg_raw[mod40][rec_num_mod40] & 255);
+            if(
+               (dcdCnt[rec_num_mod40] < Constants.DCD_CNT_MIN) ||
+               (dcdCnt[rec_num_mod40] > Constants.DCD_CNT_MAX)
+            ){
+               dcdCnt[rec_num_mod40] = Constants.DCD_CNT_FILL;
+            }
+            if(
+               (modemCnt[rec_num_mod40] < Constants.MODEM_CNT_MIN) ||
+               (modemCnt[rec_num_mod40] > Constants.MODEM_CNT_MAX)
+            ){
+               modemCnt[rec_num_mod40] = Constants.MODEM_CNT_FILL;
+            }
             break;
          default:
             break;
@@ -521,28 +622,73 @@ public class DataHolder{
          lc4_raw[rec_num_20Hz + lc_i] =
             frame.shiftRight(1264 - (48 * lc_i))
                .and(BigInteger.valueOf(255)).intValue();
+
+         if(
+            (lc1_raw[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+            (lc1_raw[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+         ){
+            lc1_raw[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+         }
+         if(
+            (lc2_raw[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+            (lc2_raw[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+         ){
+            lc2_raw[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+         }
+         if(
+            (lc3_raw[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+            (lc3_raw[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+         ){
+            lc3_raw[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+         }
+         if(
+            (lc4_raw[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+            (lc4_raw[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+         ){
+            lc4_raw[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+         }
       }
       fspc_q[rec_num_1Hz] = 0;
        
       //medium spectra: 12 channels per frame, 16 bits/channels
-      for(int mspc_i = 0; mspc_i < 12; mspc_i++){
-         mspc_raw[rec_num_mod4][(mod4 * 12) + mspc_i] =
+      for(int mspc_i = 0, chan_i = 0; mspc_i < 12; mspc_i++){
+         chan_i = (mod4 * 12) + mspc_i;
+         mspc_raw[rec_num_mod4][chan_i] =
                frame.shiftRight(336 - (16 * mspc_i))
                   .and(BigInteger.valueOf(65535)).intValue();
+         if(
+            (mspc_raw[rec_num_mod4][chan_i] < Constants.MSPC_RAW_MIN) ||
+            (mspc_raw[rec_num_mod4][chan_i] > Constants.MSPC_RAW_MAX)
+         ){
+            mspc_raw[rec_num_mod4][chan_i] = Constants.MSPC_RAW_FILL;
+         }
       }
       mspc_q[rec_num_mod4] = 0;
 
       //slow spectra: 8 channels per frame, 16 bits/channels
-      for(int sspc_i = 0; sspc_i < 8; sspc_i++){
-         sspc_raw[rec_num_mod32][(mod32 * 8) + sspc_i] =
+      for(int sspc_i = 0, chan_i = 0; sspc_i < 8; sspc_i++){
+         chan_i = (mod32 * 8) + sspc_i;
+         sspc_raw[rec_num_mod32][chan_i] =
                frame.shiftRight(144 - (16 * sspc_i))
                   .and(BigInteger.valueOf(65535)).intValue();
+         if(
+            (sspc_raw[rec_num_mod32][chan_i] < Constants.SSPC_RAW_MIN) ||
+            (sspc_raw[rec_num_mod32][chan_i] > Constants.SSPC_RAW_MAX)
+         ){
+            sspc_raw[rec_num_mod32][chan_i] = Constants.SSPC_RAW_FILL;
+         }
       }
       sspc_q[rec_num_mod32] = 0;
       
       //rate counter: mod4 data, 16bits
       rcnt_raw[mod4][rec_num_mod4] = 
          frame.shiftRight(16).and(BigInteger.valueOf(65535)).longValue();
+      if(
+         (rcnt_raw[mod4][rec_num_mod4] < Constants.RCNT_MIN) ||
+         (rcnt_raw[mod4][rec_num_mod4] > Constants.RCNT_MAX)
+      ){
+         rcnt_raw[mod4][rec_num_mod4] = Constants.RCNT_FILL;
+      }
       rcnt_q[rec_num_mod4] = 0;
    }
 

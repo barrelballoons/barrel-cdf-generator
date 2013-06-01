@@ -124,10 +124,10 @@ public class LevelOne{
       //select values for this date
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
         //convert lat and lon to physical units
-        gps[0][rec_i] = data.gps_raw[0][data_i];
-        gps[1][rec_i] = data.gps_raw[1][data_i];
-        gps[2][rec_i] = data.gps_raw[2][data_i];
-        gps[3][rec_i] = data.gps_raw[3][data_i];
+        gps[Constants.ALT_I][rec_i] = data.gps_raw[Constants.ALT_I][data_i];
+        gps[Constants.TIME_I][rec_i] = data.gps_raw[Constants.TIME_I][data_i];
+        gps[Constants.LAT_I][rec_i] = data.gps_raw[Constants.LAT_I][data_i];
+        gps[Constants.LON_I][rec_i] = data.gps_raw[Constants.LON_I][data_i];
         frameGroup[rec_i] = data.frame_mod4[data_i];
         epoch[rec_i] = data.epoch_mod4[data_i];
         q[rec_i] = data.gps_q[data_i];
@@ -153,7 +153,7 @@ public class LevelOne{
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         gps[0]
+         gps[Constants.ALT_I]
       );
 
       var = cdf.getVariable("ms_of_week");
@@ -163,7 +163,7 @@ public class LevelOne{
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         gps[1]
+         gps[Constants.TIME_I]
       );
 
       var = cdf.getVariable("GPS_Lat");
@@ -173,7 +173,7 @@ public class LevelOne{
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         gps[2] 
+         gps[Constants.LAT_I] 
       );
 
       var = cdf.getVariable("GPS_Lon");
@@ -183,7 +183,7 @@ public class LevelOne{
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
-         gps[3]
+         gps[Constants.LON_I]
       );
 
       var = cdf.getVariable("FrameGroup");

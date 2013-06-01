@@ -137,7 +137,7 @@ public class ExtractTiming {
          if((fc <= MINFC) || (fc >= MAXFC)){continue;}
 
          //figure out the offset from mod4 fc and 1Hz fc
-         fc -= ((fc % 4) - DataHolder.TIME); 
+         fc -= ((fc % 4) - Constants.TIME_I); 
          
          //get the indices of other cadence data
          rec_1Hz_i = data.convertIndex(rec_mod4_i, fc, "mod4", "1Hz");
@@ -168,7 +168,7 @@ public class ExtractTiming {
       
       size_1Hz = data.getSize("1Hz");
       //create a model for each batch of time records
-      for(int first_rec = 0; first_rec < time_rec_cnt; first_rec = last_rec+1){
+      for(int first_rec = 0; first_rec < time_rec_cnt; first_rec = last_rec){
          //incriment the last_rec by the max, or however many recs are left
          last_rec += Math.min(MAX_RECS, (time_rec_cnt - first_rec));
          
@@ -178,16 +178,17 @@ public class ExtractTiming {
          //Need to add better criteria than this for accepting a new model
          if(new_fit != null){
             fit = new_fit;
+
             models[model_cnt] = new LinModel();
             models[model_cnt].setSlope(fit.getSlope()); 
             models[model_cnt].setIntercept(fit.getIntercept()); 
             models[model_cnt].setFirst(time_recs[first_rec].getFrame()); 
-            models[model_cnt].setLast(time_recs[last_rec].getFrame()); 
+            models[model_cnt].setLast(time_recs[last_rec - 1].getFrame()); 
             model_cnt++;
 
             System.out.println(
                "Frames " + time_recs[first_rec].getFrame() + " - " +
-               time_recs[last_rec].getFrame()); 
+               time_recs[last_rec - 1].getFrame()); 
             System.out.println(
                "\tm = " + fit.getSlope() + ", b = " + fit.getIntercept() + 
                " slope error = " + fit.getSlopeStdErr() + " n = " + fit.getN()
