@@ -40,6 +40,9 @@ public class DataHolder{
 	   "Interrupt", "LowLevel", "PeakDet", "HighLevel"
    };
       
+   private float min_alt;
+   private boolean low_alt = true;
+
    public short[]  
       payID = new short[MAX_FRAMES], 
       ver = new short[MAX_FRAMES],
@@ -258,6 +261,16 @@ public class DataHolder{
             hkpg_raw[j][i] = Constants.HKPG_FILL;
          }
       }
+
+      //set minimum altitude based on either command line argument or
+      //default setting in the Constants class
+      if(CDF_Gen.getSetting("min_alt").equals("")){
+         min_alt = Constants.ALT_MIN;
+      }else{
+         min_alt = Float.parseFloat(CDF_Gen.getSetting("min_alt"));
+      }
+
+      System.out.println("Rejecting data bellow " + min_alt + " kilometers.");
    }
 
    public int getSize(String cadence){
@@ -337,29 +350,38 @@ public class DataHolder{
    }
 
    public void addFrame(BigInteger frame, int dpu_id){
-      int mod4 = 0, mod32 = 0, mod40 = 0;
-      long tmpFC = 0;
-      short tmpVer = 0, tmpPayID = 0;
-      //int hour =0, min =0, sec = 0;
-
       //Breakdown frame counter words: 
       //save the frame counter parts as temp variables,
       //they will be written to the main structure once rec_num is calculated.
       //First 5 bits are version, next 6 are id, last 21 are FC
-      tmpVer = 
+      short tmpVer = 
          frame.shiftRight(1691).and(BigInteger.valueOf(31)).shortValue();
-      tmpPayID = 
+      short tmpPayID = 
          frame.shiftRight(1685).and(BigInteger.valueOf(63)).shortValue();
-      tmpFC = 
+      int tmpFC = 
          frame.shiftRight(1664).and(BigInteger.valueOf(2097151)).intValue();
+      int tmpGPS = 
+         frame.shiftRight(1632).and(BigInteger.valueOf(4294967295L)).intValue();
 
       //check to make sure we have a frame from the correct payload
       if(dpu_id != tmpPayID){return;}
 
       //get multiplex info
-      mod4 = (int)tmpFC % 4;
-      mod32 = (int)tmpFC % 32;
-      mod40 = (int)tmpFC % 40;
+      int mod4 = (int)tmpFC % 4;
+      int mod32 = (int)tmpFC % 32;
+      int mod40 = (int)tmpFC % 40;
+
+      //check the payload is above the minimum altitude
+      if(low_alt){
+         if((mod4 == Constants.ALT_I) && ((tmpGPS / 1000000) >= min_alt)){
+            low_alt = false;
+         }else{return;}
+      }else{
+         if((mod4 == Constants.ALT_I) && ((tmpGPS / 1000000) < min_alt)){
+            low_alt = true;
+            return;
+         }
+      }
 
       //sets the current record number
       rec_num_1Hz++;
