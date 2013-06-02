@@ -80,8 +80,8 @@ public class Constants{
    public static final long
       HKPG_MIN = 0, HKPG_MAX = 65535, HKPG_FILL = INT4_FILL,
       RCNT_MIN = 0, RCNT_MAX = 65535, RCNT_FILL = INT4_FILL;
-   public static final double
+   public static final float 
       LAT_MIN = -90, LAT_MAX = 90, LAT_FILL = FLOAT_FILL,
       LON_MIN = -180, LON_MAX = 180, LON_FILL = FLOAT_FILL,
-      ALT_MIN = 0, ALT_MAX = 50, ALT_FILL = FLOAT_FILL;
+      ALT_MIN = 5, ALT_MAX = 50, ALT_FILL = FLOAT_FILL;
 }
