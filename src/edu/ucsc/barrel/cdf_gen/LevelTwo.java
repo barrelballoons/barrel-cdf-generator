@@ -1038,7 +1038,7 @@ public class LevelTwo{
 
          //rebin the spectrum
          mspc_rebin[mspc_rec] = spectrum.rebin(
-            data.mspc_raw[mspc_rec], old_edges, std_edges, 49, 49, true 
+            data.mspc_raw[mspc_rec], old_edges, std_edges 
          );
 
          //divide counts by bin width and adjust the time scale
@@ -1158,7 +1158,7 @@ public class LevelTwo{
          
          //rebin the spectum
          sspc_rebin[sspc_rec] = spectrum.rebin(
-            data.sspc_raw[sspc_rec], old_edges, std_edges, 257, 257, false
+            data.sspc_raw[sspc_rec], old_edges, std_edges
          );
 
          //divide counts by bin width and convert the time scale to /sec
@@ -1413,7 +1413,7 @@ public class LevelTwo{
          }
       }
       if(first_i != -1 && (last_i - first_i) > 0){
-         doGpsCdf(first_i, last_i, date);
+         //doGpsCdf(first_i, last_i, date);
          doMspcCdf(first_i, last_i, date);
          doRcntCdf(first_i, last_i, date);  
       }
