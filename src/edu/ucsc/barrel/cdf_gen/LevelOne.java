@@ -702,8 +702,8 @@ public class LevelOne{
          epoch[rec_i] = data.epoch_mod4[data_i];
          q[rec_i] = data.mspc_q[data_i];
          mspc[rec_i] = data.mspc_raw[data_i];
-      }
 
+      }
       System.out.println("\nSaving MSPC...");
 
       String srcName = 

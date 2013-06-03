@@ -51,7 +51,9 @@ public class Constants{
    static public final long
       UINT4_FILL = 4294967295L;
    static public final float 
-      FLOAT_FILL = -1.0E31f;
+      FLOAT_FILL = -1.0e+31f;
+   static public final double 
+      DOUBLE_FILL = -1.0e+31;
 
    //variable specific constants
    public static final short

@@ -176,6 +176,7 @@ public class SpectrumExtract {
 
       //This loops over each bin of the OUTPUT spectrum and sees which bins of
       //the the INPUT spectrum overlap it:
+      spec_loop:
       for(int i = 0; i < numOfBins; i++){
          //reset the counts for each type of overlap
          a_cnt = 0;
@@ -224,30 +225,50 @@ public class SpectrumExtract {
          //this bin of the output spectrum
          if (a_cnt > 0){ 
             for(int k = 0; k < a_cnt; k++){
-               specout[i] += 
-                  widths_out[i] / widths_in[ a[k] ] * specin[ a[k] ];
+               if(specin[a[k]] < 0){
+                  specout[i] = Constants.DOUBLE_FILL;
+                  continue spec_loop;
+               }else{
+                  specout[i] += 
+                     widths_out[i] / widths_in[a[k]] * specin[a[k]];
+               }
             }
          }
          if (b_cnt > 0){
             for(int k = 0; k < b_cnt; k++){
-               specout[i] += specin[ b[k] ];
+               if(specin[b[k]] < 0){
+                  specout[i] = Constants.DOUBLE_FILL;
+                  continue spec_loop;
+               }else{
+                  specout[i] += specin[b[k]];
+               }
             }
          }
          if (c_cnt > 0){
             for(int k = 0; k < c_cnt; k++){
-               specout[i] += 
-                  (eb2[i]-ea1[ c[k] ]) / widths_in[ c[k] ] * specin[ c[k] ];
+               if(specin[c[k]] < 0){
+                  specout[i] = Constants.DOUBLE_FILL;
+                  continue spec_loop;
+               }else{
+                  specout[i] += 
+                     (eb2[i] - ea1[c[k]]) / widths_in[c[k]] * specin[c[k]];
+               }
             }
          }
          if (d_cnt > 0){
             for(int k = 0; k < d_cnt; k++){
-               specout[i] += 
-                  (ea2[ d[k] ] - eb1[i]) / widths_in[ d[k] ] * specin[ d[k] ];
+               if(specin[d[k]] < 0){
+                  specout[i] = Constants.DOUBLE_FILL;
+                  continue spec_loop;
+               }else{
+                  specout[i] += 
+                     (ea2[d[k]] - eb1[i]) / widths_in[d[k]] * specin[d[k]];
+               }
             }
          }
          
       }
-
+      
       return specout;
    }
 

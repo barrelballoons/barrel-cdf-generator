@@ -699,7 +699,7 @@ public class LevelTwo{
                   (data.hkpg_raw[var_i][rec_i] * data.hkpg_scale[var_i]) + 
                   data.hkpg_offset[var_i];
             }else{
-               hkpg_scaled[rec_i] = Constants.FLOAT_FILL;
+               hkpg_scaled[rec_i] = Constants.DOUBLE_FILL;
             }
          }
 
@@ -862,7 +862,7 @@ public class LevelTwo{
 
          //get temperatures
          hkpg_rec = lc_rec / 20 / 40; //convert from 20Hz to mod40
-         if(data.hkpg_raw[Constants.T0][hkpg_rec] != Constants.FLOAT_FILL){
+         if(data.hkpg_raw[Constants.T0][hkpg_rec] != Constants.DOUBLE_FILL){
             scint_temp = 
                (data.hkpg_raw[Constants.T0][hkpg_rec] * 
                data.hkpg_scale[Constants.T0]) + 
@@ -870,7 +870,7 @@ public class LevelTwo{
          }else{
             scint_temp = 20;
          }
-         if(data.hkpg_raw[Constants.T5][hkpg_rec] != Constants.FLOAT_FILL){
+         if(data.hkpg_raw[Constants.T5][hkpg_rec] != Constants.DOUBLE_FILL){
             dpu_temp = 
                (data.hkpg_raw[Constants.T5][hkpg_rec] * 
                data.hkpg_scale[Constants.T5]) + 
@@ -887,25 +887,25 @@ public class LevelTwo{
             spectrum.createBinEdges(0, scint_temp, dpu_temp, peak);
 
          //write the spectrum to the new array
-         if(data.lc1_raw[lc_rec] != Constants.FLOAT_FILL){
+         if(data.lc1_raw[lc_rec] != Constants.FSPC_RAW_FILL){
             lc_scaled[0][lc_rec] = data.lc1_raw[lc_rec] * 20;
          }else{
-            lc_scaled[0][lc_rec] = Constants.FLOAT_FILL;
+            lc_scaled[0][lc_rec] = Constants.DOUBLE_FILL;
          }
-         if(data.lc2_raw[lc_rec] != Constants.FLOAT_FILL){
+         if(data.lc2_raw[lc_rec] != Constants.FSPC_RAW_FILL){
             lc_scaled[1][lc_rec] = data.lc2_raw[lc_rec] * 20;
          }else{
-            lc_scaled[1][lc_rec] = Constants.FLOAT_FILL;
+            lc_scaled[1][lc_rec] = Constants.DOUBLE_FILL;
          }
-         if(data.lc3_raw[lc_rec] != Constants.FLOAT_FILL){
+         if(data.lc3_raw[lc_rec] != Constants.FSPC_RAW_FILL){
             lc_scaled[2][lc_rec] = data.lc3_raw[lc_rec] * 20;
          }else{
-            lc_scaled[2][lc_rec] = Constants.FLOAT_FILL;
+            lc_scaled[2][lc_rec] = Constants.DOUBLE_FILL;
          }
-         if(data.lc4_raw[lc_rec] != Constants.FLOAT_FILL){
+         if(data.lc4_raw[lc_rec] != Constants.FSPC_RAW_FILL){
             lc_scaled[3][lc_rec] = data.lc4_raw[lc_rec] * 20;
          }else{
-            lc_scaled[3][lc_rec] = Constants.FLOAT_FILL;
+            lc_scaled[3][lc_rec] = Constants.DOUBLE_FILL;
          }
       }
 
@@ -1013,7 +1013,7 @@ public class LevelTwo{
          
          //get temperatures
          hkpg_rec = mspc_rec * 4 / 40; //convert from mod4 to mod40
-         if(data.hkpg_raw[Constants.T0][hkpg_rec] != Constants.FLOAT_FILL){
+         if(data.hkpg_raw[Constants.T0][hkpg_rec] != Constants.DOUBLE_FILL){
             scint_temp = 
                (data.hkpg_raw[Constants.T0][hkpg_rec] * 
                data.hkpg_scale[Constants.T0]) + 
@@ -1021,7 +1021,7 @@ public class LevelTwo{
          }else{
             scint_temp = 20;
          }
-         if(data.hkpg_raw[Constants.T5][hkpg_rec] != Constants.FLOAT_FILL){
+         if(data.hkpg_raw[Constants.T5][hkpg_rec] != Constants.DOUBLE_FILL){
             dpu_temp = 
                (data.hkpg_raw[Constants.T5][hkpg_rec] * 
                data.hkpg_scale[Constants.T5]) + 
@@ -1043,10 +1043,11 @@ public class LevelTwo{
 
          //divide counts by bin width and adjust the time scale
          for(int bin_i = 0; bin_i < mspc_rebin[mspc_rec].length; bin_i++){
-            mspc_rebin[mspc_rec][bin_i] /= 
-               std_edges[bin_i + 1] - std_edges[bin_i];
-
-            mspc_rebin[mspc_rec][bin_i] /= 4;
+            if(mspc_rebin[mspc_rec][bin_i] != Constants.DOUBLE_FILL){
+               mspc_rebin[mspc_rec][bin_i] /= 
+                  std_edges[bin_i + 1] - std_edges[bin_i];
+               mspc_rebin[mspc_rec][bin_i] /= 4;
+            }
          }
       }
 
@@ -1163,9 +1164,11 @@ public class LevelTwo{
 
          //divide counts by bin width and convert the time scale to /sec
          for(int bin_i = 0; bin_i < sspc_rebin[sspc_rec].length; bin_i++){
-            sspc_rebin[sspc_rec][bin_i] /= 
-               std_edges[bin_i + 1] - std_edges[bin_i];
-            sspc_rebin[sspc_rec][bin_i] /= 32;
+            if(sspc_rebin[sspc_rec][bin_i] != Constants.DOUBLE_FILL){
+               sspc_rebin[sspc_rec][bin_i] /= 
+                  std_edges[bin_i + 1] - std_edges[bin_i];
+               sspc_rebin[sspc_rec][bin_i] /= 32;
+            }
          }
       }
 
@@ -1246,7 +1249,7 @@ public class LevelTwo{
             if(data.rcnt_raw[var_i][rec_i] != Constants.RCNT_FILL){
                rc_timeScaled[var_i][rec_i] = data.rcnt_raw[var_i][rec_i] / 4;
             }else{
-               rc_timeScaled[var_i][rec_i] = Constants.FLOAT_FILL;
+               rc_timeScaled[var_i][rec_i] = Constants.DOUBLE_FILL;
             }
          }
       }
@@ -1413,7 +1416,7 @@ public class LevelTwo{
          }
       }
       if(first_i != -1 && (last_i - first_i) > 0){
-         //doGpsCdf(first_i, last_i, date);
+         doGpsCdf(first_i, last_i, date);
          doMspcCdf(first_i, last_i, date);
          doRcntCdf(first_i, last_i, date);  
       }

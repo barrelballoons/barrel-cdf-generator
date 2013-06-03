@@ -257,7 +257,7 @@ public class DataHolder{
          cmdCnt[i] = Constants.CMD_CNT_FILL;
 
          for(int j = 0; j < 36; j++){
-            hkpg[j][i] = Constants.FLOAT_FILL;
+            hkpg[j][i] = Constants.DOUBLE_FILL;
             hkpg_raw[j][i] = Constants.HKPG_FILL;
          }
       }
