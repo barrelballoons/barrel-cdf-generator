@@ -86,4 +86,10 @@ public class Constants{
       LAT_MIN = -90, LAT_MAX = 90, LAT_FILL = FLOAT_FILL,
       LON_MIN = -180, LON_MAX = 180, LON_FILL = FLOAT_FILL,
       ALT_MIN = 5, ALT_MAX = 50, ALT_FILL = FLOAT_FILL;
+
+   //various accumulation time offsets based on nominal ms/frame
+   public static final long 
+      SSPC_ACCUM = 31968000000L,
+      QUAD_ACCUM = 3996000000L,
+      SING_ACCUM = 999000000L;
 }

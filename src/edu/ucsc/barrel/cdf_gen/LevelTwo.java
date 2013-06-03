@@ -203,7 +203,7 @@ public class LevelTwo{
          
          //save the values from the other variables
          frameGroup[rec_i] = data.frame_mod4[data_i];
-         epoch[rec_i] = data.epoch_mod4[data_i];
+         epoch[rec_i] = data.epoch_mod4[data_i] - Constants.SING_ACCUM;
          q[rec_i] = data.gps_q[data_i];
 
          //make sure we have a complete gps record before generating mag coords
@@ -445,7 +445,7 @@ public class LevelTwo{
         version[rec_i] = data.ver[data_i];
         payID[rec_i] = data.payID[data_i];
         frameGroup[rec_i] = data.frame_1Hz[data_i];
-        epoch[rec_i] = data.epoch_1Hz[data_i];
+        epoch[rec_i] = data.epoch_1Hz[data_i] - Constants.SING_ACCUM;
         q[rec_i] = data.pps_q[data_i];
       }
 
@@ -581,7 +581,7 @@ public class LevelTwo{
          }
 
          frameGroup[rec_i] = data.frame_4Hz[data_i];
-         epoch[rec_i] = data.epoch_4Hz[data_i];
+         epoch[rec_i] = data.epoch_4Hz[data_i] - Constants.SING_ACCUM;
          q[rec_i] = data.magn_q[data_i];
       }
 
@@ -723,7 +723,7 @@ public class LevelTwo{
          cmdCnt[rec_i] = data.cmdCnt[data_i];
          frameGroup[rec_i] = data.frame_mod40[data_i];
          weeks[rec_i] = data.weeks[data_i];
-         epoch[rec_i] = data.epoch_mod40[data_i];
+         epoch[rec_i] = data.epoch_mod40[data_i] - Constants.SING_ACCUM;
          q[rec_i] = data.hkpg_q[data_i];
       }
 
@@ -911,7 +911,7 @@ public class LevelTwo{
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          frameGroup[rec_i] = data.frame_20Hz[data_i];
-         epoch[rec_i] = data.epoch_20Hz[data_i];
+         epoch[rec_i] = data.epoch_20Hz[data_i] - Constants.SING_ACCUM;
          q[rec_i] = data.fspc_q[data_i];
       }
 
@@ -1051,13 +1051,13 @@ public class LevelTwo{
          }
       }
 
+      System.out.println("\nSaving MSPC...");
+
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          frameGroup[rec_i] = data.frame_mod4[data_i];
-         epoch[rec_i] = data.epoch_mod4[data_i];
+         epoch[rec_i] = data.epoch_mod4[data_i] - Constants.QUAD_ACCUM;
          q[rec_i] = data.mspc_q[data_i];
       }
-
-      System.out.println("\nSaving MSPC...");
 
       String srcName = 
          "cdf_skels/l2/barCLL_PP_S_l2_mspc_YYYYMMDD_v++.cdf";
@@ -1174,7 +1174,7 @@ public class LevelTwo{
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          frameGroup[rec_i] = data.frame_mod32[data_i];
-         epoch[rec_i] = data.epoch_mod32[data_i];
+         epoch[rec_i] = data.epoch_mod32[data_i] - Constants.SSPC_ACCUM;
          q[rec_i] = data.sspc_q[data_i];
       }
 
@@ -1256,7 +1256,7 @@ public class LevelTwo{
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          frameGroup[rec_i] = data.frame_mod4[data_i];
-         epoch[rec_i] = data.epoch_mod4[data_i];
+         epoch[rec_i] = data.epoch_mod4[data_i] - Constants.QUAD_ACCUM;
          q[rec_i] = data.rcnt_q[data_i];
       }
          
