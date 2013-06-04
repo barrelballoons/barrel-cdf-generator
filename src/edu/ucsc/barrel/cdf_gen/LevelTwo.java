@@ -1013,7 +1013,7 @@ public class LevelTwo{
          
          //get temperatures
          hkpg_rec = mspc_rec * 4 / 40; //convert from mod4 to mod40
-         if(data.hkpg_raw[Constants.T0][hkpg_rec] != Constants.DOUBLE_FILL){
+         if(data.hkpg_raw[Constants.T0][hkpg_rec] != Constants.HKPG_FILL){
             scint_temp = 
                (data.hkpg_raw[Constants.T0][hkpg_rec] * 
                data.hkpg_scale[Constants.T0]) + 
@@ -1021,7 +1021,7 @@ public class LevelTwo{
          }else{
             scint_temp = 20;
          }
-         if(data.hkpg_raw[Constants.T5][hkpg_rec] != Constants.DOUBLE_FILL){
+         if(data.hkpg_raw[Constants.T5][hkpg_rec] != Constants.HKPG_FILL){
             dpu_temp = 
                (data.hkpg_raw[Constants.T5][hkpg_rec] * 
                data.hkpg_scale[Constants.T5]) + 
@@ -1134,7 +1134,7 @@ public class LevelTwo{
       for(int sspc_rec = 0, hkpg_rec = 0; sspc_rec < numOfRecs; sspc_rec++){
          //get temperatures
          hkpg_rec = sspc_rec * 32 / 40; //convert from mod32 to mod40
-         if(data.hkpg_raw[Constants.T0][hkpg_rec] != 0){
+         if(data.hkpg_raw[Constants.T0][hkpg_rec] != Constants.HKPG_FILL){
             scint_temp = 
                (data.hkpg_raw[Constants.T0][hkpg_rec] * 
                data.hkpg_scale[Constants.T0]) + 
@@ -1142,7 +1142,7 @@ public class LevelTwo{
          }else{
             scint_temp = 20;
          }
-         if(data.hkpg_raw[Constants.T5][hkpg_rec] != 0){
+         if(data.hkpg_raw[Constants.T5][hkpg_rec] != Constants.HKPG_FILL){
             dpu_temp = 
                (data.hkpg_raw[Constants.T5][hkpg_rec] * 
                data.hkpg_scale[Constants.T5]) + 
