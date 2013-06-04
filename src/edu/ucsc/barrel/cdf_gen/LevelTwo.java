@@ -1079,6 +1079,16 @@ public class LevelTwo{
          mspc_rebin
       );
 
+      var = cdf.getVariable("MSPC_ch");
+      System.out.println("Spectrum Arrays...");
+      var.putHyperData(
+         var.getNumWrittenRecords(), numOfRecs, 1, 
+         new long[] {0, 0}, 
+         new long[] {48, 1}, 
+         new long[] {1, 1}, 
+         mspc_rebin
+      );
+
       var = cdf.getVariable("FrameGroup");
       System.out.println("FrameGroup...");
       var.putHyperData(
@@ -1190,6 +1200,16 @@ public class LevelTwo{
       cdf = CDF_Gen.openCDF(destName);
 
       var = cdf.getVariable("SSPC");
+      System.out.println("Spectrum Arrays...");
+      var.putHyperData(
+         var.getNumWrittenRecords(), numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {256, 1}, 
+         new long[] {1}, 
+         sspc_rebin
+      );
+
+      var = cdf.getVariable("SSPC_ch");
       System.out.println("Spectrum Arrays...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
