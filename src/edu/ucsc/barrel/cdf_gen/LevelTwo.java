@@ -690,13 +690,13 @@ public class LevelTwo{
 
       cdf = CDF_Gen.openCDF(destName);
          
-      for(int var_i = 0; var_i < data.hkpg_scale.length; var_i++){
+      for(int var_i = 0; var_i < 36; var_i++){
          //scale all the records for this variable
          double[] hkpg_scaled = new double[numOfRecs];
-         for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
-            if(data.hkpg_raw[var_i][rec_i] != Constants.HKPG_FILL){
+         for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
+            if(data.hkpg_raw[var_i][data_i] != Constants.HKPG_FILL){
                hkpg_scaled[rec_i] = 
-                  (data.hkpg_raw[var_i][rec_i] * data.hkpg_scale[var_i]) + 
+                  (data.hkpg_raw[var_i][data_i] * data.hkpg_scale[var_i]) + 
                   data.hkpg_offset[var_i];
             }else{
                hkpg_scaled[rec_i] = Constants.DOUBLE_FILL;
@@ -861,7 +861,7 @@ public class LevelTwo{
       for(int lc_rec = 0, hkpg_rec = 0; lc_rec < numOfRecs; lc_rec++){
 
          //get temperatures
-         hkpg_rec = lc_rec / 20 / 40; //convert from 20Hz to mod40
+         hkpg_rec = (lc_rec + first) / 20 / 40; //convert from 20Hz to mod40
          if(data.hkpg_raw[Constants.T0][hkpg_rec] != Constants.DOUBLE_FILL){
             scint_temp = 
                (data.hkpg_raw[Constants.T0][hkpg_rec] * 
@@ -887,22 +887,22 @@ public class LevelTwo{
             spectrum.createBinEdges(0, scint_temp, dpu_temp, peak);
 
          //write the spectrum to the new array
-         if(data.lc1_raw[lc_rec] != Constants.FSPC_RAW_FILL){
+         if(data.lc1_raw[lc_rec + first] != Constants.FSPC_RAW_FILL){
             lc_scaled[0][lc_rec] = data.lc1_raw[lc_rec + first] * 20;
          }else{
             lc_scaled[0][lc_rec] = Constants.DOUBLE_FILL;
          }
-         if(data.lc2_raw[lc_rec] != Constants.FSPC_RAW_FILL){
+         if(data.lc2_raw[lc_rec + first] != Constants.FSPC_RAW_FILL){
             lc_scaled[1][lc_rec] = data.lc2_raw[lc_rec + first] * 20;
          }else{
             lc_scaled[1][lc_rec] = Constants.DOUBLE_FILL;
          }
-         if(data.lc3_raw[lc_rec] != Constants.FSPC_RAW_FILL){
+         if(data.lc3_raw[lc_rec + first] != Constants.FSPC_RAW_FILL){
             lc_scaled[2][lc_rec] = data.lc3_raw[lc_rec + first] * 20;
          }else{
             lc_scaled[2][lc_rec] = Constants.DOUBLE_FILL;
          }
-         if(data.lc4_raw[lc_rec] != Constants.FSPC_RAW_FILL){
+         if(data.lc4_raw[lc_rec + first] != Constants.FSPC_RAW_FILL){
             lc_scaled[3][lc_rec] = data.lc4_raw[lc_rec + first] * 20;
          }else{
             lc_scaled[3][lc_rec] = Constants.DOUBLE_FILL;
@@ -1012,7 +1012,7 @@ public class LevelTwo{
       for(int mspc_rec = 0, hkpg_rec = 0; mspc_rec < numOfRecs; mspc_rec++){
          
          //get temperatures
-         hkpg_rec = mspc_rec * 4 / 40; //convert from mod4 to mod40
+         hkpg_rec = (mspc_rec + first) * 4 / 40; //convert from mod4 to mod40
          if(data.hkpg_raw[Constants.T0][hkpg_rec] != Constants.HKPG_FILL){
             scint_temp = 
                (data.hkpg_raw[Constants.T0][hkpg_rec] * 
@@ -1038,7 +1038,7 @@ public class LevelTwo{
 
          //rebin the spectrum
          mspc_rebin[mspc_rec] = spectrum.rebin(
-            data.mspc_raw[mspc_rec], old_edges, std_edges 
+            data.mspc_raw[mspc_rec + first], old_edges, std_edges 
          );
 
          //divide counts by bin width and adjust the time scale
@@ -1143,7 +1143,7 @@ public class LevelTwo{
       //rebin the sspc spectra
       for(int sspc_rec = 0, hkpg_rec = 0; sspc_rec < numOfRecs; sspc_rec++){
          //get temperatures
-         hkpg_rec = sspc_rec * 32 / 40; //convert from mod32 to mod40
+         hkpg_rec = (sspc_rec + first) * 32 / 40; //convert from mod32 to mod40
          if(data.hkpg_raw[Constants.T0][hkpg_rec] != Constants.HKPG_FILL){
             scint_temp = 
                (data.hkpg_raw[Constants.T0][hkpg_rec] * 
@@ -1169,7 +1169,7 @@ public class LevelTwo{
          
          //rebin the spectum
          sspc_rebin[sspc_rec] = spectrum.rebin(
-            data.sspc_raw[sspc_rec], old_edges, std_edges
+            data.sspc_raw[sspc_rec + first], old_edges, std_edges
          );
 
          //divide counts by bin width and convert the time scale to /sec
