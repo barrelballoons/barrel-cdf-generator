@@ -888,22 +888,22 @@ public class LevelTwo{
 
          //write the spectrum to the new array
          if(data.lc1_raw[lc_rec] != Constants.FSPC_RAW_FILL){
-            lc_scaled[0][lc_rec] = data.lc1_raw[lc_rec] * 20;
+            lc_scaled[0][lc_rec] = data.lc1_raw[lc_rec + first] * 20;
          }else{
             lc_scaled[0][lc_rec] = Constants.DOUBLE_FILL;
          }
          if(data.lc2_raw[lc_rec] != Constants.FSPC_RAW_FILL){
-            lc_scaled[1][lc_rec] = data.lc2_raw[lc_rec] * 20;
+            lc_scaled[1][lc_rec] = data.lc2_raw[lc_rec + first] * 20;
          }else{
             lc_scaled[1][lc_rec] = Constants.DOUBLE_FILL;
          }
          if(data.lc3_raw[lc_rec] != Constants.FSPC_RAW_FILL){
-            lc_scaled[2][lc_rec] = data.lc3_raw[lc_rec] * 20;
+            lc_scaled[2][lc_rec] = data.lc3_raw[lc_rec + first] * 20;
          }else{
             lc_scaled[2][lc_rec] = Constants.DOUBLE_FILL;
          }
          if(data.lc4_raw[lc_rec] != Constants.FSPC_RAW_FILL){
-            lc_scaled[3][lc_rec] = data.lc4_raw[lc_rec] * 20;
+            lc_scaled[3][lc_rec] = data.lc4_raw[lc_rec + first] * 20;
          }else{
             lc_scaled[3][lc_rec] = Constants.DOUBLE_FILL;
          }
@@ -1266,8 +1266,9 @@ public class LevelTwo{
       //change all the units from cnts/4sec to cnts/sec
       for(int var_i = 0; var_i < 4; var_i++){
          for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
-            if(data.rcnt_raw[var_i][data_i] != Constants.RCNT_FILL){
-               rc_timeScaled[var_i][rec_i] = data.rcnt_raw[var_i][data_i] / 4;
+            if(data.rcnt_raw[var_i][rec_i + first] != Constants.RCNT_FILL){
+               rc_timeScaled[var_i][rec_i] = 
+                  data.rcnt_raw[var_i][rec_i + first] / 4;
             }else{
                rc_timeScaled[var_i][rec_i] = Constants.DOUBLE_FILL;
             }
