@@ -24,6 +24,7 @@ Description:
 
 package edu.ucsc.barrel.cdf_gen;
 
+import java.util.Arrays;
 import org.apache.commons.math3.fitting.GaussianFitter;
 import org.apache.commons.math3.optim.nonlinear.vector.
           jacobian.LevenbergMarquardtOptimizer;
@@ -141,75 +142,136 @@ public class SpectrumExtract {
       return edges_cal;
    }
    
+
    public static double[] rebin(
-      int[] oldVals, double[] oldBins, double[] newBins, 
-      int n, int m, boolean flux
+      int[] specin, double[] edges_in, double[] edges_out
    ){
-      double[] result = new double[m - 1];
-      double oldLo = oldBins[0];
-      double oldHi = oldBins[1];
-      double newLo = newBins[0];
-      double newHi = newBins[1];
-      int newIndex = 0;
-      int oldIndex = 0;
-      double total = 0;
+      int a_cnt, b_cnt, c_cnt, d_cnt;
 
-      while(true){
-         if (oldHi <= newLo){
-            oldIndex++;
-            if(oldIndex >= (n - 1)){return result;}
-            oldLo = oldHi;
-            oldHi = oldBins[oldIndex + 1];
-            continue;
-         }
-         if (newHi <= oldLo){
-            if(flux){
-               result[newIndex] = (float) (total / (newHi - newLo));
-            }else{
-               result[newIndex] = (float) (total / (oldHi - oldLo));
-            }
-            
-            total = 0;
-            newIndex++;
-            
-            if(newIndex >= (m - 1)){return result;}
-            
-            newLo = newHi;
-            newHi = newBins[newIndex + 1];
+      //assumes the input and outpus edges are the same length array
+      int 
+         numOfEdges = edges_in.length,
+         numOfBins = specin.length;
 
-            continue;
-         }
+      int[] 
+         a = new int[numOfEdges],
+         b = new int[numOfEdges],
+         c = new int[numOfEdges],
+         d = new int[numOfEdges];
 
-         if (newHi < oldHi){
-            total += (newHi - Math.max(oldLo, newLo)) * oldVals[oldIndex];
-            if(flux){
-               result[newIndex] = (float) (total / (newHi-newLo));
-            }else{
-               result[newIndex] = (float) (total / (oldHi-oldLo));
-            }
-            total = 0;
-            newIndex++;
-            if(newIndex >= (m - 1)){return result;}
-            newLo = newHi;
-            newHi = newBins[newIndex + 1];
-            continue;
-         }else{
-            total += (oldHi - Math.max(oldLo,newLo)) * oldVals[oldIndex];
-            oldIndex++;
-            if (oldIndex >= (n - 1)){
-               if(flux){
-                  result[newIndex] = (float) (total / (newHi-newLo));
-               }
-               else{
-                  result[newIndex] = (float) (total / (oldHi-oldLo));
-               }
-               return result;
-            }
-            oldLo = oldHi;
-            oldHi = oldBins[oldIndex + 1];
-         }
+      double[] 
+         ea1 = Arrays.copyOfRange(edges_in, 0, (numOfEdges - 1)),
+         ea2 = Arrays.copyOfRange(edges_in, 1, numOfEdges),
+         eb1 = Arrays.copyOfRange(edges_out, 0, (numOfEdges - 1)),
+         eb2 = Arrays.copyOfRange(edges_out, 1, numOfEdges),
+         specout = new double[numOfBins],
+         widths_in = new double[numOfBins],
+         widths_out = new double[numOfBins];
+
+      //calculate the widths of each bin
+      for(int i = 0; i < numOfBins; i++){
+         widths_in[i] = ea2[i] - ea1[i];
+         widths_out[i] = eb2[i] - eb1[i];
       }
+
+      //This loops over each bin of the OUTPUT spectrum and sees which bins of
+      //the the INPUT spectrum overlap it:
+      spec_loop:
+      for(int i = 0; i < numOfBins; i++){
+         //reset the counts for each type of overlap
+         a_cnt = 0;
+         b_cnt = 0;
+         c_cnt = 0;
+         d_cnt = 0;
+
+         //loop through each of the new edges looking for overlaps
+         for(int j = 0; j < numOfBins; j++){
+
+            //There are four kinds of overlap: 
+            //new channel completely covers old,
+            //old completely covers new, 
+            //and offsets to both sides. 
+         
+            //Old bins completely contain new bins [exclude specific case
+            //where they are identical, but keep cases where one side matches]:
+            if(
+               ((eb1[i] >= ea1[j]) && (eb2[i] <= ea2[j])) &&
+               !((eb1[i] == ea1[j]) && (eb2[i] == ea2[j]))
+            ){
+               a[a_cnt] = j;
+               a_cnt++;
+            }
+
+            //New bins completely contain old bins
+            if((eb1[i] <= ea1[j]) && (eb2[i] >= ea2[j])){
+               b[b_cnt] = j;
+               b_cnt++;
+            }
+
+            //new bin overlaps lower edge
+            if((eb2[i] < ea2[j]) && (eb2[i] > ea1[j]) && (eb1[i] < ea1[j])){
+               c[c_cnt] = j;
+               c_cnt++;
+            }
+
+            // new bin overlaps upper edge
+            if((eb1[i] > ea1[j]) && (eb1[i] < ea2[j]) && (eb2[i] > ea2[j])){
+               d[d_cnt] = j;
+               d_cnt++;
+            }
+         }
+
+         //Transfer counts from input spectrum into 
+         //this bin of the output spectrum
+         if (a_cnt > 0){ 
+            for(int k = 0; k < a_cnt; k++){
+               if(specin[a[k]] < 0){
+                  specout[i] = Constants.DOUBLE_FILL;
+                  continue spec_loop;
+               }else{
+                  specout[i] += 
+                     widths_out[i] / widths_in[a[k]] * specin[a[k]];
+               }
+            }
+         }
+         if (b_cnt > 0){
+            for(int k = 0; k < b_cnt; k++){
+               if(specin[b[k]] < 0){
+                  specout[i] = Constants.DOUBLE_FILL;
+                  continue spec_loop;
+               }else{
+                  specout[i] += specin[b[k]];
+               }
+            }
+         }
+         if (c_cnt > 0){
+            for(int k = 0; k < c_cnt; k++){
+               if(specin[c[k]] < 0){
+                  specout[i] = Constants.DOUBLE_FILL;
+                  continue spec_loop;
+               }else{
+                  specout[i] += 
+                     (eb2[i] - ea1[c[k]]) / widths_in[c[k]] * specin[c[k]];
+               }
+            }
+         }
+         if (d_cnt > 0){
+            for(int k = 0; k < d_cnt; k++){
+               if(specin[d[k]] < 0){
+                  specout[i] = Constants.DOUBLE_FILL;
+                  continue spec_loop;
+               }else{
+                  specout[i] += 
+                     (ea2[d[k]] - eb1[i]) / widths_in[d[k]] * specin[d[k]];
+               }
+            }
+         }
+         
+      }
+      
+      return specout;
    }
+
 
    public static double find511(double[] slow, int offset){
       GaussianFitter fitter = 
