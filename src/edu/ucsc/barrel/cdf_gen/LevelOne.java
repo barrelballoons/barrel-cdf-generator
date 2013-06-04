@@ -129,7 +129,7 @@ public class LevelOne{
         gps[Constants.LAT_I][rec_i] = data.gps_raw[Constants.LAT_I][data_i];
         gps[Constants.LON_I][rec_i] = data.gps_raw[Constants.LON_I][data_i];
         frameGroup[rec_i] = data.frame_mod4[data_i];
-        epoch[rec_i] = data.epoch_mod4[data_i];
+        epoch[rec_i] = data.epoch_mod4[data_i] - Constants.SING_ACCUM;
         q[rec_i] = data.gps_q[data_i];
       }
 
@@ -243,7 +243,7 @@ public class LevelOne{
         version[rec_i] = data.ver[data_i];
         payID[rec_i] = data.payID[data_i];
         frameGroup[rec_i] = data.frame_1Hz[data_i];
-        epoch[rec_i] = data.epoch_1Hz[data_i];
+        epoch[rec_i] = data.epoch_1Hz[data_i] - Constants.SING_ACCUM;
         q[rec_i] = data.pps_q[data_i];
       }
 
@@ -347,7 +347,7 @@ public class LevelOne{
          magy[rec_i] = data.magy_raw[data_i];
          magz[rec_i] = data.magz_raw[data_i];
          frameGroup[rec_i] = data.frame_4Hz[data_i];
-         epoch[rec_i] = data.epoch_4Hz[data_i];
+         epoch[rec_i] = data.epoch_4Hz[data_i] - Constants.SING_ACCUM;
          q[rec_i] = data.magn_q[data_i];
       }
 
@@ -472,7 +472,7 @@ public class LevelOne{
          cmdCnt[rec_i] = data.cmdCnt[data_i];
          frameGroup[rec_i] = data.frame_mod40[data_i];
          weeks[rec_i] = data.weeks[data_i];
-         epoch[rec_i] = data.epoch_mod40[data_i];
+         epoch[rec_i] = data.epoch_mod40[data_i] - Constants.SING_ACCUM;
          q[rec_i] = data.hkpg_q[data_i];
       }
 
@@ -604,7 +604,7 @@ public class LevelOne{
       
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          frameGroup[rec_i] = data.frame_20Hz[data_i];
-         epoch[rec_i] = data.epoch_20Hz[data_i];
+         epoch[rec_i] = data.epoch_20Hz[data_i] - Constants.SING_ACCUM;
          q[rec_i] = data.fspc_q[data_i];
          lc[0][rec_i] = data.lc1_raw[data_i];
          lc[1][rec_i] = data.lc2_raw[data_i];
@@ -699,11 +699,11 @@ public class LevelOne{
       
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          frameGroup[rec_i] = data.frame_mod4[data_i];
-         epoch[rec_i] = data.epoch_mod4[data_i];
+         epoch[rec_i] = data.epoch_mod4[data_i] - Constants.QUAD_ACCUM;
          q[rec_i] = data.mspc_q[data_i];
          mspc[rec_i] = data.mspc_raw[data_i];
-      }
 
+      }
       System.out.println("\nSaving MSPC...");
 
       String srcName = 
@@ -772,7 +772,7 @@ public class LevelOne{
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          frameGroup[rec_i] = data.frame_mod32[data_i];
-         epoch[rec_i] = data.epoch_mod32[data_i];
+         epoch[rec_i] = data.epoch_mod32[data_i] - Constants.SSPC_ACCUM;
          q[rec_i] = data.sspc_q[data_i];
          sspc[rec_i] = data.sspc_raw[data_i];
       }
@@ -844,7 +844,7 @@ public class LevelOne{
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          frameGroup[rec_i] = data.frame_mod4[data_i];
-         epoch[rec_i] = data.epoch_mod4[data_i];
+         epoch[rec_i] = data.epoch_mod4[data_i] - Constants.QUAD_ACCUM;
          q[rec_i] = data.rcnt_q[data_i];
          rc[0][rec_i] = data.rcnt_raw[0][rec_i];
          rc[1][rec_i] = data.rcnt_raw[1][rec_i];

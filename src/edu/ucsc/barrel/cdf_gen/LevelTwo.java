@@ -203,7 +203,7 @@ public class LevelTwo{
          
          //save the values from the other variables
          frameGroup[rec_i] = data.frame_mod4[data_i];
-         epoch[rec_i] = data.epoch_mod4[data_i];
+         epoch[rec_i] = data.epoch_mod4[data_i] - Constants.SING_ACCUM;
          q[rec_i] = data.gps_q[data_i];
 
          //make sure we have a complete gps record before generating mag coords
@@ -445,7 +445,7 @@ public class LevelTwo{
         version[rec_i] = data.ver[data_i];
         payID[rec_i] = data.payID[data_i];
         frameGroup[rec_i] = data.frame_1Hz[data_i];
-        epoch[rec_i] = data.epoch_1Hz[data_i];
+        epoch[rec_i] = data.epoch_1Hz[data_i] - Constants.SING_ACCUM;
         q[rec_i] = data.pps_q[data_i];
       }
 
@@ -581,7 +581,7 @@ public class LevelTwo{
          }
 
          frameGroup[rec_i] = data.frame_4Hz[data_i];
-         epoch[rec_i] = data.epoch_4Hz[data_i];
+         epoch[rec_i] = data.epoch_4Hz[data_i] - Constants.SING_ACCUM;
          q[rec_i] = data.magn_q[data_i];
       }
 
@@ -699,7 +699,7 @@ public class LevelTwo{
                   (data.hkpg_raw[var_i][rec_i] * data.hkpg_scale[var_i]) + 
                   data.hkpg_offset[var_i];
             }else{
-               hkpg_scaled[rec_i] = Constants.FLOAT_FILL;
+               hkpg_scaled[rec_i] = Constants.DOUBLE_FILL;
             }
          }
 
@@ -723,7 +723,7 @@ public class LevelTwo{
          cmdCnt[rec_i] = data.cmdCnt[data_i];
          frameGroup[rec_i] = data.frame_mod40[data_i];
          weeks[rec_i] = data.weeks[data_i];
-         epoch[rec_i] = data.epoch_mod40[data_i];
+         epoch[rec_i] = data.epoch_mod40[data_i] - Constants.SING_ACCUM;
          q[rec_i] = data.hkpg_q[data_i];
       }
 
@@ -862,7 +862,7 @@ public class LevelTwo{
 
          //get temperatures
          hkpg_rec = lc_rec / 20 / 40; //convert from 20Hz to mod40
-         if(data.hkpg_raw[Constants.T0][hkpg_rec] != Constants.FLOAT_FILL){
+         if(data.hkpg_raw[Constants.T0][hkpg_rec] != Constants.DOUBLE_FILL){
             scint_temp = 
                (data.hkpg_raw[Constants.T0][hkpg_rec] * 
                data.hkpg_scale[Constants.T0]) + 
@@ -870,7 +870,7 @@ public class LevelTwo{
          }else{
             scint_temp = 20;
          }
-         if(data.hkpg_raw[Constants.T5][hkpg_rec] != Constants.FLOAT_FILL){
+         if(data.hkpg_raw[Constants.T5][hkpg_rec] != Constants.DOUBLE_FILL){
             dpu_temp = 
                (data.hkpg_raw[Constants.T5][hkpg_rec] * 
                data.hkpg_scale[Constants.T5]) + 
@@ -887,31 +887,31 @@ public class LevelTwo{
             spectrum.createBinEdges(0, scint_temp, dpu_temp, peak);
 
          //write the spectrum to the new array
-         if(data.lc1_raw[lc_rec] != Constants.FLOAT_FILL){
+         if(data.lc1_raw[lc_rec] != Constants.FSPC_RAW_FILL){
             lc_scaled[0][lc_rec] = data.lc1_raw[lc_rec] * 20;
          }else{
-            lc_scaled[0][lc_rec] = Constants.FLOAT_FILL;
+            lc_scaled[0][lc_rec] = Constants.DOUBLE_FILL;
          }
-         if(data.lc2_raw[lc_rec] != Constants.FLOAT_FILL){
+         if(data.lc2_raw[lc_rec] != Constants.FSPC_RAW_FILL){
             lc_scaled[1][lc_rec] = data.lc2_raw[lc_rec] * 20;
          }else{
-            lc_scaled[1][lc_rec] = Constants.FLOAT_FILL;
+            lc_scaled[1][lc_rec] = Constants.DOUBLE_FILL;
          }
-         if(data.lc3_raw[lc_rec] != Constants.FLOAT_FILL){
+         if(data.lc3_raw[lc_rec] != Constants.FSPC_RAW_FILL){
             lc_scaled[2][lc_rec] = data.lc3_raw[lc_rec] * 20;
          }else{
-            lc_scaled[2][lc_rec] = Constants.FLOAT_FILL;
+            lc_scaled[2][lc_rec] = Constants.DOUBLE_FILL;
          }
-         if(data.lc4_raw[lc_rec] != Constants.FLOAT_FILL){
+         if(data.lc4_raw[lc_rec] != Constants.FSPC_RAW_FILL){
             lc_scaled[3][lc_rec] = data.lc4_raw[lc_rec] * 20;
          }else{
-            lc_scaled[3][lc_rec] = Constants.FLOAT_FILL;
+            lc_scaled[3][lc_rec] = Constants.DOUBLE_FILL;
          }
       }
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          frameGroup[rec_i] = data.frame_20Hz[data_i];
-         epoch[rec_i] = data.epoch_20Hz[data_i];
+         epoch[rec_i] = data.epoch_20Hz[data_i] - Constants.SING_ACCUM;
          q[rec_i] = data.fspc_q[data_i];
       }
 
@@ -1013,7 +1013,7 @@ public class LevelTwo{
          
          //get temperatures
          hkpg_rec = mspc_rec * 4 / 40; //convert from mod4 to mod40
-         if(data.hkpg_raw[Constants.T0][hkpg_rec] != Constants.FLOAT_FILL){
+         if(data.hkpg_raw[Constants.T0][hkpg_rec] != Constants.DOUBLE_FILL){
             scint_temp = 
                (data.hkpg_raw[Constants.T0][hkpg_rec] * 
                data.hkpg_scale[Constants.T0]) + 
@@ -1021,7 +1021,7 @@ public class LevelTwo{
          }else{
             scint_temp = 20;
          }
-         if(data.hkpg_raw[Constants.T5][hkpg_rec] != Constants.FLOAT_FILL){
+         if(data.hkpg_raw[Constants.T5][hkpg_rec] != Constants.DOUBLE_FILL){
             dpu_temp = 
                (data.hkpg_raw[Constants.T5][hkpg_rec] * 
                data.hkpg_scale[Constants.T5]) + 
@@ -1038,25 +1038,26 @@ public class LevelTwo{
 
          //rebin the spectrum
          mspc_rebin[mspc_rec] = spectrum.rebin(
-            data.mspc_raw[mspc_rec], old_edges, std_edges, 49, 49, true 
+            data.mspc_raw[mspc_rec], old_edges, std_edges 
          );
 
          //divide counts by bin width and adjust the time scale
          for(int bin_i = 0; bin_i < mspc_rebin[mspc_rec].length; bin_i++){
-            mspc_rebin[mspc_rec][bin_i] /= 
-               std_edges[bin_i + 1] - std_edges[bin_i];
-
-            mspc_rebin[mspc_rec][bin_i] /= 4;
+            if(mspc_rebin[mspc_rec][bin_i] != Constants.DOUBLE_FILL){
+               mspc_rebin[mspc_rec][bin_i] /= 
+                  std_edges[bin_i + 1] - std_edges[bin_i];
+               mspc_rebin[mspc_rec][bin_i] /= 4;
+            }
          }
       }
 
+      System.out.println("\nSaving MSPC...");
+
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          frameGroup[rec_i] = data.frame_mod4[data_i];
-         epoch[rec_i] = data.epoch_mod4[data_i];
+         epoch[rec_i] = data.epoch_mod4[data_i] - Constants.QUAD_ACCUM;
          q[rec_i] = data.mspc_q[data_i];
       }
-
-      System.out.println("\nSaving MSPC...");
 
       String srcName = 
          "cdf_skels/l2/barCLL_PP_S_l2_mspc_YYYYMMDD_v++.cdf";
@@ -1158,20 +1159,22 @@ public class LevelTwo{
          
          //rebin the spectum
          sspc_rebin[sspc_rec] = spectrum.rebin(
-            data.sspc_raw[sspc_rec], old_edges, std_edges, 257, 257, false
+            data.sspc_raw[sspc_rec], old_edges, std_edges
          );
 
          //divide counts by bin width and convert the time scale to /sec
          for(int bin_i = 0; bin_i < sspc_rebin[sspc_rec].length; bin_i++){
-            sspc_rebin[sspc_rec][bin_i] /= 
-               std_edges[bin_i + 1] - std_edges[bin_i];
-            sspc_rebin[sspc_rec][bin_i] /= 32;
+            if(sspc_rebin[sspc_rec][bin_i] != Constants.DOUBLE_FILL){
+               sspc_rebin[sspc_rec][bin_i] /= 
+                  std_edges[bin_i + 1] - std_edges[bin_i];
+               sspc_rebin[sspc_rec][bin_i] /= 32;
+            }
          }
       }
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          frameGroup[rec_i] = data.frame_mod32[data_i];
-         epoch[rec_i] = data.epoch_mod32[data_i];
+         epoch[rec_i] = data.epoch_mod32[data_i] - Constants.SSPC_ACCUM;
          q[rec_i] = data.sspc_q[data_i];
       }
 
@@ -1246,14 +1249,14 @@ public class LevelTwo{
             if(data.rcnt_raw[var_i][rec_i] != Constants.RCNT_FILL){
                rc_timeScaled[var_i][rec_i] = data.rcnt_raw[var_i][rec_i] / 4;
             }else{
-               rc_timeScaled[var_i][rec_i] = Constants.FLOAT_FILL;
+               rc_timeScaled[var_i][rec_i] = Constants.DOUBLE_FILL;
             }
          }
       }
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          frameGroup[rec_i] = data.frame_mod4[data_i];
-         epoch[rec_i] = data.epoch_mod4[data_i];
+         epoch[rec_i] = data.epoch_mod4[data_i] - Constants.QUAD_ACCUM;
          q[rec_i] = data.rcnt_q[data_i];
       }
          
