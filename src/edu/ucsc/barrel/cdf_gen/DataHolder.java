@@ -475,6 +475,17 @@ public class DataHolder{
          }
       }
 
+      //flag potentially bad gps and pps records
+
+      if(
+         mod4 > 0 && // make sure there is a previous record to compare to
+         pps[rec_num_1Hz] == 65535 && //possible bad pps
+         ms_of_week[rec_num_mod4] == ms_of_week[rec_num_mod4 - 1] //gps repeat
+      ){
+         pps_q[rec_num_1Hz] |= Constants.NO_GPS;
+         gps_q[rec_num_mod4] |= Constants.NO_GPS;
+      }
+
       //mag data 4 sets of xyz vectors. 24 bits/component
       for(int i = 0; i < 4; i++){
          magx_raw[rec_num_4Hz + i] = 
