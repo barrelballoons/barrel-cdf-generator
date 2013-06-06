@@ -28,7 +28,7 @@ package edu.ucsc.barrel.cdf_gen;
 public class Constants{
    
    //Quality flags
-   int 
+   static public final int 
       FC_ROLL = 1, //The frame counter has gone beyone 2^21 and started over
       NO_GPS = 2, //There is no GPS signal present so timing info may be off
       FILL_TIME = 4, //This data point was not used to create a timing model

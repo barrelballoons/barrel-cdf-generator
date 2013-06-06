@@ -427,6 +427,7 @@ public class DataHolder{
                (gps_raw[mod4][rec_num_mod4] > Constants.ALT_RAW_MAX)
             ){
                gps_raw[mod4][rec_num_mod4] = Constants.ALT_RAW_FILL;
+               gps_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;  
             }
             break;
          case Constants.TIME_I: 
@@ -435,7 +436,10 @@ public class DataHolder{
                (gps_raw[mod4][rec_num_mod4] > Constants.MS_WEEK_MAX)
             ){
                gps_raw[mod4][rec_num_mod4] = Constants.MS_WEEK_FILL;
+               gps_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;  
             }
+
+            ms_of_week[rec_num_mod4] = gps_raw[Constants.TIME_I][rec_num_mod4];
             break;
          case Constants.LAT_I: 
             if(
@@ -443,6 +447,7 @@ public class DataHolder{
                (gps_raw[mod4][rec_num_mod4] > Constants.LAT_RAW_MAX)
             ){
                gps_raw[mod4][rec_num_mod4] = Constants.LAT_RAW_FILL;
+               gps_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;  
             }
             break;
          case Constants.LON_I: 
@@ -451,26 +456,10 @@ public class DataHolder{
                (gps_raw[mod4][rec_num_mod4] > Constants.LON_RAW_MAX)
             ){
                gps_raw[mod4][rec_num_mod4] = Constants.LON_RAW_FILL;
+               gps_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;  
             }
             break;
       }
-
-      //save the time variable separately for the epoch calculation 
-      if(mod4 == Constants.TIME_I){
-         ms_of_week[rec_num_mod4] = gps_raw[Constants.TIME_I][rec_num_mod4];
-
-         /*
-         sec = ms_of_week[rec_num_mod4] / 1000; //convert ms to sec
-         sec %= 86400; //remove any complete days
-         hour = sec / 3600;
-         sec %= 3600;
-         min = sec / 60;
-         sec %= 60;
-         */
-      }
-
-      //fill the quality flag with a 0 for now
-      gps_q[rec_num_mod4] = 0;
 
       //GPS PPS
       pps[rec_num_1Hz] = 
@@ -482,9 +471,9 @@ public class DataHolder{
          //make sure the value is not out of range because of an early pps
          if(pps[rec_num_1Hz] != 65535){
             pps[rec_num_1Hz] = Constants.PPS_FILL;
+            pps_q[rec_num_1Hz] |= Constants.OUT_OF_RANGE;
          }
       }
-      pps_q[rec_num_1Hz] = 0;
 
       //mag data 4 sets of xyz vectors. 24 bits/component
       for(int i = 0; i < 4; i++){
@@ -530,21 +519,22 @@ public class DataHolder{
             (magx_raw[rec_num_4Hz] > Constants.MAG_MAX)
          ){
             magx_raw[rec_num_4Hz] = Constants.MAG_FILL;
+            magn_q[rec_num_4Hz] |= Constants.OUT_OF_RANGE;
          }
          if(
             (magy_raw[rec_num_4Hz] < Constants.MAG_MIN) ||
             (magy_raw[rec_num_4Hz] > Constants.MAG_MAX)
          ){
             magy_raw[rec_num_4Hz] = Constants.MAG_FILL;
+            magn_q[rec_num_4Hz] |= Constants.OUT_OF_RANGE;
          }
          if(
             (magz_raw[rec_num_4Hz] < Constants.MAG_MIN) ||
             (magz_raw[rec_num_4Hz] > Constants.MAG_MAX)
          ){
             magz_raw[rec_num_4Hz] = Constants.MAG_FILL;
+            magn_q[rec_num_4Hz] |= Constants.OUT_OF_RANGE;
          }
-
-         magn_q[rec_num_1Hz] = 0;
       }
 
       
@@ -556,6 +546,7 @@ public class DataHolder{
          (hkpg_raw[mod40][rec_num_mod40] > Constants.HKPG_MAX)
       ){
          hkpg_raw[mod40][rec_num_mod40] = Constants.HKPG_FILL;
+         hkpg_q[rec_num_mod40] |= Constants.OUT_OF_RANGE;
       }
 
       switch(mod40){
@@ -570,12 +561,14 @@ public class DataHolder{
                (sats[rec_num_mod40] > Constants.SATS_MAX)
             ){
                sats[rec_num_mod40] = Constants.SATS_FILL;
+               hkpg_q[rec_num_mod40] |= Constants.OUT_OF_RANGE;
             }
             if(
                (offset[rec_num_mod40] < Constants.LEAP_SEC_MIN) ||
                (offset[rec_num_mod40] > Constants.LEAP_SEC_MAX)
             ){
                offset[rec_num_mod40] = Constants.LEAP_SEC_FILL;
+               hkpg_q[rec_num_mod40] |= Constants.OUT_OF_RANGE;
             }
             break;
          case 37:
@@ -586,6 +579,7 @@ public class DataHolder{
                (weeks[rec_num_mod40] > Constants.WEEKS_MAX)
             ){
                weeks[rec_num_mod40] = Constants.WEEKS_FILL;
+               hkpg_q[rec_num_mod40] |= Constants.OUT_OF_RANGE;
             }
             break;
          case 38:
@@ -598,12 +592,14 @@ public class DataHolder{
                (termStat[rec_num_mod40] > Constants.TERM_STAT_MAX)
             ){
                termStat[rec_num_mod40] = Constants.TERM_STAT_FILL;
+               hkpg_q[rec_num_mod40] |= Constants.OUT_OF_RANGE;
             }
             if(
                (cmdCnt[rec_num_mod40] < Constants.CMD_CNT_MIN) ||
                (cmdCnt[rec_num_mod40] > Constants.CMD_CNT_MAX)
             ){
                cmdCnt[rec_num_mod40] = Constants.CMD_CNT_FILL;
+               hkpg_q[rec_num_mod40] |= Constants.OUT_OF_RANGE;
             }
             break;
          case 39:
@@ -616,18 +612,19 @@ public class DataHolder{
                (dcdCnt[rec_num_mod40] > Constants.DCD_CNT_MAX)
             ){
                dcdCnt[rec_num_mod40] = Constants.DCD_CNT_FILL;
+               hkpg_q[rec_num_mod40] |= Constants.OUT_OF_RANGE;
             }
             if(
                (modemCnt[rec_num_mod40] < Constants.MODEM_CNT_MIN) ||
                (modemCnt[rec_num_mod40] > Constants.MODEM_CNT_MAX)
             ){
                modemCnt[rec_num_mod40] = Constants.MODEM_CNT_FILL;
+               hkpg_q[rec_num_mod40] |= Constants.OUT_OF_RANGE;
             }
             break;
          default:
             break;
       }
-      hkpg_q[rec_num_mod40] = 0;
          
       //fast spectra: 20 sets of 4 channel data. 
       //ch1 and ch2 are 16 bits, ch3 and ch4 are 8bits 
@@ -650,27 +647,30 @@ public class DataHolder{
             (lc1_raw[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
          ){
             lc1_raw[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+            fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
          }
          if(
             (lc2_raw[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
             (lc2_raw[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
          ){
             lc2_raw[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+            fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
          }
          if(
             (lc3_raw[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
             (lc3_raw[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
          ){
             lc3_raw[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+            fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
          }
          if(
             (lc4_raw[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
             (lc4_raw[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
          ){
             lc4_raw[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+            fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
          }
       }
-      fspc_q[rec_num_1Hz] = 0;
        
       //medium spectra: 12 channels per frame, 16 bits/channels
       for(int mspc_i = 0, chan_i = 0; mspc_i < 12; mspc_i++){
@@ -683,9 +683,9 @@ public class DataHolder{
             (mspc_raw[rec_num_mod4][chan_i] > Constants.MSPC_RAW_MAX)
          ){
             mspc_raw[rec_num_mod4][chan_i] = Constants.MSPC_RAW_FILL;
+            mspc_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;
          }
       }
-      mspc_q[rec_num_mod4] = 0;
 
       //slow spectra: 8 channels per frame, 16 bits/channels
       for(int sspc_i = 0, chan_i = 0; sspc_i < 8; sspc_i++){
@@ -698,9 +698,9 @@ public class DataHolder{
             (sspc_raw[rec_num_mod32][chan_i] > Constants.SSPC_RAW_MAX)
          ){
             sspc_raw[rec_num_mod32][chan_i] = Constants.SSPC_RAW_FILL;
+            sspc_q[rec_num_mod32] |= Constants.OUT_OF_RANGE;
          }
       }
-      sspc_q[rec_num_mod32] = 0;
       
       //rate counter: mod4 data, 16bits
       rcnt_raw[mod4][rec_num_mod4] = 
@@ -710,7 +710,7 @@ public class DataHolder{
          (rcnt_raw[mod4][rec_num_mod4] > Constants.RCNT_MAX)
       ){
          rcnt_raw[mod4][rec_num_mod4] = Constants.RCNT_FILL;
+         rcnt_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;
       }
-      rcnt_q[rec_num_mod4] = 0;
    }
 }
