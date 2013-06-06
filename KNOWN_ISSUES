@@ -17,3 +17,12 @@ line fitting and/or other methods.
 Magnetic Coordinates:
 It seems like there are a very large number of bad values in the magnetic
 coordinate file. This needs to be investigated.
+
+CMD_CNT:
+Bitmask used to pull out CMD_CNT info is wrong. MSB should be ignored to get
+the correct value.
+
+MIN_ALT:
+Any altitude value below 5km will get a fill value regardless of min_alt command
+line argument.
+
