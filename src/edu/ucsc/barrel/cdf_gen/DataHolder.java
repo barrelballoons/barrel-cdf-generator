@@ -547,6 +547,7 @@ public class DataHolder{
       ){
          hkpg_raw[mod40][rec_num_mod40] = Constants.HKPG_FILL;
          hkpg_q[rec_num_mod40] |= Constants.OUT_OF_RANGE;
+         CDF_Gen.log.writeln(mod40 + "");
       }
 
       switch(mod40){
@@ -562,6 +563,7 @@ public class DataHolder{
             ){
                sats[rec_num_mod40] = Constants.SATS_FILL;
                hkpg_q[rec_num_mod40] |= Constants.OUT_OF_RANGE;
+         CDF_Gen.log.writeln("Sats");
             }
             if(
                (offset[rec_num_mod40] < Constants.LEAP_SEC_MIN) ||
@@ -569,6 +571,7 @@ public class DataHolder{
             ){
                offset[rec_num_mod40] = Constants.LEAP_SEC_FILL;
                hkpg_q[rec_num_mod40] |= Constants.OUT_OF_RANGE;
+         CDF_Gen.log.writeln("Leap");
             }
             break;
          case 37:
@@ -580,19 +583,21 @@ public class DataHolder{
             ){
                weeks[rec_num_mod40] = Constants.WEEKS_FILL;
                hkpg_q[rec_num_mod40] |= Constants.OUT_OF_RANGE;
+         CDF_Gen.log.writeln("Weeks");
             }
             break;
          case 38:
             termStat[rec_num_mod40] = 
                (short)(hkpg_raw[mod40][rec_num_mod40] >> 15);
             cmdCnt[rec_num_mod40] = 
-               (int)(hkpg_raw[mod40][rec_num_mod40] & 32768);
+               (int)(hkpg_raw[mod40][rec_num_mod40] & 32767);
             if(
                (termStat[rec_num_mod40] < Constants.TERM_STAT_MIN) ||
                (termStat[rec_num_mod40] > Constants.TERM_STAT_MAX)
             ){
                termStat[rec_num_mod40] = Constants.TERM_STAT_FILL;
                hkpg_q[rec_num_mod40] |= Constants.OUT_OF_RANGE;
+         CDF_Gen.log.writeln("TermStat");
             }
             if(
                (cmdCnt[rec_num_mod40] < Constants.CMD_CNT_MIN) ||
@@ -600,6 +605,7 @@ public class DataHolder{
             ){
                cmdCnt[rec_num_mod40] = Constants.CMD_CNT_FILL;
                hkpg_q[rec_num_mod40] |= Constants.OUT_OF_RANGE;
+         CDF_Gen.log.writeln("CMD " + cmdCnt[rec_num_mod40] + " " + Long.toBinaryString(hkpg_raw[mod40][rec_num_mod40]) + " " + Long.toBinaryString(32767L));
             }
             break;
          case 39:
@@ -613,6 +619,7 @@ public class DataHolder{
             ){
                dcdCnt[rec_num_mod40] = Constants.DCD_CNT_FILL;
                hkpg_q[rec_num_mod40] |= Constants.OUT_OF_RANGE;
+         CDF_Gen.log.writeln("DCD");
             }
             if(
                (modemCnt[rec_num_mod40] < Constants.MODEM_CNT_MIN) ||
@@ -620,6 +627,7 @@ public class DataHolder{
             ){
                modemCnt[rec_num_mod40] = Constants.MODEM_CNT_FILL;
                hkpg_q[rec_num_mod40] |= Constants.OUT_OF_RANGE;
+         CDF_Gen.log.writeln("Modem");
             }
             break;
          default:
