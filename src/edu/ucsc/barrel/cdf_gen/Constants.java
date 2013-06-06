@@ -27,6 +27,15 @@ package edu.ucsc.barrel.cdf_gen;
 
 public class Constants{
    
+   //Quality flags
+   int 
+      FC_ROLL = 1, //The frame counter has gone beyone 2^21 and started over
+      NO_GPS = 2, //There is no GPS signal present so timing info may be off
+      FILL_TIME = 4, //This data point was not used to create a timing model
+      PART_SPEC = 8, //The spectrum is missing some frames
+      LOW_ALT = 16, //Indicator that the payload has dropped below MIN_SCI_ALT
+      OUT_OF_RANGE = 32; //The rare case that the DPU returns unacceptable data
+
    //Index references for various data storage arrays 
    static public final int 
       //gps index
@@ -85,7 +94,7 @@ public class Constants{
    public static final float 
       LAT_MIN = -90, LAT_MAX = 90, LAT_FILL = FLOAT_FILL,
       LON_MIN = -180, LON_MAX = 180, LON_FILL = FLOAT_FILL,
-      ALT_MIN = 5, ALT_MAX = 50, ALT_FILL = FLOAT_FILL;
+      MIN_SCI_ALT = 20, ALT_MIN = 5, ALT_MAX = 50, ALT_FILL = FLOAT_FILL;
 
    //various accumulation time offsets based on nominal ms/frame
    public static final long 
