@@ -448,8 +448,8 @@ public class LevelOne{
          
       for(int var_i = 0; var_i < data.hkpg.length; var_i++){
          hkpg = new long[numOfRecs];
-         for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
-            hkpg[rec_i] =  data.hkpg_raw[var_i][rec_i];
+         for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
+            hkpg[rec_i] =  data.hkpg_raw[var_i][data_i];
          }
 
          var = cdf.getVariable(data.hkpg_label[var_i]);
@@ -846,10 +846,10 @@ public class LevelOne{
          frameGroup[rec_i] = data.frame_mod4[data_i];
          epoch[rec_i] = data.epoch_mod4[data_i] - Constants.QUAD_ACCUM;
          q[rec_i] = data.rcnt_q[data_i];
-         rc[0][rec_i] = data.rcnt_raw[0][rec_i];
-         rc[1][rec_i] = data.rcnt_raw[1][rec_i];
-         rc[2][rec_i] = data.rcnt_raw[2][rec_i];
-         rc[3][rec_i] = data.rcnt_raw[3][rec_i];
+         rc[0][rec_i] = data.rcnt_raw[0][data_i];
+         rc[1][rec_i] = data.rcnt_raw[1][data_i];
+         rc[2][rec_i] = data.rcnt_raw[2][data_i];
+         rc[3][rec_i] = data.rcnt_raw[3][data_i];
       }
          
       System.out.println("\nSaving RCNT...");

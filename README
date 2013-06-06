@@ -1,12 +1,25 @@
 barrel-cdf-generator
 ====================
 
-The BARREL CDF Generator is meant to run daily to produce L1 and L2 BARREL CDF Files. 
+The BARREL CDF Generator is meant to run daily to produce L1 and L2 BARREL CDF 
+Files. 
 
 syntax:
-java -jar cdf_gen.jar date=yymmdd ini=xxxx L=ll
-yymmdd is the day of data to process.
-xxxx lists the location of an ini file that contains server information and list of payloads to process.
-ll is a list of comma delimited CDF levels to produce (e.g. L=1,2).
+java -jar cdf_gen.jar ini=XXXX date=YYMMDD [L=LL] [min_alt=KM]
 
-A description of the data format for the output files is located in the docs/ directory.
+YYMMDD is the day of data to process.
+
+XXXX lists the location of an ini file that contains server information and list
+of payloads to process.
+
+LL is a list of comma delimited CDF levels to produce (e.g. L=1,2). L0 (Day-long
+telemetry files) are created regardless of this setting.
+
+KM is the minimum altitude to include in the CDFs. Default is 5km.
+
+All command line arguments can be listed in in the ini file (with the exeption
+of the ini= argument of course). Ini file listings take precedence over command
+line arguments.
+
+A description of the data format for the output files is located in the docs/ 
+directory.
