@@ -41,10 +41,16 @@ public class DataHolder{
 	   "Interrupt", "LowLevel", "PeakDet", "HighLevel"
    };
    
+   private String payload;
+
    //variables to keep track of valid altitude range
    private float min_alt;
    private boolean low_alt = true;
    
+   //variables to  signal frame counter rollover
+   private int last_fc = 0;
+   private boolean fc_rollover = false;
+
    //variable to track complete spectra
    private int 
       sspc_frames = 0,
@@ -121,7 +127,9 @@ public class DataHolder{
       size_1Hz = 0, size_4Hz = 0, size_20Hz = 0, 
       size_mod4 = 0, size_mod32 = 0, size_mod40 = 0;
 
-   public DataHolder(){
+   public DataHolder(String final p){
+      payload = p;
+      
       //fill the housekeeping reference arrays
       hkpg_scale[Constants.V0] = 0.0003052f;
       hkpg_scale[Constants.V1] = 0.0003052f;
@@ -264,8 +272,12 @@ public class DataHolder{
       }else{
          min_alt = Float.parseFloat(CDF_Gen.getSetting("min_alt"));
       }
-
       System.out.println("Rejecting data bellow " + min_alt + " kilometers.");
+      
+      //Figure out if the previous CDF file had a frame counter rollover
+      if(new File("fc_rollovers/" + payload).exists()){
+        fc_rollover = true; 
+      }
    }
 
    public int getSize(String cadence){
@@ -414,6 +426,32 @@ public class DataHolder{
       ver[rec_num_1Hz] = tmpVer;
       payID[rec_num_1Hz] = tmpPayID;
       frame_1Hz[rec_num_1Hz] = (int)tmpFC;
+
+      //check for fc rollover
+      if((tmpFC - last_fc) <= Constants.LAST_DAY_FC){
+         //rollover detected
+         fc_rollover = true;
+         frame_1Hz[rec_num_1Hz] += Constants.FC_OFFSET;
+
+         Logger rollover_file = 
+            new Logger("fc_rollovers/" + payload);
+         rollover_file.close();
+      }else{
+         last_fc = tmpFC;
+      }
+
+      //if there was a rollover, add an offset and flag the data
+      if(fc_rollover){
+         frame_1Hz[rec_num_1Hz] += Constants.FC_OFFSET;
+         gps_q[rec_num_1Hz] |= Constants.FC_ROLL;
+         pps_q[rec_num_1Hz] |= Constants.FC_ROLL;
+         magn_q[rec_num_1Hz] |= Constants.FC_ROLL;
+         hkpg_q[rec_num_1Hz] |= Constants.FC_ROLL;
+         rcnt_q[rec_num_1Hz] |= Constants.FC_ROLL;
+         fspc_q[rec_num_1Hz] |= Constants.FC_ROLL;
+         mspc_q[rec_num_1Hz] |= Constants.FC_ROLL;
+         sspc_q[rec_num_1Hz] |= Constants.FC_ROLL;
+      }
 
       //figure out the other time scale frame counters
       for(int rec_i = rec_num_4Hz; rec_i < rec_num_4Hz + 4; rec_i++){
