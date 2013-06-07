@@ -99,8 +99,7 @@ public class DataHolder{
       rcnt_q = new int[MAX_FRAMES / 4],
       fspc_q = new int[MAX_FRAMES * 20],
       mspc_q = new int[MAX_FRAMES / 4],
-      sspc_q = new int[MAX_FRAMES / 32],
-      time_q = new int[MAX_FRAMES];
+      sspc_q = new int[MAX_FRAMES / 32];
    public int[][] 
       mspc_raw = new int[MAX_FRAMES / 4][48],
       sspc_raw = new int[MAX_FRAMES / 32][256];
@@ -453,6 +452,15 @@ public class DataHolder{
             ){
                gps_raw[mod4][rec_num_mod4] = Constants.ALT_RAW_FILL;
                gps_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;  
+            }
+            else if(gps_raw[mod4][rec_num_mod4] < Constants.MIN_SCI_ALT){
+               gps_q[rec_num_mod4] |= Constants.LOW_ALT;
+               pps_q[rec_num_mod4] |= Constants.LOW_ALT;
+               magn_q[rec_num_mod4] |= Constants.LOW_ALT;
+               hkpg_q[rec_num_mod4] |= Constants.LOW_ALT;
+               rcnt_q[rec_num_mod4] |= Constants.LOW_ALT;
+               mspc_q[rec_num_mod4] |= Constants.LOW_ALT;
+               sspc_q[rec_num_mod4] |= Constants.LOW_ALT;
             }
             break;
          case Constants.TIME_I: 

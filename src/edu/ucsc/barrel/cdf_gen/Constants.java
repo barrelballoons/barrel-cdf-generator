@@ -64,6 +64,10 @@ public class Constants{
    static public final double 
       DOUBLE_FILL = -1.0e+31;
 
+   //minimum altitude at which we can expect good science (in mm)
+   static public final int
+      MIN_SCI_ALT = 20000000;
+
    //variable specific constants
    public static final short
       PAYID_MIN = 0, PAYID_MAX = 63, PAYID_FILL = INT2_FILL,
@@ -94,7 +98,7 @@ public class Constants{
    public static final float 
       LAT_MIN = -90, LAT_MAX = 90, LAT_FILL = FLOAT_FILL,
       LON_MIN = -180, LON_MAX = 180, LON_FILL = FLOAT_FILL,
-      MIN_SCI_ALT = 20, ALT_MIN = 5, ALT_MAX = 50, ALT_FILL = FLOAT_FILL;
+      ALT_MIN = 5, ALT_MAX = 50, ALT_FILL = FLOAT_FILL;
 
    //various accumulation time offsets based on nominal ms/frame
    public static final long 
