@@ -26,3 +26,6 @@ MIN_ALT:
 Any altitude value below 5km will get a fill value regardless of min_alt command
 line argument.
 
+GPS_TIME Fill Values:
+The array was not being initialized with fill values so gaps often show up as 0.
+
