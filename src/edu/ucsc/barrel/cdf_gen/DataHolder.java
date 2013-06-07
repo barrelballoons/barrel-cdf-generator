@@ -39,9 +39,15 @@ public class DataHolder{
    static public final String[] rc_label = {
 	   "Interrupt", "LowLevel", "PeakDet", "HighLevel"
    };
-      
+   
+   //variables to keep track of valid altitude range
    private float min_alt;
    private boolean low_alt = true;
+   
+   //variable to track complete spectra
+   private int 
+      sspc_frames = 0,
+      mspc_frames = 0;
 
    public short[]  
       payID = new short[MAX_FRAMES], 
@@ -389,9 +395,27 @@ public class DataHolder{
       rec_num_4Hz = (rec_num_1Hz) * 4;
       rec_num_20Hz = (rec_num_1Hz) * 20;
       try{
-         if((tmpFC - mod4) != frame_mod4[rec_num_mod4]){rec_num_mod4++;}
-         if((tmpFC - mod32) != frame_mod32[rec_num_mod32]){rec_num_mod32++;}
-         if((tmpFC - mod40) != frame_mod40[rec_num_mod40]){rec_num_mod40++;}
+         if((tmpFC - mod4) != frame_mod4[rec_num_mod4]){
+            //check if the medium spectrum is complete
+            if(mspc_frames != 4){
+               mspc_q[rec_num_mod4] = Constants.PART_SPEC;
+            }
+            mspc_frames = 0;
+
+            rec_num_mod4++;
+         }
+         if((tmpFC - mod32) != frame_mod32[rec_num_mod32]){
+            //check if the medium spectrum is complete
+            if(sspc_frames != 32){
+               sspc_q[rec_num_mod32] = Constants.PART_SPEC;
+            }
+            sspc_frames = 0;
+
+            rec_num_mod32++;
+         }
+         if((tmpFC - mod40) != frame_mod40[rec_num_mod40]){
+            rec_num_mod40++;
+         }
       }catch(ArrayIndexOutOfBoundsException ex){
          rec_num_mod4 = 0;
          rec_num_mod32 = 0;
@@ -617,7 +641,6 @@ public class DataHolder{
             ){
                cmdCnt[rec_num_mod40] = Constants.CMD_CNT_FILL;
                hkpg_q[rec_num_mod40] |= Constants.OUT_OF_RANGE;
-         CDF_Gen.log.writeln("CMD " + cmdCnt[rec_num_mod40] + " " + Long.toBinaryString(hkpg_raw[mod40][rec_num_mod40]) + " " + Long.toBinaryString(32767L));
             }
             break;
          case 39:
@@ -706,6 +729,8 @@ public class DataHolder{
             mspc_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;
          }
       }
+      //add to frame count
+      mspc_frames++;
 
       //slow spectra: 8 channels per frame, 16 bits/channels
       for(int sspc_i = 0, chan_i = 0; sspc_i < 8; sspc_i++){
@@ -721,6 +746,8 @@ public class DataHolder{
             sspc_q[rec_num_mod32] |= Constants.OUT_OF_RANGE;
          }
       }
+      //add to the frame count
+      sspc_frames++;
       
       //rate counter: mod4 data, 16bits
       rcnt_raw[mod4][rec_num_mod4] = 

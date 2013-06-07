@@ -32,7 +32,7 @@ public class Constants{
       FC_ROLL = 1, //The frame counter has gone beyone 2^21 and started over
       NO_GPS = 2, //There is no GPS signal present so timing info may be off
       FILL_TIME = 4, //This data point was not used to create a timing model
-      PART_SPEC = 8, //The spectrum is missing some frames
+      PART_SPEC = 8, //The spectrum contains fill values 
       LOW_ALT = 16, //Indicator that the payload has dropped below MIN_SCI_ALT
       OUT_OF_RANGE = 32; //The rare case that the DPU returns unacceptable data
 
