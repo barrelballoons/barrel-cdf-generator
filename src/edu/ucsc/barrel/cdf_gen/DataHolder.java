@@ -25,6 +25,7 @@ Description:
 package edu.ucsc.barrel.cdf_gen;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 
 public class DataHolder{
    ///Largest number of frames we can store.
@@ -211,61 +212,49 @@ public class DataHolder{
       hkpg_label[Constants.T15] = "T15_CCStat";
 
       //fill all of the storage arrays with fill values
-      for(int i = 0; i < MAX_FRAMES; i++){
-         payID[i] = Constants.PAYID_FILL;
-         ver[i] = Constants.VER_FILL;
-         frame_1Hz[i] = Constants.FC_FILL;
-         pps[i] = Constants.PPS_FILL;
-
-         for(int j = 0; j < 4; j++){
-            frame_4Hz[(i * 4) + j] = Constants.FC_FILL;
-            magx_raw[(i * 4) + j] = Constants.MAG_FILL;
-            magy_raw[(i * 4) + j] = Constants.MAG_FILL;
-            magz_raw[(i * 4) + j] = Constants.MAG_FILL;
-         }
-         for(int j = 0; j < 20; j++){
-            frame_20Hz[(i * 20) + j] = Constants.UINT2_FILL;
-            lc1_raw[(i * 20) + j] = Constants.FSPC_RAW_FILL;
-            lc2_raw[(i * 20) + j] = Constants.FSPC_RAW_FILL;
-            lc3_raw[(i * 20) + j] = Constants.FSPC_RAW_FILL;
-            lc4_raw[(i * 20) + j] = Constants.FSPC_RAW_FILL;
-         }
+      Arrays.fill(frame_1Hz, Constants.FC_FILL);
+      Arrays.fill(frame_4Hz, Constants.FC_FILL);
+      Arrays.fill(frame_20Hz, Constants.FC_FILL);
+      Arrays.fill(frame_mod4, Constants.FC_FILL);
+      Arrays.fill(frame_mod32, Constants.FC_FILL);
+      Arrays.fill(frame_mod40, Constants.FC_FILL);
+      Arrays.fill(payID, Constants.PAYID_FILL);
+      Arrays.fill(ver, Constants.VER_FILL);
+      Arrays.fill(pps, Constants.PPS_FILL);
+      Arrays.fill(magx_raw, Constants.MAG_FILL);
+      Arrays.fill(magy_raw, Constants.MAG_FILL);
+      Arrays.fill(magz_raw, Constants.MAG_FILL);
+      Arrays.fill(ms_of_week, Constants.MS_WEEK_FILL);
+      Arrays.fill(gps_raw[Constants.TIME_I], Constants.MS_WEEK_FILL);
+      Arrays.fill(gps_raw[Constants.LAT_I], Constants.LAT_RAW_FILL);
+      Arrays.fill(gps_raw[Constants.LON_I], Constants.LON_RAW_FILL);
+      Arrays.fill(gps_raw[Constants.ALT_I], Constants.ALT_RAW_FILL);
+      Arrays.fill(lc1_raw, Constants.FSPC_RAW_FILL);
+      Arrays.fill(lc2_raw, Constants.FSPC_RAW_FILL);
+      Arrays.fill(lc3_raw, Constants.FSPC_RAW_FILL);
+      Arrays.fill(lc4_raw, Constants.FSPC_RAW_FILL);
+      Arrays.fill(rcnt_raw[0], Constants.RCNT_FILL);
+      Arrays.fill(rcnt_raw[1], Constants.RCNT_FILL);
+      Arrays.fill(rcnt_raw[2], Constants.RCNT_FILL);
+      Arrays.fill(rcnt_raw[3], Constants.RCNT_FILL);
+      Arrays.fill(sats, Constants.SATS_FILL);
+      Arrays.fill(offset, Constants.LEAP_SEC_FILL);
+      Arrays.fill(termStat, Constants.TERM_STAT_FILL);
+      Arrays.fill(modemCnt, Constants.MODEM_CNT_FILL);
+      Arrays.fill(dcdCnt, Constants.DCD_CNT_FILL);
+      Arrays.fill(weeks, Constants.WEEKS_FILL);
+      Arrays.fill(cmdCnt, Constants.CMD_CNT_FILL);
+      for(int var_i = 0; var_i < 40; var_i++){
+         Arrays.fill(hkpg_raw[var_i], Constants.HKPG_FILL);
       }
-      for(int i = 0; i < (MAX_FRAMES / 4); i++){
-         frame_mod4[i] = Constants.FC_FILL;
-         ms_of_week[i] = Constants.MS_WEEK_FILL;
-         gps_raw[Constants.TIME_I][i] = Constants.MS_WEEK_FILL;
-         gps_raw[Constants.LAT_I][i] = Constants.LAT_RAW_FILL;
-         gps_raw[Constants.LON_I][i] = Constants.LON_RAW_FILL;
-         gps_raw[Constants.ALT_I][i] = Constants.ALT_RAW_FILL;
-
-         for(int j = 0; j < 4; j++){
-            rcnt_raw[j][i] = Constants.RCNT_FILL;
-         }
-         for(int j = 0; j < 48; j++){
-            mspc_raw[i][j] = Constants.MSPC_RAW_FILL;
-         }
+      for(int var_i = 0; var_i < 36; var_i++){
+         Arrays.fill(hkpg[var_i], Constants.DOUBLE_FILL);
       }
-      for(int i = 0; i < (MAX_FRAMES / 32); i++){
-         frame_mod32[i] = Constants.FC_FILL;
-         for(int j = 0; j < 256; j++){
-            sspc_raw[i][j] = Constants.SSPC_RAW_FILL;
-         }
+      for(int[] rec: mspc_raw){
+         Arrays.fill(rec, Constants.MSPC_RAW_FILL);
       }
-      for(int i = 0; i < (MAX_FRAMES / 40); i++){
-         frame_mod40[i] = Constants.FC_FILL;
-         sats[i] = Constants.SATS_FILL;
-         offset[i] = Constants.LEAP_SEC_FILL;
-         termStat[i] = Constants.TERM_STAT_FILL;
-         modemCnt[i] = Constants.MODEM_CNT_FILL;
-         dcdCnt[i] = Constants.DCD_CNT_FILL;
-         weeks[i] = Constants.WEEKS_FILL;
-         cmdCnt[i] = Constants.CMD_CNT_FILL;
-
-         for(int j = 0; j < 36; j++){
-            hkpg[j][i] = Constants.DOUBLE_FILL;
-            hkpg_raw[j][i] = Constants.HKPG_FILL;
-         }
+      for(int[] rec: sspc_raw){
+         Arrays.fill(rec, Constants.SSPC_RAW_FILL);
       }
 
       //set minimum altitude based on either command line argument or
