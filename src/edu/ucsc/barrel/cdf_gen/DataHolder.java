@@ -229,6 +229,7 @@ public class DataHolder{
       for(int i = 0; i < (MAX_FRAMES / 4); i++){
          frame_mod4[i] = Constants.FC_FILL;
          ms_of_week[i] = Constants.MS_WEEK_FILL;
+         gps_raw[Constants.TIME_I][i] = Constants.MS_WEEK_FILL;
          gps_raw[Constants.LAT_I][i] = Constants.LAT_RAW_FILL;
          gps_raw[Constants.LON_I][i] = Constants.LON_RAW_FILL;
          gps_raw[Constants.ALT_I][i] = Constants.ALT_RAW_FILL;
