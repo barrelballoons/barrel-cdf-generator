@@ -24,6 +24,7 @@ Description:
 
 package edu.ucsc.barrel.cdf_gen;
 
+import java.io.File;
 import java.math.BigInteger;
 import java.util.Arrays;
 
@@ -127,7 +128,7 @@ public class DataHolder{
       size_1Hz = 0, size_4Hz = 0, size_20Hz = 0, 
       size_mod4 = 0, size_mod32 = 0, size_mod40 = 0;
 
-   public DataHolder(String final p){
+   public DataHolder(final String p){
       payload = p;
       
       //fill the housekeeping reference arrays

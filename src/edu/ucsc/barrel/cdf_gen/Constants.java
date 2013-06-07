@@ -102,7 +102,7 @@ public class Constants{
       FC_OFFSET = 2097152;
 
    //minimum altitude at which we can expect good science (in mm)
-   public static final int =  MIN_SCI_ALT = 20000000;
+   public static final int MIN_SCI_ALT = 20000000;
 
    //various accumulation time offsets based on nominal ms/frame
    public static final long 
