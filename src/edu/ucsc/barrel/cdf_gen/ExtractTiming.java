@@ -134,7 +134,9 @@ public class ExtractTiming {
          
          //get initial fc from the mod4 framegroup
          fc = data.frame_mod4[rec_mod4_i]; //last good fc from this mod4 group
-         if((fc <= MINFC) || (fc >= MAXFC)){continue;}
+         
+         //check if fc is a fill value
+         if(fc == Constants.FC_FILL){continue;}
 
          //figure out the offset from mod4 fc and 1Hz fc
          fc -= ((fc % 4) - Constants.TIME_I); 

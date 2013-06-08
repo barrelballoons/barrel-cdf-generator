@@ -373,6 +373,28 @@ public class DataHolder{
 
       //check to make sure we have a frame from the correct payload
       if(dpu_id != tmpPayID){return;}
+      
+      //validate frame number
+      if(tmpFC <= Constants.FC_MIN || tmpFC > Constants.FC_MAX){return;}
+
+      //check for fc rollover
+      if(fc_rollover){
+         tmpFC += Constants.FC_OFFSET;
+      }else{
+         if((tmpFC - last_fc) <= Constants.LAST_DAY_FC){
+            //rollover detected
+System.out.println("fc_detected");
+            fc_rollover = true;
+            
+            //offset fc
+            tmpFC += Constants.FC_OFFSET;
+
+            //create an empty file to indicate rollover
+            (new Logger("fc_rollovers/" + payload)).close();
+         }else{
+            last_fc = tmpFC;
+         }
+      }
 
       //get multiplex info
       int mod4 = (int)tmpFC % 4;
@@ -428,32 +450,6 @@ public class DataHolder{
       payID[rec_num_1Hz] = tmpPayID;
       frame_1Hz[rec_num_1Hz] = (int)tmpFC;
 
-      //check for fc rollover
-      if((tmpFC - last_fc) <= Constants.LAST_DAY_FC){
-         //rollover detected
-         fc_rollover = true;
-         frame_1Hz[rec_num_1Hz] += Constants.FC_OFFSET;
-
-         Logger rollover_file = 
-            new Logger("fc_rollovers/" + payload);
-         rollover_file.close();
-      }else{
-         last_fc = tmpFC;
-      }
-
-      //if there was a rollover, add an offset and flag the data
-      if(fc_rollover){
-         frame_1Hz[rec_num_1Hz] += Constants.FC_OFFSET;
-         gps_q[rec_num_1Hz] |= Constants.FC_ROLL;
-         pps_q[rec_num_1Hz] |= Constants.FC_ROLL;
-         magn_q[rec_num_1Hz] |= Constants.FC_ROLL;
-         hkpg_q[rec_num_1Hz] |= Constants.FC_ROLL;
-         rcnt_q[rec_num_1Hz] |= Constants.FC_ROLL;
-         fspc_q[rec_num_1Hz] |= Constants.FC_ROLL;
-         mspc_q[rec_num_1Hz] |= Constants.FC_ROLL;
-         sspc_q[rec_num_1Hz] |= Constants.FC_ROLL;
-      }
-
       //figure out the other time scale frame counters
       for(int rec_i = rec_num_4Hz; rec_i < rec_num_4Hz + 4; rec_i++){
          frame_4Hz[rec_i] = frame_1Hz[rec_num_1Hz];
@@ -467,6 +463,18 @@ public class DataHolder{
       frame_mod32[rec_num_mod32] = frame_1Hz[rec_num_1Hz] - mod32;
       frame_mod40[rec_num_mod40] = frame_1Hz[rec_num_1Hz] - mod40;
       
+      //if there was a rollover, flag the data
+      if(fc_rollover){
+         gps_q[rec_num_mod4] |= Constants.FC_ROLL;
+         pps_q[rec_num_1Hz] |= Constants.FC_ROLL;
+         magn_q[rec_num_4Hz] |= Constants.FC_ROLL;
+         hkpg_q[rec_num_mod40] |= Constants.FC_ROLL;
+         rcnt_q[rec_num_mod4] |= Constants.FC_ROLL;
+         fspc_q[rec_num_20Hz] |= Constants.FC_ROLL;
+         mspc_q[rec_num_mod4] |= Constants.FC_ROLL;
+         sspc_q[rec_num_mod32] |= Constants.FC_ROLL;
+      }
+
       //get gps info: 32 bits of mod4 gps data followed by 16 bits of pps data
       gps_raw[mod4][rec_num_mod4] =
          frame.shiftRight(1632).and(BigInteger.valueOf(4294967295L)).
