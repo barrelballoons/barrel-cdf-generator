@@ -129,7 +129,7 @@ public class DataHolder{
       size_mod4 = 0, size_mod32 = 0, size_mod40 = 0;
 
    public DataHolder(final String p){
-      payload = p;
+      payload = (p.split(","))[0];
       
       //fill the housekeeping reference arrays
       hkpg_scale[Constants.V0] = 0.0003052f;
@@ -381,11 +381,14 @@ public class DataHolder{
       if(fc_rollover){
          tmpFC += Constants.FC_OFFSET;
       }else{
-         if((tmpFC - last_fc) <= Constants.LAST_DAY_FC){
+         if((last_fc - tmpFC) > Constants.LAST_DAY_FC){
             //rollover detected
-System.out.println("fc_detected");
             fc_rollover = true;
-            
+           
+            System.out.println(
+               "Payload " + payload + " rolled over after fc = " + last_fc 
+            );
+
             //offset fc
             tmpFC += Constants.FC_OFFSET;
 
