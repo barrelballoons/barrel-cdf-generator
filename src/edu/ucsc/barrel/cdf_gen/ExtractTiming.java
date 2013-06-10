@@ -60,7 +60,7 @@ public class ExtractTiming {
    private class TimeRec{
       private long ms;//frame timestamp
       private long frame;//frame counter
-      private long GPS_EPOCH = -630763148816L;//number of ms from Jan 6, 1980 to J2000
+      private long GPS_EPOCH = -630763148816L;//ms from Jan 6, 1980 to J2000
 
       public TimeRec(long fc, long msw, short weeks, short pps){
          //figure out if we need to add an extra second based on the PPS
@@ -226,8 +226,22 @@ public class ExtractTiming {
       size = data.getSize("1Hz");
       for(int data_i = 0, model_i = 0; data_i < size; data_i++){
          fc = data.frame_1Hz[data_i];
-         data.epoch_1Hz[data_i] = calcEpoch(fc, model_i);
 
+         //verify we have the correct model selected
+         model_i = selectModel(fc, model_i);
+
+         //save the model used for this frame
+         data.time_model_intercept[data_i] = 
+            models[model_i].getIntercept();
+         data.time_model_slope[data_i] = 
+            models[model_i].getSlope();
+
+         //calculate epoch in ns
+         data.epoch_1Hz[data_i] = (long)(
+            ((fc * data.time_model_slope[data_i]) + 
+            data.time_model_intercept[data_i]) * 1000000
+         );
+            
          //save epoch to the various time scales
          //fill the >1Hz times 
          for(int fill_i = 0; fill_i < 4; fill_i++){
@@ -244,21 +258,33 @@ public class ExtractTiming {
       size = data.getSize("mod4");
       for(int data_i = 0, model_i = 0; data_i < size; data_i++){
          fc = data.frame_mod4[data_i];
-         data.epoch_mod4[data_i] = calcEpoch(fc, model_i);
+         model_i = selectModel(fc, model_i);
+         data.epoch_mod4[data_i] = (long)(
+            ((fc * models[model_i].getSlope()) + 
+            models[model_i].getIntercept()) * 1000000
+         );
       }
 
       //fill mod32 timestamps
       size = data.getSize("mod32");
       for(int data_i = 0, model_i = 0; data_i < size; data_i++){
          fc = data.frame_mod32[data_i];
-         data.epoch_mod32[data_i] = calcEpoch(fc, model_i);
+         model_i = selectModel(fc, model_i);
+         data.epoch_mod32[data_i] = (long)(
+            ((fc * models[model_i].getSlope()) + 
+            models[model_i].getIntercept()) * 1000000
+         );
       }
 
       //fill mod40 timestamps
       size = data.getSize("mod40");
       for(int data_i = 0, model_i = 0; data_i < size; data_i++){
          fc = data.frame_mod40[data_i];
-         data.epoch_mod40[data_i] = calcEpoch(fc, model_i);
+         model_i = selectModel(fc, model_i);
+         data.epoch_mod40[data_i] = (long)(
+            ((fc * models[model_i].getSlope()) + 
+            models[model_i].getIntercept()) * 1000000
+         );
       }
    }
 
@@ -295,8 +321,8 @@ public class ExtractTiming {
       }
    }
    
-   private long calcEpoch(long fc, int model_i){
-      double m, b;
+   private int selectModel(final long fc, final int i){
+      int model_i = i;
       //select a model for this frame
       if(fc > models[model_i].getLast()){
          //frame came after the last valid fc for the current model
@@ -311,11 +337,9 @@ public class ExtractTiming {
          }
       }
 
-      m = models[model_i].getSlope();
-      b = models[model_i].getIntercept();
-      
-      return (long)((m * fc) + b) * 1000000L;
+      return model_i;
    }
+
    private SimpleRegression genModel(int first, int last){
       int cnt = last - first;
       double[] offsets = new double[cnt];

@@ -227,6 +227,16 @@ public class DataHolder{
       Arrays.fill(frame_mod4, Constants.FC_FILL);
       Arrays.fill(frame_mod32, Constants.FC_FILL);
       Arrays.fill(frame_mod40, Constants.FC_FILL);
+/*
+      Arrays.fill(epoch_1Hz, Constants.FC_FILL);
+      Arrays.fill(epoch_4Hz, Constants.FC_FILL);
+      Arrays.fill(epoch_20Hz, Constants.FC_FILL);
+      Arrays.fill(epoch_mod4, Constants.FC_FILL);
+      Arrays.fill(epoch_mod32, Constants.FC_FILL);
+      Arrays.fill(epoch_mod40, Constants.FC_FILL);
+*/
+      Arrays.fill(time_model_slope, Constants.FLOAT_FILL);
+      Arrays.fill(time_model_intercept, Constants.FLOAT_FILL);
       Arrays.fill(payID, Constants.PAYID_FILL);
       Arrays.fill(ver, Constants.VER_FILL);
       Arrays.fill(pps, Constants.PPS_FILL);
