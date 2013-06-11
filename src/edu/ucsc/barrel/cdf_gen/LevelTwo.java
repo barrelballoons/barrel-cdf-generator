@@ -1162,7 +1162,7 @@ public class LevelTwo{
          }
 
          //find the bin that contains the 511 line
-         //peak = spectrum.find511(sspc_rebin[sspc_rec], offset);
+         spectrum.find511(data.sspc_raw[sspc_rec], 100, 50);
       
          //get the adjusted bin edges
          old_edges = spectrum.createBinEdges(2, scint_temp, dpu_temp, peak);

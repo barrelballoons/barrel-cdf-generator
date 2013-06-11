@@ -84,7 +84,34 @@ public class SpectrumExtract {
             (slow_bin_widths[bin_i] / 2) + edges_raw[2][bin_i];
       }
    }
-   
+  
+   //Take in a spectrum and search for the 511 line based on 
+   public static int find511(int[] spec_in, int guess, int width){
+      GaussianFitter fitter = 
+         new GaussianFitter(new LevenbergMarquardtOptimizer());
+      double[] fit_params;
+      double x, y;
+      int start, stop;
+      
+      start = Math.max((int)(guess - (width/2)), 0);
+      stop = Math.min((int)(guess + (width/2)), spec_in.length);
+
+      for(int spec_i = start; spec_i < stop; spec_i++){
+         x = 
+            (edges_raw[2][spec_i + 1] - edges_raw[2][spec_i]) / 2;
+         y = 
+            spec_in[spec_i] / (edges_raw[2][spec_i + 1] - edges_raw[2][spec_i]);
+         fitter.addObservedPoint(x, y);
+      }
+
+      fit_params = fitter.fit();
+
+      for(int i=0;i<fit_params.length;i++){System.out.print(fit_params[i] + " ");}
+
+      System.out.println("\n");
+      return 1;
+   }
+
    public static double[] stdEdges(int spec_i, double scale){
       int length = edges_raw[spec_i].length;
       double[] result = new double[length];
@@ -273,29 +300,4 @@ public class SpectrumExtract {
    }
 
 
-   public static double find511(double[] slow, int offset){
-      GaussianFitter fitter = 
-         new GaussianFitter(new LevenbergMarquardtOptimizer());
-      
-      //nominal range for 511 line
-      int width = 25;
-      
-      //add points in the search range to the fitter object
-      double x = 0, y = 0;
-      for(int pnt_i = 0; pnt_i < width; pnt_i++){
-         y = slow[pnt_i + offset] / slow_bin_widths[pnt_i + offset];
-         x = slow_bin_midpoints[pnt_i + offset];
-         fitter.addObservedPoint(x, y);
-      }
-      double[] fit_params = fitter.fit();
-
-      if(
-         fit_params[1] < slow_bin_midpoints[offset] || 
-         fit_params[1] > slow_bin_midpoints[offset+width]
-      ){
-         return -1;
-      }
-
-     return fit_params[1];
-   }
 }
