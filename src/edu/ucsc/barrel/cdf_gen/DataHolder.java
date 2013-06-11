@@ -24,6 +24,7 @@ Description:
 
 package edu.ucsc.barrel.cdf_gen;
 
+import java.io.File;
 import java.math.BigInteger;
 import java.util.Arrays;
 
@@ -41,10 +42,16 @@ public class DataHolder{
 	   "Interrupt", "LowLevel", "PeakDet", "HighLevel"
    };
    
+   private String payload;
+
    //variables to keep track of valid altitude range
    private float min_alt;
    private boolean low_alt = true;
    
+   //variables to  signal frame counter rollover
+   private int last_fc = 0;
+   private boolean fc_rollover = false;
+
    //variable to track complete spectra
    private int 
       sspc_frames = 0,
@@ -121,7 +128,9 @@ public class DataHolder{
       size_1Hz = 0, size_4Hz = 0, size_20Hz = 0, 
       size_mod4 = 0, size_mod32 = 0, size_mod40 = 0;
 
-   public DataHolder(){
+   public DataHolder(final String p){
+      payload = (p.split(","))[0];
+      
       //fill the housekeeping reference arrays
       hkpg_scale[Constants.V0] = 0.0003052f;
       hkpg_scale[Constants.V1] = 0.0003052f;
@@ -218,6 +227,16 @@ public class DataHolder{
       Arrays.fill(frame_mod4, Constants.FC_FILL);
       Arrays.fill(frame_mod32, Constants.FC_FILL);
       Arrays.fill(frame_mod40, Constants.FC_FILL);
+/*
+      Arrays.fill(epoch_1Hz, Constants.FC_FILL);
+      Arrays.fill(epoch_4Hz, Constants.FC_FILL);
+      Arrays.fill(epoch_20Hz, Constants.FC_FILL);
+      Arrays.fill(epoch_mod4, Constants.FC_FILL);
+      Arrays.fill(epoch_mod32, Constants.FC_FILL);
+      Arrays.fill(epoch_mod40, Constants.FC_FILL);
+*/
+      Arrays.fill(time_model_slope, Constants.FLOAT_FILL);
+      Arrays.fill(time_model_intercept, Constants.FLOAT_FILL);
       Arrays.fill(payID, Constants.PAYID_FILL);
       Arrays.fill(ver, Constants.VER_FILL);
       Arrays.fill(pps, Constants.PPS_FILL);
@@ -264,8 +283,12 @@ public class DataHolder{
       }else{
          min_alt = Float.parseFloat(CDF_Gen.getSetting("min_alt"));
       }
-
       System.out.println("Rejecting data bellow " + min_alt + " kilometers.");
+      
+      //Figure out if the previous CDF file had a frame counter rollover
+      if(new File("fc_rollovers/" + payload).exists()){
+        fc_rollover = true; 
+      }
    }
 
    public int getSize(String cadence){
@@ -360,6 +383,31 @@ public class DataHolder{
 
       //check to make sure we have a frame from the correct payload
       if(dpu_id != tmpPayID){return;}
+      
+      //validate frame number
+      if(tmpFC <= Constants.FC_MIN || tmpFC > Constants.FC_MAX){return;}
+
+      //check for fc rollover
+      if(fc_rollover){
+         tmpFC += Constants.FC_OFFSET;
+      }else{
+         if((last_fc - tmpFC) > Constants.LAST_DAY_FC){
+            //rollover detected
+            fc_rollover = true;
+           
+            System.out.println(
+               "Payload " + payload + " rolled over after fc = " + last_fc 
+            );
+
+            //offset fc
+            tmpFC += Constants.FC_OFFSET;
+
+            //create an empty file to indicate rollover
+            (new Logger("fc_rollovers/" + payload)).close();
+         }else{
+            last_fc = tmpFC;
+         }
+      }
 
       //get multiplex info
       int mod4 = (int)tmpFC % 4;
@@ -428,6 +476,18 @@ public class DataHolder{
       frame_mod32[rec_num_mod32] = frame_1Hz[rec_num_1Hz] - mod32;
       frame_mod40[rec_num_mod40] = frame_1Hz[rec_num_1Hz] - mod40;
       
+      //if there was a rollover, flag the data
+      if(fc_rollover){
+         gps_q[rec_num_mod4] |= Constants.FC_ROLL;
+         pps_q[rec_num_1Hz] |= Constants.FC_ROLL;
+         magn_q[rec_num_4Hz] |= Constants.FC_ROLL;
+         hkpg_q[rec_num_mod40] |= Constants.FC_ROLL;
+         rcnt_q[rec_num_mod4] |= Constants.FC_ROLL;
+         fspc_q[rec_num_20Hz] |= Constants.FC_ROLL;
+         mspc_q[rec_num_mod4] |= Constants.FC_ROLL;
+         sspc_q[rec_num_mod32] |= Constants.FC_ROLL;
+      }
+
       //get gps info: 32 bits of mod4 gps data followed by 16 bits of pps data
       gps_raw[mod4][rec_num_mod4] =
          frame.shiftRight(1632).and(BigInteger.valueOf(4294967295L)).
