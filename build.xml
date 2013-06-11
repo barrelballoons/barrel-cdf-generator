@@ -17,6 +17,7 @@
     <target name="compile">
         <mkdir dir="build/classes"/>
         <javac 
+         includeantruntime="true"
     		debug="true" 
     	   debuglevel="lines,vars,source"
     		srcdir="${src.dir}" 
@@ -46,7 +47,7 @@
         <copy todir="build/jar">
             <fileset dir="${runtime.dir}"/>
         </copy>
+        <mkdir dir="build/jar/fc_rollovers"/>
     </target>
-
     <target name="clean-build" depends="clean,jar,copy"/>
 </project>

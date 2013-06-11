@@ -234,7 +234,11 @@ public class LevelOne{
          frameGroup = new int[numOfRecs],
          q = new int[numOfRecs],
          pps = new int[numOfRecs];
-      long[] epoch = new long[numOfRecs];
+      long[] 
+         epoch = new long[numOfRecs];
+      double[] 
+         slope = new double[numOfRecs],
+         intercept = new double[numOfRecs];
 
       System.out.println("\nSaving PPS Level One CDF...");
 
@@ -242,6 +246,8 @@ public class LevelOne{
         pps[rec_i] = data.pps[data_i];
         version[rec_i] = data.ver[data_i];
         payID[rec_i] = data.payID[data_i];
+        slope[rec_i] = data.time_model_slope[data_i];
+        intercept[rec_i] = data.time_model_intercept[rec_i];
         frameGroup[rec_i] = data.frame_1Hz[data_i];
         epoch[rec_i] = data.epoch_1Hz[data_i] - Constants.SING_ACCUM;
         q[rec_i] = data.pps_q[data_i];
@@ -284,6 +290,26 @@ public class LevelOne{
          new long[] {1}, 
          new long[] {1}, 
          payID
+      );
+
+      var = cdf.getVariable("Time_Model_Slope");
+      System.out.println("Time_Model_Slope...");
+      var.putHyperData(
+         var.getNumWrittenRecords(), numOfRecs, 1L, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         slope 
+      );
+
+      var = cdf.getVariable("Time_Model_Intercept");
+      System.out.println("Time_Model_Intercept...");
+      var.putHyperData(
+         var.getNumWrittenRecords(), numOfRecs, 1L, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         intercept
       );
 
       var = cdf.getVariable("FrameGroup");

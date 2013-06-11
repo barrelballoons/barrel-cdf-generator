@@ -126,7 +126,7 @@ public class CDF_Gen implements CDFConstants{
          settings.put("currentPayload", payload_i);
          
          //create a new storage object
-         data = new DataHolder();
+         data = new DataHolder(payload_i);
          
          //Figure out where the input files are coming from
          if(getSetting("local") == ""){
