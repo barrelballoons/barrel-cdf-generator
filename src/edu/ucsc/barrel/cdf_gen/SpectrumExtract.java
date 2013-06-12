@@ -28,11 +28,12 @@ import java.util.Arrays;
 import org.apache.commons.math3.fitting.GaussianFitter;
 import org.apache.commons.math3.optim.nonlinear.vector.
           jacobian.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 public class SpectrumExtract {
 
    //create uncalibrated bin edges
-   public final static double[][] edges_raw = {
+   private static double[][] edges_raw = {
       {0, 75, 230, 350, 620},
       {
          42, 46, 50, 53, 57, 60, 64, 70, 78, 84, 92, 100, 
@@ -67,6 +68,36 @@ public class SpectrumExtract {
          3712, 3776, 3840, 3904, 3968, 4032, 4096
       }
    };
+
+   private static double[] slow_chan_midpoints = {
+      0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5,  
+      11.5, 12.5, 13.5, 14.5, 15.5, 16.5, 17.5, 18.5, 19.5, 20.5,  
+      21.5, 22.5, 23.5, 24.5, 25.5, 26.5, 27.5, 28.5, 29.5, 30.5,  
+      31.5, 32.5, 33.5, 34.5, 35.5, 36.5, 37.5, 38.5, 39.5, 40.5,  
+      41.5, 42.5, 43.5, 44.5, 45.5, 46.5, 47.5, 48.5, 49.5, 50.5,  
+      51.5, 52.5, 53.5, 54.5, 55.5, 56.5, 57.5, 58.5, 59.5, 60.5,  
+      61.5, 62.5, 63.5, 65, 67, 69, 71, 73, 75, 77, 79, 81,  
+      83, 85, 87, 89, 91, 93, 95, 97, 99, 101, 103, 105,  
+      107, 109, 111, 113, 115, 117, 119, 121, 123, 125,  
+      127, 130, 134, 138, 142, 146, 150, 154, 158, 162,  
+      166, 170, 174, 178, 182, 186, 190, 194, 198, 202,  
+      206, 210, 214, 218, 222, 226, 230, 234, 238, 242,  
+      246, 250, 254, 260, 268, 276, 284, 292, 300, 308,  
+      316, 324, 332, 340, 348, 356, 364, 372, 380, 388,  
+      396, 404, 412, 420, 428, 436, 444, 452, 460, 468,  
+      476, 484, 492, 500, 508, 520, 536, 552, 568, 584,  
+      600, 616, 632, 648, 664, 680, 696, 712, 728, 744,  
+      760, 776, 792, 808, 824, 840, 856, 872, 888, 904,  
+      920, 936, 952, 968, 984, 1000, 1016, 1040, 1072, 1104,  
+      1136, 1168, 1200, 1232, 1264, 1296, 1328, 1360, 1392,  
+      1424, 1456, 1488, 1520, 1552, 1584, 1616, 1648, 1680,  
+      1712, 1744, 1776, 1808, 1840, 1872, 1904, 1936, 1968,  
+      2000, 2032, 2080, 2144, 2208, 2272, 2336, 2400, 2464,  
+      2528, 2592, 2656, 2720, 2784, 2848, 2912, 2976, 3040,  
+      3104, 3168, 3232, 3296, 3360, 3424, 3488, 3552, 3616,  
+      3680, 3744, 3808, 3872, 3936, 4000, 4064
+   };
+
    private static double[] slow_bin_widths;
    private static double[] slow_bin_midpoints;
 
@@ -85,32 +116,76 @@ public class SpectrumExtract {
       }
    }
   
-   //Take in a spectrum and search for the 511 line based on 
-   public static int find511(int[] spec_in, int guess, int width){
+   public static double find511(int[] spec_in, int offset, int width){
+      SimpleRegression linreg = new SimpleRegression();
       GaussianFitter fitter = 
          new GaussianFitter(new LevenbergMarquardtOptimizer());
       double[] fit_params;
-      double x, y;
-      int start, stop;
-      
-      start = Math.max((int)(guess - (width/2)), 0);
-      stop = Math.min((int)(guess + (width/2)), spec_in.length);
 
-      for(int spec_i = start; spec_i < stop; spec_i++){
-         x = 
-            (edges_raw[2][spec_i + 1] - edges_raw[2][spec_i]) / 2;
-         y = 
-            spec_in[spec_i] / (edges_raw[2][spec_i + 1] - edges_raw[2][spec_i]);
-         fitter.addObservedPoint(x, y);
+      //array of indicies that refer to which sspc channels to search
+      int[] select = new int[width];
+      for(int chan_i = 0; chan_i < width; chan_i++){
+        select[chan_i] = chan_i + offset;
       }
 
+      double[] 
+        x = new double[width],
+        y = new double[width];
+
+      for(int pnt_i = 0, chan_i = select[0]; pnt_i < width; pnt_i++, chan_i++){
+        y[pnt_i] = 
+           spec_in[chan_i] / 
+           (edges_raw[2][chan_i + 1] - edges_raw[2][chan_i]);
+        x[pnt_i] = chan_i;//slow_chan_midpoints[chan_i];
+      }
+
+      // describe a line through endpoints of the selected range
+      double m = (y[width - 1] - y[0]) / (x[width - 1] - x[0]);
+      double b = y[0] - m * x[0];
+
+      //find approximate peak location after subtracting linear bkgd
+      double[] peakregion = new double[width];
+      double apex = 0;
+      for(int chan_i = 0; chan_i < width; chan_i++){
+        peakregion[chan_i] = y[chan_i] - (m * x[chan_i] + b);
+        apex = Math.max(apex, peakregion[chan_i]);
+      }
+
+      //do the curve fit
+      for(int spec_i = 0; spec_i < width; spec_i++){
+         System.out.println( x[spec_i] + " " + peakregion[spec_i]);
+         fitter.addObservedPoint(x[spec_i],  peakregion[spec_i]);
+      }
       fit_params = fitter.fit();
 
-      for(int i=0;i<fit_params.length;i++){System.out.print(fit_params[i] + " ");}
-
-      System.out.println("\n");
-      return 1;
+System.out.println(fit_params[1] + "\n");
+      if(fit_params[1] < x[0] || fit_params[1] > x[width - 1]){
+         return -1;
+      }else{
+         return fit_params[1];
+      }
    }
+/*  
+  double[] higharea = new double[width];
+  int high_cnt = 0;
+  for(int chan_i = 0; chan_i < width; chan_i++){
+     if(peakregion[chan_i] > (0.5 * apex)){
+        higharea[high_cnt] = chan_i;
+        high_cnt++;
+     }
+  }
+  if (high_cnt < 2){return -1;}
+ *
+  peaklocation = x[floor(median(higharea))]
+
+  guess=[1., peaklocation, 10., m, b]
+  yfit=curvefit(x,y,1./err^2,guess, $
+       chisq=chisq,sigma,function_name='mygauss',status=stat)
+  if (guess[2] gt 20 or guess[0] lt 0.2) then return, -1
+
+  return,guess[1]
+
+*/
 
    public static double[] stdEdges(int spec_i, double scale){
       int length = edges_raw[spec_i].length;
