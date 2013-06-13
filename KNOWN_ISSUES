@@ -29,3 +29,8 @@ line argument.
 GPS_TIME Fill Values:
 The array was not being initialized with fill values so gaps often show up as 0.
 
+Housekeeping Meta-Data:
+Some of the housekeeping values have a minimum allowed value set to 0 even 
+though that variable may go negative. This will prevent out of range points 
+from being displayed in Autoplot.
+
