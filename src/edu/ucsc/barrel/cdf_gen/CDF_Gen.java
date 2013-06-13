@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 public class CDF_Gen implements CDFConstants{
    
    //custom objects
@@ -192,6 +193,44 @@ public class CDF_Gen implements CDFConstants{
                }
                
                if(getSetting("L").indexOf("2") > -1){
+                  //create a set of linear models that track the location of
+                  //the 511 line and store them in the DataHolder object
+                  int 
+                     total_specs = data.getSize("mod32"),
+                     start_i = 0,
+                     stop_i = 0,
+                     max_recs = 10;
+                  
+                  System.out.println("Starting Level Two...");
+                  System.out.println("Locating 511 line...");
+
+                  while(start_i < total_specs){
+                     stop_i = Math.min(total_specs, start_i + max_recs); 
+                     SpectrumExtract.fill511models(start_i, stop_i, data);
+                     start_i = stop_i;
+                  }
+
+System.exit(1);
+DescriptiveStatistics ma = new DescriptiveStatistics();
+ma.setWindowSize(10);
+ma.addValue(data.peak511_bin[0]);
+ma.addValue(data.peak511_bin[1]);
+ma.addValue(data.peak511_bin[2]);
+ma.addValue(data.peak511_bin[3]);
+ma.addValue(data.peak511_bin[4]);
+ma.addValue(data.peak511_bin[5]);
+ma.addValue(data.peak511_bin[6]);
+ma.addValue(data.peak511_bin[7]);
+ma.addValue(data.peak511_bin[8]);
+ma.addValue(data.peak511_bin[9]);
+
+for(int i = 10; i < data.getSize("mod32"); i++){
+   if(data.peak511_bin[i] != -1){
+      ma.addValue(data.peak511_bin[i]);
+      CDF_Gen.log.writeln(data.frame_mod32[i] + " " + data.peak511_bin[i]);//ma.getMean());
+   }
+}
+System.exit(1);
                   //create Level Two
                   LevelTwo L2 =
 						   new LevelTwo(

@@ -28,12 +28,13 @@ import java.util.Arrays;
 import org.apache.commons.math3.fitting.GaussianFitter;
 import org.apache.commons.math3.optim.nonlinear.vector.
           jacobian.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 public class SpectrumExtract {
 
    //create uncalibrated bin edges
-   private static double[][] edges_raw = {
+   private static final double[][] RAW_EDGES = {
       {0, 75, 230, 350, 620},
       {
          42, 46, 50, 53, 57, 60, 64, 70, 78, 84, 92, 100, 
@@ -69,7 +70,7 @@ public class SpectrumExtract {
       }
    };
 
-   private static double[] slow_chan_midpoints = {
+   private static final double[] SSPC_MIDPOINTS = {
       0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5,  
       11.5, 12.5, 13.5, 14.5, 15.5, 16.5, 17.5, 18.5, 19.5, 20.5,  
       21.5, 22.5, 23.5, 24.5, 25.5, 26.5, 27.5, 28.5, 29.5, 30.5,  
@@ -98,101 +99,151 @@ public class SpectrumExtract {
       3680, 3744, 3808, 3872, 3936, 4000, 4064
    };
 
-   private static double[] slow_bin_widths;
-   private static double[] slow_bin_midpoints;
+   //defines the search window for the 511 line
+   private static final int
+      PEAK_511_START = 100,
+      PEAK_511_WIDTH = 25;
 
-   public SpectrumExtract(){
-      //calculate the nominal slow spectrum bin widths and midpoints
-      slow_bin_widths = new double[edges_raw[2].length - 1];     
-      for(int edge_i = 1; edge_i < edges_raw[2].length; edge_i++){
-         slow_bin_widths[edge_i - 1] = 
-            edges_raw[2][edge_i] - edges_raw[2][edge_i - 1];
-      }
+   public SpectrumExtract(){}
 
-      slow_bin_midpoints = new double[slow_bin_widths.length];
-      for(int bin_i = 0; bin_i < slow_bin_widths.length; bin_i++){
-         slow_bin_midpoints[bin_i] = 
-            (slow_bin_widths[bin_i] / 2) + edges_raw[2][bin_i];
-      }
-   }
-  
-   public static double find511(int[] spec_in, int offset, int width){
-      SimpleRegression linreg = new SimpleRegression();
-      GaussianFitter fitter = 
-         new GaussianFitter(new LevenbergMarquardtOptimizer());
-      double[] fit_params;
+   public static void fill511models(int start, int stop, DataHolder data){ 
+      int length = stop - start;
+      
+      if(length < 2){return;}
+      
+      DescriptiveStatistics stats = new DescriptiveStatistics();
+      double max_bin, min_bin;
+      int[] select = new int[PEAK_511_WIDTH];
+      double[] peaks = new double[length];
 
       //array of indicies that refer to which sspc channels to search
-      int[] select = new int[width];
-      for(int chan_i = 0; chan_i < width; chan_i++){
-        select[chan_i] = chan_i + offset;
+      for(int chan_i = 0; chan_i < PEAK_511_WIDTH; chan_i++){
+        select[chan_i] = chan_i + PEAK_511_START;
+      }
+      
+      //find the 511 line in each of the spectra in this group
+      for(int spec_i = start, peak_i = 0; spec_i < stop; spec_i++, peak_i++){
+         //make sure this is a complete spectrum
+         if((data.sspc_q[spec_i] & Constants.PART_SPEC) == 0){
+            peaks[peak_i] = find511(data.sspc_raw[spec_i], select);
+         }else{
+            peaks[peak_i] = -1;
+         }
+         
+         //check for a valid peak location was set 
+         if(peaks[peak_i] != -1){
+            stats.addValue(peaks[peak_i]);
+         }
       }
 
-      double[] 
-        x = new double[width],
-        y = new double[width];
+      //remove any peaks that are located > 1 standard deviation from median
+      max_bin = 
+         stats.getPercentile(50) + 
+         stats.getStandardDeviation();
+      min_bin =
+         max_bin - (2 * stats.getStandardDeviation());
+      for(int peak_i = 0; peak_i < length; peak_i++){
+         if(peaks[peak_i] > max_bin || peaks[peak_i] < min_bin){
+            peaks[peak_i] = -1;
+         }
+      }
+      
+      //perform the linear regression and fill data.peak_???[] arrays
+      createLinModel(data, peaks, start, stop);
+   }
 
-      for(int pnt_i = 0, chan_i = select[0]; pnt_i < width; pnt_i++, chan_i++){
+   private static double find511(int[] spec_in, int[] select){
+      GaussianFitter fitter = 
+         new GaussianFitter(new LevenbergMarquardtOptimizer());
+      double[] 
+         x = new double[PEAK_511_WIDTH],
+         y = new double[PEAK_511_WIDTH],
+         fit_params = {-1, -1, -1};
+      int[]
+         high_area = new int[PEAK_511_WIDTH];
+      double
+         m, b, 
+         apex = 0;
+      int
+         high_cnt = 0;
+      
+      //fill an array of points to fit
+      for(
+         int pnt_i = 0, chan_i = select[0]; 
+         pnt_i < PEAK_511_WIDTH; 
+         pnt_i++, chan_i++
+      ){
         y[pnt_i] = 
            spec_in[chan_i] / 
-           (edges_raw[2][chan_i + 1] - edges_raw[2][chan_i]);
-        x[pnt_i] = chan_i;//slow_chan_midpoints[chan_i];
+           (RAW_EDGES[2][chan_i + 1] - RAW_EDGES[2][chan_i]);
+        x[pnt_i] = chan_i;//SSPC_MIDPOINTS[chan_i];
       }
 
-      // describe a line through endpoints of the selected range
-      double m = (y[width - 1] - y[0]) / (x[width - 1] - x[0]);
-      double b = y[0] - m * x[0];
+      // guess at a linear background
+      m = (y[PEAK_511_WIDTH - 1] - y[0]) / (x[PEAK_511_WIDTH - 1] - x[0]);
+      b = y[0] - m * x[0];
 
-      //find approximate peak location after subtracting linear bkgd
-      double[] peakregion = new double[width];
-      double apex = 0;
-      for(int chan_i = 0; chan_i < width; chan_i++){
-        peakregion[chan_i] = y[chan_i] - (m * x[chan_i] + b);
-        apex = Math.max(apex, peakregion[chan_i]);
+      //subtract background and search for peak
+      for(int chan_i = 0; chan_i < PEAK_511_WIDTH; chan_i++){
+        y[chan_i] -= (m * x[chan_i] + b);
+        apex = Math.max(apex, y[chan_i]);
       }
+      
+      //find a group of points that are near the peak
+      for(int chan_i = 0; chan_i < PEAK_511_WIDTH; chan_i++){
+         if(y[chan_i] > (0.5 * apex)){
+            high_area[high_cnt] = chan_i;
+            high_cnt++;
+         }
+      }
+      if (high_cnt < 2){return -1;}
+      
+      fit_params[0] = 10; //guess for peak height
+      fit_params[1] = x[high_area[high_cnt / 2]]; //guess for peak location
+      fit_params[2] = 1; //guess for peak sigma
 
       //do the curve fit
-      for(int spec_i = 0; spec_i < width; spec_i++){
-         System.out.println( x[spec_i] + " " + peakregion[spec_i]);
-         fitter.addObservedPoint(x[spec_i],  peakregion[spec_i]);
+      for(int spec_i = 0; spec_i < PEAK_511_WIDTH; spec_i++){
+         fitter.addObservedPoint(x[spec_i],  y[spec_i]);
       }
-      fit_params = fitter.fit();
+      fit_params = fitter.fit(fit_params);
 
-System.out.println(fit_params[1] + "\n");
-      if(fit_params[1] < x[0] || fit_params[1] > x[width - 1]){
-         return -1;
-      }else{
-         return fit_params[1];
+      return fit_params[1];
+   }
+
+   private static void createLinModel(
+      DataHolder data, double[] peaks, int start, int stop
+   ){
+      SimpleRegression fit = new SimpleRegression();
+      double m = 0, b = 0;
+
+      //do the linear regression on the data
+      for(int peak_i = 0, data_i = start; data_i < stop; peak_i++, data_i++){
+            data.peak511_bin[data_i] = peaks[peak_i];
+         if(peaks[peak_i] != -1){
+           fit.addData(data.frame_mod32[data_i], peaks[peak_i]);
+        }
+      }
+      m = fit.getSlope();
+      b = fit.getIntercept();
+
+      //calculate 511 location based on linear model
+      for(int data_i = start; data_i < stop; data_i++){
+         data.peak511_bin[data_i] = 
+            (data.frame_mod32[data_i] * m) + b;
+         data.peak511_slope[data_i] = m;
+         data.peak511_intercept[data_i] = b;
+
+         CDF_Gen.log.writeln(data.frame_mod32[data_i] + " " + data.peak511_bin[data_i]);
       }
    }
-/*  
-  double[] higharea = new double[width];
-  int high_cnt = 0;
-  for(int chan_i = 0; chan_i < width; chan_i++){
-     if(peakregion[chan_i] > (0.5 * apex)){
-        higharea[high_cnt] = chan_i;
-        high_cnt++;
-     }
-  }
-  if (high_cnt < 2){return -1;}
- *
-  peaklocation = x[floor(median(higharea))]
-
-  guess=[1., peaklocation, 10., m, b]
-  yfit=curvefit(x,y,1./err^2,guess, $
-       chisq=chisq,sigma,function_name='mygauss',status=stat)
-  if (guess[2] gt 20 or guess[0] lt 0.2) then return, -1
-
-  return,guess[1]
-
-*/
 
    public static double[] stdEdges(int spec_i, double scale){
-      int length = edges_raw[spec_i].length;
+      int length = RAW_EDGES[spec_i].length;
       double[] result = new double[length];
 
       for(int edge_i = 0; edge_i < length; edge_i++){
-         result[edge_i] = scale * edges_raw[spec_i][edge_i];
+         result[edge_i] = scale * RAW_EDGES[spec_i][edge_i];
       }
 
       return result;
@@ -202,15 +253,15 @@ System.out.println(fit_params[1] + "\n");
       int spec_i, double xtal_temp, double dpu_temp, double peak511
    ){
       double factor1, factor2, scale;
-      double[] edges_nonlin = new double[edges_raw[spec_i].length];
-      double[] edges_cal = new double[edges_raw[spec_i].length];
+      double[] edges_nonlin = new double[RAW_EDGES[spec_i].length];
+      double[] edges_cal = new double[RAW_EDGES[spec_i].length];
 
       //a rational function approximates energy non-linearity
       for(int edge_i = 0; edge_i < edges_nonlin.length; edge_i++){
          edges_nonlin[edge_i] = 
-            edges_raw[spec_i][edge_i] * (
-               1 - 11.6 / (edges_raw[spec_i][edge_i] + 10.8) + 
-               0.000091 * edges_raw[spec_i][edge_i]
+            RAW_EDGES[spec_i][edge_i] * (
+               1 - 11.6 / (RAW_EDGES[spec_i][edge_i] + 10.8) + 
+               0.000091 * RAW_EDGES[spec_i][edge_i]
             );
       }
 

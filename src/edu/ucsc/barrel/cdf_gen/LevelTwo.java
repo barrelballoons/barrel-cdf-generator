@@ -879,9 +879,6 @@ public class LevelTwo{
             dpu_temp = 20;
          }
          
-         //find the bin that contains the 511 line
-         //peak = spectrum.find511(mspc_rebin[mspc_rec], offset);
-
          //get the adjusted bin edges
          chan_edges[lc_rec] = 
             spectrum.createBinEdges(0, scint_temp, dpu_temp, peak);
@@ -1030,9 +1027,6 @@ public class LevelTwo{
             dpu_temp = 20;
          }
          
-         //find the bin that contains the 511 line
-         //peak = spectrum.find511(mspc_rebin[mspc_rec], offset);
-      
          //get the adjusted bin edges
          old_edges = spectrum.createBinEdges(1, scint_temp, dpu_temp, peak);
 
@@ -1126,14 +1120,13 @@ public class LevelTwo{
       CDF cdf;
       Variable var;
       
-      double peak = -1, scint_temp = 0, dpu_temp = 0;
-      
-      int offset = 90;
+      double scint_temp = 0, dpu_temp = 0;
 
       int numOfRecs = last - first;
       double[][] sspc_rebin = new double[numOfRecs][256];
-      double[] old_edges = new double[257];
-      double[] std_edges = SpectrumExtract.stdEdges(2, 2.4414);
+      double[] 
+         old_edges, 
+         std_edges = SpectrumExtract.stdEdges(2, 2.4414);
       
       int[] 
          frameGroup = new int[numOfRecs],
@@ -1160,15 +1153,9 @@ public class LevelTwo{
          }else{
             dpu_temp = 20;
          }
-
-         //find the bin that contains the 511 line
-         double p = spectrum.find511(data.sspc_raw[sspc_rec], 100, 25);
-         if(p != -1){
-            CDF_Gen.log.writeln( data.frame_mod32[sspc_rec] + " " + p );
-         }
       
          //get the adjusted bin edges
-         old_edges = spectrum.createBinEdges(2, scint_temp, dpu_temp, peak);
+         old_edges = spectrum.createBinEdges(2, scint_temp, dpu_temp, -1);
          
          //rebin the spectum
          sspc_rebin[sspc_rec] = spectrum.rebin(
