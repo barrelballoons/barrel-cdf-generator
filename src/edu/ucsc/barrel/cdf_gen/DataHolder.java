@@ -480,12 +480,16 @@ public class DataHolder{
       if(fc_rollover){
          gps_q[rec_num_mod4] |= Constants.FC_ROLL;
          pps_q[rec_num_1Hz] |= Constants.FC_ROLL;
-         magn_q[rec_num_4Hz] |= Constants.FC_ROLL;
          hkpg_q[rec_num_mod40] |= Constants.FC_ROLL;
          rcnt_q[rec_num_mod4] |= Constants.FC_ROLL;
-         fspc_q[rec_num_20Hz] |= Constants.FC_ROLL;
          mspc_q[rec_num_mod4] |= Constants.FC_ROLL;
          sspc_q[rec_num_mod32] |= Constants.FC_ROLL;
+         for(int lc_i = 0; lc_i < 20; lc_i++){
+            fspc_q[rec_num_1Hz + lc_i] |= Constants.FC_ROLL;
+         }
+         for(int mag_i = 0; mag_i < 4; mag_i++){
+            magn_q[rec_num_1Hz + mag_i] |= Constants.FC_ROLL;
+         }
       }
 
       //get gps info: 32 bits of mod4 gps data followed by 16 bits of pps data
@@ -504,12 +508,17 @@ public class DataHolder{
             }
             else if(gps_raw[mod4][rec_num_mod4] < Constants.MIN_SCI_ALT){
                gps_q[rec_num_mod4] |= Constants.LOW_ALT;
-               pps_q[rec_num_mod4] |= Constants.LOW_ALT;
-               magn_q[rec_num_mod4] |= Constants.LOW_ALT;
-               hkpg_q[rec_num_mod4] |= Constants.LOW_ALT;
+               pps_q[rec_num_1Hz] |= Constants.LOW_ALT;
+               hkpg_q[rec_num_mod40] |= Constants.LOW_ALT;
                rcnt_q[rec_num_mod4] |= Constants.LOW_ALT;
                mspc_q[rec_num_mod4] |= Constants.LOW_ALT;
-               sspc_q[rec_num_mod4] |= Constants.LOW_ALT;
+               sspc_q[rec_num_mod32] |= Constants.LOW_ALT;
+               for(int lc_i = 0; lc_i < 20; lc_i++){
+                  fspc_q[rec_num_1Hz + lc_i] |= Constants.LOW_ALT;
+               }
+               for(int mag_i = 0; mag_i < 4; mag_i++){
+                  magn_q[rec_num_1Hz + mag_i] |= Constants.LOW_ALT;
+               }
             }
             break;
          case Constants.TIME_I: 
@@ -519,6 +528,18 @@ public class DataHolder{
             ){
                gps_raw[mod4][rec_num_mod4] = Constants.MS_WEEK_FILL;
                gps_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;  
+            }
+            
+
+            //propagate the low altitude flag to higher cadence variable
+            if((gps_q[rec_num_mod4] & Constants.LOW_ALT) != 0){
+               pps_q[rec_num_1Hz] |= Constants.LOW_ALT;
+               for(int lc_i = 0; lc_i < 20; lc_i++){
+                  fspc_q[rec_num_1Hz + lc_i] |= Constants.LOW_ALT;
+               }
+               for(int mag_i = 0; mag_i < 4; mag_i++){
+                  magn_q[rec_num_1Hz + mag_i] |= Constants.LOW_ALT;
+               }
             }
 
             ms_of_week[rec_num_mod4] = gps_raw[Constants.TIME_I][rec_num_mod4];
@@ -531,6 +552,17 @@ public class DataHolder{
                gps_raw[mod4][rec_num_mod4] = Constants.LAT_RAW_FILL;
                gps_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;  
             }
+
+            if((gps_q[rec_num_mod4] & Constants.LOW_ALT) != 0){
+               pps_q[rec_num_1Hz] |= Constants.LOW_ALT;
+               for(int lc_i = 0; lc_i < 20; lc_i++){
+                  fspc_q[rec_num_1Hz + lc_i] |= Constants.LOW_ALT;
+               }
+               for(int mag_i = 0; mag_i < 4; mag_i++){
+                  magn_q[rec_num_1Hz + mag_i] |= Constants.LOW_ALT;
+               }
+            }
+
             break;
          case Constants.LON_I: 
             if(
@@ -540,6 +572,17 @@ public class DataHolder{
                gps_raw[mod4][rec_num_mod4] = Constants.LON_RAW_FILL;
                gps_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;  
             }
+
+            if((gps_q[rec_num_mod4] & Constants.LOW_ALT) != 0){
+               pps_q[rec_num_1Hz] |= Constants.LOW_ALT;
+               for(int lc_i = 0; lc_i < 20; lc_i++){
+                  fspc_q[rec_num_1Hz + lc_i] |= Constants.LOW_ALT;
+               }
+               for(int mag_i = 0; mag_i < 4; mag_i++){
+                  magn_q[rec_num_1Hz + mag_i] |= Constants.LOW_ALT;
+               }
+            }
+
             break;
       }
 
