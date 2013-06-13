@@ -17,3 +17,8 @@ line fitting and/or other methods.
 Magnetic Coordinates:
 It seems like there are a very large number of bad values in the magnetic
 coordinate file. This needs to be investigated.
+
+Housekeeping Meta-Data:
+Some of the housekeeping values have a minimum allowed value set to 0 even 
+though that variable may go negative. This will prevent out of range points 
+from being displayed in Autoplot.
