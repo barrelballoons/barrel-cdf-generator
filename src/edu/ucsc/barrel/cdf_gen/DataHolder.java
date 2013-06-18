@@ -117,9 +117,7 @@ public class DataHolder{
       lc3_raw = new int[MAX_FRAMES * 20],
       lc4_raw = new int[MAX_FRAMES * 20];
    public double[]
-      peak511_bin = new double[MAX_FRAMES / 32],
-      peak511_slope = new double[MAX_FRAMES / 32],
-      peak511_intercept = new double[MAX_FRAMES / 32];
+      peak511_bin = new double[MAX_FRAMES / 32];
 
    public int 
       //record numbers are incrimented on the first record so

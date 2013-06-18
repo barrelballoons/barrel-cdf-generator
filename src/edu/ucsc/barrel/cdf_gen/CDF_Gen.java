@@ -43,7 +43,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 public class CDF_Gen implements CDFConstants{
    
    //custom objects
@@ -206,31 +205,17 @@ public class CDF_Gen implements CDFConstants{
 
                   while(start_i < total_specs){
                      stop_i = Math.min(total_specs, start_i + max_recs); 
-                     SpectrumExtract.fill511models(start_i, stop_i, data);
+                     SpectrumExtract.do511Fits(start_i, stop_i, data);
                      start_i = stop_i;
                   }
-
-System.exit(1);
-DescriptiveStatistics ma = new DescriptiveStatistics();
-ma.setWindowSize(10);
-ma.addValue(data.peak511_bin[0]);
-ma.addValue(data.peak511_bin[1]);
-ma.addValue(data.peak511_bin[2]);
-ma.addValue(data.peak511_bin[3]);
-ma.addValue(data.peak511_bin[4]);
-ma.addValue(data.peak511_bin[5]);
-ma.addValue(data.peak511_bin[6]);
-ma.addValue(data.peak511_bin[7]);
-ma.addValue(data.peak511_bin[8]);
-ma.addValue(data.peak511_bin[9]);
-
-for(int i = 10; i < data.getSize("mod32"); i++){
-   if(data.peak511_bin[i] != -1){
-      ma.addValue(data.peak511_bin[i]);
-      CDF_Gen.log.writeln(data.frame_mod32[i] + " " + data.peak511_bin[i]);//ma.getMean());
-   }
+                  
+                  smoothData(data.peak511_bin, 80);
+                  int good = 0, bad = 0;
+for(int i = 0; i < data.getSize("mod32"); i++){
+   if(data.peak511_bin[i] == -1){bad++;}
+   else{good++; CDF_Gen.log.writeln(data.frame_mod32[i] + " " + data.peak511_bin[i]);}
 }
-System.exit(1);
+System.out.println("GOOD: "+good+" "+"BAD: "+bad);
                   //create Level Two
                   LevelTwo L2 =
 						   new LevelTwo(
@@ -251,6 +236,33 @@ System.exit(1);
       log.close();
    }
    
+   public static void smoothData(double[] input_data, int smooth_factor){
+
+      double value = 0;
+      int size = data.getSize("mod32");
+      int step_size = 1;
+      int start;
+
+      //find first good value
+      for(start = 0; start < size; start++){
+         if(data.peak511_bin[start] != -1){
+            value = data.peak511_bin[start];
+            break;
+         }
+      }
+
+      for(int i = start; i < size; i++){
+         if(data.peak511_bin[i] == -1){
+            step_size++;
+         }else{
+            value += 
+               (data.peak511_bin[i] - value) / (smooth_factor / step_size);
+            data.peak511_bin[i] = value;
+            step_size = 1;
+         }
+      }
+   }
+
    public static byte[] hexToByte(String s) {
       int len = s.length();
       byte[] bytes = new byte[len / 2];

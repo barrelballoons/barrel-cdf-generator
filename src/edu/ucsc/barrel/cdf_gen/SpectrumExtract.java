@@ -106,7 +106,7 @@ public class SpectrumExtract {
 
    public SpectrumExtract(){}
 
-   public static void fill511models(int start, int stop, DataHolder data){ 
+   public static void do511Fits(int start, int stop, DataHolder data){ 
       int length = stop - start;
       
       if(length < 2){return;}
@@ -114,7 +114,6 @@ public class SpectrumExtract {
       DescriptiveStatistics stats = new DescriptiveStatistics();
       double max_bin, min_bin;
       int[] select = new int[PEAK_511_WIDTH];
-      double[] peaks = new double[length];
 
       //array of indicies that refer to which sspc channels to search
       for(int chan_i = 0; chan_i < PEAK_511_WIDTH; chan_i++){
@@ -122,17 +121,17 @@ public class SpectrumExtract {
       }
       
       //find the 511 line in each of the spectra in this group
-      for(int spec_i = start, peak_i = 0; spec_i < stop; spec_i++, peak_i++){
+      for(int spec_i = start; spec_i < stop; spec_i++){
          //make sure this is a complete spectrum
          if((data.sspc_q[spec_i] & Constants.PART_SPEC) == 0){
-            peaks[peak_i] = find511(data.sspc_raw[spec_i], select);
+            data.peak511_bin[spec_i] = find511(data.sspc_raw[spec_i], select);
          }else{
-            peaks[peak_i] = -1;
+            data.peak511_bin[spec_i] = -1;
          }
          
          //check for a valid peak location was set 
-         if(peaks[peak_i] != -1){
-            stats.addValue(peaks[peak_i]);
+         if(data.peak511_bin[spec_i] != -1){
+            stats.addValue(data.peak511_bin[spec_i]);
          }
       }
 
@@ -142,14 +141,14 @@ public class SpectrumExtract {
          stats.getStandardDeviation();
       min_bin =
          max_bin - (2 * stats.getStandardDeviation());
-      for(int peak_i = 0; peak_i < length; peak_i++){
-         if(peaks[peak_i] > max_bin || peaks[peak_i] < min_bin){
-            peaks[peak_i] = -1;
+      for(int peak_i = start; peak_i < stop; peak_i++){
+         if(
+            data.peak511_bin[peak_i] > max_bin || 
+            data.peak511_bin[peak_i] < min_bin)
+         {
+            data.peak511_bin[peak_i] = -1;
          }
       }
-      
-      //perform the linear regression and fill data.peak_???[] arrays
-      createLinModel(data, peaks, start, stop);
    }
 
    private static double find511(int[] spec_in, int[] select){
@@ -176,7 +175,7 @@ public class SpectrumExtract {
         y[pnt_i] = 
            spec_in[chan_i] / 
            (RAW_EDGES[2][chan_i + 1] - RAW_EDGES[2][chan_i]);
-        x[pnt_i] = chan_i;//SSPC_MIDPOINTS[chan_i];
+        x[pnt_i] = SSPC_MIDPOINTS[chan_i];
       }
 
       // guess at a linear background
@@ -209,33 +208,6 @@ public class SpectrumExtract {
       fit_params = fitter.fit(fit_params);
 
       return fit_params[1];
-   }
-
-   private static void createLinModel(
-      DataHolder data, double[] peaks, int start, int stop
-   ){
-      SimpleRegression fit = new SimpleRegression();
-      double m = 0, b = 0;
-
-      //do the linear regression on the data
-      for(int peak_i = 0, data_i = start; data_i < stop; peak_i++, data_i++){
-            data.peak511_bin[data_i] = peaks[peak_i];
-         if(peaks[peak_i] != -1){
-           fit.addData(data.frame_mod32[data_i], peaks[peak_i]);
-        }
-      }
-      m = fit.getSlope();
-      b = fit.getIntercept();
-
-      //calculate 511 location based on linear model
-      for(int data_i = start; data_i < stop; data_i++){
-         data.peak511_bin[data_i] = 
-            (data.frame_mod32[data_i] * m) + b;
-         data.peak511_slope[data_i] = m;
-         data.peak511_intercept[data_i] = b;
-
-         CDF_Gen.log.writeln(data.frame_mod32[data_i] + " " + data.peak511_bin[data_i]);
-      }
    }
 
    public static double[] stdEdges(int spec_i, double scale){
