@@ -208,14 +208,8 @@ public class CDF_Gen implements CDFConstants{
                      SpectrumExtract.do511Fits(start_i, stop_i, data);
                      start_i = stop_i;
                   }
-                  
                   smoothData(data.peak511_bin, 80);
-                  int good = 0, bad = 0;
-for(int i = 0; i < data.getSize("mod32"); i++){
-   if(data.peak511_bin[i] == -1){bad++;}
-   else{good++; CDF_Gen.log.writeln(data.frame_mod32[i] + " " + data.peak511_bin[i]);}
-}
-System.out.println("GOOD: "+good+" "+"BAD: "+bad);
+
                   //create Level Two
                   LevelTwo L2 =
 						   new LevelTwo(
@@ -242,6 +236,7 @@ System.out.println("GOOD: "+good+" "+"BAD: "+bad);
       int size = data.getSize("mod32");
       int step_size = 1;
       int start;
+      double adjusted_smooth;
 
       //find first good value
       for(start = 0; start < size; start++){
@@ -252,11 +247,12 @@ System.out.println("GOOD: "+good+" "+"BAD: "+bad);
       }
 
       for(int i = start; i < size; i++){
-         if(data.peak511_bin[i] == -1){
+        if(data.peak511_bin[i] == -1){
             step_size++;
          }else{
+            adjusted_smooth = (double)smooth_factor / (double)step_size;
             value += 
-               (data.peak511_bin[i] - value) / (smooth_factor / step_size);
+               (data.peak511_bin[i] - value) / adjusted_smooth;
             data.peak511_bin[i] = value;
             step_size = 1;
          }
