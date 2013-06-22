@@ -880,8 +880,8 @@ public class LevelTwo{
          }
          
          //get the adjusted bin edges
-         chan_edges[lc_rec] = 
-            spectrum.createBinEdges(0, scint_temp, dpu_temp, peak);
+         //chan_edges[lc_rec] = 
+         //   spectrum.createBinEdges(0, /*scint_temp, dpu_temp, */peak);
 
          //write the spectrum to the new array
          if(data.lc1_raw[lc_rec + first] != Constants.FSPC_RAW_FILL){
@@ -1006,8 +1006,9 @@ public class LevelTwo{
 
       
       //rebin the mspc spectra
-      for(int mspc_rec = 0, hkpg_rec = 0; mspc_rec < numOfRecs; mspc_rec++){
-         
+      for(int mspc_rec = 0, sspc_rec = 0; mspc_rec < numOfRecs; mspc_rec++){
+        
+         /*
          //get temperatures
          hkpg_rec = (mspc_rec + first) * 4 / 40; //convert from mod4 to mod40
          if(data.hkpg_raw[Constants.T0][hkpg_rec] != Constants.HKPG_FILL){
@@ -1025,10 +1026,20 @@ public class LevelTwo{
                data.hkpg_offset[Constants.T5];
          }else{
             dpu_temp = 20;
-         }
+         }*/
          
+         //incremint sspc_rec if needed
+         if(
+            (data.frame_mod4[mspc_rec] - data.frame_mod4[mspc_rec] % 32) != 
+            data.frame_mod32[sspc_rec]
+         ){
+            sspc_rec++;
+         }
+
          //get the adjusted bin edges
-         old_edges = spectrum.createBinEdges(1, scint_temp, dpu_temp, peak);
+         old_edges = spectrum.createBinEdges(
+            1, /*scint_temp, dpu_temp, */ data.peak511_bin[sspc_rec]
+         );
 
          //rebin the spectrum
          mspc_rebin[mspc_rec] = spectrum.rebin(
@@ -1126,6 +1137,7 @@ public class LevelTwo{
       double[][] sspc_rebin = new double[numOfRecs][256];
       double[] 
          old_edges, 
+         peak = new double[numOfRecs],
          std_edges = SpectrumExtract.stdEdges(2, 2.4414);
       
       int[] 
@@ -1133,9 +1145,11 @@ public class LevelTwo{
          q = new int[numOfRecs];
       long[] epoch = new long[numOfRecs];
 
+      System.out.println("\nSaving SSPC...");
+
       //rebin the sspc spectra
       for(int sspc_rec = 0, hkpg_rec = 0; sspc_rec < numOfRecs; sspc_rec++){
-         //get temperatures
+/*         //get temperatures
          hkpg_rec = (sspc_rec + first) * 32 / 40; //convert from mod32 to mod40
          if(data.hkpg_raw[Constants.T0][hkpg_rec] != Constants.HKPG_FILL){
             scint_temp = 
@@ -1153,9 +1167,9 @@ public class LevelTwo{
          }else{
             dpu_temp = 20;
          }
-      
+*/    
          //get the adjusted bin edges
-         old_edges = spectrum.createBinEdges(2, scint_temp, dpu_temp, -1);
+         old_edges = spectrum.createBinEdges(2, data.peak511_bin[sspc_rec]);
          
          //rebin the spectum
          sspc_rebin[sspc_rec] = spectrum.rebin(
@@ -1173,12 +1187,12 @@ public class LevelTwo{
       }
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
+         peak[rec_i] = data.peak511_bin[data_i];
          frameGroup[rec_i] = data.frame_mod32[data_i];
          epoch[rec_i] = data.epoch_mod32[data_i] - Constants.SSPC_ACCUM;
          q[rec_i] = data.sspc_q[data_i];
       }
 
-      System.out.println("\nSaving SSPC...");
 
       String srcName = 
          "cdf_skels/l2/barCLL_PP_S_l2_sspc_YYYYMMDD_v++.cdf";
@@ -1207,6 +1221,16 @@ public class LevelTwo{
          new long[] {256, 1}, 
          new long[] {1}, 
          sspc_rebin
+      );
+
+      var = cdf.getVariable("Peak_511");
+      System.out.println("Peak_511...");
+      var.putHyperData(
+         var.getNumWrittenRecords(), numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {256, 1}, 
+         new long[] {1}, 
+         peak
       );
 
       var = cdf.getVariable("FrameGroup");

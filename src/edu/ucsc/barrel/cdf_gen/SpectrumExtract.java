@@ -126,11 +126,11 @@ public class SpectrumExtract {
          if((data.sspc_q[spec_i] & Constants.PART_SPEC) == 0){
             data.peak511_bin[spec_i] = find511(data.sspc_raw[spec_i], select);
          }else{
-            data.peak511_bin[spec_i] = -1;
+            data.peak511_bin[spec_i] = Constants.DOUBLE_FILL;
          }
          
          //check for a valid peak location was set 
-         if(data.peak511_bin[spec_i] != -1){
+         if(data.peak511_bin[spec_i] != Constants.DOUBLE_FILL){
             stats.addValue(data.peak511_bin[spec_i]);
          }
       }
@@ -146,7 +146,7 @@ public class SpectrumExtract {
             data.peak511_bin[peak_i] > max_bin || 
             data.peak511_bin[peak_i] < min_bin)
          {
-            data.peak511_bin[peak_i] = -1;
+            data.peak511_bin[peak_i] = Constants.DOUBLE_FILL;
          }
       }
    }
@@ -157,7 +157,9 @@ public class SpectrumExtract {
       double[] 
          x = new double[PEAK_511_WIDTH],
          y = new double[PEAK_511_WIDTH],
-         fit_params = {-1, -1, -1};
+         fit_params = {
+            Constants.DOUBLE_FILL, Constants.DOUBLE_FILL, Constants.DOUBLE_FILL
+         };
       int[]
          high_area = new int[PEAK_511_WIDTH];
       double
@@ -195,7 +197,7 @@ public class SpectrumExtract {
             high_cnt++;
          }
       }
-      if (high_cnt < 2){return -1;}
+      if (high_cnt < 2){return Constants.DOUBLE_FILL;}
       
       fit_params[0] = 10; //guess for peak height
       fit_params[1] = x[high_area[high_cnt / 2]]; //guess for peak location
@@ -222,7 +224,7 @@ public class SpectrumExtract {
    }
 
    public static double[] createBinEdges(
-      int spec_i, double xtal_temp, double dpu_temp, double peak511
+      int spec_i, double peak511// double xtal_temp, double dpu_temp, double peak511
    ){
       double factor1, factor2, scale;
       double[] edges_nonlin = new double[RAW_EDGES[spec_i].length];
@@ -236,7 +238,8 @@ public class SpectrumExtract {
                0.000091 * RAW_EDGES[spec_i][edge_i]
             );
       }
-
+     
+      /*
       //quadratic function for crystal gain drift with temperature
       factor1 = 1;
       if(xtal_temp != 0){
@@ -247,19 +250,20 @@ public class SpectrumExtract {
       factor2 = 1;
       if(dpu_temp != 0){
          factor2 += (23 - dpu_temp) * 0.00034;
-      }
+      }*/
 
       //set an overall scale factor to position 511keV line
       //this also helps compensate incorrect temperature values
-      scale = 2.5; //nominal keV/bin
-      if(peak511 != -1){
+
+      scale = 2.4414; //nominal keV/bin
+      if(peak511 != Constants.DOUBLE_FILL){
          scale = 
-            511. * factor2 / factor1 / peak511 / 
+            511.  /* * factor2 / factor1*/ / peak511 / 
             (1.0 - 11.6 / (peak511 + 10.8) + 0.000091 * peak511);
       }
 
       //apply corrections to energy bin edges
-      scale = scale * factor1 / factor2;
+      //scale *= factor1 / factor2;
       for(int edge_i = 0; edge_i < edges_cal.length; edge_i++){
          edges_cal[edge_i] = scale * (edges_nonlin[edge_i]);
       }
