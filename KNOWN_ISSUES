@@ -34,3 +34,7 @@ Some of the housekeeping values have a minimum allowed value set to 0 even
 though that variable may go negative. This will prevent out of range points 
 from being displayed in Autoplot.
 
+SSPC "energy" variable:                                                         
+There are some out-of-sequence values in this array. The array is used for      
+labeling as a "Depend_1" variable. This will cause a small problem for autoplot 
+users or anyone relying on "Depend_1" for labels.       
