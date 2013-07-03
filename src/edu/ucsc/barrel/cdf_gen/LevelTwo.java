@@ -232,6 +232,8 @@ public class LevelTwo{
                   (year + 2000), day_of_year, sec_of_day
                )
             );
+         }else{
+            geo_coord_file.writeln("NaN NaN NaN NaN NaN NaN NaN");
          }
       }
       geo_coord_file.close();
