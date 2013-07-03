@@ -272,7 +272,6 @@ public class LevelTwo{
 
             //check for repeated frame
             this_frame = Integer.parseInt(mag_coords[0]);
-            CDF_Gen.log.writeln(this_frame + " " + last_frame);
             if(this_frame != last_frame){
             //make sure the mag coordinates were calculated correctly
                if(mag_coords[8].indexOf("*") == -1){
