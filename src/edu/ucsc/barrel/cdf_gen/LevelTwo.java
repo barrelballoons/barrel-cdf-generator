@@ -261,32 +261,49 @@ public class LevelTwo{
                )
             );
          String line;
-         int rec_i = 0;
+         int 
+            rec_i = 0,
+            this_frame = 0,
+            last_frame = 0;
+
          while((line = mag_coord_file.readLine()) != null){
             line = line.trim();
-
-            //make sure the mag coordinates were calculated correctly
             mag_coords = line.split("\\s+");
-            if(mag_coords[8].indexOf("*") == -1){
-               l2[rec_i] = Math.abs(Float.parseFloat(mag_coords[8]));
-            }else{
-               l2[rec_i] = Constants.FLOAT_FILL;
+
+            //check for repeated frame
+            this_frame = Integer.parseInt(mag_coords[0]);
+            CDF_Gen.log.writeln(this_frame + " " + last_frame);
+            if(this_frame != last_frame){
+            //make sure the mag coordinates were calculated correctly
+               if(mag_coords[8].indexOf("*") == -1){
+                  l2[rec_i] = Math.abs(Float.parseFloat(mag_coords[8]));
+               }else{
+                  l2[rec_i] = Constants.FLOAT_FILL;
+               }
+               if(mag_coords[9].indexOf("*") == -1){
+                  mlt2[rec_i] = Float.parseFloat(mag_coords[9]);
+               }else{
+                  mlt2[rec_i] = Constants.FLOAT_FILL;
+               }
+               if(mag_coords[11].indexOf("*") == -1){
+                  l6[rec_i] = Math.abs(Float.parseFloat(mag_coords[11]));
+               }else{
+                  l6[rec_i] = Constants.FLOAT_FILL;
+               }
+               if(mag_coords[12].indexOf("*") == -1){
+                  mlt6[rec_i] = Float.parseFloat(mag_coords[12]);
+               }else{
+                  mlt6[rec_i] = Constants.FLOAT_FILL;
+               }
+
+               last_frame = this_frame;
             }
-            if(mag_coords[9].indexOf("*") == -1){
-               mlt2[rec_i] = Float.parseFloat(mag_coords[9]);
-            }else{
-               mlt2[rec_i] = Constants.FLOAT_FILL;
-            }
-            if(mag_coords[11].indexOf("*") == -1){
-               l6[rec_i] = Math.abs(Float.parseFloat(mag_coords[11]));
-            }else{
-               l6[rec_i] = Constants.FLOAT_FILL;
-            }
-            if(mag_coords[12].indexOf("*") == -1){
-               mlt6[rec_i] = Float.parseFloat(mag_coords[12]);
-            }else{
-               mlt6[rec_i] = Constants.FLOAT_FILL;
-            }
+            else{
+               l2[rec_i] = Constants.FLOAT_FILL; 
+               l6[rec_i] = Constants.FLOAT_FILL; 
+               mlt2[rec_i] = Constants.FLOAT_FILL; 
+               mlt6[rec_i] = Constants.FLOAT_FILL; 
+            } 
 
             rec_i++;
          }
