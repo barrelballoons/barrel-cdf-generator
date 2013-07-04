@@ -101,14 +101,15 @@ public class SpectrumExtract {
 
    //defines the search window for the 511 line
    private static final int
-      PEAK_511_START = 100,
-      PEAK_511_WIDTH = 25;
+      PEAK_511_START = 90,
+      PEAK_511_WIDTH = 50;
 
    public SpectrumExtract(){}
 
    public static void do511Fits(int start, int stop, DataHolder data){ 
       int length = stop - start;
-      
+      int max_cnts = 250 * length;
+
       if(length < 2){return;}
       
       DescriptiveStatistics stats = new DescriptiveStatistics();
@@ -116,10 +117,6 @@ public class SpectrumExtract {
       double[]
          search_spec = new double[PEAK_511_WIDTH],
          bin_num = new double[PEAK_511_WIDTH];
-      int 
-         sum_i = 0,
-         this_frame = 0,
-         last_frame = data.frame_mod32[start];
       
       //create array of detector bin numbers we will be searching
       for(int bin_i = 0; bin_i < PEAK_511_WIDTH; bin_i++){
@@ -127,66 +124,29 @@ public class SpectrumExtract {
       }
 
 
-      //find the 511 line in each of the spectra in this group
+      //sum up all of the spectra from this group
       for(int spec_i = start; spec_i < stop; spec_i++){
-
-         //make sure we haven't crossed a large gap (> ~5 minutes)
-         this_frame = data.frame_mod32[spec_i];
-         if((this_frame - last_frame) > 320){
-            if(sum_i > 4){
-               peak = find511(bin_num, search_spec);
-            }else{
-               peak = Constants.DOUBLE_FILL;
-            }
-            for(int peak_i = (spec_i - sum_i); peak_i < spec_i; peak_i++){
-               data.peak511_bin[spec_i] = peak; 
-            }
-            peak = Constants.DOUBLE_FILL;
-            sum_i = 0;
-            search_spec = new double[PEAK_511_WIDTH];
-         }
 
          //only add the spectrum to the sum if it is complete
          if((data.sspc_q[spec_i] & Constants.PART_SPEC) == 0){
             for(int chan_i = 0; chan_i < PEAK_511_WIDTH; chan_i++){
-               search_spec[chan_i] = 
-                  data.sspc_raw[spec_i + sum_i][chan_i + PEAK_511_START];
+               search_spec[chan_i] += 
+                  data.sspc_raw[spec_i][chan_i + PEAK_511_START];
+               //check to see if it is likely the 511 line will be washed out
+               if(search_spec[chan_i] > max_cnts){
+                  for(int peak_i = start; peak_i < stop; peak_i++){
+                     data.peak511_bin[peak_i] = Constants.DOUBLE_FILL; 
+                  }
+                  return;
+               }
             }
-
-            last_frame = this_frame;
-            sum_i++;
          }
-
-         //Find the peak if we have at least 10 spectra
-         if(sum_i > 10){
-            peak = find511(bin_num, search_spec);
-
-            for(int peak_i = (spec_i - sum_i); peak_i < spec_i; peak_i++){
-               data.peak511_bin[spec_i] = peak; 
-            }
-
-            //check for a valid peak location was set 
-            if(peak != Constants.DOUBLE_FILL){stats.addValue(peak);}
-
-            peak = Constants.DOUBLE_FILL;
-            sum_i = 0;
-            search_spec = new double[PEAK_511_WIDTH];
-         }  
       }
 
-      //remove any peaks that are located > 1 standard deviation from median
-      max_bin = 
-         stats.getPercentile(50) + 
-         stats.getStandardDeviation();
-      min_bin =
-         max_bin - (2 * stats.getStandardDeviation());
+      peak = find511(bin_num, search_spec);
+
       for(int peak_i = start; peak_i < stop; peak_i++){
-         if(
-            data.peak511_bin[peak_i] > max_bin || 
-            data.peak511_bin[peak_i] < min_bin)
-         {
-            data.peak511_bin[peak_i] = Constants.DOUBLE_FILL;
-         }
+         data.peak511_bin[peak_i] = peak; 
       }
    }
 
@@ -194,48 +154,55 @@ public class SpectrumExtract {
       GaussianFitter fitter = 
          new GaussianFitter(new LevenbergMarquardtOptimizer());
       double[] 
-         fit_params = {
-            Constants.DOUBLE_FILL, Constants.DOUBLE_FILL, Constants.DOUBLE_FILL
-         };
+         fit_params = {10, Constants.DOUBLE_FILL, 1};
       int[]
          high_area = new int[PEAK_511_WIDTH];
       double
          m, b, 
-         apex = 0;
+         this_curvature = 0,
+         low_curvature = 0;
       int
+         apex = 0,
          high_cnt = 0;
       
       // guess at a linear background
       m = (y[PEAK_511_WIDTH - 1] - y[0]) / (x[PEAK_511_WIDTH - 1] - x[0]);
       b = y[0] - m * x[0];
-
-      //subtract background and search for peak
-      for(int chan_i = 0; chan_i < PEAK_511_WIDTH; chan_i++){
-        y[chan_i] -= (m * x[chan_i] + b);
-        apex = Math.max(apex, y[chan_i]);
+      
+      //convert y to cnts/bin_width
+      for(int bin_i = 0; bin_i < x.length; bin_i++){
+         y[bin_i] /= (
+            RAW_EDGES[2][bin_i + PEAK_511_START + 1] - 
+            RAW_EDGES[2][bin_i + PEAK_511_START]
+         );
       }
-for(int i = 0; i < x.length; i++){
-   CDF_Gen.log.writeln(x[i] + ", " + y[i]); 
+/*
+for(int i = 2; i < x.length - 2; i++){
+   CDF_Gen.log.writeln(
+      x[i] + ", " + 
+      y[i] + ", " +
+      (y[i + 1] - y[i]) + ", " +
+      (y[i + 2] - (2 * y[i]) + y[i - 2])
+   ); 
 }
-      //find a group of points that are near the peak
-      for(int chan_i = 0; chan_i < PEAK_511_WIDTH; chan_i++){
-         if(y[chan_i] > (0.5 * apex)){
-            high_area[high_cnt] = chan_i;
-            high_cnt++;
+*/
+      //take the second derivitave to find peak
+      for(int bin_i = 2; bin_i < x.length - 2; bin_i++){
+         this_curvature = y[bin_i + 2] - (2 * y[bin_i]) + y[bin_i - 2];
+         if(this_curvature < low_curvature){
+            low_curvature = this_curvature;
+            apex = bin_i;
          }
       }
-      if (high_cnt < 2){return Constants.DOUBLE_FILL;}
-      
-      fit_params[0] = 10; //guess for peak height
-      fit_params[1] = x[high_area[high_cnt / 2]]; //guess for peak location
-      fit_params[2] = 1; //guess for peak sigma
 
       //do the curve fit
-      for(int spec_i = 0; spec_i < PEAK_511_WIDTH; spec_i++){
-         fitter.addObservedPoint(x[spec_i],  y[spec_i]);
+      fit_params[1] = x[apex]; //guess for peak location
+      for(int bin_i = apex - 3; bin_i < apex + 3; bin_i++){
+         fitter.addObservedPoint(x[bin_i],  y[bin_i]);
+         CDF_Gen.log.writeln(x[bin_i] + ", " + y[bin_i]);
       }
       fit_params = fitter.fit(fit_params);
-
+System.out.println(apex);
       return fit_params[1];
    }
 
