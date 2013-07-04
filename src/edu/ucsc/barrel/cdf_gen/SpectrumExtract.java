@@ -112,27 +112,66 @@ public class SpectrumExtract {
       if(length < 2){return;}
       
       DescriptiveStatistics stats = new DescriptiveStatistics();
-      double max_bin, min_bin;
-      int[] select = new int[PEAK_511_WIDTH];
-
-      //array of indicies that refer to which sspc channels to search
-      for(int chan_i = 0; chan_i < PEAK_511_WIDTH; chan_i++){
-        select[chan_i] = chan_i + PEAK_511_START;
-      }
+      double max_bin, min_bin, peak;
+      double[]
+         search_spec = new double[PEAK_511_WIDTH],
+         bin_num = new double[PEAK_511_WIDTH];
+      int 
+         sum_i = 0,
+         this_frame = 0,
+         last_frame = data.frame_mod32[start];
       
+      //create array of detector bin numbers we will be searching
+      for(int bin_i = 0; bin_i < PEAK_511_WIDTH; bin_i++){
+         bin_num[bin_i] = SSPC_MIDPOINTS[bin_i + PEAK_511_START]; 
+      }
+
+
       //find the 511 line in each of the spectra in this group
       for(int spec_i = start; spec_i < stop; spec_i++){
-         //make sure this is a complete spectrum
+
+         //make sure we haven't crossed a large gap (> ~5 minutes)
+         this_frame = data.frame_mod32[spec_i];
+         if((this_frame - last_frame) > 320){
+            if(sum_i > 4){
+               peak = find511(bin_num, search_spec);
+            }else{
+               peak = Constants.DOUBLE_FILL;
+            }
+            for(int peak_i = (spec_i - sum_i); peak_i < spec_i; peak_i++){
+               data.peak511_bin[spec_i] = peak; 
+            }
+            peak = Constants.DOUBLE_FILL;
+            sum_i = 0;
+            search_spec = new double[PEAK_511_WIDTH];
+         }
+
+         //only add the spectrum to the sum if it is complete
          if((data.sspc_q[spec_i] & Constants.PART_SPEC) == 0){
-            data.peak511_bin[spec_i] = find511(data.sspc_raw[spec_i], select);
-         }else{
-            data.peak511_bin[spec_i] = Constants.DOUBLE_FILL;
+            for(int chan_i = 0; chan_i < PEAK_511_WIDTH; chan_i++){
+               search_spec[chan_i] = 
+                  data.sspc_raw[spec_i + sum_i][chan_i + PEAK_511_START];
+            }
+
+            last_frame = this_frame;
+            sum_i++;
          }
-         
-         //check for a valid peak location was set 
-         if(data.peak511_bin[spec_i] != Constants.DOUBLE_FILL){
-            stats.addValue(data.peak511_bin[spec_i]);
-         }
+
+         //Find the peak if we have at least 10 spectra
+         if(sum_i > 10){
+            peak = find511(bin_num, search_spec);
+
+            for(int peak_i = (spec_i - sum_i); peak_i < spec_i; peak_i++){
+               data.peak511_bin[spec_i] = peak; 
+            }
+
+            //check for a valid peak location was set 
+            if(peak != Constants.DOUBLE_FILL){stats.addValue(peak);}
+
+            peak = Constants.DOUBLE_FILL;
+            sum_i = 0;
+            search_spec = new double[PEAK_511_WIDTH];
+         }  
       }
 
       //remove any peaks that are located > 1 standard deviation from median
@@ -151,12 +190,10 @@ public class SpectrumExtract {
       }
    }
 
-   private static double find511(int[] spec_in, int[] select){
+   private static double find511(double[] x, double[] y){
       GaussianFitter fitter = 
          new GaussianFitter(new LevenbergMarquardtOptimizer());
       double[] 
-         x = new double[PEAK_511_WIDTH],
-         y = new double[PEAK_511_WIDTH],
          fit_params = {
             Constants.DOUBLE_FILL, Constants.DOUBLE_FILL, Constants.DOUBLE_FILL
          };
@@ -168,18 +205,6 @@ public class SpectrumExtract {
       int
          high_cnt = 0;
       
-      //fill an array of points to fit
-      for(
-         int pnt_i = 0, chan_i = select[0]; 
-         pnt_i < PEAK_511_WIDTH; 
-         pnt_i++, chan_i++
-      ){
-        y[pnt_i] = 
-           spec_in[chan_i] / 
-           (RAW_EDGES[2][chan_i + 1] - RAW_EDGES[2][chan_i]);
-        x[pnt_i] = SSPC_MIDPOINTS[chan_i];
-      }
-
       // guess at a linear background
       m = (y[PEAK_511_WIDTH - 1] - y[0]) / (x[PEAK_511_WIDTH - 1] - x[0]);
       b = y[0] - m * x[0];
@@ -189,7 +214,9 @@ public class SpectrumExtract {
         y[chan_i] -= (m * x[chan_i] + b);
         apex = Math.max(apex, y[chan_i]);
       }
-      
+for(int i = 0; i < x.length; i++){
+   CDF_Gen.log.writeln(x[i] + ", " + y[i]); 
+}
       //find a group of points that are near the peak
       for(int chan_i = 0; chan_i < PEAK_511_WIDTH; chan_i++){
          if(y[chan_i] > (0.5 * apex)){
