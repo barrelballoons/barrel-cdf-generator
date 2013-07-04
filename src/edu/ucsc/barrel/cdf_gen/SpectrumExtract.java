@@ -25,6 +25,7 @@ Description:
 package edu.ucsc.barrel.cdf_gen;
 
 import java.util.Arrays;
+import java.lang.ArrayIndexOutOfBoundsException;
 import org.apache.commons.math3.fitting.GaussianFitter;
 import org.apache.commons.math3.optim.nonlinear.vector.
           jacobian.LevenbergMarquardtOptimizer;
@@ -196,13 +197,21 @@ for(int i = 2; i < x.length - 2; i++){
       }
 
       //do the curve fit
-      fit_params[1] = x[apex]; //guess for peak location
-      for(int bin_i = apex - 3; bin_i < apex + 3; bin_i++){
-         fitter.addObservedPoint(x[bin_i],  y[bin_i]);
-         CDF_Gen.log.writeln(x[bin_i] + ", " + y[bin_i]);
+      try{
+         fit_params[1] = x[apex]; //guess for peak location
+         for(int bin_i = apex - 3; bin_i < apex + 3; bin_i++){
+            fitter.addObservedPoint(x[bin_i],  y[bin_i]);
+            CDF_Gen.log.writeln(x[bin_i] + ", " + y[bin_i]);
+         }
+         fit_params = fitter.fit(fit_params);
       }
-      fit_params = fitter.fit(fit_params);
-System.out.println(apex);
+      catch(ArrayIndexOutOfBoundsException ex){
+         System.out.println(
+            "Payload ID: " + CDF_Gen.getSetting("currentPayload") + 
+            " Date: " + CDF_Gen.getSetting("date"));
+         System.out.println("Gaussian out of bounds: " + apex);
+         fit_params[1] = Constants.DOUBLE_FILL;
+      }
       return fit_params[1];
    }
 
