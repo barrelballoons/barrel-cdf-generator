@@ -201,7 +201,6 @@ public class SpectrumExtract {
          fit_params[1] = x[apex]; //guess for peak location
          for(int bin_i = apex - 3; bin_i < apex + 3; bin_i++){
             fitter.addObservedPoint(x[bin_i],  y[bin_i]);
-         //   CDF_Gen.log.writeln(x[bin_i] + ", " + y[bin_i]);
          }
          fit_params = fitter.fit(fit_params);
       }
