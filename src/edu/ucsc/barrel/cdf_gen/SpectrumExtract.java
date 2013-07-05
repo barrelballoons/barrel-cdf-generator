@@ -155,13 +155,15 @@ public class SpectrumExtract {
       GaussianFitter fitter = 
          new GaussianFitter(new LevenbergMarquardtOptimizer());
       double[] 
-         fit_params = {10, Constants.DOUBLE_FILL, 1};
+         fit_params = {10, Constants.DOUBLE_FILL, 1},
+         curve = new double[PEAK_511_WIDTH - 4];
       int[]
          high_area = new int[PEAK_511_WIDTH];
       double
          m, b, 
-         this_curvature = 0,
-         low_curvature = 0;
+         slope = 0,
+         this_low= 0,
+         last_low = 0;
       int
          apex = 0,
          high_cnt = 0;
@@ -178,21 +180,39 @@ public class SpectrumExtract {
          );
       }
 /*
-for(int i = 2; i < x.length - 2; i++){
-   CDF_Gen.log.writeln(
+for(int i = 2; i < x.length - 4; i++){
+   System.out.println(
       x[i] + ", " + 
       y[i] + ", " +
       (y[i + 1] - y[i]) + ", " +
-      (y[i + 2] - (2 * y[i]) + y[i - 2])
+      (y[i + 2] - (2 * y[i]) + y[i - 2]) + ", " +
+    //  (value += ((y[i + 2] - (2 * y[i]) + y[i - 2]) - value) / 40)
+      (
+         (
+            (y[i + 2] - (2 * y[i]) + y[i - 2]) + 
+            (y[i + 2 + 1] - (2 * y[i + 1]) + y[i - 2 + 1]) + 
+            (y[i + 2 + 2] - (2 * y[i + 2]) + y[i - 2 + 2])
+         )/3  
+      )
    ); 
 }
 */
+
       //take the second derivitave to find peak
       for(int bin_i = 2; bin_i < x.length - 2; bin_i++){
-         this_curvature = y[bin_i + 2] - (2 * y[bin_i]) + y[bin_i - 2];
-         if(this_curvature < low_curvature){
-            low_curvature = this_curvature;
-            apex = bin_i;
+         curve[bin_i - 2] = y[bin_i + 2] - (2 * y[bin_i]) + y[bin_i - 2];
+      }
+      
+      //find low point of second derivitave using moving average
+      this_low  = (curve[0] + curve[1] + curve[2]);
+//      CDF_Gen.log.writeln(x[3] + ", " + y[3] + ", " +  this_low);
+      last_low = this_low;
+      for(int bin_i = 2; bin_i < curve.length - 1; bin_i++){
+         this_low += (curve[bin_i + 1] - curve[bin_i - 2]);
+//CDF_Gen.log.writeln(x[bin_i + 2] + ", " + y[bin_i + 2] + ", " + curve[bin_i] + ", " +this_low);
+         if(this_low < last_low){
+            apex = bin_i + 2;
+            last_low = this_low;
          }
       }
 
@@ -201,9 +221,14 @@ for(int i = 2; i < x.length - 2; i++){
          fit_params[1] = x[apex]; //guess for peak location
          for(int bin_i = apex - 3; bin_i < apex + 3; bin_i++){
             fitter.addObservedPoint(x[bin_i],  y[bin_i]);
-            CDF_Gen.log.writeln(x[bin_i] + ", " + y[bin_i]);
+         //   CDF_Gen.log.writeln(x[bin_i] + ", " + y[bin_i]);
          }
          fit_params = fitter.fit(fit_params);
+/*
+if(fit_params[1] < 200){
+   CDF_Gen.log.writeln(fit_params[1] + "---" + x[apex]);
+}
+*/
       }
       catch(ArrayIndexOutOfBoundsException ex){
          System.out.println(
