@@ -2,28 +2,7 @@ Epoch Variable:
 The epoch variables of each file appear to be fairly good. They seem have 
 at least 1 second accuracy at this point, but still need through testing and
 some improvement. 
-One area where epoch will be off is if the frame counter rolls over (whether 
-due to DPU reset or actual frame number roll over). 
-
-Frame Counter Rollover;
-When the frame counter reaches 2^21 it will rollover. This will through off
-any mod40 data and epoch calculation. 
 
 Spectra:
-The channel to energy level conversion seems to be off. Currently this is only
-done with temperature corrections. In the future this will be done with 511 
-line fitting and/or other methods.
-
-Magnetic Coordinates:
-It seems like there are a very large number of bad values in the magnetic
-coordinate file. This needs to be investigated.
-
-Housekeeping Meta-Data:
-Some of the housekeeping values have a minimum allowed value set to 0 even 
-though that variable may go negative. This will prevent out of range points 
-from being displayed in Autoplot.
-
-SSPC "energy" variable:
-There are some out-of-sequence values in this array. The array is used for 
-labeling as a "Depend_1" variable. This will cause a small problem for autoplot 
-users or anyone relying on "Depend_1" for labels.
+The energy calibration is done simply by finding the 511 line and scaling the 
+data. This process will be refined in the future.
