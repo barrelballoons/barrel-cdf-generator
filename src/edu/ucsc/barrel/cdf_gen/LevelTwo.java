@@ -232,6 +232,8 @@ public class LevelTwo{
                   (year + 2000), day_of_year, sec_of_day
                )
             );
+         }else{
+            geo_coord_file.writeln("NaN NaN NaN NaN NaN NaN NaN");
          }
       }
       geo_coord_file.close();
@@ -259,32 +261,48 @@ public class LevelTwo{
                )
             );
          String line;
-         int rec_i = 0;
+         int 
+            rec_i = 0,
+            this_frame = 0,
+            last_frame = 0;
+
          while((line = mag_coord_file.readLine()) != null){
             line = line.trim();
-
-            //make sure the mag coordinates were calculated correctly
             mag_coords = line.split("\\s+");
-            if(mag_coords[8].indexOf("*") == -1){
-               l2[rec_i] = Math.abs(Float.parseFloat(mag_coords[8]));
-            }else{
-               l2[rec_i] = Constants.FLOAT_FILL;
+
+            //check for repeated frame
+            this_frame = Integer.parseInt(mag_coords[0]);
+            if(this_frame != last_frame){
+            //make sure the mag coordinates were calculated correctly
+               if(mag_coords[8].indexOf("*") == -1){
+                  l2[rec_i] = Math.abs(Float.parseFloat(mag_coords[8]));
+               }else{
+                  l2[rec_i] = Constants.FLOAT_FILL;
+               }
+               if(mag_coords[9].indexOf("*") == -1){
+                  mlt2[rec_i] = Float.parseFloat(mag_coords[9]);
+               }else{
+                  mlt2[rec_i] = Constants.FLOAT_FILL;
+               }
+               if(mag_coords[11].indexOf("*") == -1){
+                  l6[rec_i] = Math.abs(Float.parseFloat(mag_coords[11]));
+               }else{
+                  l6[rec_i] = Constants.FLOAT_FILL;
+               }
+               if(mag_coords[12].indexOf("*") == -1){
+                  mlt6[rec_i] = Float.parseFloat(mag_coords[12]);
+               }else{
+                  mlt6[rec_i] = Constants.FLOAT_FILL;
+               }
+
+               last_frame = this_frame;
             }
-            if(mag_coords[9].indexOf("*") == -1){
-               mlt2[rec_i] = Float.parseFloat(mag_coords[9]);
-            }else{
-               mlt2[rec_i] = Constants.FLOAT_FILL;
-            }
-            if(mag_coords[11].indexOf("*") == -1){
-               l6[rec_i] = Math.abs(Float.parseFloat(mag_coords[11]));
-            }else{
-               l6[rec_i] = Constants.FLOAT_FILL;
-            }
-            if(mag_coords[12].indexOf("*") == -1){
-               mlt6[rec_i] = Float.parseFloat(mag_coords[12]);
-            }else{
-               mlt6[rec_i] = Constants.FLOAT_FILL;
-            }
+            else{
+               l2[rec_i] = Constants.FLOAT_FILL; 
+               l6[rec_i] = Constants.FLOAT_FILL; 
+               mlt2[rec_i] = Constants.FLOAT_FILL; 
+               mlt6[rec_i] = Constants.FLOAT_FILL; 
+            } 
 
             rec_i++;
          }
@@ -879,12 +897,9 @@ public class LevelTwo{
             dpu_temp = 20;
          }
          
-         //find the bin that contains the 511 line
-         //peak = spectrum.find511(mspc_rebin[mspc_rec], offset);
-
          //get the adjusted bin edges
-         chan_edges[lc_rec] = 
-            spectrum.createBinEdges(0, scint_temp, dpu_temp, peak);
+         //chan_edges[lc_rec] = 
+         //   spectrum.createBinEdges(0, /*scint_temp, dpu_temp, */peak);
 
          //write the spectrum to the new array
          if(data.lc1_raw[lc_rec + first] != Constants.FSPC_RAW_FILL){
@@ -1009,8 +1024,9 @@ public class LevelTwo{
 
       
       //rebin the mspc spectra
-      for(int mspc_rec = 0, hkpg_rec = 0; mspc_rec < numOfRecs; mspc_rec++){
-         
+      for(int mspc_rec = 0, sspc_rec = 0; mspc_rec < numOfRecs; mspc_rec++){
+        
+         /*
          //get temperatures
          hkpg_rec = (mspc_rec + first) * 4 / 40; //convert from mod4 to mod40
          if(data.hkpg_raw[Constants.T0][hkpg_rec] != Constants.HKPG_FILL){
@@ -1028,13 +1044,20 @@ public class LevelTwo{
                data.hkpg_offset[Constants.T5];
          }else{
             dpu_temp = 20;
-         }
+         }*/
          
-         //find the bin that contains the 511 line
-         //peak = spectrum.find511(mspc_rebin[mspc_rec], offset);
-      
+         //incremint sspc_rec if needed
+         if(
+            (data.frame_mod4[mspc_rec] - data.frame_mod4[mspc_rec] % 32) != 
+            data.frame_mod32[sspc_rec]
+         ){
+            sspc_rec++;
+         }
+
          //get the adjusted bin edges
-         old_edges = spectrum.createBinEdges(1, scint_temp, dpu_temp, peak);
+         old_edges = spectrum.createBinEdges(
+            1, /*scint_temp, dpu_temp, */ data.peak511_bin[sspc_rec]
+         );
 
          //rebin the spectrum
          mspc_rebin[mspc_rec] = spectrum.rebin(
@@ -1126,23 +1149,25 @@ public class LevelTwo{
       CDF cdf;
       Variable var;
       
-      double peak = -1, scint_temp = 0, dpu_temp = 0;
-      
-      int offset = 90;
+      double scint_temp = 0, dpu_temp = 0;
 
       int numOfRecs = last - first;
       double[][] sspc_rebin = new double[numOfRecs][256];
-      double[] old_edges = new double[257];
-      double[] std_edges = SpectrumExtract.stdEdges(2, 2.4414);
+      double[] 
+         old_edges, 
+         peak = new double[numOfRecs],
+         std_edges = SpectrumExtract.stdEdges(2, 2.4414);
       
       int[] 
          frameGroup = new int[numOfRecs],
          q = new int[numOfRecs];
       long[] epoch = new long[numOfRecs];
 
+      System.out.println("\nSaving SSPC...");
+
       //rebin the sspc spectra
       for(int sspc_rec = 0, hkpg_rec = 0; sspc_rec < numOfRecs; sspc_rec++){
-         //get temperatures
+/*         //get temperatures
          hkpg_rec = (sspc_rec + first) * 32 / 40; //convert from mod32 to mod40
          if(data.hkpg_raw[Constants.T0][hkpg_rec] != Constants.HKPG_FILL){
             scint_temp = 
@@ -1160,12 +1185,9 @@ public class LevelTwo{
          }else{
             dpu_temp = 20;
          }
-
-         //find the bin that contains the 511 line
-         //peak = spectrum.find511(sspc_rebin[sspc_rec], offset);
-      
+*/    
          //get the adjusted bin edges
-         old_edges = spectrum.createBinEdges(2, scint_temp, dpu_temp, peak);
+         old_edges = spectrum.createBinEdges(2, data.peak511_bin[sspc_rec]);
          
          //rebin the spectum
          sspc_rebin[sspc_rec] = spectrum.rebin(
@@ -1183,12 +1205,12 @@ public class LevelTwo{
       }
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
+         peak[rec_i] = data.peak511_bin[data_i];
          frameGroup[rec_i] = data.frame_mod32[data_i];
          epoch[rec_i] = data.epoch_mod32[data_i] - Constants.SSPC_ACCUM;
          q[rec_i] = data.sspc_q[data_i];
       }
 
-      System.out.println("\nSaving SSPC...");
 
       String srcName = 
          "cdf_skels/l2/barCLL_PP_S_l2_sspc_YYYYMMDD_v++.cdf";
@@ -1217,6 +1239,16 @@ public class LevelTwo{
          new long[] {256, 1}, 
          new long[] {1}, 
          sspc_rebin
+      );
+
+      var = cdf.getVariable("Peak_511");
+      System.out.println("Peak_511...");
+      var.putHyperData(
+         var.getNumWrittenRecords(), numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {256, 1}, 
+         new long[] {1}, 
+         peak
       );
 
       var = cdf.getVariable("FrameGroup");

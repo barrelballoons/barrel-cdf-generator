@@ -39,6 +39,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -192,6 +193,25 @@ public class CDF_Gen implements CDFConstants{
                }
                
                if(getSetting("L").indexOf("2") > -1){
+                  //create a set of linear models that track the location of
+                  //the 511 line and store them in the DataHolder object
+                  int 
+                     total_specs = data.getSize("mod32"),
+                     start_i = 0,
+                     stop_i = 0,
+                     max_recs = 10;
+                  
+                  System.out.println("Starting Level Two...");
+                  System.out.println("Locating 511 line...");
+
+                  while(start_i < total_specs){
+                     stop_i = Math.min(total_specs, start_i + max_recs); 
+                     SpectrumExtract.do511Fits(start_i, stop_i, data);
+                     start_i = stop_i;
+                  }
+
+                  smoothData(data.peak511_bin, 80);
+
                   //create Level Two
                   LevelTwo L2 =
 						   new LevelTwo(
@@ -212,6 +232,62 @@ public class CDF_Gen implements CDFConstants{
       log.close();
    }
    
+   public static void smoothData(double[] input_data, int smooth_factor){
+      int 
+         size = data.getSize("mod32"),
+         step_size = 1, 
+         start = 0;
+      double 
+         m, b, //values used for interpolating data        
+         adjusted_smooth, //smoothing factor that is adjusted by gap length
+         last_value = Constants.DOUBLE_FILL, new_value = Constants.DOUBLE_FILL;
+
+      //find first good value
+      for(start = 0; start < size; start++){
+         if(data.peak511_bin[start] != Constants.DOUBLE_FILL){
+            new_value = data.peak511_bin[start];
+            last_value = data.peak511_bin[start];
+            break;
+         }
+      }
+
+      //fill any missing data before the first point
+      Arrays.fill(data.peak511_bin, 0, start, new_value);
+
+      for(int filter_i = start; filter_i < size; filter_i++){
+        if(data.peak511_bin[filter_i] == Constants.DOUBLE_FILL){
+            //temporarily fill the gap with the last good value 
+            //this is done in case there is not another good value
+            //to use for interpolation
+            data.peak511_bin[filter_i] = last_value;
+            step_size++;
+         }else{
+            adjusted_smooth = (double)smooth_factor / (double)step_size;
+            last_value = new_value;
+            new_value = 
+               last_value + 
+               (data.peak511_bin[filter_i] - last_value) / adjusted_smooth;
+            data.peak511_bin[filter_i] = new_value;
+            
+            //fill any gaps
+            if(step_size > 1){
+               m = (last_value - new_value) / step_size;
+               b = new_value - (m * filter_i);
+
+               for(
+                  int fill_i = filter_i - step_size; 
+                  fill_i < filter_i; 
+                  fill_i++
+               ){
+                  data.peak511_bin[fill_i] = m * fill_i + b;
+               }
+
+               step_size = 1;
+            }
+         }
+      }
+   }
+
    public static byte[] hexToByte(String s) {
       int len = s.length();
       byte[] bytes = new byte[len / 2];
@@ -243,7 +319,8 @@ public class CDF_Gen implements CDFConstants{
         	   setPair = line.split("#");
             line = setPair[0];
             
-            //get the key and value pair. Make sure there is only one pair per line
+            //get the key and value pair. 
+            //Make sure there is only one pair per line
             setPair = line.split("=");
             if(setPair.length == 2){
                //remove leading and trailing whitespace from key and value
