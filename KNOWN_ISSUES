@@ -6,9 +6,3 @@ some improvement.
 Spectra:
 The energy calibration is done simply by finding the 511 line and scaling the 
 data. This process will be refined in the future.
-
-Housekeeping Meta-Data:
-Some of the housekeeping values have a minimum allowed value set to 0 even 
-though that variable may go negative. This will prevent out of range points 
-from being displayed in Autoplot.
-
