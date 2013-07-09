@@ -75,19 +75,17 @@ public class DataHolder{
   public int[] 
       ms_of_week = new int[MAX_FRAMES / 4]; 
    public long[][]
-      hkpg_raw = new long[40][MAX_FRAMES / 40],
-      rcnt_raw = new long[4][MAX_FRAMES / 4];
+      hkpg = new long[40][MAX_FRAMES / 40],
+      rcnt = new long[4][MAX_FRAMES / 4];
    public int[][]
-      gps_raw = new int[4][MAX_FRAMES / 4]; 
+      gps = new int[4][MAX_FRAMES / 4]; 
    public int[]
-      magx_raw = new int[MAX_FRAMES * 4],
-      magy_raw = new int[MAX_FRAMES * 4],
-      magz_raw = new int[MAX_FRAMES * 4];
+      magx = new int[MAX_FRAMES * 4],
+      magy = new int[MAX_FRAMES * 4],
+      magz = new int[MAX_FRAMES * 4];
    public double[]
       time_model_slope = new double[MAX_FRAMES],
       time_model_intercept = new double[MAX_FRAMES];
-   public double[][]
-      hkpg = new double[36][MAX_FRAMES / 40];
    public int[]
       frame_1Hz = new int[MAX_FRAMES],
       frame_4Hz = new int[MAX_FRAMES * 4],
@@ -109,13 +107,13 @@ public class DataHolder{
       mspc_q = new int[MAX_FRAMES / 4],
       sspc_q = new int[MAX_FRAMES / 32];
    public int[][] 
-      mspc_raw = new int[MAX_FRAMES / 4][48],
-      sspc_raw = new int[MAX_FRAMES / 32][256];
+      mspc = new int[MAX_FRAMES / 4][48],
+      sspc = new int[MAX_FRAMES / 32][256];
    public int[] 
-      lc1_raw = new int[MAX_FRAMES * 20],
-      lc2_raw = new int[MAX_FRAMES * 20],
-      lc3_raw = new int[MAX_FRAMES * 20],
-      lc4_raw = new int[MAX_FRAMES * 20];
+      lc1 = new int[MAX_FRAMES * 20],
+      lc2 = new int[MAX_FRAMES * 20],
+      lc3 = new int[MAX_FRAMES * 20],
+      lc4 = new int[MAX_FRAMES * 20];
    public double[]
       peak511_bin = new double[MAX_FRAMES / 32];
 
@@ -242,22 +240,22 @@ public class DataHolder{
       Arrays.fill(payID, Constants.PAYID_FILL);
       Arrays.fill(ver, Constants.VER_FILL);
       Arrays.fill(pps, Constants.PPS_FILL);
-      Arrays.fill(magx_raw, Constants.MAG_FILL);
-      Arrays.fill(magy_raw, Constants.MAG_FILL);
-      Arrays.fill(magz_raw, Constants.MAG_FILL);
+      Arrays.fill(magx, Constants.MAG_FILL);
+      Arrays.fill(magy, Constants.MAG_FILL);
+      Arrays.fill(magz, Constants.MAG_FILL);
       Arrays.fill(ms_of_week, Constants.MS_WEEK_FILL);
-      Arrays.fill(gps_raw[Constants.TIME_I], Constants.MS_WEEK_FILL);
-      Arrays.fill(gps_raw[Constants.LAT_I], Constants.LAT_RAW_FILL);
-      Arrays.fill(gps_raw[Constants.LON_I], Constants.LON_RAW_FILL);
-      Arrays.fill(gps_raw[Constants.ALT_I], Constants.ALT_RAW_FILL);
-      Arrays.fill(lc1_raw, Constants.FSPC_RAW_FILL);
-      Arrays.fill(lc2_raw, Constants.FSPC_RAW_FILL);
-      Arrays.fill(lc3_raw, Constants.FSPC_RAW_FILL);
-      Arrays.fill(lc4_raw, Constants.FSPC_RAW_FILL);
-      Arrays.fill(rcnt_raw[0], Constants.RCNT_FILL);
-      Arrays.fill(rcnt_raw[1], Constants.RCNT_FILL);
-      Arrays.fill(rcnt_raw[2], Constants.RCNT_FILL);
-      Arrays.fill(rcnt_raw[3], Constants.RCNT_FILL);
+      Arrays.fill(gps[Constants.TIME_I], Constants.MS_WEEK_FILL);
+      Arrays.fill(gps[Constants.LAT_I], Constants.LAT_RAW_FILL);
+      Arrays.fill(gps[Constants.LON_I], Constants.LON_RAW_FILL);
+      Arrays.fill(gps[Constants.ALT_I], Constants.ALT_RAW_FILL);
+      Arrays.fill(lc1, Constants.FSPC_RAW_FILL);
+      Arrays.fill(lc2, Constants.FSPC_RAW_FILL);
+      Arrays.fill(lc3, Constants.FSPC_RAW_FILL);
+      Arrays.fill(lc4, Constants.FSPC_RAW_FILL);
+      Arrays.fill(rcnt[0], Constants.RCNT_FILL);
+      Arrays.fill(rcnt[1], Constants.RCNT_FILL);
+      Arrays.fill(rcnt[2], Constants.RCNT_FILL);
+      Arrays.fill(rcnt[3], Constants.RCNT_FILL);
       Arrays.fill(sats, Constants.SATS_FILL);
       Arrays.fill(offset, Constants.LEAP_SEC_FILL);
       Arrays.fill(termStat, Constants.TERM_STAT_FILL);
@@ -266,15 +264,12 @@ public class DataHolder{
       Arrays.fill(weeks, Constants.WEEKS_FILL);
       Arrays.fill(cmdCnt, Constants.CMD_CNT_FILL);
       for(int var_i = 0; var_i < 40; var_i++){
-         Arrays.fill(hkpg_raw[var_i], Constants.HKPG_FILL);
+         Arrays.fill(hkpg[var_i], Constants.HKPG_FILL);
       }
-      for(int var_i = 0; var_i < 36; var_i++){
-         Arrays.fill(hkpg[var_i], Constants.DOUBLE_FILL);
-      }
-      for(int[] rec: mspc_raw){
+      for(int[] rec: mspc){
          Arrays.fill(rec, Constants.MSPC_RAW_FILL);
       }
-      for(int[] rec: sspc_raw){
+      for(int[] rec: sspc){
          Arrays.fill(rec, Constants.SSPC_RAW_FILL);
       }
 
@@ -495,20 +490,20 @@ public class DataHolder{
       }
 
       //get gps info: 32 bits of mod4 gps data followed by 16 bits of pps data
-      gps_raw[mod4][rec_num_mod4] =
+      gps[mod4][rec_num_mod4] =
          frame.shiftRight(1632).and(BigInteger.valueOf(4294967295L)).
             intValue();
 
       switch(mod4){
          case Constants.ALT_I: 
             if(
-               (gps_raw[mod4][rec_num_mod4] < Constants.ALT_RAW_MIN) ||
-               (gps_raw[mod4][rec_num_mod4] > Constants.ALT_RAW_MAX)
+               (gps[mod4][rec_num_mod4] < Constants.ALT_RAW_MIN) ||
+               (gps[mod4][rec_num_mod4] > Constants.ALT_RAW_MAX)
             ){
-               gps_raw[mod4][rec_num_mod4] = Constants.ALT_RAW_FILL;
+               gps[mod4][rec_num_mod4] = Constants.ALT_RAW_FILL;
                gps_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;  
             }
-            else if(gps_raw[mod4][rec_num_mod4] < Constants.MIN_SCI_ALT){
+            else if(gps[mod4][rec_num_mod4] < Constants.MIN_SCI_ALT){
                gps_q[rec_num_mod4] |= Constants.LOW_ALT;
                pps_q[rec_num_1Hz] |= Constants.LOW_ALT;
                hkpg_q[rec_num_mod40] |= Constants.LOW_ALT;
@@ -525,10 +520,10 @@ public class DataHolder{
             break;
          case Constants.TIME_I: 
             if(
-               (gps_raw[mod4][rec_num_mod4] < Constants.MS_WEEK_MIN) ||
-               (gps_raw[mod4][rec_num_mod4] > Constants.MS_WEEK_MAX)
+               (gps[mod4][rec_num_mod4] < Constants.MS_WEEK_MIN) ||
+               (gps[mod4][rec_num_mod4] > Constants.MS_WEEK_MAX)
             ){
-               gps_raw[mod4][rec_num_mod4] = Constants.MS_WEEK_FILL;
+               gps[mod4][rec_num_mod4] = Constants.MS_WEEK_FILL;
                gps_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;  
             }
             
@@ -544,14 +539,14 @@ public class DataHolder{
                }
             }
 
-            ms_of_week[rec_num_mod4] = gps_raw[Constants.TIME_I][rec_num_mod4];
+            ms_of_week[rec_num_mod4] = gps[Constants.TIME_I][rec_num_mod4];
             break;
          case Constants.LAT_I: 
             if(
-               (gps_raw[mod4][rec_num_mod4] < Constants.LAT_RAW_MIN) ||
-               (gps_raw[mod4][rec_num_mod4] > Constants.LAT_RAW_MAX)
+               (gps[mod4][rec_num_mod4] < Constants.LAT_RAW_MIN) ||
+               (gps[mod4][rec_num_mod4] > Constants.LAT_RAW_MAX)
             ){
-               gps_raw[mod4][rec_num_mod4] = Constants.LAT_RAW_FILL;
+               gps[mod4][rec_num_mod4] = Constants.LAT_RAW_FILL;
                gps_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;  
             }
 
@@ -568,10 +563,10 @@ public class DataHolder{
             break;
          case Constants.LON_I: 
             if(
-               (gps_raw[mod4][rec_num_mod4] < Constants.LON_RAW_MIN) ||
-               (gps_raw[mod4][rec_num_mod4] > Constants.LON_RAW_MAX)
+               (gps[mod4][rec_num_mod4] < Constants.LON_RAW_MIN) ||
+               (gps[mod4][rec_num_mod4] > Constants.LON_RAW_MAX)
             ){
-               gps_raw[mod4][rec_num_mod4] = Constants.LON_RAW_FILL;
+               gps[mod4][rec_num_mod4] = Constants.LON_RAW_FILL;
                gps_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;  
             }
 
@@ -615,75 +610,75 @@ public class DataHolder{
 
       //mag data 4 sets of xyz vectors. 24 bits/component
       for(int i = 0; i < 4; i++){
-         magx_raw[rec_num_4Hz + i] = 
+         magx[rec_num_4Hz + i] = 
             frame.shiftRight(1592 - (72 * i)).
             and(BigInteger.valueOf(16777215)).intValue();
-         magy_raw[rec_num_4Hz + i] = 
+         magy[rec_num_4Hz + i] = 
             frame.shiftRight(1568 - (72 * i)).
             and(BigInteger.valueOf(16777215)).intValue();
-         magz_raw[rec_num_4Hz] = 
+         magz[rec_num_4Hz] = 
             frame.shiftRight(1544 - (72 * i)).
             and(BigInteger.valueOf(16777215)).intValue();
-         magx_raw[rec_num_4Hz + i] = 
+         magx[rec_num_4Hz + i] = 
             frame.shiftRight(1592 - (72 * i)).
             and(BigInteger.valueOf(16777215)).intValue();
-         magy_raw[rec_num_4Hz + i] = 
+         magy[rec_num_4Hz + i] = 
             frame.shiftRight(1568 - (72 * i)).
             and(BigInteger.valueOf(16777215)).intValue();
-         magz_raw[rec_num_4Hz + i] = 
+         magz[rec_num_4Hz + i] = 
             frame.shiftRight(1544 - (72 * i)).
             and(BigInteger.valueOf(16777215)).intValue();
-         magx_raw[rec_num_4Hz + i] = 
+         magx[rec_num_4Hz + i] = 
             frame.shiftRight(1592 - (72 * i)).
             and(BigInteger.valueOf(16777215)).intValue();
-         magy_raw[rec_num_4Hz + i] = 
+         magy[rec_num_4Hz + i] = 
             frame.shiftRight(1568 - (72 * i)).
             and(BigInteger.valueOf(16777215)).intValue();
-         magz_raw[rec_num_4Hz + i] = 
+         magz[rec_num_4Hz + i] = 
             frame.shiftRight(1544 - (72 * i)).
             and(BigInteger.valueOf(16777215)).intValue();
-         magx_raw[rec_num_4Hz + i] = 
+         magx[rec_num_4Hz + i] = 
             frame.shiftRight(1592 - (72 * i)).
             and(BigInteger.valueOf(16777215)).intValue();
-         magy_raw[rec_num_4Hz + i] = 
+         magy[rec_num_4Hz + i] = 
             frame.shiftRight(1568 - (72 * i)).
             and(BigInteger.valueOf(16777215)).intValue();
-         magz_raw[rec_num_4Hz + i] = 
+         magz[rec_num_4Hz + i] = 
             frame.shiftRight(1544 - (72 * i)).
             and(BigInteger.valueOf(16777215)).intValue();
          
          if(
-            (magx_raw[rec_num_4Hz] < Constants.MAG_MIN) ||
-            (magx_raw[rec_num_4Hz] > Constants.MAG_MAX)
+            (magx[rec_num_4Hz] < Constants.MAG_MIN) ||
+            (magx[rec_num_4Hz] > Constants.MAG_MAX)
          ){
-            magx_raw[rec_num_4Hz] = Constants.MAG_FILL;
+            magx[rec_num_4Hz] = Constants.MAG_FILL;
             magn_q[rec_num_4Hz] |= Constants.OUT_OF_RANGE;
          }
          if(
-            (magy_raw[rec_num_4Hz] < Constants.MAG_MIN) ||
-            (magy_raw[rec_num_4Hz] > Constants.MAG_MAX)
+            (magy[rec_num_4Hz] < Constants.MAG_MIN) ||
+            (magy[rec_num_4Hz] > Constants.MAG_MAX)
          ){
-            magy_raw[rec_num_4Hz] = Constants.MAG_FILL;
+            magy[rec_num_4Hz] = Constants.MAG_FILL;
             magn_q[rec_num_4Hz] |= Constants.OUT_OF_RANGE;
          }
          if(
-            (magz_raw[rec_num_4Hz] < Constants.MAG_MIN) ||
-            (magz_raw[rec_num_4Hz] > Constants.MAG_MAX)
+            (magz[rec_num_4Hz] < Constants.MAG_MIN) ||
+            (magz[rec_num_4Hz] > Constants.MAG_MAX)
          ){
-            magz_raw[rec_num_4Hz] = Constants.MAG_FILL;
+            magz[rec_num_4Hz] = Constants.MAG_FILL;
             magn_q[rec_num_4Hz] |= Constants.OUT_OF_RANGE;
          }
       }
 
       
       //mod40 housekeeping data: 16bits
-      hkpg_raw[mod40][rec_num_mod40] = 
+      hkpg[mod40][rec_num_mod40] = 
          frame.shiftRight(1312).and(BigInteger.valueOf(65535)).longValue();
       if(
-         (hkpg_raw[mod40][rec_num_mod40] < Constants.HKPG_MIN) ||
-         (hkpg_raw[mod40][rec_num_mod40] > Constants.HKPG_MAX)
+         (hkpg[mod40][rec_num_mod40] < Constants.HKPG_MIN) ||
+         (hkpg[mod40][rec_num_mod40] > Constants.HKPG_MAX)
       ){
-         hkpg_raw[mod40][rec_num_mod40] = Constants.HKPG_FILL;
+         hkpg[mod40][rec_num_mod40] = Constants.HKPG_FILL;
          hkpg_q[rec_num_mod40] |= Constants.OUT_OF_RANGE;
          CDF_Gen.log.writeln(mod40 + "");
       }
@@ -691,9 +686,9 @@ public class DataHolder{
       switch(mod40){
          case 36:
             sats[rec_num_mod40] = 
-               (short)(hkpg_raw[mod40][rec_num_mod40] >> 8);
+               (short)(hkpg[mod40][rec_num_mod40] >> 8);
             offset[rec_num_mod40] = 
-               (short)(hkpg_raw[mod40][rec_num_mod40] & 255);
+               (short)(hkpg[mod40][rec_num_mod40] & 255);
 
             if(
                (sats[rec_num_mod40] < Constants.SATS_MIN) ||
@@ -714,7 +709,7 @@ public class DataHolder{
             break;
          case 37:
             weeks[rec_num_mod40] = 
-               (int)hkpg_raw[mod40][rec_num_mod40];
+               (int)hkpg[mod40][rec_num_mod40];
             if(
                (weeks[rec_num_mod40] < Constants.WEEKS_MIN) ||
                (weeks[rec_num_mod40] > Constants.WEEKS_MAX)
@@ -726,9 +721,9 @@ public class DataHolder{
             break;
          case 38:
             termStat[rec_num_mod40] = 
-               (short)(hkpg_raw[mod40][rec_num_mod40] >> 15);
+               (short)(hkpg[mod40][rec_num_mod40] >> 15);
             cmdCnt[rec_num_mod40] = 
-               (int)(hkpg_raw[mod40][rec_num_mod40] & 32767);
+               (int)(hkpg[mod40][rec_num_mod40] & 32767);
             if(
                (termStat[rec_num_mod40] < Constants.TERM_STAT_MIN) ||
                (termStat[rec_num_mod40] > Constants.TERM_STAT_MAX)
@@ -747,9 +742,9 @@ public class DataHolder{
             break;
          case 39:
             dcdCnt[rec_num_mod40] = 
-               (short)(hkpg_raw[mod40][rec_num_mod40] >> 8);
+               (short)(hkpg[mod40][rec_num_mod40] >> 8);
             modemCnt[rec_num_mod40] = 
-               (short)(hkpg_raw[mod40][rec_num_mod40] & 255);
+               (short)(hkpg[mod40][rec_num_mod40] & 255);
             if(
                (dcdCnt[rec_num_mod40] < Constants.DCD_CNT_MIN) ||
                (dcdCnt[rec_num_mod40] > Constants.DCD_CNT_MAX)
@@ -774,45 +769,45 @@ public class DataHolder{
       //fast spectra: 20 sets of 4 channel data. 
       //ch1 and ch2 are 16 bits, ch3 and ch4 are 8bits 
       for(int lc_i = 0; lc_i < 20; lc_i++){
-         lc1_raw[rec_num_20Hz + lc_i] =
+         lc1[rec_num_20Hz + lc_i] =
             frame.shiftRight(1296 - (48 * lc_i))
                .and(BigInteger.valueOf(65535)).intValue();
-         lc2_raw[rec_num_20Hz + lc_i] =
+         lc2[rec_num_20Hz + lc_i] =
             frame.shiftRight(1280 - (48 * lc_i))
                .and(BigInteger.valueOf(65535)).intValue();
-         lc3_raw[rec_num_20Hz + lc_i] =
+         lc3[rec_num_20Hz + lc_i] =
             frame.shiftRight(1272 - (48 * lc_i))
                .and(BigInteger.valueOf(255)).intValue();
-         lc4_raw[rec_num_20Hz + lc_i] =
+         lc4[rec_num_20Hz + lc_i] =
             frame.shiftRight(1264 - (48 * lc_i))
                .and(BigInteger.valueOf(255)).intValue();
 
          if(
-            (lc1_raw[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
-            (lc1_raw[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            (lc1[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+            (lc1[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
          ){
-            lc1_raw[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+            lc1[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
             fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
          }
          if(
-            (lc2_raw[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
-            (lc2_raw[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            (lc2[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+            (lc2[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
          ){
-            lc2_raw[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+            lc2[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
             fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
          }
          if(
-            (lc3_raw[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
-            (lc3_raw[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            (lc3[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+            (lc3[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
          ){
-            lc3_raw[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+            lc3[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
             fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
          }
          if(
-            (lc4_raw[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
-            (lc4_raw[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            (lc4[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+            (lc4[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
          ){
-            lc4_raw[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+            lc4[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
             fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
          }
       }
@@ -820,14 +815,14 @@ public class DataHolder{
       //medium spectra: 12 channels per frame, 16 bits/channels
       for(int mspc_i = 0, chan_i = 0; mspc_i < 12; mspc_i++){
          chan_i = (mod4 * 12) + mspc_i;
-         mspc_raw[rec_num_mod4][chan_i] =
+         mspc[rec_num_mod4][chan_i] =
                frame.shiftRight(336 - (16 * mspc_i))
                   .and(BigInteger.valueOf(65535)).intValue();
          if(
-            (mspc_raw[rec_num_mod4][chan_i] < Constants.MSPC_RAW_MIN) ||
-            (mspc_raw[rec_num_mod4][chan_i] > Constants.MSPC_RAW_MAX)
+            (mspc[rec_num_mod4][chan_i] < Constants.MSPC_RAW_MIN) ||
+            (mspc[rec_num_mod4][chan_i] > Constants.MSPC_RAW_MAX)
          ){
-            mspc_raw[rec_num_mod4][chan_i] = Constants.MSPC_RAW_FILL;
+            mspc[rec_num_mod4][chan_i] = Constants.MSPC_RAW_FILL;
             mspc_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;
          }
       }
@@ -837,14 +832,14 @@ public class DataHolder{
       //slow spectra: 8 channels per frame, 16 bits/channels
       for(int sspc_i = 0, chan_i = 0; sspc_i < 8; sspc_i++){
          chan_i = (mod32 * 8) + sspc_i;
-         sspc_raw[rec_num_mod32][chan_i] =
+         sspc[rec_num_mod32][chan_i] =
                frame.shiftRight(144 - (16 * sspc_i))
                   .and(BigInteger.valueOf(65535)).intValue();
          if(
-            (sspc_raw[rec_num_mod32][chan_i] < Constants.SSPC_RAW_MIN) ||
-            (sspc_raw[rec_num_mod32][chan_i] > Constants.SSPC_RAW_MAX)
+            (sspc[rec_num_mod32][chan_i] < Constants.SSPC_RAW_MIN) ||
+            (sspc[rec_num_mod32][chan_i] > Constants.SSPC_RAW_MAX)
          ){
-            sspc_raw[rec_num_mod32][chan_i] = Constants.SSPC_RAW_FILL;
+            sspc[rec_num_mod32][chan_i] = Constants.SSPC_RAW_FILL;
             sspc_q[rec_num_mod32] |= Constants.OUT_OF_RANGE;
          }
       }
@@ -852,13 +847,13 @@ public class DataHolder{
       sspc_frames++;
       
       //rate counter: mod4 data, 16bits
-      rcnt_raw[mod4][rec_num_mod4] = 
+      rcnt[mod4][rec_num_mod4] = 
          frame.shiftRight(16).and(BigInteger.valueOf(65535)).longValue();
       if(
-         (rcnt_raw[mod4][rec_num_mod4] < Constants.RCNT_MIN) ||
-         (rcnt_raw[mod4][rec_num_mod4] > Constants.RCNT_MAX)
+         (rcnt[mod4][rec_num_mod4] < Constants.RCNT_MIN) ||
+         (rcnt[mod4][rec_num_mod4] > Constants.RCNT_MAX)
       ){
-         rcnt_raw[mod4][rec_num_mod4] = Constants.RCNT_FILL;
+         rcnt[mod4][rec_num_mod4] = Constants.RCNT_FILL;
          rcnt_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;
       }
    }

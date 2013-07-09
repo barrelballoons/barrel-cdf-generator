@@ -206,20 +206,23 @@ public class LevelZero{
       if(cksm == (0xffff & sum)){ 
          //checksum passed!
          //write to level zero file
-         outFile.write(CDF_Gen.hexToByte(frame));
+         outFile.write(hexToByte(frame));
          
          //add frame to data object
-         CDF_Gen.getDataSet().addFrame(binFrame, dpu_id);
-         
-         //try{
-         //   //save hex frame to the day-long string
-         //   CDF_Gen.L1.extractFrame(frame);
-         //}catch(CDFException ex){
-         //   System.out.println(ex.getMessage());
-         //}
+         CDF_Gen.data.addFrame(binFrame, dpu_id);
       }else{
          System.out.println("Checksum Failed for frame in  " + fileName + "!");
       }
+   }
+   
+   private static byte[] hexToByte(String s) {
+      int len = s.length();
+      byte[] bytes = new byte[len / 2];
+      for (int i = 0; i < len; i += 2) {
+          bytes[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+                               + Character.digit(s.charAt(i+1), 16));
+      }
+      return bytes;
    }
    
    //close the output file when done and 
@@ -227,11 +230,6 @@ public class LevelZero{
    public void finish() throws IOException{
       if (outFile != null) {
          outFile.close();
-         //try{
-         //   CDF_Gen.L1.finalize();
-         //}catch(CDFException ex){
-         //   System.out.println(ex.getMessage());
-         //}
       }
    }
 }
