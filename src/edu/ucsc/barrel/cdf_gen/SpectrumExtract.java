@@ -34,6 +34,8 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 public class SpectrumExtract {
 
+   private SpectrumExtract(){}
+
    //create uncalibrated bin edges
    private static final double[][] RAW_EDGES = {
       {0, 75, 230, 350, 620},
@@ -105,9 +107,9 @@ public class SpectrumExtract {
       PEAK_511_START = 90,
       PEAK_511_WIDTH = 50;
 
-   public SpectrumExtract(){}
+   public static void do511Fits(int start, int stop){ 
+      DataHolder data = CDF_Gen.data;
 
-   public static void do511Fits(int start, int stop, DataHolder data){ 
       int length = stop - start;
       int max_cnts = 250 * length;
 
@@ -132,7 +134,7 @@ public class SpectrumExtract {
          if((data.sspc_q[spec_i] & Constants.PART_SPEC) == 0){
             for(int chan_i = 0; chan_i < PEAK_511_WIDTH; chan_i++){
                search_spec[chan_i] += 
-                  data.sspc_raw[spec_i][chan_i + PEAK_511_START];
+                  data.sspc[spec_i][chan_i + PEAK_511_START];
                //check to see if it is likely the 511 line will be washed out
                if(search_spec[chan_i] > max_cnts){
                   for(int peak_i = start; peak_i < stop; peak_i++){

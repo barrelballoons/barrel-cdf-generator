@@ -40,7 +40,7 @@ public class DataCollector{
    private ArrayList<String> urls = new ArrayList<String>();
    private ArrayList<String> serverList = new ArrayList<String>();
    private String outDir = ".";
-   private String outFile = "default";
+   private String outFile;
    private String currentPayload;
    private String currentDate;
    
@@ -79,6 +79,7 @@ public class DataCollector{
    //If the output directory exists, get a listing and delete each file
    private void testOutputDir(File tempDir){
       if(tempDir.exists()){
+         //if the output directory exists, delete all contents
          String[] list = tempDir.list();
          for(String list_i : list){
             File tempFile = new File(outDir + "/" + list_i);

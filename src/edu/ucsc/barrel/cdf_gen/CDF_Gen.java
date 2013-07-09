@@ -26,32 +26,21 @@ Description:
 
 package edu.ucsc.barrel.cdf_gen;
 
-import gsfc.nssdc.cdf.CDF;
-import gsfc.nssdc.cdf.CDFConstants;
-import gsfc.nssdc.cdf.CDFException;
-import gsfc.nssdc.cdf.Variable;
-import gsfc.nssdc.cdf.util.CDFTT2000;
-
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CDF_Gen implements CDFConstants{
+public class CDF_Gen{
    
-   //custom objects
-   private static DataHolder data;
+   public static DataHolder data;
    private static DataCollector dataPull;
    private static LevelZero L0;
    
-   //private members
    private static ArrayList<String> servers = new ArrayList<String>();
    private static ArrayList<String> payloads = new ArrayList<String>();
    private static Map<String, String> settings = new HashMap<String, String>();
@@ -64,12 +53,6 @@ public class CDF_Gen implements CDFConstants{
    public static String L2_Dir;
    public static Logger log;
    
-   //List of types of CDF files
-   public static String[] fileTypes = 
-      {"magn","rcnt","ephm","fspc","mspc","sspc","hkpg","pps-"};
-   
-   public static DataHolder getDataSet(){return data;}
-   
    public static void main(String[] args){
       int time_cnt = 0;
       //array to hold payload id, lauch order, and launch site
@@ -81,7 +64,7 @@ public class CDF_Gen implements CDFConstants{
       //ensure there is some user input
       if(args.length == 0){
          System.out.println(
-            "Usage: java -jar cdf_gen.jar ini=<ini file> date=<date>"
+            "Usage: java -jar cdf_gen.jar ini=<ini file> date=<date> L=<levels>"
          );
          System.exit(0);
       }
@@ -140,6 +123,8 @@ public class CDF_Gen implements CDFConstants{
             //download each file after the URL list is made
             dataPull.getFiles();
          }else{
+            //a telemetry file was provided so instead of creating one we will
+            //just change the tlm directory
             tlm_Dir = getSetting("local");
          }
          
@@ -206,7 +191,7 @@ public class CDF_Gen implements CDFConstants{
 
                   while(start_i < total_specs){
                      stop_i = Math.min(total_specs, start_i + max_recs); 
-                     SpectrumExtract.do511Fits(start_i, stop_i, data);
+                     SpectrumExtract.do511Fits(start_i, stop_i);
                      start_i = stop_i;
                   }
 
@@ -288,16 +273,6 @@ public class CDF_Gen implements CDFConstants{
       }
    }
 
-   public static byte[] hexToByte(String s) {
-      int len = s.length();
-      byte[] bytes = new byte[len / 2];
-      for (int i = 0; i < len; i += 2) {
-          bytes[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                               + Character.digit(s.charAt(i+1), 16));
-      }
-      return bytes;
-  }
-   
    private static void loadConfig(String[] args){
 	   String[] setPair;
 	   
@@ -351,100 +326,5 @@ public class CDF_Gen implements CDFConstants{
    public static String getSetting(String key){
       if(settings.get(key) != null) return settings.get(key);
       else return "";
-   }
-   
-   public static void copyFile(File sourceFile, File destFile, boolean clobber){
-      try{
-         if(destFile.exists() && !clobber){
-            return;
-         }
-
-         if(!destFile.exists()){
-            //create the output directory and file if needed
-            new File(destFile.getParent()).mkdirs();
-            destFile.createNewFile();
-         }
-   
-         FileChannel source = null;
-         FileChannel destination = null;
-      
-         try{
-            source = new FileInputStream(sourceFile).getChannel();
-            destination = new FileOutputStream(destFile).getChannel();
-            destination.transferFrom(source, 0, source.size());
-         }finally {
-            if(source != null) {
-               source.close();
-            }
-            if(destination != null) {
-               destination.close();
-            }
-         }
-      }catch(IOException ex){
-         System.out.println(
-            "Could not copy CDF file: "
-               + ex.getMessage()
-         );
-      }
-   }
-
-   public static CDF openCDF(String fileName){
-
-      CDF cdf = null;
-      try{
-         cdf = CDF.open(fileName);
-         
-         if (cdf.getStatus() != CDF_OK)
-         {
-            System.out.print("Error with CDF! ");
-            
-            if (cdf.getStatus() == CHECKSUM_ERROR){
-               System.out.print("Bad checksum!");
-            }
-            
-            if (cdf != null) cdf.close();
-            
-            System.out.println("");
-         }
-      }catch(CDFException ex){
-         System.out.println(ex.getMessage());
-      }
-      
-      return cdf;
-   }
-   public static void putData(
-      CDF cdf, String targetVar, long record, Object value, long index
-   ){
-      //make sure we have a valid record number
-      if(record == -1L){return;}
-      
-      //search for variable index
-      try{
-         Variable var = cdf.getVariable(targetVar);
-         
-         var.putSingleData(record, new long[] {index}, value);
-         
-         long status = cdf.getStatus();
-         if (status != CDF_OK){
-            String statusText = CDF.getStatusText(status);
-            if(statusText.indexOf("INFO") == -1){
-               System.out.println (
-						"Problem with record " + record + " of " +
-						var.getName() + ": " + statusText
-					);
-            }
-         }
-         
-         //if(!found){System.out.println("Could not find " +targetVar);}
-      }catch(CDFException ex){
-         System.out.println(
-            "Error saving CDF data!\n" +
-            "Cant save \"" + targetVar + " = " + value.toString() + 
-            "\" in record \"" + record + " of " + cdf.getName() + "\": " + 
-            ex.getMessage() +
-            "\n"
-         );
-         System.exit(0);
-      }
    }
 }

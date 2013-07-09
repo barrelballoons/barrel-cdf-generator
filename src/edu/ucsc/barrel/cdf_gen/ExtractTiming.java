@@ -33,10 +33,6 @@ public class ExtractTiming {
    private static final int MAX_RECS = 500;// max number of mod4 recs for model
    private static final double NOM_RATE = 999.89;// nominal ms per frame
    private static final int MSPERWEEK = 604800000;// mseconds in a week
-   private static final short PPSFILL = -32768;// fill value for PPS
-   private static final int MSFILL = -2147483648;// fill value for ms_of_week
-   private static final int FCFILL = -2147483648;// fill value for frame counter
-   private static final short WKFILL = -32768;// fill value for week
    private static final short MINWK = 1200;
    private static final byte MINPPS = 0;
    private static final byte MINMS = 1;
@@ -45,17 +41,6 @@ public class ExtractTiming {
    private static final short MAXPPS = 1000;
    private static final int MAXMS = 604800000;
    private static final int MAXFC = 2097152;
-   
-   //quality flags
-   private static final short FILLED = 1;
-   private static final short NOINFO = 2;
-   private static final short BADMOEL = 4;
-   private static final short BADFC = 8;
-   private static final short BADMS = 16;
-   private static final short BADWK = 32;
-   private static final short BADPPS = 64;
-
-   private long today;
 
    private class TimeRec{
       private long ms;//frame timestamp
@@ -108,11 +93,8 @@ public class ExtractTiming {
    private DataHolder data;
    
    public ExtractTiming(String d){
-      //save today's date
-      today = Long.valueOf(d);
-      
       //get DataHolder storage object
-      data = CDF_Gen.getDataSet();
+      data = CDF_Gen.data;
       
       int temp, day, fc, week, ms, pps, cnt, mod40;
       int rec_i = 0, frame_i = 0;

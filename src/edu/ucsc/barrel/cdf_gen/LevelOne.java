@@ -26,16 +26,20 @@ package edu.ucsc.barrel.cdf_gen;
 
 import gsfc.nssdc.cdf.CDF;
 import gsfc.nssdc.cdf.CDFException;
+import gsfc.nssdc.cdf.CDFConstants;
 import gsfc.nssdc.cdf.util.CDFTT2000;
 import gsfc.nssdc.cdf.Variable;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.nio.channels.FileChannel;
 import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
 
-public class LevelOne{
+public class LevelOne implements CDFConstants{
    String outputPath;
    int lastFrame = -1;
    long ms_of_week = 0;
@@ -47,10 +51,6 @@ public class LevelOne{
       revNum = "00";
    int today, yesterday, tomorrow;
    Calendar dateObj = Calendar.getInstance();
-   
-   SpectrumExtract spectrum;
-   
-   short INCOMPLETE_GROUP = 8196;
    
    private DataHolder data;
    
@@ -92,10 +92,7 @@ public class LevelOne{
          dateObj.get(Calendar.DATE);
 
       //get the data storage object
-      data = CDF_Gen.getDataSet();
-     
-      //create the spectrum rebinning object
-      spectrum = new SpectrumExtract();
+      data = CDF_Gen.data;
      
       //set output path
       outputPath = CDF_Gen.L1_Dir;
@@ -124,27 +121,27 @@ public class LevelOne{
       //select values for this date
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
         //convert lat and lon to physical units
-        gps[Constants.ALT_I][rec_i] = data.gps_raw[Constants.ALT_I][data_i];
-        gps[Constants.TIME_I][rec_i] = data.gps_raw[Constants.TIME_I][data_i];
-        gps[Constants.LAT_I][rec_i] = data.gps_raw[Constants.LAT_I][data_i];
-        gps[Constants.LON_I][rec_i] = data.gps_raw[Constants.LON_I][data_i];
+        gps[Constants.ALT_I][rec_i] = data.gps[Constants.ALT_I][data_i];
+        gps[Constants.TIME_I][rec_i] = data.gps[Constants.TIME_I][data_i];
+        gps[Constants.LAT_I][rec_i] = data.gps[Constants.LAT_I][data_i];
+        gps[Constants.LON_I][rec_i] = data.gps[Constants.LON_I][data_i];
         frameGroup[rec_i] = data.frame_mod4[data_i];
         epoch[rec_i] = data.epoch_mod4[data_i] - Constants.SING_ACCUM;
         q[rec_i] = data.gps_q[data_i];
       }
 
       //make sure there is a CDF file to open
-      //(CDF_Gen.copyFile will not clobber an existing file)
+      //(copyFile() will not clobber an existing file)
       String srcName = 
          "cdf_skels/l1/barCLL_PP_S_l1_ephm_YYYYMMDD_v++.cdf";
       String destName = 
          outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
          "_l1_" + "ephm" + "_20" + date +  "_v" + revNum + ".cdf";
 
-      CDF_Gen.copyFile(new File(srcName), new File(destName), false);
+      copyFile(new File(srcName), new File(destName), false);
 
       //open EPHM CDF and save the reference in the cdf variable
-      cdf = CDF_Gen.openCDF(destName);
+      cdf = openCDF(destName);
       
       var = cdf.getVariable("GPS_Alt");
       System.out.println("GPS_Alt...");
@@ -258,9 +255,9 @@ public class LevelOne{
       String destName = 
          outputPath  + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
          "_l1_" + "pps-" + "_20" + date +  "_v" + revNum + ".cdf";
-      CDF_Gen.copyFile(new File(srcName), new File(destName), false);
+      copyFile(new File(srcName), new File(destName), false);
 
-      cdf = CDF_Gen.openCDF(destName);
+      cdf = openCDF(destName);
       
       var = cdf.getVariable("GPS_PPS");
       System.out.println("GPS_PPS...");
@@ -364,14 +361,14 @@ public class LevelOne{
       String destName = 
          outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
          "_l1_" + "magn" + "_20" + date +  "_v" + revNum + ".cdf";
-      CDF_Gen.copyFile(new File(srcName), new File(destName), false);
+      copyFile(new File(srcName), new File(destName), false);
 
-      cdf = CDF_Gen.openCDF(destName);
+      cdf = openCDF(destName);
      
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-         magx[rec_i] = data.magx_raw[data_i];
-         magy[rec_i] = data.magy_raw[data_i];
-         magz[rec_i] = data.magz_raw[data_i];
+         magx[rec_i] = data.magx[data_i];
+         magy[rec_i] = data.magy[data_i];
+         magz[rec_i] = data.magz[data_i];
          frameGroup[rec_i] = data.frame_4Hz[data_i];
          epoch[rec_i] = data.epoch_4Hz[data_i] - Constants.SING_ACCUM;
          q[rec_i] = data.magn_q[data_i];
@@ -468,14 +465,14 @@ public class LevelOne{
          outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn 
          + "_l1_" + "hkpg" + "_20" + date +  "_v" + revNum + ".cdf";
 
-      CDF_Gen.copyFile(new File(srcName), new File(destName), false);
+      copyFile(new File(srcName), new File(destName), false);
 
-      cdf = CDF_Gen.openCDF(destName);
+      cdf = openCDF(destName);
          
       for(int var_i = 0; var_i < data.hkpg.length; var_i++){
          hkpg = new long[numOfRecs];
          for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-            hkpg[rec_i] =  data.hkpg_raw[var_i][data_i];
+            hkpg[rec_i] =  data.hkpg[var_i][data_i];
          }
 
          var = cdf.getVariable(data.hkpg_label[var_i]);
@@ -624,18 +621,18 @@ public class LevelOne{
       String destName = 
          outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn 
          + "_l1_" + "fspc" + "_20" + date +  "_v" + revNum + ".cdf";
-      CDF_Gen.copyFile(new File(srcName), new File(destName), false);
+      copyFile(new File(srcName), new File(destName), false);
 
-      cdf = CDF_Gen.openCDF(destName);
+      cdf = openCDF(destName);
       
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          frameGroup[rec_i] = data.frame_20Hz[data_i];
          epoch[rec_i] = data.epoch_20Hz[data_i] - Constants.SING_ACCUM;
          q[rec_i] = data.fspc_q[data_i];
-         lc[0][rec_i] = data.lc1_raw[data_i];
-         lc[1][rec_i] = data.lc2_raw[data_i];
-         lc[2][rec_i] = data.lc3_raw[data_i];
-         lc[3][rec_i] = data.lc4_raw[data_i];
+         lc[0][rec_i] = data.lc1[data_i];
+         lc[1][rec_i] = data.lc2[data_i];
+         lc[2][rec_i] = data.lc3[data_i];
+         lc[3][rec_i] = data.lc4[data_i];
       }
 
       var = cdf.getVariable("LC1");
@@ -727,7 +724,7 @@ public class LevelOne{
          frameGroup[rec_i] = data.frame_mod4[data_i];
          epoch[rec_i] = data.epoch_mod4[data_i] - Constants.QUAD_ACCUM;
          q[rec_i] = data.mspc_q[data_i];
-         mspc[rec_i] = data.mspc_raw[data_i];
+         mspc[rec_i] = data.mspc[data_i];
 
       }
       System.out.println("\nSaving MSPC...");
@@ -738,9 +735,9 @@ public class LevelOne{
          outputPath  + "/" + date + "/"+ "bar1" + flt + "_" + id + "_" + stn 
          + "_l1_" + "mspc" + "_20" + date +  "_v" + revNum + ".cdf";
 
-      CDF_Gen.copyFile(new File(srcName), new File(destName), false);
+      copyFile(new File(srcName), new File(destName), false);
 
-      cdf = CDF_Gen.openCDF(destName);
+      cdf = openCDF(destName);
 
       var = cdf.getVariable("MSPC");
       System.out.println("Spectrum Arrays...");
@@ -800,7 +797,7 @@ public class LevelOne{
          frameGroup[rec_i] = data.frame_mod32[data_i];
          epoch[rec_i] = data.epoch_mod32[data_i] - Constants.SSPC_ACCUM;
          q[rec_i] = data.sspc_q[data_i];
-         sspc[rec_i] = data.sspc_raw[data_i];
+         sspc[rec_i] = data.sspc[data_i];
       }
 
       System.out.println("\nSaving SSPC...");
@@ -810,9 +807,9 @@ public class LevelOne{
       String destName = 
          outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn +
          "_l1_" + "sspc" + "_20" + date +  "_v" + revNum + ".cdf";
-      CDF_Gen.copyFile(new File(srcName), new File(destName), false);
+      copyFile(new File(srcName), new File(destName), false);
 
-      cdf = CDF_Gen.openCDF(destName);
+      cdf = openCDF(destName);
 
       var = cdf.getVariable("SSPC");
       System.out.println("Spectrum Arrays...");
@@ -872,10 +869,10 @@ public class LevelOne{
          frameGroup[rec_i] = data.frame_mod4[data_i];
          epoch[rec_i] = data.epoch_mod4[data_i] - Constants.QUAD_ACCUM;
          q[rec_i] = data.rcnt_q[data_i];
-         rc[0][rec_i] = data.rcnt_raw[0][data_i];
-         rc[1][rec_i] = data.rcnt_raw[1][data_i];
-         rc[2][rec_i] = data.rcnt_raw[2][data_i];
-         rc[3][rec_i] = data.rcnt_raw[3][data_i];
+         rc[0][rec_i] = data.rcnt[0][data_i];
+         rc[1][rec_i] = data.rcnt[1][data_i];
+         rc[2][rec_i] = data.rcnt[2][data_i];
+         rc[3][rec_i] = data.rcnt[3][data_i];
       }
          
       System.out.println("\nSaving RCNT...");
@@ -886,9 +883,9 @@ public class LevelOne{
          outputPath + "/" + date + "/"  + "bar1" + flt + "_" + id + "_" + stn
          + "_l1_" + "rcnt" + "_20" + date +  "_v" + revNum + ".cdf";
 
-      CDF_Gen.copyFile(new File(srcName), new File(destName), false);
+      copyFile(new File(srcName), new File(destName), false);
 
-      cdf = CDF_Gen.openCDF(destName);
+      cdf = openCDF(destName);
 
       var = cdf.getVariable("Interrupt");
       System.out.println("Interrupt...");
@@ -1119,5 +1116,65 @@ public class LevelOne{
       if(first_i != -1){
          doFspcCdf(first_i, last_i, date); 
       }
+   }
+   
+   public static void copyFile(File sourceFile, File destFile, boolean clobber){
+      try{
+         if(destFile.exists() && !clobber){
+            return;
+         }
+
+         if(!destFile.exists()){
+            //create the output directory and file if needed
+            new File(destFile.getParent()).mkdirs();
+            destFile.createNewFile();
+         }
+   
+         FileChannel source = null;
+         FileChannel destination = null;
+      
+         try{
+            source = new FileInputStream(sourceFile).getChannel();
+            destination = new FileOutputStream(destFile).getChannel();
+            destination.transferFrom(source, 0, source.size());
+         }finally {
+            if(source != null) {
+               source.close();
+            }
+            if(destination != null) {
+               destination.close();
+            }
+         }
+      }catch(IOException ex){
+         System.out.println(
+            "Could not copy CDF file: "
+               + ex.getMessage()
+         );
+      }
+   }
+
+   public static CDF openCDF(String fileName){
+
+      CDF cdf = null;
+      try{
+         cdf = CDF.open(fileName);
+         
+         if (cdf.getStatus() != CDF_OK)
+         {
+            System.out.print("Error with CDF! ");
+            
+            if (cdf.getStatus() == CHECKSUM_ERROR){
+               System.out.print("Bad checksum!");
+            }
+            
+            if (cdf != null) cdf.close();
+            
+            System.out.println("");
+         }
+      }catch(CDFException ex){
+         System.out.println(ex.getMessage());
+      }
+      
+      return cdf;
    }
  }
