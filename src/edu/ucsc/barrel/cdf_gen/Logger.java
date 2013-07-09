@@ -33,20 +33,20 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class Logger{
+public class Logger extends File{
    private BufferedWriter bw;
 
    public Logger(final String filename){
-      //Open the Log file for writing
+      super(filename);
 
+      //Open the Log file for writing
       try{
-         File file = new File(filename);
          // if file doesnt exists, then create it
-         if (!file.exists()) {
-            file.createNewFile();
+         if (!this.exists()) {
+            this.createNewFile();
          }
 
-         FileWriter fw = new FileWriter(file.getAbsoluteFile());
+         FileWriter fw = new FileWriter(this.getAbsoluteFile());
          bw = new BufferedWriter(fw);
       }catch(IOException e){
          System.out.println("Could not open log file for writing:");
@@ -61,14 +61,13 @@ public class Logger{
          System.out.println(e.getMessage());
       }
    }
-   public void writeln(String content){
-      try{
-         bw.write(content);
-         bw.newLine();
-      }catch(IOException e){
-         System.out.println(e.getMessage());
-      }
-   }
+   public void write(){write("");}
+   public void write(int content){write(content + "");}
+   public void write(long content){write(content + "");}
+   public void write(float content){write(content + "");}
+   public void write(double content){write(content + "");}
+   public void write(Object content){write(content.toString());}
+
    public void newLine(){
       try{
          bw.newLine();
@@ -77,7 +76,16 @@ public class Logger{
       }
    }
 
-
+   public void writeln(String content){
+     write(content);
+     newLine();
+   }
+   public void writeln(){writeln("");}
+   public void writeln(int content){writeln(content + "");}
+   public void writeln(long content){writeln(content + "");}
+   public void writeln(float content){writeln(content + "");}
+   public void writeln(double content){writeln(content + "");}
+   public void writeln(Object content){writeln(content.toString());}
 
    public void close(){
       try{
