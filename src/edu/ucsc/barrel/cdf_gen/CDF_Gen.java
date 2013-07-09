@@ -173,7 +173,7 @@ public class CDF_Gen{
                if(getSetting("L").indexOf("1") > -1){
                   //create Level One 
                   LevelOne L1 =
-						   new LevelOne(getSetting("date"), id, flt, stn);
+						   new LevelOne(getSetting("date"), id, flt, stn, L1_Dir);
                   L1 = null;
                }
                
@@ -200,7 +200,7 @@ public class CDF_Gen{
                   //create Level Two
                   LevelTwo L2 =
 						   new LevelTwo(
-                        getSetting("date"), id, flt, stn, getSetting("mag_gen")
+                        getSetting("date"), id, flt, stn, L2_Dir
                      );
 
                   L2 = null;

@@ -43,71 +43,14 @@ import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
 
-public class LevelTwo implements CDFConstants{
-   String outputPath;
-   int lastFrame = -1;
-   int weeks = 0;
-   String
-      id = "00",
-      flt = "00",
-      stn = "0",
-      revNum = "00",
-      mag_gen_program = "";
-   int today, yesterday, tomorrow;
-   Calendar dateObj = Calendar.getInstance();
-   
-   private DataHolder data;
-   
+public class LevelTwo extends CDFWriter{
+
    public LevelTwo(
       final String d, final String p, 
-      final String f, final String s, final String m
+      final String f, final String s, final String dir 
    ) throws IOException
    {
-      //get file revision number
-      if(CDF_Gen.getSetting("rev") != null){
-         revNum = CDF_Gen.getSetting("rev");
-      }
-      
-      //save input arguments
-      id = p;
-      flt = f;
-      stn = s;
-      today = Integer.valueOf(d);
-      mag_gen_program = m;
-
-      //calculate yesterday and tomorrow from today's date
-      int year, month, day;
-      year = today / 10000;
-      month = (today - (year * 10000)) / 100;
-      day = today - (year * 10000) - (month * 100);
-      dateObj.clear();
-      dateObj.set(year, month - 1, day);
-      dateObj.add(Calendar.DATE, -1);
-
-      yesterday = 
-         (dateObj.get(Calendar.YEAR) * 10000) + 
-         ((dateObj.get(Calendar.MONTH) + 1) * 100) + 
-         dateObj.get(Calendar.DATE);
-
-      dateObj.add(Calendar.DATE, 2);
-
-      tomorrow = 
-         (dateObj.get(Calendar.YEAR) * 10000) + 
-         ((dateObj.get(Calendar.MONTH) + 1) * 100) + 
-         dateObj.get(Calendar.DATE);
-
-      //get the data storage object
-      data = CDF_Gen.data;
-     
-      //set output path
-      outputPath = CDF_Gen.L2_Dir;
-      
-      //get data from DataHolder and save them to CDF files
-      try{
-         writeData();
-      }catch(CDFException ex){
-         System.out.println(ex.getMessage());
-      }
+      super(d, p, f, s, dir, "Level Two");
    }
    
    //Convert the EPHM data and save it to CDF files
@@ -155,7 +98,7 @@ public class LevelTwo implements CDFConstants{
       //convert lat, lon, and alt values and select values for this date
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          //convert mm to km
-         alt[rec_i] = (float)data.gps[Constants.ALT_I][data_i];
+         alt[rec_i] = (float)CDF_Gen.data.gps[Constants.ALT_I][data_i];
          if(alt[rec_i] != Constants.ALT_RAW_FILL){
             alt[rec_i] /= 1000000;
          }else{
@@ -163,7 +106,7 @@ public class LevelTwo implements CDFConstants{
          }
 
          //convert lat and lon to physical units
-         lat[rec_i] = (float)data.gps[Constants.LAT_I][data_i];
+         lat[rec_i] = (float)CDF_Gen.data.gps[Constants.LAT_I][data_i];
          if(lat[rec_i] != Constants.LAT_RAW_FILL){
             lat[rec_i] *= 
                Float.intBitsToFloat(Integer.valueOf("33B40000", 16).intValue());
@@ -171,7 +114,7 @@ public class LevelTwo implements CDFConstants{
             lat[rec_i] = (float)Constants.LAT_FILL;
          }
 
-         lon[rec_i] = (float)data.gps[Constants.LON_I][data_i];
+         lon[rec_i] = (float)CDF_Gen.data.gps[Constants.LON_I][data_i];
          if(lon[rec_i] != Constants.LON_RAW_FILL){
             lon[rec_i] *= 
                Float.intBitsToFloat(Integer.valueOf("33B40000", 16).intValue());
@@ -180,8 +123,8 @@ public class LevelTwo implements CDFConstants{
          }
 
          //calculate the GPS time
-         if(data.ms_of_week[data_i] != Constants.MS_WEEK_FILL){
-            sec = data.ms_of_week[data_i] / 1000; //convert ms to sec
+         if(CDF_Gen.data.ms_of_week[data_i] != Constants.MS_WEEK_FILL){
+            sec = CDF_Gen.data.ms_of_week[data_i] / 1000; //convert ms to sec
             sec %= 86400; //remove any complete days
             hour = sec / 3600;
             sec %= 3600;
@@ -196,9 +139,9 @@ public class LevelTwo implements CDFConstants{
          }
          
          //save the values from the other variables
-         frameGroup[rec_i] = data.frame_mod4[data_i];
-         epoch[rec_i] = data.epoch_mod4[data_i] - Constants.SING_ACCUM;
-         q[rec_i] = data.gps_q[data_i];
+         frameGroup[rec_i] = CDF_Gen.data.frame_mod4[data_i];
+         epoch[rec_i] = CDF_Gen.data.epoch_mod4[data_i] - Constants.SING_ACCUM;
+         q[rec_i] = CDF_Gen.data.gps_q[data_i];
 
          //make sure we have a complete gps record before generating mag coords
          if(
@@ -235,7 +178,8 @@ public class LevelTwo implements CDFConstants{
       //get the magnetic field info for this location
       try{
          String command = 
-            mag_gen_program + " " + "pay" + id + "_" + date + "_gps.txt";
+            CDF_Gen.getSetting("mag_gen") + " " + 
+            "pay" + id + "_" + date + "_gps.txt";
 
          Process p = Runtime.getRuntime().exec(command);
          BufferedReader input =                                           
@@ -453,12 +397,12 @@ public class LevelTwo implements CDFConstants{
       System.out.println("\nSaving PPS Level Two CDF...");
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-        pps[rec_i] = data.pps[data_i];
-        version[rec_i] = data.ver[data_i];
-        payID[rec_i] = data.payID[data_i];
-        frameGroup[rec_i] = data.frame_1Hz[data_i];
-        epoch[rec_i] = data.epoch_1Hz[data_i] - Constants.SING_ACCUM;
-        q[rec_i] = data.pps_q[data_i];
+        pps[rec_i] = CDF_Gen.data.pps[data_i];
+        version[rec_i] = CDF_Gen.data.ver[data_i];
+        payID[rec_i] = CDF_Gen.data.payID[data_i];
+        frameGroup[rec_i] = CDF_Gen.data.frame_1Hz[data_i];
+        epoch[rec_i] = CDF_Gen.data.epoch_1Hz[data_i] - Constants.SING_ACCUM;
+        q[rec_i] = CDF_Gen.data.pps_q[data_i];
       }
 
       String srcName = 
@@ -561,18 +505,18 @@ public class LevelTwo implements CDFConstants{
      
       //extract the nominal magnetometer value and calculate |B|
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-         if(data.magx[data_i] != Constants.FLOAT_FILL){
-            magx[rec_i] = (data.magx[data_i] - 8388608.0f) / 83886.070f;
+         if(CDF_Gen.data.magx[data_i] != Constants.FLOAT_FILL){
+            magx[rec_i] = (CDF_Gen.data.magx[data_i] - 8388608.0f) / 83886.070f;
          }else{
             magx[rec_i] = Constants.FLOAT_FILL;
          }
-         if(data.magy[data_i] != Constants.FLOAT_FILL){
-            magy[rec_i] = (data.magy[data_i] - 8388608.0f) / 83886.070f;
+         if(CDF_Gen.data.magy[data_i] != Constants.FLOAT_FILL){
+            magy[rec_i] = (CDF_Gen.data.magy[data_i] - 8388608.0f) / 83886.070f;
          }else{
             magx[rec_i] = Constants.FLOAT_FILL;
          }
-         if(data.magz[data_i] != Constants.FLOAT_FILL){
-            magz[rec_i] = (data.magz[data_i] - 8388608.0f) / 83886.070f;
+         if(CDF_Gen.data.magz[data_i] != Constants.FLOAT_FILL){
+            magz[rec_i] = (CDF_Gen.data.magz[data_i] - 8388608.0f) / 83886.070f;
          }else{
             magx[rec_i] = Constants.FLOAT_FILL;
          }
@@ -592,9 +536,9 @@ public class LevelTwo implements CDFConstants{
             magTot[rec_i] = Constants.FLOAT_FILL;
          }
 
-         frameGroup[rec_i] = data.frame_4Hz[data_i];
-         epoch[rec_i] = data.epoch_4Hz[data_i] - Constants.SING_ACCUM;
-         q[rec_i] = data.magn_q[data_i];
+         frameGroup[rec_i] = CDF_Gen.data.frame_4Hz[data_i];
+         epoch[rec_i] = CDF_Gen.data.epoch_4Hz[data_i] - Constants.SING_ACCUM;
+         q[rec_i] = CDF_Gen.data.magn_q[data_i];
       }
 
       //store the nominal mag values
@@ -706,17 +650,19 @@ public class LevelTwo implements CDFConstants{
          //scale all the records for this variable
          double[] hkpg_scaled = new double[numOfRecs];
          for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-            if(data.hkpg[var_i][data_i] != Constants.HKPG_FILL){
+            if(CDF_Gen.data.hkpg[var_i][data_i] != Constants.HKPG_FILL){
                hkpg_scaled[rec_i] = 
-                  (data.hkpg[var_i][data_i] * data.hkpg_scale[var_i]) + 
-                  data.hkpg_offset[var_i];
+                  (
+                     CDF_Gen.data.hkpg[var_i][data_i] * 
+                     CDF_Gen.data.hkpg_scale[var_i]
+                  ) + CDF_Gen.data.hkpg_offset[var_i];
             }else{
                hkpg_scaled[rec_i] = Constants.DOUBLE_FILL;
             }
          }
 
-         var = cdf.getVariable(data.hkpg_label[var_i]);
-         System.out.println(data.hkpg_label[var_i] + "...");
+         var = cdf.getVariable(CDF_Gen.data.hkpg_label[var_i]);
+         System.out.println(CDF_Gen.data.hkpg_label[var_i] + "...");
          var.putHyperData(
             var.getNumWrittenRecords(), numOfRecs, 1, 
             new long[] {0}, 
@@ -727,16 +673,16 @@ public class LevelTwo implements CDFConstants{
       }
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-         sats[rec_i] = data.sats[data_i];
-         offset[rec_i] = data.offset[data_i];
-         termStat[rec_i] = data.termStat[data_i];
-         modemCnt[rec_i] = data.modemCnt[data_i];
-         dcdCnt[rec_i] = data.dcdCnt[data_i];
-         cmdCnt[rec_i] = data.cmdCnt[data_i];
-         frameGroup[rec_i] = data.frame_mod40[data_i];
-         weeks[rec_i] = data.weeks[data_i];
-         epoch[rec_i] = data.epoch_mod40[data_i] - Constants.SING_ACCUM;
-         q[rec_i] = data.hkpg_q[data_i];
+         sats[rec_i] = CDF_Gen.data.sats[data_i];
+         offset[rec_i] = CDF_Gen.data.offset[data_i];
+         termStat[rec_i] = CDF_Gen.data.termStat[data_i];
+         modemCnt[rec_i] = CDF_Gen.data.modemCnt[data_i];
+         dcdCnt[rec_i] = CDF_Gen.data.dcdCnt[data_i];
+         cmdCnt[rec_i] = CDF_Gen.data.cmdCnt[data_i];
+         frameGroup[rec_i] = CDF_Gen.data.frame_mod40[data_i];
+         weeks[rec_i] = CDF_Gen.data.weeks[data_i];
+         epoch[rec_i] = CDF_Gen.data.epoch_mod40[data_i] - Constants.SING_ACCUM;
+         q[rec_i] = CDF_Gen.data.hkpg_q[data_i];
       }
 
       var = cdf.getVariable("numOfSats");
@@ -874,19 +820,19 @@ public class LevelTwo implements CDFConstants{
 
          //get temperatures
          hkpg_rec = (lc_rec + first) / 20 / 40; //convert from 20Hz to mod40
-         if(data.hkpg[Constants.T0][hkpg_rec] != Constants.DOUBLE_FILL){
+         if(CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] != Constants.DOUBLE_FILL){
             scint_temp = 
-               (data.hkpg[Constants.T0][hkpg_rec] * 
-               data.hkpg_scale[Constants.T0]) + 
-               data.hkpg_offset[Constants.T0];
+               (CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] * 
+               CDF_Gen.data.hkpg_scale[Constants.T0]) + 
+               CDF_Gen.data.hkpg_offset[Constants.T0];
          }else{
             scint_temp = 20;
          }
-         if(data.hkpg[Constants.T5][hkpg_rec] != Constants.DOUBLE_FILL){
+         if(CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] != Constants.DOUBLE_FILL){
             dpu_temp = 
-               (data.hkpg[Constants.T5][hkpg_rec] * 
-               data.hkpg_scale[Constants.T5]) + 
-               data.hkpg_offset[Constants.T5];
+               (CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] * 
+               CDF_Gen.data.hkpg_scale[Constants.T5]) + 
+               CDF_Gen.data.hkpg_offset[Constants.T5];
          }else{
             dpu_temp = 20;
          }
@@ -896,32 +842,32 @@ public class LevelTwo implements CDFConstants{
          //   SpectrumExtract.createBinEdges(0, /*scint_temp, dpu_temp, */peak);
 
          //write the spectrum to the new array
-         if(data.lc1[lc_rec + first] != Constants.FSPC_RAW_FILL){
-            lc_scaled[0][lc_rec] = data.lc1[lc_rec + first] * 20;
+         if(CDF_Gen.data.lc1[lc_rec + first] != Constants.FSPC_RAW_FILL){
+            lc_scaled[0][lc_rec] = CDF_Gen.data.lc1[lc_rec + first] * 20;
          }else{
             lc_scaled[0][lc_rec] = Constants.DOUBLE_FILL;
          }
-         if(data.lc2[lc_rec + first] != Constants.FSPC_RAW_FILL){
-            lc_scaled[1][lc_rec] = data.lc2[lc_rec + first] * 20;
+         if(CDF_Gen.data.lc2[lc_rec + first] != Constants.FSPC_RAW_FILL){
+            lc_scaled[1][lc_rec] = CDF_Gen.data.lc2[lc_rec + first] * 20;
          }else{
             lc_scaled[1][lc_rec] = Constants.DOUBLE_FILL;
          }
-         if(data.lc3[lc_rec + first] != Constants.FSPC_RAW_FILL){
-            lc_scaled[2][lc_rec] = data.lc3[lc_rec + first] * 20;
+         if(CDF_Gen.data.lc3[lc_rec + first] != Constants.FSPC_RAW_FILL){
+            lc_scaled[2][lc_rec] = CDF_Gen.data.lc3[lc_rec + first] * 20;
          }else{
             lc_scaled[2][lc_rec] = Constants.DOUBLE_FILL;
          }
-         if(data.lc4[lc_rec + first] != Constants.FSPC_RAW_FILL){
-            lc_scaled[3][lc_rec] = data.lc4[lc_rec + first] * 20;
+         if(CDF_Gen.data.lc4[lc_rec + first] != Constants.FSPC_RAW_FILL){
+            lc_scaled[3][lc_rec] = CDF_Gen.data.lc4[lc_rec + first] * 20;
          }else{
             lc_scaled[3][lc_rec] = Constants.DOUBLE_FILL;
          }
       }
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-         frameGroup[rec_i] = data.frame_20Hz[data_i];
-         epoch[rec_i] = data.epoch_20Hz[data_i] - Constants.SING_ACCUM;
-         q[rec_i] = data.fspc_q[data_i];
+         frameGroup[rec_i] = CDF_Gen.data.frame_20Hz[data_i];
+         epoch[rec_i] = CDF_Gen.data.epoch_20Hz[data_i] - Constants.SING_ACCUM;
+         q[rec_i] = CDF_Gen.data.fspc_q[data_i];
       }
 
       var = cdf.getVariable("LC1");
@@ -1023,39 +969,40 @@ public class LevelTwo implements CDFConstants{
          /*
          //get temperatures
          hkpg_rec = (mspc_rec + first) * 4 / 40; //convert from mod4 to mod40
-         if(data.hkpg[Constants.T0][hkpg_rec] != Constants.HKPG_FILL){
+         if(CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] != Constants.HKPG_FILL){
             scint_temp = 
-               (data.hkpg[Constants.T0][hkpg_rec] * 
-               data.hkpg_scale[Constants.T0]) + 
-               data.hkpg_offset[Constants.T0];
+               (CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] * 
+               CDF_Gen.data.hkpg_scale[Constants.T0]) + 
+               CDF_Gen.data.hkpg_offset[Constants.T0];
          }else{
             scint_temp = 20;
          }
-         if(data.hkpg[Constants.T5][hkpg_rec] != Constants.HKPG_FILL){
+         if(CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] != Constants.HKPG_FILL){
             dpu_temp = 
-               (data.hkpg[Constants.T5][hkpg_rec] * 
-               data.hkpg_scale[Constants.T5]) + 
-               data.hkpg_offset[Constants.T5];
+               (CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] * 
+               CDF_Gen.data.hkpg_scale[Constants.T5]) + 
+               CDF_Gen.data.hkpg_offset[Constants.T5];
          }else{
             dpu_temp = 20;
          }*/
          
          //incremint sspc_rec if needed
          if(
-            (data.frame_mod4[mspc_rec] - data.frame_mod4[mspc_rec] % 32) != 
-            data.frame_mod32[sspc_rec]
+            (CDF_Gen.data.frame_mod4[mspc_rec] - 
+            CDF_Gen.data.frame_mod4[mspc_rec] % 32) != 
+            CDF_Gen.data.frame_mod32[sspc_rec]
          ){
             sspc_rec++;
          }
 
          //get the adjusted bin edges
          old_edges = SpectrumExtract.createBinEdges(
-            1, /*scint_temp, dpu_temp, */ data.peak511_bin[sspc_rec]
+            1, /*scint_temp, dpu_temp, */ CDF_Gen.data.peak511_bin[sspc_rec]
          );
 
          //rebin the spectrum
          mspc_rebin[mspc_rec] = SpectrumExtract.rebin(
-            data.mspc[mspc_rec + first], old_edges, std_edges 
+            CDF_Gen.data.mspc[mspc_rec + first], old_edges, std_edges 
          );
 
          //divide counts by bin width and adjust the time scale
@@ -1071,9 +1018,9 @@ public class LevelTwo implements CDFConstants{
       System.out.println("\nSaving MSPC...");
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-         frameGroup[rec_i] = data.frame_mod4[data_i];
-         epoch[rec_i] = data.epoch_mod4[data_i] - Constants.QUAD_ACCUM;
-         q[rec_i] = data.mspc_q[data_i];
+         frameGroup[rec_i] = CDF_Gen.data.frame_mod4[data_i];
+         epoch[rec_i] = CDF_Gen.data.epoch_mod4[data_i] - Constants.QUAD_ACCUM;
+         q[rec_i] = CDF_Gen.data.mspc_q[data_i];
       }
 
       String srcName = 
@@ -1163,30 +1110,32 @@ public class LevelTwo implements CDFConstants{
       for(int sspc_rec = 0, hkpg_rec = 0; sspc_rec < numOfRecs; sspc_rec++){
 /*         //get temperatures
          hkpg_rec = (sspc_rec + first) * 32 / 40; //convert from mod32 to mod40
-         if(data.hkpg[Constants.T0][hkpg_rec] != Constants.HKPG_FILL){
+         if(CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] != Constants.HKPG_FILL){
             scint_temp = 
-               (data.hkpg[Constants.T0][hkpg_rec] * 
-               data.hkpg_scale[Constants.T0]) + 
-               data.hkpg_offset[Constants.T0];
+               (CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] * 
+               CDF_Gen.data.hkpg_scale[Constants.T0]) + 
+               CDF_Gen.data.hkpg_offset[Constants.T0];
          }else{
             scint_temp = 20;
          }
-         if(data.hkpg[Constants.T5][hkpg_rec] != Constants.HKPG_FILL){
+         if(CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] != Constants.HKPG_FILL){
             dpu_temp = 
-               (data.hkpg[Constants.T5][hkpg_rec] * 
-               data.hkpg_scale[Constants.T5]) + 
-               data.hkpg_offset[Constants.T5];
+               (CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] * 
+               CDF_Gen.data.hkpg_scale[Constants.T5]) + 
+               CDF_Gen.data.hkpg_offset[Constants.T5];
          }else{
             dpu_temp = 20;
          }
 */    
          //get the adjusted bin edges
          old_edges = 
-            SpectrumExtract.createBinEdges(2, data.peak511_bin[sspc_rec]);
+            SpectrumExtract.createBinEdges(
+               2, CDF_Gen.data.peak511_bin[sspc_rec]
+            );
          
          //rebin the spectum
          sspc_rebin[sspc_rec] = SpectrumExtract.rebin(
-            data.sspc[sspc_rec + first], old_edges, std_edges
+            CDF_Gen.data.sspc[sspc_rec + first], old_edges, std_edges
          );
 
          //divide counts by bin width and convert the time scale to /sec
@@ -1200,10 +1149,10 @@ public class LevelTwo implements CDFConstants{
       }
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-         peak[rec_i] = data.peak511_bin[data_i];
-         frameGroup[rec_i] = data.frame_mod32[data_i];
-         epoch[rec_i] = data.epoch_mod32[data_i] - Constants.SSPC_ACCUM;
-         q[rec_i] = data.sspc_q[data_i];
+         peak[rec_i] = CDF_Gen.data.peak511_bin[data_i];
+         frameGroup[rec_i] = CDF_Gen.data.frame_mod32[data_i];
+         epoch[rec_i] = CDF_Gen.data.epoch_mod32[data_i] - Constants.SSPC_ACCUM;
+         q[rec_i] = CDF_Gen.data.sspc_q[data_i];
       }
 
 
@@ -1293,9 +1242,9 @@ public class LevelTwo implements CDFConstants{
       //change all the units from cnts/4sec to cnts/sec
       for(int var_i = 0; var_i < 4; var_i++){
          for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
-            if(data.rcnt[var_i][rec_i + first] != Constants.RCNT_FILL){
+            if(CDF_Gen.data.rcnt[var_i][rec_i + first] != Constants.RCNT_FILL){
                rc_timeScaled[var_i][rec_i] = 
-                  data.rcnt[var_i][rec_i + first] / 4;
+                  CDF_Gen.data.rcnt[var_i][rec_i + first] / 4;
             }else{
                rc_timeScaled[var_i][rec_i] = Constants.DOUBLE_FILL;
             }
@@ -1303,9 +1252,9 @@ public class LevelTwo implements CDFConstants{
       }
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-         frameGroup[rec_i] = data.frame_mod4[data_i];
-         epoch[rec_i] = data.epoch_mod4[data_i] - Constants.QUAD_ACCUM;
-         q[rec_i] = data.rcnt_q[data_i];
+         frameGroup[rec_i] = CDF_Gen.data.frame_mod4[data_i];
+         epoch[rec_i] = CDF_Gen.data.epoch_mod4[data_i] - Constants.QUAD_ACCUM;
+         q[rec_i] = CDF_Gen.data.rcnt_q[data_i];
       }
          
       System.out.println("\nSaving RCNT...");
@@ -1391,238 +1340,5 @@ public class LevelTwo implements CDFConstants{
       );
 
       cdf.close();
-   }
-
-   private void writeData() throws CDFException{
-      File outDir;
-
-      System.out.println(
-         "Creating Level Two... (" + data.getSize("1Hz") + " frames)"
-      );
-      
-      //make sure the needed output directories exist
-      outDir = new File(outputPath + "/" + yesterday);
-      if(!outDir.exists()){outDir.mkdirs();}
-      outDir = new File(outputPath + "/" + today);
-      if(!outDir.exists()){outDir.mkdirs();}
-      outDir = new File(outputPath + "/" + tomorrow);
-      if(!outDir.exists()){outDir.mkdirs();}
-
-      //fill CDF files for yesterday, today, and tomorrow
-      doAllCdf(yesterday);
-      doAllCdf(today);
-      doAllCdf(tomorrow);
-
-      System.out.println("Created Level Two.");
-   }
-
-   private void doAllCdf(int date) throws CDFException{
-      int first_i, last_i, size;
-      long rec_date = 0;
-      long[] tt2000_parts; 
-
-      //find the first and last indicies for this day for the 1Hz file
-      first_i = -1;
-      size = data.getSize("1Hz");
-      for(last_i = 0; last_i < size; last_i++){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_1Hz[last_i]);
-         rec_date = 
-            tt2000_parts[2] + //day
-            (100 * tt2000_parts[1]) + //month
-            (10000 * (tt2000_parts[0] - 2000)); //year
-         if(first_i == -1) {
-            if(rec_date == date){
-               //found the first_i index
-               first_i = last_i;
-            }
-         }else if(rec_date > date){
-            break;
-         }
-      }
-      //make sure we have a valid start and stop index and 
-      //that there are some records to process
-      if(first_i != -1 && (last_i - first_i) > 0){
-         doPpsCdf(first_i, last_i, date);
-      }
-
-      //...for the mod4 file
-      first_i = -1;
-      size = data.getSize("mod4");
-      for(last_i = 0; last_i < size; last_i++){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_mod4[last_i]);
-         rec_date = 
-            tt2000_parts[2] + //day
-            (100 * tt2000_parts[1]) + //month
-            (10000 * (tt2000_parts[0] - 2000)); //year
-         if(first_i == -1) {
-            if(rec_date == date){
-               //found the first_i index
-               first_i = last_i;
-            }
-         }else if(rec_date > date){
-            break;
-         }
-      }
-      if(first_i != -1 && (last_i - first_i) > 0){
-         doGpsCdf(first_i, last_i, date);
-         doMspcCdf(first_i, last_i, date);
-         doRcntCdf(first_i, last_i, date);  
-      }
-
-      //...for the mod32 file
-      first_i = -1;
-      size = data.getSize("mod32");
-      for(last_i = 0; last_i < size; last_i++){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_mod32[last_i]);
-         rec_date = 
-            tt2000_parts[2] + //day
-            (100 * tt2000_parts[1]) + //month
-            (10000 * (tt2000_parts[0] - 2000)); //year
-         if(first_i == -1) {
-            if(rec_date == date){
-               //found the first_i index
-               first_i = last_i;
-            }
-         }else if(rec_date > date){
-            break;
-         }
-      }
-      if(first_i != -1 && (last_i - first_i) > 0){
-         doSspcCdf(first_i, last_i, date);  
-      }
-
-      //...for the mod40 file
-      first_i = -1;
-      size = data.getSize("mod40");
-      for(last_i = 0; last_i < size; last_i++){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_mod40[last_i]);
-         rec_date = 
-            tt2000_parts[2] + //day
-            (100 * tt2000_parts[1]) + //month
-            (10000 * (tt2000_parts[0] - 2000)); //year
-         if(first_i == -1) {
-            if(rec_date == date){
-               //found the first_i index
-               first_i = last_i;
-            }
-         }else if(rec_date > date){
-            break;
-         }
-      }
-      if(first_i != -1 && (last_i - first_i) > 0){
-         doHkpgCdf(first_i, last_i, date);  
-      }
-
-      //...for the 4Hz file
-      first_i = -1;
-      size = data.getSize("4Hz");
-      for(last_i = 0; last_i < size; last_i++){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_4Hz[last_i]);
-         rec_date = 
-            tt2000_parts[2] + //day
-            (100 * tt2000_parts[1]) + //month
-            (10000 * (tt2000_parts[0] - 2000)); //year
-         if(first_i == -1) {
-            if(rec_date == date){
-               //found the first_i index
-               first_i = last_i;
-            }
-         }else if(rec_date > date){
-            break;
-         }
-      }
-      if(first_i != -1 && (last_i - first_i) > 0){
-         //make sure the first and last records are not mid-frame
-         first_i = Math.max(0, (first_i - (first_i % 4)));
-         last_i = Math.min(size, (last_i + 4 - (last_i % 4)));
-
-         doMagCdf(first_i, last_i, date);
-      }
-
-      //...for the 20Hz file
-      first_i = -1;
-      size = data.getSize("20Hz");
-      for(last_i = 0; last_i < size; last_i++){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_20Hz[last_i]);
-         rec_date = 
-            tt2000_parts[2] + //day
-            (100 * tt2000_parts[1]) + //month
-            (10000 * (tt2000_parts[0] - 2000)); //year
-         if(first_i == -1) {
-            if(rec_date == date){
-               //found the first_i index
-               first_i = last_i;
-            }
-         }else if(rec_date > date){
-            break;
-         }
-      }
-      if(first_i != -1 && (last_i - first_i) > 0){
-         //make sure the first and last records are not mid-frame
-         first_i = Math.max(0, (first_i - (first_i % 20)));
-         last_i = Math.min(size, (last_i + 20 - (last_i % 20)));
-
-         doFspcCdf(first_i, last_i, date); 
-      }
-   }
-
-   public static void copyFile(File sourceFile, File destFile, boolean clobber){
-      try{
-         if(destFile.exists() && !clobber){
-            return;
-         }
-
-         if(!destFile.exists()){
-            //create the output directory and file if needed
-            new File(destFile.getParent()).mkdirs();
-            destFile.createNewFile();
-         }
-   
-         FileChannel source = null;
-         FileChannel destination = null;
-      
-         try{
-            source = new FileInputStream(sourceFile).getChannel();
-            destination = new FileOutputStream(destFile).getChannel();
-            destination.transferFrom(source, 0, source.size());
-         }finally {
-            if(source != null) {
-               source.close();
-            }
-            if(destination != null) {
-               destination.close();
-            }
-         }
-      }catch(IOException ex){
-         System.out.println(
-            "Could not copy CDF file: "
-               + ex.getMessage()
-         );
-      }
-   }
-
-   public static CDF openCDF(String fileName){
-
-      CDF cdf = null;
-      try{
-         cdf = CDF.open(fileName);
-         
-         if (cdf.getStatus() != CDF_OK)
-         {
-            System.out.print("Error with CDF! ");
-            
-            if (cdf.getStatus() == CHECKSUM_ERROR){
-               System.out.print("Bad checksum!");
-            }
-            
-            if (cdf != null) cdf.close();
-            
-            System.out.println("");
-         }
-      }catch(CDFException ex){
-         System.out.println(ex.getMessage());
-      }
-      
-      return cdf;
    }
  }
