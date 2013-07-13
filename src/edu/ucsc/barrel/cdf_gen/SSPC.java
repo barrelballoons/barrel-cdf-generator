@@ -44,10 +44,13 @@ import java.util.Vector;
 import java.util.Arrays;
 
 public class SSPC extends BarrelCDF{
-   static public CDF create(
+   private CDF cdf;
+
+   public SSPC(
       final String path,final  String date, final int lvl
-   ){
-      CDF cdf = super.create(path);
+   ) throws CDFException{
+      super(path);
+      cdf = super.getCDF();
       Attribute attr;
 
       //Set global attributes specific to this type of CDF
@@ -84,70 +87,147 @@ public class SSPC extends BarrelCDF{
          "payload_id_l2_scintillator_00000000_v01"
       );
 
-      //create SSPC variables
+      //create SSPC variable
+      //This variable will contain the slow spectrum that is returned over
+      //32 frames.
       Variable sspc = 
          Variable.create(
-            cdf, "SSPC", CDF_DOUBLE, 1L, 2L, new  long[] {1, 256}, 
+            cdf, "SSPC", CDF_FLOAT, 1L, 2L, new  long[] {1, 256}, 
             VARY, new long[] {VARY, VARY}
          );   
-      attr = cdf.getrAttribute("FIELDNAM");
-      Entry.create(attr, epoch.getID(), CDF_CHAR, "SSPC");
+      attr = cdf.getAttribute("FIELDNAM");
+      Entry.create(attr, sspc.getID(), CDF_CHAR, "SSPC");
 
-      attr = cdf.getrAttribute("CATDESC");
-      Entry.create(attr, epoch.getID(), CDF_CHAR, "SSPC");
+      attr = cdf.getAttribute("CATDESC");
+      Entry.create(attr, sspc.getID(), CDF_CHAR, "SSPC");
 
-      attr = cdf.getrAttribute("VAR_NOTES");
+      attr = cdf.getAttribute("VAR_NOTES");
       Entry.create(
-         attr, epoch.getID(), CDF_CHAR, 
+         attr, sspc.getID(), CDF_CHAR, 
          "Rebinned, divided by energy bin widths and " +
          "adjusted to /sec time scale."
       );
 
-      attr = cdf.getrAttribute("VAR_TYPE");
-      Entry.create(attr, epoch.getID(), CDF_CHAR, "data");
+      attr = cdf.getAttribute("VAR_TYPE");
+      Entry.create(attr, sspc.getID(), CDF_CHAR, "data");
 
-      attr = cdf.getrAttribute("DEPEND_0");
-      Entry.create(attr, epoch.getID(), CDF_CHAR, "Epoch");
+      attr = cdf.getAttribute("DEPEND_0");
+      Entry.create(attr, sspc.getID(), CDF_CHAR, "Epoch");
 
-      attr = cdf.getrAttribute("FORMAT");
-      Entry.create(attr, epoch.getID(), CDF_CHAR, "%f");
+      attr = cdf.getAttribute("FORMAT");
+      Entry.create(attr, sspc.getID(), CDF_CHAR, "%f");
 
-      attr = cdf.getrAttribute("UNITS");
-      Entry.create(attr, epoch.getID(), CDF_CHAR, "cnts/kev/sec");
+      attr = cdf.getAttribute("UNITS");
+      Entry.create(attr, sspc.getID(), CDF_CHAR, "cnts/keV/sec");
 
-      attr = cdf.getrAttribute("SCALETYP");
-      Entry.create(monotonic, epoch.getID(), CDF_CHAR, "log");
+      attr = cdf.getAttribute("SCALETYP");
+      Entry.create(attr, sspc.getID(), CDF_CHAR, "log");
 
-      attr = cdf.getrAttribute("DISPLAY_TYPE");
-      Entry.create(time_base, epoch.getID(), CDF_CHAR, "spectrogram");
+      attr = cdf.getAttribute("DISPLAY_TYPE");
+      Entry.create(attr, sspc.getID(), CDF_CHAR, "spectrogram");
 
-      attr = cdf.getrAttribute("VALIDMIN");
-      Entry.create(time_scale, epoch.getID(), CDF_DOUBLE, 0.0);
+      attr = cdf.getAttribute("VALIDMIN");
+      Entry.create(attr, sspc.getID(), CDF_FLOAT, 0.0);
 
-      attr = cdf.getrAttribute("VALIDMAX");
-      Entry.create(ref_pos, epoch.getID(), CDF_DOUBLE, 59391.0);
+      attr = cdf.getAttribute("VALIDMAX");
+      Entry.create(attr, sspc.getID(), CDF_FLOAT, 59391.0);
 
-      attr = cdf.getrAttribute("FILLVAL");
-      Entry.create(ref_pos, epoch.getID(), CDF_DOUBLE, -1.0e+31);
+      attr = cdf.getAttribute("FILLVAL");
+      Entry.create(attr, sspc.getID(), CDF_FLOAT, -1.0e+31);
 
-      attr = cdf.getrAttribute("LABLAXIS");
-      Entry.create(ref_pos, epoch.getID(), CDF_CHAR, "SSPC");
+      attr = cdf.getAttribute("LABLAXIS");
+      Entry.create(attr, sspc.getID(), CDF_CHAR, "SSPC");
 
-      attr = cdf.getrAttribute("DEPEND_1");
-      Entry.create(ref_pos, epoch.getID(), CDF_CHAR, "energy");
+      attr = cdf.getAttribute("DEPEND_1");
+      Entry.create(attr, sspc.getID(), CDF_CHAR, "energy");
 
-      Variable frameGroup = 
+
+      //Create the "energy" variable
+      //This variable lists the starting energy for each channel in keV
+      Variable energy = 
          Variable.create(
-            cdf, "FrameGroup", CDF_INT4, 1L, 0L, new  long[] {1}, 
-            VARY, new long[] {NOVARY}
+            cdf, "energy", CDF_FLOAT, 1L, 2L, new  long[] {1, 256}, 
+            NOVARY, new long[] {NOVARY}
          );
-      Variable q = 
+      attr = cdf.getAttribute("FIELDNAM");
+      Entry.create(attr, energy.getID(), CDF_CHAR, "Energy Level");
+
+      attr = cdf.getAttribute("CATDESC");
+      Entry.create(attr, energy.getID(), CDF_CHAR, "Energy Level");
+
+      attr = cdf.getAttribute("VAR_NOTES");
+      Entry.create(
+         attr, energy.getID(), CDF_CHAR, 
+         "Start of each slow spectrum energy channel."
+      );
+
+      attr = cdf.getAttribute("VAR_TYPE");
+      Entry.create(attr, energy.getID(), CDF_CHAR, "support_data");
+
+      attr = cdf.getAttribute("DEPEND_0");
+      Entry.create(attr, energy.getID(), CDF_CHAR, "Epoch");
+
+      attr = cdf.getAttribute("FORMAT");
+      Entry.create(attr, energy.getID(), CDF_CHAR, "%f");
+
+      attr = cdf.getAttribute("UNITS");
+      Entry.create(attr, energy.getID(), CDF_CHAR, "keV");
+
+      attr = cdf.getAttribute("SCALETYP");
+      Entry.create(attr, energy.getID(), CDF_CHAR, "linear");
+
+      attr = cdf.getAttribute("VALIDMIN");
+      Entry.create(attr, energy.getID(), CDF_FLOAT, 0.0);
+
+      attr = cdf.getAttribute("VALIDMAX");
+      Entry.create(attr, energy.getID(), CDF_FLOAT, 10000.0);
+
+      attr = cdf.getAttribute("FILLVAL");
+      Entry.create(attr, energy.getID(), CDF_FLOAT, -1.0e+31);
+
+      attr = cdf.getAttribute("LABLAXIS");
+      Entry.create(attr, energy.getID(), CDF_CHAR, "Energy");
+
+      attr = cdf.getAttribute("DELTA_PLUS_VAR");
+      Entry.create(attr, energy.getID(), CDF_CHAR, "BinWidth");
+
+      //Create a variable that will track each energy channel width
+      Variable bin_width = 
          Variable.create(
-            cdf, "Q", CDF_INT4, 1L, 0L, new  long[] {1}, 
-            VARY, new long[] {NOVARY}
+            cdf, "BinWidth", CDF_FLOAT, 1L, 2L, new  long[] {1, 256}, 
+            NOVARY, new long[] {NOVARY}
          );
+      attr = cdf.getAttribute("FIELDNAM");
+      Entry.create(attr, bin_width.getID(), CDF_CHAR, "Bin Width");
 
+      attr = cdf.getAttribute("CATDESC");
+      Entry.create(attr, bin_width.getID(), CDF_CHAR, "Width of energy channel");
 
-      return cdf;
+      attr = cdf.getAttribute("VAR_TYPE");
+      Entry.create(attr, bin_width.getID(), CDF_CHAR, "support_data");
+
+      attr = cdf.getAttribute("DEPEND_0");
+      Entry.create(attr, bin_width.getID(), CDF_CHAR, "Epoch");
+
+      attr = cdf.getAttribute("FORMAT");
+      Entry.create(attr, bin_width.getID(), CDF_CHAR, "%f");
+
+      attr = cdf.getAttribute("UNITS");
+      Entry.create(attr, bin_width.getID(), CDF_CHAR, "keV");
+
+      attr = cdf.getAttribute("SCALETYP");
+      Entry.create(attr, bin_width.getID(), CDF_CHAR, "linear");
+
+      attr = cdf.getAttribute("VALIDMIN");
+      Entry.create(attr, bin_width.getID(), CDF_FLOAT, 0.0);
+
+      attr = cdf.getAttribute("VALIDMAX");
+      Entry.create(attr, bin_width.getID(), CDF_FLOAT, 200.0);
+
+      attr = cdf.getAttribute("FILLVAL");
+      Entry.create(attr, bin_width.getID(), CDF_FLOAT, -1.0e+31);
+
+      attr = cdf.getAttribute("LABLAXIS");
+      Entry.create(attr, bin_width.getID(), CDF_CHAR, "Width");
    }
 }

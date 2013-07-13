@@ -43,14 +43,16 @@ import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
 
-public class BarrelCDF extends CDF{
-   static public CDF create(String path){
-      CDF cdf = super.create(path);
-      
+public class BarrelCDF implements CDFConstants{
+      private CDF cdf;
+
+   public BarrelCDF(String path) throws CDFException{
+      cdf = CDF.create(path);
+
       //get today's date
       DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
-      Calender cal = Calendar.getInstance();
-      String date = dateFormat.format(cal.getTime())
+      Calendar cal = Calendar.getInstance();
+      String date = dateFormat.format(cal.getTime());
       
       //calculate min and max epochs
       long min_epoch = CDFTT2000.fromUTCparts(2012, 00, 01);
@@ -180,19 +182,19 @@ public class BarrelCDF extends CDF{
          abs_err = 
             Attribute.create(cdf, "ABSOLUTE_ERROR", VARIABLE_SCOPE), 
          rel_err = 
-            Attribute.create(cdf, "RELATIVE_ERROR", variable_scope), 
+            Attribute.create(cdf, "RELATIVE_ERROR", VARIABLE_SCOPE), 
          depend_1 = 
-            Attribute.create(cdf, "DEPEND_1", variable_scope), 
+            Attribute.create(cdf, "DEPEND_1", VARIABLE_SCOPE), 
          delta_plus = 
-            Attribute.create(cdf, "DELTA_PLUS_VAR", variable_scope), 
+            Attribute.create(cdf, "DELTA_PLUS_VAR", VARIABLE_SCOPE), 
          delta_minus = 
-            Attribute.create(cdf, "DELTA_MINUS_VAR", variable_scope); 
+            Attribute.create(cdf, "DELTA_MINUS_VAR", VARIABLE_SCOPE); 
          
       //create variables used by all CDFs
       Variable
          epoch = 
             Variable.create(
-               cdf, "Epoch", CDF_TT2000, 1L, 0L, new  long[] {1}, 
+               cdf, "Epoch", CDF_TIME_TT2000, 1L, 0L, new  long[] {1}, 
                VARY, new long[] {NOVARY}
          ),   
          frameGroup = 
@@ -210,9 +212,9 @@ public class BarrelCDF extends CDF{
       Entry.create(field, epoch.getID(), CDF_CHAR, "Epoch");
       Entry.create(cat_desc, epoch.getID(), CDF_CHAR, "Default time");
       Entry.create(scale_type, epoch.getID(), CDF_CHAR, "linear");
-      Entry.create(valid_min, epoch.getID(), CDF_TT2000, epoch_min);
-      Entry.create(valid_max, epoch.getID(), CDF_TT2000, epoch_max);
-      Entry.create(fill_val, epoch.getID(), CDF_TT2000, 0L);
+      Entry.create(valid_min, epoch.getID(), CDF_TIME_TT2000, min_epoch);
+      Entry.create(valid_max, epoch.getID(), CDF_TIME_TT2000, max_epoch);
+      Entry.create(fill_val, epoch.getID(), CDF_TIME_TT2000, 0L);
       Entry.create(label_axis, epoch.getID(), CDF_CHAR, "Epoch");
       Entry.create(monotonic, epoch.getID(), CDF_CHAR, "INCREASE");
       Entry.create(time_base, epoch.getID(), CDF_CHAR, "J2000");
@@ -237,7 +239,7 @@ public class BarrelCDF extends CDF{
          cat_desc, q.getID(), CDF_CHAR, 
          "32 bit flag used to indicate data quality."
       );
-      Entry.create(depend_o, q.getID(), CDF_CHAR, "Epoch");
+      Entry.create(depend_0, q.getID(), CDF_CHAR, "Epoch");
       Entry.create(format, q.getID(), CDF_CHAR, "%u");
       Entry.create(scale_type, q.getID(), CDF_CHAR, "linear");
       Entry.create(disp_type, q.getID(), CDF_CHAR, "time_series");
@@ -245,7 +247,7 @@ public class BarrelCDF extends CDF{
       Entry.create(valid_max, q.getID(), CDF_INT4, 2147483647);
       Entry.create(fill_val, q.getID(), CDF_INT4, -2147483648);
       Entry.create(label_axis, q.getID(), CDF_CHAR, "Q");
-
-      return cdf;
    }
+
+   public CDF getCDF(){return cdf;}
 }
