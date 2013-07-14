@@ -43,10 +43,11 @@ import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
 
-public class BarrelCDF implements CDFConstants{
+public class BarrelCDF extends File implements CDFConstants{
       private CDF cdf;
 
    public BarrelCDF(String path) throws CDFException{
+      super(path);
       cdf = CDF.create(path);
 
       //get today's date
@@ -109,28 +110,29 @@ public class BarrelCDF implements CDFConstants{
          loical_id = 
             Attribute.create(cdf, "Logical_file_id", GLOBAL_SCOPE); 
 
-      Entry.create(file_name_con, 1, CDF_CHAR, "source_datatype_descriptor");
-      Entry.create(mission_grp, 1, CDF_CHAR, "RBSP");
-      Entry.create(pi_aff, 1, CDF_CHAR, "Dartmouth College");
-      Entry.create(src_name, 1, CDF_CHAR, "Payload_ID");
-      Entry.create(project, 1, CDF_CHAR, "LWS>Living With a Star>BARREL");
-      Entry.create(pi, 1, CDF_CHAR, "Robyn Millan");
-      Entry.create(data_ver, 1, CDF_CHAR, CDF_Gen.getSetting("rev"));
+      Entry.create(file_name_con, 0, CDF_CHAR, "source_datatype_descriptor");
+      Entry.create(mission_grp, 0, CDF_CHAR, "RBSP");
+      Entry.create(pi_aff, 0, CDF_CHAR, "Dartmouth College");
+      Entry.create(src_name, 0, CDF_CHAR, "Payload_ID");
+      Entry.create(project, 0, CDF_CHAR, "LWS>Living With a Star>BARREL");
+      Entry.create(pi, 0, CDF_CHAR, "Robyn Millan");
+      Entry.create(data_ver, 0, CDF_CHAR, CDF_Gen.getSetting("rev"));
       Entry.create(
-         discipline, 1, CDF_CHAR, "Space Physics>Magnetospheric Science"
+         discipline, 0, CDF_CHAR, "Space Physics>Magnetospheric Science"
       );
-      Entry.create(ack, 1, CDF_CHAR, "");
-      Entry.create(link_title, 1, CDF_CHAR, "BARREL Data Repository");
-      Entry.create(gen_by, 1, CDF_CHAR, "barreldata.ucsc.edu");
+      Entry.create(link_title, 0, CDF_CHAR, "BARREL Data Repository");
+      Entry.create(gen_by, 0, CDF_CHAR, "barreldata.ucsc.edu");
       Entry.create(
-         rules, 1, CDF_CHAR, 
-         "Please contact robyn.millan@dartmouth.edu before publication."
+         rules, 0, CDF_CHAR, 
+         "BARREL will make all its scientific data products quickly and " +
+         "publicly available but all users are expected to read and follow " +
+         "the \"BARREL Mission Data Usage Policy\" which can be " +
+         "found on the BARREL website or obtained by contacting the BARREL " +
+         "PI at Robyn.Millan@dartmouth.edu"
       );
-      Entry.create(gen_date, 1, CDF_CHAR, date);
-      Entry.create(link_http, 1, CDF_CHAR, "http://barreldata.ucsc.edu");
-      Entry.create(mods, 1, CDF_CHAR, "");
-      Entry.create(adid_ref, 1, CDF_CHAR, "");
-      
+      Entry.create(gen_date, 0, CDF_CHAR, date);
+      Entry.create(link_http, 0, CDF_CHAR, "http://barreldata.ucsc.edu");
+
       //create variable attributes
       Attribute 
          field = 
@@ -189,7 +191,7 @@ public class BarrelCDF implements CDFConstants{
             Attribute.create(cdf, "DELTA_PLUS_VAR", VARIABLE_SCOPE), 
          delta_minus = 
             Attribute.create(cdf, "DELTA_MINUS_VAR", VARIABLE_SCOPE); 
-         
+
       //create variables used by all CDFs
       Variable
          epoch = 
@@ -211,10 +213,15 @@ public class BarrelCDF implements CDFConstants{
       //fill the attributes for the variables in each file
       Entry.create(field, epoch.getID(), CDF_CHAR, "Epoch");
       Entry.create(cat_desc, epoch.getID(), CDF_CHAR, "Default time");
+      Entry.create(var_type, epoch.getID(), CDF_CHAR, "support_data");
+      Entry.create(units, epoch.getID(), CDF_CHAR, "ns");
       Entry.create(scale_type, epoch.getID(), CDF_CHAR, "linear");
       Entry.create(valid_min, epoch.getID(), CDF_TIME_TT2000, min_epoch);
       Entry.create(valid_max, epoch.getID(), CDF_TIME_TT2000, max_epoch);
-      Entry.create(fill_val, epoch.getID(), CDF_TIME_TT2000, 0L);
+      Entry.create(
+         fill_val, epoch.getID(), CDF_TIME_TT2000, 
+         -9223372036854775808L
+      );
       Entry.create(label_axis, epoch.getID(), CDF_CHAR, "Epoch");
       Entry.create(monotonic, epoch.getID(), CDF_CHAR, "INCREASE");
       Entry.create(time_base, epoch.getID(), CDF_CHAR, "J2000");
@@ -225,6 +232,7 @@ public class BarrelCDF implements CDFConstants{
       Entry.create(
          cat_desc, frameGroup.getID(), CDF_CHAR, "DPU Frame Counter."
       );
+      Entry.create(var_type, frameGroup.getID(), CDF_CHAR, "support_data");
       Entry.create(depend_0, frameGroup.getID(), CDF_CHAR,  "Epoch");
       Entry.create(format, frameGroup.getID(), CDF_CHAR,  "%u");
       Entry.create(scale_type, frameGroup.getID(), CDF_CHAR,  "linear");
@@ -239,6 +247,7 @@ public class BarrelCDF implements CDFConstants{
          cat_desc, q.getID(), CDF_CHAR, 
          "32 bit flag used to indicate data quality."
       );
+      Entry.create(var_type, q.getID(), CDF_CHAR, "data");
       Entry.create(depend_0, q.getID(), CDF_CHAR, "Epoch");
       Entry.create(format, q.getID(), CDF_CHAR, "%u");
       Entry.create(scale_type, q.getID(), CDF_CHAR, "linear");
@@ -250,4 +259,103 @@ public class BarrelCDF implements CDFConstants{
    }
 
    public CDF getCDF(){return cdf;}
+
+   public void writeData(String name, int[] data) throws CDFException{
+      Variable var = this.cdf.getVariable(name);
+      long start = var.getNumWrittenRecords();
+      long size = data.length;
+      var.putHyperData(
+         start, size, 1, 
+         new long[] {0}, new long[] {1}, new long[] {1},
+         data
+      );
+   }
+   public void writeData(String name, long[] data) throws CDFException{
+      Variable var = this.cdf.getVariable(name);
+      long start = var.getNumWrittenRecords();
+      long size = data.length;
+      var.putHyperData(
+         start, size, 1, 
+         new long[] {0}, new long[] {1}, new long[] {1},
+         data
+      );
+   }
+   public void writeData(String name, float[] data) throws CDFException{
+      Variable var = this.cdf.getVariable(name);
+      long start = var.getNumWrittenRecords();
+      long size = data.length;
+      var.putHyperData(
+         start, size, 1, 
+         new long[] {0}, new long[] {1}, new long[] {1},
+         data
+      );
+   }
+   public void writeData(String name, double[] data) throws CDFException{
+      Variable var = this.cdf.getVariable(name);
+      long start = var.getNumWrittenRecords();
+      long size = data.length;
+      var.putHyperData(
+         start, size, 1, 
+         new long[] {0}, new long[] {1}, new long[] {1},
+         data
+      );
+   }
+   public void writeData(String name, String[] data) throws CDFException{
+      Variable var = this.cdf.getVariable(name);
+      long start = var.getNumWrittenRecords();
+      long size = data.length;
+      var.putHyperData(
+         start, size, 1, 
+         new long[] {0}, new long[] {1}, new long[] {1},
+         data
+      );
+   }
+   public void writeData(String name, int[][] data) throws CDFException{
+      Variable var = this.cdf.getVariable(name);
+      long start = var.getNumWrittenRecords();
+      long size = data.length;
+      long[] dimCnts = {data[0].length, 1};
+      var.putHyperData(
+         start, size, 1, 
+         new long[] {0}, new long[] {256, 1}, new long[] {1},
+         data
+      );
+   }
+   public void writeData(String name, long[][] data) throws CDFException{
+      Variable var = this.cdf.getVariable(name);
+      long start = var.getNumWrittenRecords();
+      long size = data.length;
+      long[] dimCnts = {data[0].length, 1};
+      var.putHyperData(
+         start, size, 1, 
+         new long[] {0}, new long[] {256, 1}, new long[] {1},
+         data
+      );
+   }
+   public void writeData(String name, float[][] data) throws CDFException{
+      Variable var = this.cdf.getVariable(name);
+      long start = var.getNumWrittenRecords();
+      long size = data.length;
+      long[] dimCnts = {data[0].length, 1};
+      var.putHyperData(
+         start, size, 1, 
+         new long[] {0}, new long[] {256, 1}, new long[] {1},
+         data
+      );
+   }
+   public void writeData(String name, double[][] data) throws CDFException{
+      Variable var = this.cdf.getVariable(name);
+      long start = var.getNumWrittenRecords();
+      long size = data.length;
+      long[] dimCnts = {data[0].length, 1};
+      var.putHyperData(
+         start, size, 1, 
+         new long[] {0}, new long[] {256, 1}, new long[] {1},
+         data
+      );
+   }
+
+   public void close() throws CDFException{
+      cdf.close();
+   }
 }

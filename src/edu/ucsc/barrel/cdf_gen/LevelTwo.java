@@ -1032,7 +1032,7 @@ public class LevelTwo extends CDFWriter{
       copyFile(new File(srcName), new File(destName), false);
 
       cdf = openCDF(destName);
-
+/*
       var = cdf.getVariable("MSPC");
       System.out.println("Spectrum Arrays...");
       var.putHyperData(
@@ -1052,7 +1052,7 @@ public class LevelTwo extends CDFWriter{
          new long[] {1, 1}, 
          mspc_rebin
       );
-
+*/
       var = cdf.getVariable("FrameGroup");
       System.out.println("FrameGroup...");
       var.putHyperData(
@@ -1087,7 +1087,7 @@ public class LevelTwo extends CDFWriter{
    }
 
    public void doSspcCdf(int first, int last, int date) throws CDFException{
-      CDF cdf;
+      //CDF cdf;
       Variable var;
       
       double scint_temp = 0, dpu_temp = 0;
@@ -1096,9 +1096,9 @@ public class LevelTwo extends CDFWriter{
       double[][] sspc_rebin = new double[numOfRecs][256];
       double[] 
          old_edges, 
-         peak = new double[numOfRecs],
          std_edges = SpectrumExtract.stdEdges(2, 2.4414);
       
+      double[] peak = new double[numOfRecs];
       int[] 
          frameGroup = new int[numOfRecs],
          q = new int[numOfRecs];
@@ -1155,14 +1155,28 @@ public class LevelTwo extends CDFWriter{
          q[rec_i] = CDF_Gen.data.sspc_q[data_i];
       }
 
-
-      String srcName = 
-         "cdf_skels/l2/barCLL_PP_S_l2_sspc_YYYYMMDD_v++.cdf";
       String destName = 
          outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn +
          "_l2_" + "sspc" + "_20" + date +  "_v" + revNum + ".cdf";
-      copyFile(new File(srcName), new File(destName), false);
 
+      SSPC sspc = new SSPC(destName, date, 2);
+      System.out.println("sspc");
+      sspc.writeData("SSPC", sspc_rebin);
+      System.out.println("Peak_511");
+      sspc.writeData("Peak_511", peak);
+      System.out.println("FrameGroup");
+      sspc.writeData("FrameGroup", frameGroup);
+      System.out.println("Epoch");
+      sspc.writeData("Epoch", epoch);
+      System.out.println("Q");
+      sspc.writeData("Q", q);
+
+
+      sspc.close();
+/*
+      String srcName = 
+         "cdf_skels/l2/barCLL_PP_S_l2_sspc_YYYYMMDD_v++.cdf";
+      copyFile(new File(srcName), new File(destName), false);
       cdf = openCDF(destName);
 
       var = cdf.getVariable("SSPC");
@@ -1226,6 +1240,7 @@ public class LevelTwo extends CDFWriter{
       );
 
       cdf.close();
+*/
    }
 
    public void doRcntCdf(int first, int last, int date) throws CDFException{

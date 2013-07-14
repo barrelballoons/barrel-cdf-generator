@@ -297,9 +297,9 @@ public class SpectrumExtract {
          ea2 = Arrays.copyOfRange(edges_in, 1, numOfEdges),
          eb1 = Arrays.copyOfRange(edges_out, 0, (numOfEdges - 1)),
          eb2 = Arrays.copyOfRange(edges_out, 1, numOfEdges),
-         specout = new double[numOfBins],
          widths_in = new double[numOfBins],
-         widths_out = new double[numOfBins];
+         widths_out = new double[numOfBins],
+         specout = new double[numOfBins];
 
       //calculate the widths of each bin
       for(int i = 0; i < numOfBins; i++){
