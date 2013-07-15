@@ -232,7 +232,7 @@ public class BarrelCDF extends File implements CDFConstants{
       Entry.create(
          cat_desc, frameGroup.getID(), CDF_CHAR, "DPU Frame Counter."
       );
-      Entry.create(var_type, frameGroup.getID(), CDF_CHAR, "support_data");
+      Entry.create(var_type, frameGroup.getID(), CDF_CHAR, "data");
       Entry.create(depend_0, frameGroup.getID(), CDF_CHAR,  "Epoch");
       Entry.create(format, frameGroup.getID(), CDF_CHAR,  "%u");
       Entry.create(scale_type, frameGroup.getID(), CDF_CHAR,  "linear");
