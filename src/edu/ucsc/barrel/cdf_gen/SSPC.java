@@ -49,7 +49,7 @@ public class SSPC extends BarrelCDF{
    private long id;
 
    private double[] 
-      BIN_START = {
+      BIN_EDGES = {
          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 
          16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 
          30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 
@@ -72,7 +72,36 @@ public class SSPC extends BarrelCDF{
          1952, 1984, 2016, 2048, 2112, 2176, 2240, 2304, 2368, 
          2432, 2496, 2560, 2624, 2688, 2752, 2816, 2880, 2944, 
          3008, 3072, 3136, 3200, 3264, 3328, 3392, 3456, 3520, 
-         3584, 3648, 3712, 3776, 3840, 3904, 3968, 4032
+         3584, 3648, 3712, 3776, 3840, 3904, 3968, 4032, 4096
+      },
+      BIN_CENTERS = {
+         0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 
+         11.5, 12.5, 13.5, 14.5, 15.5, 16.5, 17.5, 18.5, 19.5, 
+         20.5, 21.5, 22.5, 23.5, 24.5, 25.5, 26.5, 27.5, 28.5, 
+         29.5, 30.5, 31.5, 32.5, 33.5, 34.5, 35.5, 36.5, 37.5, 
+         38.5, 39.5, 40.5, 41.5, 42.5, 43.5, 44.5, 45.5, 46.5, 
+         47.5, 48.5, 49.5, 50.5, 51.5, 52.5, 53.5, 54.5, 55.5, 
+         56.5, 57.5, 58.5, 59.5, 60.5, 61.5, 62.5, 63.5, 65, 
+         67, 69, 71, 73, 75, 77, 79, 81, 83, 85, 87, 89, 91, 
+         93, 95, 97, 99, 101, 103, 105, 107, 109, 111, 113, 
+         115, 117, 119, 121, 123, 125, 127, 130, 134, 138, 
+         142, 146, 150, 154, 158, 162, 166, 170, 174, 178, 
+         182, 186, 190, 194, 198, 202, 206, 210, 214, 218, 
+         222, 226, 230, 234, 238, 242, 246, 250, 254, 260, 
+         268, 276, 284, 292, 300, 308, 316, 324, 332, 340, 
+         348, 356, 364, 372, 380, 388, 396, 404, 412, 420, 
+         428, 436, 444, 452, 460, 468, 476, 484, 492, 500, 
+         508, 520, 536, 552, 568, 584, 600, 616, 632, 648, 
+         664, 680, 696, 712, 728, 744, 760, 776, 792, 808, 
+         824, 840, 856, 872, 888, 904, 920, 936, 952, 968, 
+         984, 1000, 1016, 1040, 1072, 1104, 1136, 1168, 1200, 
+         1232, 1264, 1296, 1328, 1360, 1392, 1424, 1456, 1488, 
+         1520, 1552, 1584, 1616, 1648, 1680, 1712, 1744, 1776, 
+         1808, 1840, 1872, 1904, 1936, 1968, 2000, 2032, 2080, 
+         2144, 2208, 2272, 2336, 2400, 2464, 2528, 2592, 2656,
+         2720, 2784, 2848, 2912, 2976, 3040, 3104, 3168, 3232, 
+         3296, 3360, 3424, 3488, 3552, 3616, 3680, 3744, 3808, 
+         3872, 3936, 4000, 4064
       },
       BIN_WIDTH = {
          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
@@ -243,19 +272,22 @@ public class SSPC extends BarrelCDF{
       Entry.create(attr, id, CDF_CHAR, "Energy");
 
       attr = cdf.getAttribute("DELTA_PLUS_VAR");
-      Entry.create(attr, id, CDF_CHAR, "BinWidth");
+      Entry.create(attr, id, CDF_CHAR, "HalfBinWidth");
+
+      attr = cdf.getAttribute("DELTA_MINUS_VAR");
+      Entry.create(attr, id, CDF_CHAR, "HalfBinWidth");
 
       //Fill the "energy" variable
-      for(int bin_i = 0; bin_i < BIN_START.length; bin_i++){
+      for(int bin_i = 0; bin_i < BIN_CENTERS.length; bin_i++){
          var.putSingleData(
-            0L, new long[] {bin_i}, BIN_START[bin_i] * scale
+            0L, new long[] {bin_i}, BIN_CENTERS[bin_i] * scale
          );
       }
 
       //Create a variable that will track each energy channel width
       var = 
          Variable.create(
-            cdf, "BinWidth", CDF_DOUBLE, 1L, 1L, new  long[] {256}, 
+            cdf, "HalfBinWidth", CDF_DOUBLE, 1L, 1L, new  long[] {256}, 
             NOVARY, new long[] {VARY}
          );
       id = var.getID();
@@ -298,7 +330,7 @@ public class SSPC extends BarrelCDF{
       //Fill the "BinWidth" variable
       for(int bin_i = 0; bin_i < BIN_WIDTH.length; bin_i++){
          var.putSingleData(
-            0L, new long[] {bin_i}, BIN_WIDTH[bin_i] * scale
+            0L, new long[] {bin_i}, BIN_WIDTH[bin_i] * scale / 2
          );
       }
 
