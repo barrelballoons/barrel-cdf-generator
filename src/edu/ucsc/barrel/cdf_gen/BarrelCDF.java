@@ -42,9 +42,14 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.Iterator;
 
 public class BarrelCDF extends File implements CDFConstants{
       private CDF cdf;
+      private HashMap global_attrs;
 
    public BarrelCDF(String path) throws CDFException{
       super(path);
@@ -58,139 +63,72 @@ public class BarrelCDF extends File implements CDFConstants{
       //calculate min and max epochs
       long min_epoch = CDFTT2000.fromUTCparts(2012, 00, 01);
       long max_epoch = CDFTT2000.fromUTCparts(2015, 11, 31);
-
-      //Set all of the global attributes used by all BARREL CDF files
-      Attribute 
-         file_name_con = 
-            Attribute.create(cdf, "File_naming_convention", GLOBAL_SCOPE), 
-         data_type = 
-            Attribute.create(cdf, "Data_type", GLOBAL_SCOPE), 
-         src_desc = 
-            Attribute.create(cdf, "Logical_source_description", GLOBAL_SCOPE), 
-         mission_grp = 
-            Attribute.create(cdf, "Mission_group", GLOBAL_SCOPE), 
-         pi_aff = 
-            Attribute.create(cdf, "PI_affiliation", GLOBAL_SCOPE), 
-         src_name = 
-            Attribute.create(cdf, "Source_name", GLOBAL_SCOPE), 
-         project = 
-            Attribute.create(cdf, "Project", GLOBAL_SCOPE), 
-         pi = 
-            Attribute.create(cdf, "PI_name", GLOBAL_SCOPE), 
-         data_ver = 
-            Attribute.create(cdf, "Data_version", GLOBAL_SCOPE), 
-         text = 
-            Attribute.create(cdf, "TEXT", GLOBAL_SCOPE), 
-         instrument_type = 
-            Attribute.create(cdf, "Instrument_type", GLOBAL_SCOPE), 
-         descriptor = 
-            Attribute.create(cdf, "Descriptor", GLOBAL_SCOPE), 
-         discipline = 
-            Attribute.create(cdf, "Discipline", GLOBAL_SCOPE), 
-         ack = 
-            Attribute.create(cdf, "Acknowledgement", GLOBAL_SCOPE), 
-         link_title = 
-            Attribute.create(cdf, "LINK_TITLE", GLOBAL_SCOPE), 
-         gen_by = 
-            Attribute.create(cdf, "Generated_by", GLOBAL_SCOPE), 
-         rules = 
-            Attribute.create(cdf, "Rules_of_use", GLOBAL_SCOPE), 
-         gen_date = 
-            Attribute.create(cdf, "Generation_date", GLOBAL_SCOPE), 
-         link_http = 
-            Attribute.create(cdf, "HTTP_LINK", GLOBAL_SCOPE), 
-         mods = 
-            Attribute.create(cdf, "MODS", GLOBAL_SCOPE), 
-         time_res = 
-            Attribute.create(cdf, "Time_resolution", GLOBAL_SCOPE), 
-         adid_ref = 
-            Attribute.create(cdf, "ADID_ref", GLOBAL_SCOPE), 
-         logical_src = 
-            Attribute.create(cdf, "Logical_source", GLOBAL_SCOPE), 
-         loical_id = 
-            Attribute.create(cdf, "Logical_file_id", GLOBAL_SCOPE); 
-
-      Entry.create(file_name_con, 0, CDF_CHAR, "source_datatype_descriptor");
-      Entry.create(mission_grp, 0, CDF_CHAR, "RBSP");
-      Entry.create(pi_aff, 0, CDF_CHAR, "Dartmouth College");
-      Entry.create(src_name, 0, CDF_CHAR, "Payload_ID");
-      Entry.create(project, 0, CDF_CHAR, "LWS>Living With a Star>BARREL");
-      Entry.create(pi, 0, CDF_CHAR, "Robyn Millan");
-      Entry.create(data_ver, 0, CDF_CHAR, CDF_Gen.getSetting("rev"));
-      Entry.create(
-         discipline, 0, CDF_CHAR, "Space Physics>Magnetospheric Science"
-      );
-      Entry.create(link_title, 0, CDF_CHAR, "BARREL Data Repository");
-      Entry.create(gen_by, 0, CDF_CHAR, "barreldata.ucsc.edu");
-      Entry.create(
-         rules, 0, CDF_CHAR, 
+      
+      //fill global_attrs HashMap with attribute info used by all CDFs
+      global_attrs.put("File_naming_convention", "source_datatype_descriptor");
+      global_attrs.put("Mission_group", "RBSP");
+      global_attrs.put("PI_affiliation","Dartmouth College");
+      global_attrs.put("Source_name", "Payload_ID");
+      global_attrs.put("Project","LWS>Living With a Star>BARREL");
+      global_attrs.put("PI_name", "Robyn Millan");
+      global_attrs.put("Data_version", CDF_Gen.getSetting("rev"));
+      global_attrs.put("Discipline", "Space Physics>Magnetospheric Science");
+      global_attrs.put("LINK_TITLE", "BARREL Data Repository");
+      global_attrs.put("Generated_by", "BARREL CDF Generator");
+      global_attrs.put(
+         "Rules_of_use",  
          "BARREL will make all its scientific data products quickly and " +
          "publicly available but all users are expected to read and follow " +
          "the \"BARREL Mission Data Usage Policy\" which can be " +
          "found on the BARREL website or obtained by contacting the BARREL " +
          "PI at Robyn.Millan@dartmouth.edu"
       );
-      Entry.create(gen_date, 0, CDF_CHAR, date);
-      Entry.create(link_http, 0, CDF_CHAR, "http://barreldata.ucsc.edu");
+      global_attrs.put("Generation_date",String.valueOf(date));
+      global_attrs.put("HTTP_LINK","http://barreldata.ucsc.edu");
+      
+      //global_attrs.put("Acknowledgement", " "); 
+      //global_attrs.put(cdf, "MODS", " "); 
+      //global_attrs.put(cdf, "Time_resolution", " "); 
+      //global_attrs.put(cdf, "ADID_ref", " "); 
+      //global_attrs.put(cdf, "Logical_source", " "); 
+      //global_attrs.put(cdf, "Logical_file_id", " "); 
+      //global_attrs.put(cdf, "TEXT", " "); 
+      //global_attrs.put(cdf, "Instrument_type", " "); 
+      //global_attrs.put(cdf, "Descriptor", " "); 
+      //global_attrs.put(cdf, "Data_type", " "); 
+      //global_attrs.put(cdf, "Logical_source_description", " ");
+      writeGlobalAttributes();
 
       //create variable attributes
-      Attribute 
-         field = 
-            Attribute.create(cdf, "FIELDNAM", VARIABLE_SCOPE), 
-         cat_desc = 
-            Attribute.create(cdf, "CATDESC", VARIABLE_SCOPE), 
-         var_notes = 
-            Attribute.create(cdf, "VAR_NOTES", VARIABLE_SCOPE), 
-         var_type = 
-            Attribute.create(cdf, "VAR_TYPE", VARIABLE_SCOPE), 
-         depend_0 = 
-            Attribute.create(cdf, "DEPEND_0", VARIABLE_SCOPE), 
-         from_ptr = 
-            Attribute.create(cdf, "FROM_PTR", VARIABLE_SCOPE), 
-         format = 
-            Attribute.create(cdf, "FORMAT", VARIABLE_SCOPE), 
-         unit_ptr = 
-            Attribute.create(cdf, "UNIT_PTR", VARIABLE_SCOPE), 
-         units = 
-            Attribute.create(cdf, "UNITS", VARIABLE_SCOPE), 
-         scal_ptr = 
-            Attribute.create(cdf, "SCAL_PTR", VARIABLE_SCOPE), 
-         scale_type = 
-            Attribute.create(cdf, "SCALETYP", VARIABLE_SCOPE), 
-         disp_type = 
-            Attribute.create(cdf, "DISPLAY_TYPE", VARIABLE_SCOPE), 
-         valid_min = 
-            Attribute.create(cdf, "VALIDMIN", VARIABLE_SCOPE), 
-         valid_max = 
-            Attribute.create(cdf, "VALIDMAX", VARIABLE_SCOPE), 
-         fill_val = 
-            Attribute.create(cdf, "FILLVAL", VARIABLE_SCOPE), 
-         label_axis = 
-            Attribute.create(cdf, "LABLAXIS", VARIABLE_SCOPE), 
-         monotonic = 
-            Attribute.create(cdf, "MONOTON", VARIABLE_SCOPE), 
-         leap_second_inc = 
-            Attribute.create(cdf, "LEAP_SECONDS_INCLUDED", VARIABLE_SCOPE), 
-         res = 
-            Attribute.create(cdf, "RESOLUTION", VARIABLE_SCOPE), 
-         bin_location = 
-            Attribute.create(cdf, "Bin_Location", VARIABLE_SCOPE), 
-         time_base = 
-            Attribute.create(cdf, "TIME_BASE", VARIABLE_SCOPE), 
-         time_scale = 
-            Attribute.create(cdf, "TIME_SCALE", VARIABLE_SCOPE), 
-         ref_pos = 
-            Attribute.create(cdf, "REFERENCE_POSITION", VARIABLE_SCOPE),
-         abs_err = 
-            Attribute.create(cdf, "ABSOLUTE_ERROR", VARIABLE_SCOPE), 
-         rel_err = 
-            Attribute.create(cdf, "RELATIVE_ERROR", VARIABLE_SCOPE), 
-         depend_1 = 
-            Attribute.create(cdf, "DEPEND_1", VARIABLE_SCOPE), 
-         delta_plus = 
-            Attribute.create(cdf, "DELTA_PLUS_VAR", VARIABLE_SCOPE), 
-         delta_minus = 
-            Attribute.create(cdf, "DELTA_MINUS_VAR", VARIABLE_SCOPE); 
+      Attribute attr; 
+      attr = Attribute.create(cdf, "FIELDNAM", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "CATDESC", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "VAR_NOTES", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "VAR_TYPE", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "DEPEND_0", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "FROM_PTR", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "FORMAT", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "UNIT_PTR", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "UNITS", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "SCAL_PTR", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "SCALETYP", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "DISPLAY_TYPE", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "VALIDMIN", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "VALIDMAX", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "FILLVAL", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "LABLAXIS", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "MONOTON", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "LEAP_SECONDS_INCLUDED", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "RESOLUTION", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "Bin_Location", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "TIME_BASE", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "TIME_SCALE", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "REFERENCE_POSITION", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "ABSOLUTE_ERROR", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "RELATIVE_ERROR", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "DEPEND_1", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "DELTA_PLUS_VAR", VARIABLE_SCOPE);          
+      attr = Attribute.create(cdf, "DELTA_MINUS_VAR", VARIABLE_SCOPE);
 
       //create variables used by all CDFs
       Variable
@@ -209,7 +147,7 @@ public class BarrelCDF extends File implements CDFConstants{
                cdf, "Q", CDF_INT4, 1L, 0L, new  long[] {1}, 
                VARY, new long[] {NOVARY}
          );
-
+/*
       //fill the attributes for the variables in each file
       Entry.create(field, epoch.getID(), CDF_CHAR, "Epoch");
       Entry.create(cat_desc, epoch.getID(), CDF_CHAR, "Default time");
@@ -232,7 +170,7 @@ public class BarrelCDF extends File implements CDFConstants{
       Entry.create(
          cat_desc, frameGroup.getID(), CDF_CHAR, "DPU Frame Counter."
       );
-      Entry.create(var_type, frameGroup.getID(), CDF_CHAR, "support_data");
+      Entry.create(var_type, frameGroup.getID(), CDF_CHAR, "data");
       Entry.create(depend_0, frameGroup.getID(), CDF_CHAR,  "Epoch");
       Entry.create(format, frameGroup.getID(), CDF_CHAR,  "%u");
       Entry.create(scale_type, frameGroup.getID(), CDF_CHAR,  "linear");
@@ -256,6 +194,21 @@ public class BarrelCDF extends File implements CDFConstants{
       Entry.create(valid_max, q.getID(), CDF_INT4, 2147483647);
       Entry.create(fill_val, q.getID(), CDF_INT4, -2147483648);
       Entry.create(label_axis, q.getID(), CDF_CHAR, "Q");
+      */
+   }
+
+   private void writeGlobalAttributes() throws CDFException{
+      //Set all of the global attributes used by all BARREL CDF files
+      Attribute attr;
+      
+      Set attr_entries = global_attrs.entrySet();
+      Iterator attr_i = attr_entries.iterator();
+      while(attr_i.hasNext()){
+         Map.Entry entry = (Map.Entry)attr_i.next();
+
+         attr = Attribute.create(cdf, String.valueOf(entry.getKey()), GLOBAL_SCOPE);
+         Entry.create(attr, 0, CDF_CHAR, String.valueOf(entry.getValue()));
+      }
    }
 
    public CDF getCDF(){return cdf;}
