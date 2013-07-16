@@ -43,12 +43,15 @@ import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
 
-public class BarrelCDF extends File implements CDFConstants{
+public class BarrelCDF implements CDFConstants{
       private CDF cdf;
+      private String path;
 
-   public BarrelCDF(String path) throws CDFException{
-      super(path);
-      cdf = CDF.create(path);
+   public BarrelCDF(String p) throws CDFException{
+      path = p;
+
+      //create 
+      if(!(new File(path)).exists()){cdf = CDF.create(path);}
 
       //get today's date
       DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
