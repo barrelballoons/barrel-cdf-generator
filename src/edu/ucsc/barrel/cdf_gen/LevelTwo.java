@@ -246,6 +246,12 @@ public class LevelTwo extends CDFWriter{
          }
 
          mag_coord_file.close();
+
+         //clean up after ourselves
+         geo_coord_file.delete();
+         (new File("pay" + id + "_" + date + "_gps_out.txt")).delete();
+
+         CDF_Gen.log.writeln("test");
       }catch(IOException ex){
          System.out.println("Could not read magnetic coordinate file:");
          System.out.println(ex.getMessage());
