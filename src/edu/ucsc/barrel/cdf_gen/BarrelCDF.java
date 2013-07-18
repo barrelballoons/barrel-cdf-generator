@@ -46,10 +46,12 @@ import java.util.Arrays;
 public class BarrelCDF implements CDFConstants{
       private CDF cdf;
       private String path;
+      private int lvl;
       private int lastRec;
 
-   public BarrelCDF(String p){
+   public BarrelCDF(final String p, final int l){
       path = p;
+      lvl = l;
       
       try{
          //create a new CDF or open an existing one. 
@@ -71,14 +73,17 @@ public class BarrelCDF implements CDFConstants{
       
       //fill global_attrs HashMap with attribute info used by all CDFs
       setAttribute("File_naming_convention", "source_datatype_descriptor");
-      setAttribute("Mission_group", "RBSP");
-      setAttribute("PI_affiliation","Dartmouth College");
-      setAttribute("Source_name", "Payload_ID");
-      setAttribute("Project","LWS>Living With a Star>BARREL");
+      setAttribute("Data_type", "l" + lvl + ">Level-" + lvl);
       setAttribute("PI_name", "Robyn Millan");
+      setAttribute("PI_affiliation","Dartmouth College");
+      setAttribute("Mission_group", "RBSP");
+      setAttribute("Project","LWS>Living With a Star>BARREL");
+      setAttribute("Source_name", "Payload_ID");
       setAttribute("Data_version", CDF_Gen.getSetting("rev"));
       setAttribute("Discipline", "Space Physics>Magnetospheric Science");
+      setAttribute("HTTP_LINK","http://barreldata.ucsc.edu");
       setAttribute("LINK_TITLE", "BARREL Data Repository");
+      setAttribute("Generation_date", String.valueOf(date));
       setAttribute("Generated_by", "BARREL CDF Generator");
       setAttribute(
          "Rules_of_use",  
@@ -88,8 +93,6 @@ public class BarrelCDF implements CDFConstants{
          "the BARREL data repository or obtained by contacting " + 
          "barrelballoons@gmail.com"
       );
-      setAttribute("Generation_date", String.valueOf(date));
-      setAttribute("HTTP_LINK","http://barreldata.ucsc.edu");
    }
 
    public void addVars() throws CDFException{
@@ -108,7 +111,7 @@ public class BarrelCDF implements CDFConstants{
             VARY, new long[] {NOVARY}
       ); 
       id = var.getID();
-      setAttribute("FIELDNAME", "Epoch", VARIABLE_SCOPE, id);
+      setAttribute("FIELDNAM", "Epoch", VARIABLE_SCOPE, id);
       setAttribute("CATDESC", "Default time", VARIABLE_SCOPE, id);
       setAttribute("VAR_TYPE", "support_data", VARIABLE_SCOPE, id);
       setAttribute("UNITS", "ns", VARIABLE_SCOPE, id);
@@ -132,15 +135,17 @@ public class BarrelCDF implements CDFConstants{
             VARY, new long[] {NOVARY}
       );
       id = var.getID();
-      setAttribute("FIELDNAME", "Frame Number", VARIABLE_SCOPE, id);
+      setAttribute("FIELDNAM", "Frame Number", VARIABLE_SCOPE, id);
       setAttribute("CATDESC", "DPU Frame Counter", VARIABLE_SCOPE, id);
       setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
       setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
       setAttribute("FORMAT", "%u", VARIABLE_SCOPE, id);
       setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", 0, VARIABLE_SCOPE, id);
-      setAttribute("VALIDMAX", 2147483647, VARIABLE_SCOPE, id);
-      setAttribute("FILLVAL", Constants.INT4_FILL, VARIABLE_SCOPE, id);
+      setAttribute("VALIDMIN", 0, VARIABLE_SCOPE, id, CDF_INT4);
+      setAttribute("VALIDMAX", 2147483647, VARIABLE_SCOPE, id, CDF_INT4);
+      setAttribute(
+         "FILLVAL", Constants.INT4_FILL, VARIABLE_SCOPE, id, CDF_INT4
+      );
       setAttribute("LABLAXIS", "Frame", VARIABLE_SCOPE, id);
 
       var = 
@@ -149,7 +154,7 @@ public class BarrelCDF implements CDFConstants{
             VARY, new long[] {NOVARY}
       );
       id = var.getID();
-      setAttribute("FIELDNAME", "Data Quality", VARIABLE_SCOPE, id);
+      setAttribute("FIELDNAM", "Data Quality", VARIABLE_SCOPE, id);
       setAttribute(
          "CATDESC", "32bit flag used to indicate data quality", 
          VARIABLE_SCOPE, id
@@ -158,9 +163,12 @@ public class BarrelCDF implements CDFConstants{
       setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
       setAttribute("FORMAT", "%u", VARIABLE_SCOPE, id);
       setAttribute("SCALETYPE", "linear", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", 0, VARIABLE_SCOPE, id);
-      setAttribute("VALIDMAX", 2147483647, VARIABLE_SCOPE, id);
-      setAttribute("FILLVAL", Constants.INT4_FILL, VARIABLE_SCOPE, id);
+      setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
+      setAttribute("VALIDMIN", 0, VARIABLE_SCOPE, id, CDF_INT4);
+      setAttribute("VALIDMAX", 2147483647, VARIABLE_SCOPE, id, CDF_INT4);
+      setAttribute(
+         "FILLVAL", Constants.INT4_FILL, VARIABLE_SCOPE, id, CDF_INT4
+      );
       setAttribute("LABLAXIS", "Q", VARIABLE_SCOPE, id);
    }
 
@@ -276,7 +284,7 @@ public class BarrelCDF implements CDFConstants{
       long[] dimCnts = {data[0].length, 1};
       var.putHyperData(
          start, size, 1, 
-         new long[] {0}, new long[] {256, 1}, new long[] {1},
+         new long[] {0}, dimCnts, new long[] {1},
          data
       );
    }
@@ -287,7 +295,7 @@ public class BarrelCDF implements CDFConstants{
       long[] dimCnts = {data[0].length, 1};
       var.putHyperData(
          start, size, 1, 
-         new long[] {0}, new long[] {256, 1}, new long[] {1},
+         new long[] {0}, dimCnts, new long[] {1},
          data
       );
    }
@@ -298,7 +306,7 @@ public class BarrelCDF implements CDFConstants{
       long[] dimCnts = {data[0].length, 1};
       var.putHyperData(
          start, size, 1, 
-         new long[] {0}, new long[] {256, 1}, new long[] {1},
+         new long[] {0}, dimCnts, new long[] {1},
          data
       );
    }
@@ -309,7 +317,7 @@ public class BarrelCDF implements CDFConstants{
       long[] dimCnts = {data[0].length, 1};
       var.putHyperData(
          start, size, 1, 
-         new long[] {0}, new long[] {256, 1}, new long[] {1},
+         new long[] {0}, dimCnts, new long[] {1},
          data
       );
    }

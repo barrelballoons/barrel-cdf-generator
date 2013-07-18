@@ -107,7 +107,7 @@ public class SSPC extends BarrelCDF{
          3296, 3360, 3424, 3488, 3552, 3616, 3680, 3744, 3808, 
          3872, 3936, 4000, 4064
       },
-      BIN_WIDTH = {
+      BIN_WIDTHS = {
          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
@@ -128,7 +128,7 @@ public class SSPC extends BarrelCDF{
       };
 
    public SSPC(final String p, final int d, final int l){
-      super(p);
+      super(p, l);
       path = p;
       date = d;
       lvl = l;
@@ -145,7 +145,6 @@ public class SSPC extends BarrelCDF{
 
    private void addSspcGlobalAtts() throws CDFException{
       //Set global attributes specific to this type of CDF
-      setAttribute("Data_type", "l" + lvl + ">Level-" + lvl);
       setAttribute(
          "Logical_source_description", "Slow time resolution X-ray spectrum"
       );
@@ -157,10 +156,10 @@ public class SSPC extends BarrelCDF{
       setAttribute("Instrument_type", "Gamma and X-Rays");
       setAttribute("Descriptor", "Scintillator");
       setAttribute("Time_resolution", "32s");
-      setAttribute("Logical_source", "payload_id_l2_scintillator");
+      setAttribute("Logical_source", "payload_id_l" + lvl  + "_scintillator");
       setAttribute(
          "Logical_file_id",
-         "payload_id_l2_scintillator_20" + date  + 
+         "payload_id_l" + lvl  + "_scintillator_20" + date  + 
          "_V" + CDF_Gen.getSetting("rev")
       );
    }
@@ -171,35 +170,38 @@ public class SSPC extends BarrelCDF{
       //32 frames.
       var = 
          Variable.create(
-            cdf, "SSPC", CDF_DOUBLE, 1L, 1L, new  long[] {256}, 
+            cdf, "SSPC", CDF_DOUBLE, 1L, 1L, new  long[] {BIN_CENTERS.length}, 
             VARY, new long[] {VARY}
          );   
       id = var.getID();
 
-      setAttribute("FIELDNAM", "SSPC");
-      setAttribute("CATDESC", "SSPC");
+      setAttribute("FIELDNAM", "SSPC", VARIABLE_SCOPE, id);
+      setAttribute("CATDESC", "SSPC", VARIABLE_SCOPE, id);
       setAttribute(
          "VAR_NOTES", 
          "Rebinned, divided by energy bin widths and " +
-         "adjusted to /sec time scale."
+         "adjusted to /sec time scale.", 
+         VARIABLE_SCOPE, id
       );
-      setAttribute("VAR_TYPE", "data");
-      setAttribute("DEPEND_0", "Epoch");
-      setAttribute("FORMAT", "%f");
-      setAttribute("UNITS", "cnts/keV/sec");
-      setAttribute("SCALETYP", "log");
-      setAttribute("DISPLAY_TYPE", "spectrogram");
-      setAttribute("VALIDMIN", 0.0);
-      setAttribute("VALIDMAX", 59391.0);
-      setAttribute("FILLVAL", Constants.DOUBLE_FILL);
-      setAttribute("LABLAXIS", "SSPC");
-      setAttribute("DEPEND_1", "energy");
+      setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
+      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
+      setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
+      setAttribute("UNITS", "cnts/keV/sec", VARIABLE_SCOPE, id);
+      setAttribute("SCALETYP", "log", VARIABLE_SCOPE, id);
+      setAttribute("DISPLAY_TYPE", "spectrogram", VARIABLE_SCOPE, id);
+      setAttribute("VALIDMIN", 0.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
+      setAttribute("VALIDMAX", 59391.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
+      setAttribute(
+         "FILLVAL", Constants.DOUBLE_FILL, VARIABLE_SCOPE, id, CDF_DOUBLE
+      );
+      setAttribute("LABLAXIS", "SSPC", VARIABLE_SCOPE, id);
+      setAttribute("DEPEND_1", "energy", VARIABLE_SCOPE, id);
 
       //Create the "energy" variable
       //This variable lists the starting energy for each channel in keV
       var = 
          Variable.create(
-            cdf, "energy", CDF_DOUBLE, 1L, 1L, new  long[] {256}, 
+            cdf, "energy", CDF_DOUBLE, 1L, 1L, new  long[] {BIN_CENTERS.length}, 
             NOVARY, new long[] {VARY}
          );
       id = var.getID();
@@ -215,9 +217,11 @@ public class SSPC extends BarrelCDF{
       setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
       setAttribute("UNITS", "keV", VARIABLE_SCOPE, id);
       setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", 0.0, VARIABLE_SCOPE, id);
-      setAttribute("VALIDMAX", 10000.0, VARIABLE_SCOPE, id);
-      setAttribute("FILLVAL", Constants.DOUBLE_FILL, VARIABLE_SCOPE, id);
+      setAttribute("VALIDMIN", 0.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
+      setAttribute("VALIDMAX", 2000.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
+      setAttribute(
+         "FILLVAL", Constants.DOUBLE_FILL, VARIABLE_SCOPE, id, CDF_DOUBLE
+      );
       setAttribute("LABLAXIS", "Energy", VARIABLE_SCOPE, id);
       setAttribute("DELTA_PLUS_VAR", "HalfBinWidth", VARIABLE_SCOPE, id);
       setAttribute("DELTA_MINUS_VAR", "HalfBinWidth", VARIABLE_SCOPE, id);
@@ -245,43 +249,18 @@ public class SSPC extends BarrelCDF{
       setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
       setAttribute("UNITS", "keV", VARIABLE_SCOPE, id);
       setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", 0.0, VARIABLE_SCOPE, id);
-      setAttribute("VALIDMAX", 200.0, VARIABLE_SCOPE, id);
-      setAttribute("FILLVAL", Constants.DOUBLE_FILL, VARIABLE_SCOPE, id);
+      setAttribute("VALIDMIN", 0.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
+      setAttribute("VALIDMAX", 200.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
+      setAttribute(
+         "FILLVAL", Constants.DOUBLE_FILL, VARIABLE_SCOPE, id, CDF_DOUBLE
+      );
       setAttribute("LABLAXIS", "Width", VARIABLE_SCOPE, id);
 
       //Fill the "BinWidth" variable
-      for(int bin_i = 0; bin_i < BIN_WIDTH.length; bin_i++){
+      for(int bin_i = 0; bin_i < BIN_WIDTHS.length; bin_i++){
          var.putSingleData(
-            0L, new long[] {bin_i}, BIN_WIDTH[bin_i] * scale / 2
+            0L, new long[] {bin_i}, BIN_WIDTHS[bin_i] * scale / 2
          );
       }
-
-      //Create a variable that will track the 511 line peak
-      var = 
-         Variable.create(
-            cdf, "Peak_511", CDF_DOUBLE, 1L, 0L, new  long[] {1}, 
-            VARY, new long[] {NOVARY}
-         );
-      id = var.getID();
-
-      setAttribute("FIELDNAM", "Peak_511", VARIABLE_SCOPE, id);
-      setAttribute("CATDESC", "Location of the 511 line", VARIABLE_SCOPE, id);
-      setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
-      setAttribute(
-         "VAR_NOTES", 
-         "This is the detector channel (0-4096) " + 
-         "which appears to contain the 511",
-         VARIABLE_SCOPE, id
-      );
-      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
-      setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
-      setAttribute("UNITS", "ch", VARIABLE_SCOPE, id);
-      setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
-      setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", 0.0, VARIABLE_SCOPE, id);
-      setAttribute("VALIDMAX", 4096.0, VARIABLE_SCOPE, id);
-      setAttribute("FILLVAL", Constants.DOUBLE_FILL, VARIABLE_SCOPE, id);
-      setAttribute("LABLAXIS", "Peak_511", VARIABLE_SCOPE, id);  
    }
 }
