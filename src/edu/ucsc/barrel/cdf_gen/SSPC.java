@@ -47,6 +47,10 @@ public class SSPC extends BarrelCDF{
    private CDF cdf;
    private Variable var;
    private long id;
+   private String path;
+   private int date, lvl;
+
+   private double scale = 2.4414; // keV/bin
 
    private double[] 
       BIN_EDGES = {
@@ -123,50 +127,45 @@ public class SSPC extends BarrelCDF{
          64, 64, 64, 64
       };
 
-   private double scale = 2.4414; // keV/bin
+   public SSPC(final String p, final int d, final int l){
+      super(p);
+      path = p;
+      date = d;
+      lvl = l;
 
-   public SSPC(
-      final String path, final int date, final int lvl
-   ) throws CDFException{
-      super(path);
-      cdf = super.getCDF();
-      Attribute attr;
+      try{
+         cdf = super.getCDF();
+      
+         addSspcGlobalAtts();
+         addSspcVars();
+      }catch(CDFException e){
+         System.out.println(e.getMessage());
+      }
+   }
 
+   private void addSspcGlobalAtts() throws CDFException{
       //Set global attributes specific to this type of CDF
-      attr = cdf.getAttribute("Data_type");
-      Entry.create(attr, 0, CDF_CHAR, "l" + lvl + ">Level-" + lvl);
-
-      attr = cdf.getAttribute("Logical_source_description");
-      Entry.create(
-         attr, 0, CDF_CHAR, "Slow time resolution X-ray spectrum"
+      setAttribute("Data_type", "l" + lvl + ">Level-" + lvl);
+      setAttribute(
+         "Logical_source_description", "Slow time resolution X-ray spectrum"
       );
-
-      attr = cdf.getAttribute("TEXT");
-      Entry.create(
-         attr, 0, CDF_CHAR, 
+      setAttribute(
+         "TEXT", 
          "X-ray spectra each made of 256 energy bins " + 
          "transmitted over 32 frames."
       );
-
-      attr = cdf.getAttribute("Instrument_type");
-      Entry.create(attr, 0, CDF_CHAR, "Gamma and X-Rays");
-      
-      attr = cdf.getAttribute("Descriptor");
-      Entry.create(attr, 0, CDF_CHAR, "Scintillator");
-      
-      attr = cdf.getAttribute("Time_resolution");
-      Entry.create(attr, 0, CDF_CHAR, "32s");
-      
-      attr = cdf.getAttribute("Logical_source");
-      Entry.create(attr, 0, CDF_CHAR, "payload_id_l2_scintillator");
-      
-      attr = cdf.getAttribute("Logical_file_id");
-      Entry.create(
-         attr, 0, CDF_CHAR, 
+      setAttribute("Instrument_type", "Gamma and X-Rays");
+      setAttribute("Descriptor", "Scintillator");
+      setAttribute("Time_resolution", "32s");
+      setAttribute("Logical_source", "payload_id_l2_scintillator");
+      setAttribute(
+         "Logical_file_id",
          "payload_id_l2_scintillator_20" + date  + 
          "_V" + CDF_Gen.getSetting("rev")
       );
+   }
 
+   private void addSspcVars() throws CDFException{
       //create SSPC variable
       //This variable will contain the slow spectrum that is returned over
       //32 frames.
@@ -177,51 +176,24 @@ public class SSPC extends BarrelCDF{
          );   
       id = var.getID();
 
-      attr = cdf.getAttribute("FIELDNAM");
-      Entry.create(attr, id, CDF_CHAR, "SSPC");
-
-      attr = cdf.getAttribute("CATDESC");
-      Entry.create(attr, id, CDF_CHAR, "SSPC");
-
-      attr = cdf.getAttribute("VAR_NOTES");
-      Entry.create(
-         attr, id, CDF_CHAR, 
+      setAttribute("FIELDNAM", "SSPC");
+      setAttribute("CATDESC", "SSPC");
+      setAttribute(
+         "VAR_NOTES", 
          "Rebinned, divided by energy bin widths and " +
          "adjusted to /sec time scale."
       );
-
-      attr = cdf.getAttribute("VAR_TYPE");
-      Entry.create(attr, id, CDF_CHAR, "data");
-
-      attr = cdf.getAttribute("DEPEND_0");
-      Entry.create(attr, id, CDF_CHAR, "Epoch");
-
-      attr = cdf.getAttribute("FORMAT");
-      Entry.create(attr, id, CDF_CHAR, "%f");
-
-      attr = cdf.getAttribute("UNITS");
-      Entry.create(attr, id, CDF_CHAR, "cnts/keV/sec");
-
-      attr = cdf.getAttribute("SCALETYP");
-      Entry.create(attr, id, CDF_CHAR, "log");
-
-      attr = cdf.getAttribute("DISPLAY_TYPE");
-      Entry.create(attr, id, CDF_CHAR, "spectrogram");
-
-      attr = cdf.getAttribute("VALIDMIN");
-      Entry.create(attr, id, CDF_DOUBLE, 0.0);
-
-      attr = cdf.getAttribute("VALIDMAX");
-      Entry.create(attr, id, CDF_DOUBLE, 59391.0);
-
-      attr = cdf.getAttribute("FILLVAL");
-      Entry.create(attr, id, CDF_DOUBLE, Constants.DOUBLE_FILL);
-
-      attr = cdf.getAttribute("LABLAXIS");
-      Entry.create(attr, id, CDF_CHAR, "SSPC");
-
-      attr = cdf.getAttribute("DEPEND_1");
-      Entry.create(attr, id, CDF_CHAR, "energy");
+      setAttribute("VAR_TYPE", "data");
+      setAttribute("DEPEND_0", "Epoch");
+      setAttribute("FORMAT", "%f");
+      setAttribute("UNITS", "cnts/keV/sec");
+      setAttribute("SCALETYP", "log");
+      setAttribute("DISPLAY_TYPE", "spectrogram");
+      setAttribute("VALIDMIN", 0.0);
+      setAttribute("VALIDMAX", 59391.0);
+      setAttribute("FILLVAL", Constants.DOUBLE_FILL);
+      setAttribute("LABLAXIS", "SSPC");
+      setAttribute("DEPEND_1", "energy");
 
       //Create the "energy" variable
       //This variable lists the starting energy for each channel in keV
@@ -232,50 +204,23 @@ public class SSPC extends BarrelCDF{
          );
       id = var.getID();
 
-      attr = cdf.getAttribute("FIELDNAM");
-      Entry.create(attr, id, CDF_CHAR, "Energy Level");
-
-      attr = cdf.getAttribute("CATDESC");
-      Entry.create(attr, id, CDF_CHAR, "Energy Level");
-
-      attr = cdf.getAttribute("VAR_NOTES");
-      Entry.create(
-         attr, id, CDF_CHAR, 
-         "Start of each slow spectrum var channel."
+      setAttribute("FIELDNAM", "Energy Level", VARIABLE_SCOPE, id);
+      setAttribute("CATDESC", "Energy Level", VARIABLE_SCOPE, id);
+      setAttribute(
+         "VAR_NOTES", "Start of each slow spectrum var channel.",
+         VARIABLE_SCOPE, id
       );
-
-      attr = cdf.getAttribute("VAR_TYPE");
-      Entry.create(attr, id, CDF_CHAR, "support_data");
-
-      attr = cdf.getAttribute("DEPEND_0");
-      Entry.create(attr, id, CDF_CHAR, "Epoch");
-
-      attr = cdf.getAttribute("FORMAT");
-      Entry.create(attr, id, CDF_CHAR, "%f");
-
-      attr = cdf.getAttribute("UNITS");
-      Entry.create(attr, id, CDF_CHAR, "keV");
-
-      attr = cdf.getAttribute("SCALETYP");
-      Entry.create(attr, id, CDF_CHAR, "linear");
-
-      attr = cdf.getAttribute("VALIDMIN");
-      Entry.create(attr, id, CDF_DOUBLE, 0.0);
-
-      attr = cdf.getAttribute("VALIDMAX");
-      Entry.create(attr, id, CDF_DOUBLE, 10000.0);
-
-      attr = cdf.getAttribute("FILLVAL");
-      Entry.create(attr, id, CDF_DOUBLE, Constants.DOUBLE_FILL);
-
-      attr = cdf.getAttribute("LABLAXIS");
-      Entry.create(attr, id, CDF_CHAR, "Energy");
-
-      attr = cdf.getAttribute("DELTA_PLUS_VAR");
-      Entry.create(attr, id, CDF_CHAR, "HalfBinWidth");
-
-      attr = cdf.getAttribute("DELTA_MINUS_VAR");
-      Entry.create(attr, id, CDF_CHAR, "HalfBinWidth");
+      setAttribute("VAR_TYPE", "support_data", VARIABLE_SCOPE, id);
+      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
+      setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
+      setAttribute("UNITS", "keV", VARIABLE_SCOPE, id);
+      setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
+      setAttribute("VALIDMIN", 0.0, VARIABLE_SCOPE, id);
+      setAttribute("VALIDMAX", 10000.0, VARIABLE_SCOPE, id);
+      setAttribute("FILLVAL", Constants.DOUBLE_FILL, VARIABLE_SCOPE, id);
+      setAttribute("LABLAXIS", "Energy", VARIABLE_SCOPE, id);
+      setAttribute("DELTA_PLUS_VAR", "HalfBinWidth", VARIABLE_SCOPE, id);
+      setAttribute("DELTA_MINUS_VAR", "HalfBinWidth", VARIABLE_SCOPE, id);
 
       //Fill the "energy" variable
       for(int bin_i = 0; bin_i < BIN_CENTERS.length; bin_i++){
@@ -292,40 +237,18 @@ public class SSPC extends BarrelCDF{
          );
       id = var.getID();
 
-      attr = cdf.getAttribute("FIELDNAM");
-      Entry.create(attr, id, CDF_CHAR, "Bin Width");
-
-      attr = cdf.getAttribute("CATDESC");
-      Entry.create(
-         attr, id, CDF_CHAR, "Width of energy channel"
-      );
-
-      attr = cdf.getAttribute("VAR_TYPE");
-      Entry.create(attr, id, CDF_CHAR, "support_data");
-
-      attr = cdf.getAttribute("DEPEND_0");
-      Entry.create(attr, id, CDF_CHAR, "Epoch");
-
-      attr = cdf.getAttribute("FORMAT");
-      Entry.create(attr, id, CDF_CHAR, "%f");
-
-      attr = cdf.getAttribute("UNITS");
-      Entry.create(attr, id, CDF_CHAR, "keV");
-
-      attr = cdf.getAttribute("SCALETYP");
-      Entry.create(attr, id, CDF_CHAR, "linear");
-
-      attr = cdf.getAttribute("VALIDMIN");
-      Entry.create(attr, id, CDF_DOUBLE, 0.0);
-
-      attr = cdf.getAttribute("VALIDMAX");
-      Entry.create(attr, id, CDF_DOUBLE, 200.0);
-
-      attr = cdf.getAttribute("FILLVAL");
-      Entry.create(attr, id, CDF_DOUBLE, Constants.DOUBLE_FILL);
-
-      attr = cdf.getAttribute("LABLAXIS");
-      Entry.create(attr, id, CDF_CHAR, "Width");
+      setAttribute("FIELDNAM", "Bin Width", VARIABLE_SCOPE, id);
+      setAttribute("CATDESC", "Width of energy channel", VARIABLE_SCOPE, id);
+      
+      setAttribute("VAR_TYPE", "support_data", VARIABLE_SCOPE, id);
+      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
+      setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
+      setAttribute("UNITS", "keV", VARIABLE_SCOPE, id);
+      setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
+      setAttribute("VALIDMIN", 0.0, VARIABLE_SCOPE, id);
+      setAttribute("VALIDMAX", 200.0, VARIABLE_SCOPE, id);
+      setAttribute("FILLVAL", Constants.DOUBLE_FILL, VARIABLE_SCOPE, id);
+      setAttribute("LABLAXIS", "Width", VARIABLE_SCOPE, id);
 
       //Fill the "BinWidth" variable
       for(int bin_i = 0; bin_i < BIN_WIDTH.length; bin_i++){
@@ -342,49 +265,23 @@ public class SSPC extends BarrelCDF{
          );
       id = var.getID();
 
-      attr = cdf.getAttribute("FIELDNAM");
-      Entry.create(attr, id, CDF_CHAR, "Peak_511");
-
-      attr = cdf.getAttribute("CATDESC");
-      Entry.create(
-         attr, id, CDF_CHAR, "Location of the 511 line"
-      );
-
-      attr = cdf.getAttribute("VAR_TYPE");
-      Entry.create(attr, id, CDF_CHAR, "data");
-
-      attr = cdf.getAttribute("VAR_NOTES");
-      Entry.create(
-         attr, id, CDF_CHAR, 
+      setAttribute("FIELDNAM", "Peak_511", VARIABLE_SCOPE, id);
+      setAttribute("CATDESC", "Location of the 511 line", VARIABLE_SCOPE, id);
+      setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
+      setAttribute(
+         "VAR_NOTES", 
          "This is the detector channel (0-4096) " + 
-         "which appears to contain the 511"
+         "which appears to contain the 511",
+         VARIABLE_SCOPE, id
       );
-
-      attr = cdf.getAttribute("DEPEND_0");
-      Entry.create(attr, id, CDF_CHAR, "Epoch");
-
-      attr = cdf.getAttribute("FORMAT");
-      Entry.create(attr, id, CDF_CHAR, "%f");
-
-      attr = cdf.getAttribute("UNITS");
-      Entry.create(attr, id, CDF_CHAR, "ch");
-
-      attr = cdf.getAttribute("SCALETYP");
-      Entry.create(attr, id, CDF_CHAR, "linear");
-
-      attr = cdf.getAttribute("DISPLAY_TYPE");
-      Entry.create(attr, id, CDF_CHAR, "time_series");
-
-      attr = cdf.getAttribute("VALIDMIN");
-      Entry.create(attr, id, CDF_DOUBLE, 0.0);
-
-      attr = cdf.getAttribute("VALIDMAX");
-      Entry.create(attr, id, CDF_DOUBLE, 4096.0);
-
-      attr = cdf.getAttribute("FILLVAL");
-      Entry.create(attr, id, CDF_DOUBLE, Constants.DOUBLE_FILL);
-
-      attr = cdf.getAttribute("LABLAXIS");
-      Entry.create(attr, id, CDF_CHAR, "Peak_511");
+      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
+      setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
+      setAttribute("UNITS", "ch", VARIABLE_SCOPE, id);
+      setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
+      setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
+      setAttribute("VALIDMIN", 0.0, VARIABLE_SCOPE, id);
+      setAttribute("VALIDMAX", 4096.0, VARIABLE_SCOPE, id);
+      setAttribute("FILLVAL", Constants.DOUBLE_FILL, VARIABLE_SCOPE, id);
+      setAttribute("LABLAXIS", "Peak_511", VARIABLE_SCOPE, id);  
    }
 }

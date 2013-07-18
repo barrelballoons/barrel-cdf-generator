@@ -48,26 +48,26 @@ public class BarrelCDF implements CDFConstants{
       private String path;
       private int lastRec;
 
-   public BarrelCDF(String p) throws CDFException{
+   public BarrelCDF(String p){
       path = p;
+      
+      try{
+         //create a new CDF or open an existing one. 
+         if(!(new File(path)).exists()){cdf = CDF.create(path);}
+         if(cdf == null){cdf = CDF.open(path);}
 
-      //create a new CDF or open an existing one. 
-      if(!(new File(path)).exists()){create();}
-      if(cdf == null){cdf = CDF.open(path);}
-
+         addGlobalAtts();
+         addVars();
+      }catch(CDFException e){
+         System.out.println(e.getMessage());
+      }
    }
 
-   public void create() throws CDFException{
-      cdf = CDF.create(path);
-
+   private void addGlobalAtts() throws CDFException{
       //get today's date
       DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
       Calendar cal = Calendar.getInstance();
       String date = dateFormat.format(cal.getTime());
-      
-      //calculate min and max epochs
-      long min_epoch = CDFTT2000.fromUTCparts(2012, 00, 01);
-      long max_epoch = CDFTT2000.fromUTCparts(2015, 11, 31);
       
       //fill global_attrs HashMap with attribute info used by all CDFs
       setAttribute("File_naming_convention", "source_datatype_descriptor");
@@ -80,7 +80,6 @@ public class BarrelCDF implements CDFConstants{
       setAttribute("Discipline", "Space Physics>Magnetospheric Science");
       setAttribute("LINK_TITLE", "BARREL Data Repository");
       setAttribute("Generated_by", "BARREL CDF Generator");
-      setAttribute("test", Long.valueOf(11111111));
       setAttribute(
          "Rules_of_use",  
          "BARREL will make all its scientific data products quickly and " +
@@ -91,139 +90,93 @@ public class BarrelCDF implements CDFConstants{
       );
       setAttribute("Generation_date", String.valueOf(date));
       setAttribute("HTTP_LINK","http://barreldata.ucsc.edu");
-      
-      //unused global variables.
-      /*
-      setAttribute("Acknowledgement", " "); 
-      setAttribute(cdf, "MODS", " "); 
-      setAttribute(cdf, "Time_resolution", " "); 
-      setAttribute(cdf, "ADID_ref", " "); 
-      setAttribute(cdf, "Logical_source", " "); 
-      setAttribute(cdf, "Logical_file_id", " "); 
-      setAttribute(cdf, "TEXT", " "); 
-      setAttribute(cdf, "Instrument_type", " "); 
-      setAttribute(cdf, "Descriptor", " "); 
-      setAttribute(cdf, "Data_type", " "); 
-      setAttribute(cdf, "Logical_source_description", " ");
-      */
+   }
 
-      /*
-      //create variable attributes
-      Attribute.create(cdf, "FIELDNAM", VARIABLE_SCOPE);          
-      Attribute.create(cdf, "CATDESC", VARIABLE_SCOPE);          
-      Attribute.create(cdf, "VAR_NOTES", VARIABLE_SCOPE);          
-      Attribute.create(cdf, "VAR_TYPE", VARIABLE_SCOPE);          
-      Attribute.create(cdf, "DEPEND_0", VARIABLE_SCOPE);          
-      Attribute.create(cdf, "FROM_PTR", VARIABLE_SCOPE);          
-      Attribute.create(cdf, "FORMAT", VARIABLE_SCOPE);          
-      Attribute.create(cdf, "UNIT_PTR", VARIABLE_SCOPE);          
-      Attribute.create(cdf, "UNITS", VARIABLE_SCOPE);          
-      Attribute.create(cdf, "SCAL_PTR", VARIABLE_SCOPE);          
-      Attribute.create(cdf, "SCALETYP", VARIABLE_SCOPE);          
-      Attribute.create(cdf, "DISPLAY_TYPE", VARIABLE_SCOPE);          
-      Attribute.create(cdf, "VALIDMIN", VARIABLE_SCOPE);          
-      Attribute.create(cdf, "VALIDMAX", VARIABLE_SCOPE);          
-      Attribute.create(cdf, "FILLVAL", VARIABLE_SCOPE);          
-      Attribute.create(cdf, "LABLAXIS", VARIABLE_SCOPE);          
-      Attribute.create(cdf, "MONOTON", VARIABLE_SCOPE);          
-      Attribute.create(cdf, "LEAP_SECONDS_INCLUDED", VARIABLE_SCOPE); 
-      Attribute.create(cdf, "RESOLUTION", VARIABLE_SCOPE);          
-      Attribute.create(cdf, "Bin_Location", VARIABLE_SCOPE);          
-      Attribute.create(cdf, "TIME_BASE", VARIABLE_SCOPE);          
-      Attribute.create(cdf, "TIME_SCALE", VARIABLE_SCOPE);          
-      Attribute.create(cdf, "REFERENCE_POSITION", VARIABLE_SCOPE);
-      Attribute.create(cdf, "ABSOLUTE_ERROR", VARIABLE_SCOPE);          
-      Attribute.create(cdf, "RELATIVE_ERROR", VARIABLE_SCOPE);          
-      Attribute.create(cdf, "DEPEND_1", VARIABLE_SCOPE);          
-      Attribute.create(cdf, "DELTA_PLUS_VAR", VARIABLE_SCOPE);          
-      Attribute.create(cdf, "DELTA_MINUS_VAR", VARIABLE_SCOPE);
-      */
-
+   public void addVars() throws CDFException{
       //create variables used by all CDFs
       Variable var;
       long id;
+
+      //calculate min and max epochs
+      long min_epoch = CDFTT2000.fromUTCparts(2012, 00, 01);
+      long max_epoch = CDFTT2000.fromUTCparts(2015, 11, 31);
+      
 
       var = 
          Variable.create(
             cdf, "Epoch", CDF_TIME_TT2000, 1L, 0L, new  long[] {1}, 
             VARY, new long[] {NOVARY}
       ); 
-      id = var.id();
+      id = var.getID();
+      setAttribute("FIELDNAME", "Epoch", VARIABLE_SCOPE, id);
+      setAttribute("CATDESC", "Default time", VARIABLE_SCOPE, id);
+      setAttribute("VAR_TYPE", "support_data", VARIABLE_SCOPE, id);
+      setAttribute("UNITS", "ns", VARIABLE_SCOPE, id);
+      setAttribute("SCALETYPE", "linear", VARIABLE_SCOPE, id);
+      setAttribute("VALIDMIN", min_epoch, VARIABLE_SCOPE, id, CDF_TIME_TT2000);
+      setAttribute("VALIDMAX", max_epoch, VARIABLE_SCOPE, id, CDF_TIME_TT2000);
+      setAttribute(
+         "FILLVAL", Long.MIN_VALUE, VARIABLE_SCOPE, id, CDF_TIME_TT2000
+      );
+      setAttribute("LABLAXIS", "Epoch", VARIABLE_SCOPE, id);
+      setAttribute("MONOTON", "INCREASE", VARIABLE_SCOPE, id);
+      setAttribute("TIME_BASE", "J2000", VARIABLE_SCOPE, id);
+      setAttribute("TIME_SCALE", "Terrestrial Time", VARIABLE_SCOPE, id);
+      setAttribute(
+         "REFERENCE_POSITION", "Rotating Earch Geoid", VARIABLE_SCOPE, id
+      );
 
       var = 
          Variable.create(
             cdf, "FrameGroup", CDF_INT4, 1L, 0L, new  long[] {1}, 
             VARY, new long[] {NOVARY}
       );
-      id = var.id();
-      
+      id = var.getID();
+      setAttribute("FIELDNAME", "Frame Number", VARIABLE_SCOPE, id);
+      setAttribute("CATDESC", "DPU Frame Counter", VARIABLE_SCOPE, id);
+      setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
+      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
+      setAttribute("FORMAT", "%u", VARIABLE_SCOPE, id);
+      setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
+      setAttribute("VALIDMIN", 0, VARIABLE_SCOPE, id);
+      setAttribute("VALIDMAX", 2147483647, VARIABLE_SCOPE, id);
+      setAttribute("FILLVAL", Constants.INT4_FILL, VARIABLE_SCOPE, id);
+      setAttribute("LABLAXIS", "Frame", VARIABLE_SCOPE, id);
+
       var = 
          Variable.create(
             cdf, "Q", CDF_INT4, 1L, 0L, new  long[] {1}, 
             VARY, new long[] {NOVARY}
       );
-      id = var.id();
-/*
-      //fill the attributes for the variables in each file
-      Entry.create(field, epoch.getID(), CDF_CHAR, "Epoch");
-      Entry.create(cat_desc, epoch.getID(), CDF_CHAR, "Default time");
-      Entry.create(var_type, epoch.getID(), CDF_CHAR, "support_data");
-      Entry.create(units, epoch.getID(), CDF_CHAR, "ns");
-      Entry.create(scale_type, epoch.getID(), CDF_CHAR, "linear");
-      Entry.create(valid_min, epoch.getID(), CDF_TIME_TT2000, min_epoch);
-      Entry.create(valid_max, epoch.getID(), CDF_TIME_TT2000, max_epoch);
-      Entry.create(
-         fill_val, epoch.getID(), CDF_TIME_TT2000, 
-         -9223372036854775808L
+      id = var.getID();
+      setAttribute("FIELDNAME", "Data Quality", VARIABLE_SCOPE, id);
+      setAttribute(
+         "CATDESC", "32bit flag used to indicate data quality", 
+         VARIABLE_SCOPE, id
       );
-      Entry.create(label_axis, epoch.getID(), CDF_CHAR, "Epoch");
-      Entry.create(monotonic, epoch.getID(), CDF_CHAR, "INCREASE");
-      Entry.create(time_base, epoch.getID(), CDF_CHAR, "J2000");
-      Entry.create(time_scale, epoch.getID(), CDF_CHAR, "Terrestrial Time");
-      Entry.create(ref_pos, epoch.getID(), CDF_CHAR, "Rotating Earth Geoid");
-
-      Entry.create(field, frameGroup.getID(), CDF_CHAR, "Frame Number");
-      Entry.create(
-         cat_desc, frameGroup.getID(), CDF_CHAR, "DPU Frame Counter."
-      );
-      Entry.create(var_type, frameGroup.getID(), CDF_CHAR, "data");
-      Entry.create(depend_0, frameGroup.getID(), CDF_CHAR,  "Epoch");
-      Entry.create(format, frameGroup.getID(), CDF_CHAR,  "%u");
-      Entry.create(scale_type, frameGroup.getID(), CDF_CHAR,  "linear");
-      Entry.create(disp_type, frameGroup.getID(), CDF_CHAR,  "time_series");
-      Entry.create(valid_min, frameGroup.getID(), CDF_INT4,  0);
-      Entry.create(valid_max, frameGroup.getID(), CDF_INT4,  2147483647);
-      Entry.create(fill_val, frameGroup.getID(), CDF_INT4,  -2147483648);
-      Entry.create(label_axis, frameGroup.getID(), CDF_CHAR,  "Frame");
-
-      Entry.create(field, q.getID(), CDF_CHAR, "Data Quality");
-      Entry.create(
-         cat_desc, q.getID(), CDF_CHAR, 
-         "32 bit flag used to indicate data quality."
-      );
-      Entry.create(var_type, q.getID(), CDF_CHAR, "data");
-      Entry.create(depend_0, q.getID(), CDF_CHAR, "Epoch");
-      Entry.create(format, q.getID(), CDF_CHAR, "%u");
-      Entry.create(scale_type, q.getID(), CDF_CHAR, "linear");
-      Entry.create(disp_type, q.getID(), CDF_CHAR, "time_series");
-      Entry.create(valid_min, q.getID(), CDF_INT4, -2147483648);
-      Entry.create(valid_max, q.getID(), CDF_INT4, 2147483647);
-      Entry.create(fill_val, q.getID(), CDF_INT4, -2147483648);
-      Entry.create(label_axis, q.getID(), CDF_CHAR, "Q");
-      */
+      setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
+      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
+      setAttribute("FORMAT", "%u", VARIABLE_SCOPE, id);
+      setAttribute("SCALETYPE", "linear", VARIABLE_SCOPE, id);
+      setAttribute("VALIDMIN", 0, VARIABLE_SCOPE, id);
+      setAttribute("VALIDMAX", 2147483647, VARIABLE_SCOPE, id);
+      setAttribute("FILLVAL", Constants.INT4_FILL, VARIABLE_SCOPE, id);
+      setAttribute("LABLAXIS", "Q", VARIABLE_SCOPE, id);
    }
+
    public CDF getCDF(){return cdf;}
-   
+   public String getPath(){return path;}
+
    public void setAttribute(
-      final String key, final Object val, 
-      final long type, final long scope, final int id
+      final String key, final Object val, final long scope, 
+      final long id, final long type
    )throws CDFException{
       Attribute attr;
 
       //either create or get the attirbute
       try{
          attr = Attribute.create(
-            cdf, String.valueOf(key), GLOBAL_SCOPE
+            cdf, String.valueOf(key), scope 
          );
       }catch(CDFException e){
          if(e.getCurrentStatus() == ATTR_EXISTS){
@@ -238,14 +191,10 @@ public class BarrelCDF implements CDFConstants{
       Entry.create(attr, id, type, val);
    }
    public void setAttribute(
-      final String key, final Object val, final long type
+      final String key, final Object val, final long scope, final long id
    )throws CDFException{
-      //attributes without id or scope are assumed to be single instance globals
-      setAttribute(key, val, type, GLOBAL_SCOPE, 0);
-   }
-   public void setAttribute(final String key, final Object val)
-   throws CDFException{
       long type;
+
       //figure out what type of variable to store this as
       if(val instanceof String){type = CDF_CHAR;}
       else{
@@ -259,19 +208,15 @@ public class BarrelCDF implements CDFConstants{
             type = CDF_DOUBLE;
          }
       }
-      setAttribute(key, val, type);
+
+      setAttribute(key, val, scope, id, type);
    }
 
-   public void writeGlobalAttributes() throws CDFException{
-      //Set all of the global attributes used by all BARREL CDF files
-      Attribute attr;
-      
-      Set attr_entries = global_attrs.entrySet();
-      Iterator attr_i = attr_entries.iterator();
-
-      while(attr_i.hasNext()){
-         Map.Entry entry = (Map.Entry)attr_i.next();
-      }
+   public void setAttribute(
+      final String key, final Object val
+   )throws CDFException{
+      //attributes without id or scope are assumed to be single instance globals
+      setAttribute(key, val, GLOBAL_SCOPE, 0);
    }
 
    public void writeData(String name, int[] data) throws CDFException{
@@ -369,7 +314,11 @@ public class BarrelCDF implements CDFConstants{
       );
    }
 
-   public void close() throws CDFException{
-      cdf.close();
+   public void close(){
+      try{
+         cdf.close();
+      }catch(CDFException e){
+         System.out.println(e.getMessage());
+      }
    }
 }
