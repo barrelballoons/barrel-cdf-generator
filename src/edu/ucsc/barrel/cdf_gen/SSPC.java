@@ -187,7 +187,7 @@ public class SSPC extends BarrelCDF{
       setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
       setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
       setAttribute("UNITS", "cnts/keV/sec", VARIABLE_SCOPE, id);
-      setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
+      setAttribute("SCALETYP", "log", VARIABLE_SCOPE, id);
       setAttribute("DISPLAY_TYPE", "spectrogram", VARIABLE_SCOPE, id);
       setAttribute("VALIDMIN", 0.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
       setAttribute("VALIDMAX", 855.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
