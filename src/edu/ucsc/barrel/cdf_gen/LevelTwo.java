@@ -1029,67 +1029,21 @@ public class LevelTwo extends CDFWriter{
          q[rec_i] = CDF_Gen.data.mspc_q[data_i];
       }
 
-      String srcName = 
-         "cdf_skels/l2/barCLL_PP_S_l2_mspc_YYYYMMDD_v++.cdf";
       String destName = 
-         outputPath  + "/" + date + "/"+ "bar1" + flt + "_" + id + "_" + stn 
-         + "_l2_" + "mspc" + "_20" + date +  "_v" + revNum + ".cdf";
+         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn +
+         "_l2_" + "mspc" + "_20" + date +  "_v" + revNum + ".cdf";
 
-      copyFile(new File(srcName), new File(destName), false);
+      MSPC mspc = new MSPC(destName, date, 2);
+      System.out.println("mspc");
+      mspc.writeData("MSPC", mspc_rebin);
+      System.out.println("FrameGroup");
+      mspc.writeData("FrameGroup", frameGroup);
+      System.out.println("Epoch");
+      mspc.writeData("Epoch", epoch);
+      System.out.println("Q");
+      mspc.writeData("Q", q);
 
-      cdf = openCDF(destName);
-/*
-      var = cdf.getVariable("MSPC");
-      System.out.println("Spectrum Arrays...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0, 0}, 
-         new long[] {48, 1}, 
-         new long[] {1, 1}, 
-         mspc_rebin
-      );
-
-      var = cdf.getVariable("MSPC_ch");
-      System.out.println("Spectrum Arrays...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0, 0}, 
-         new long[] {48, 1}, 
-         new long[] {1, 1}, 
-         mspc_rebin
-      );
-*/
-      var = cdf.getVariable("FrameGroup");
-      System.out.println("FrameGroup...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         frameGroup
-      );
-
-      var = cdf.getVariable("Epoch");
-      System.out.println("Epoch...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         epoch
-      );
-
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         q
-      );
-
-      cdf.close();
+      mspc.close();
    }
 
    public void doSspcCdf(int first, int last, int date) throws CDFException{
@@ -1176,7 +1130,6 @@ public class LevelTwo extends CDFWriter{
       sspc.writeData("Epoch", epoch);
       System.out.println("Q");
       sspc.writeData("Q", q);
-
 
       sspc.close();
 /*
