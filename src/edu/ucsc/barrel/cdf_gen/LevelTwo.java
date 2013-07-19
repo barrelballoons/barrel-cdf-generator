@@ -800,8 +800,9 @@ public class LevelTwo extends CDFWriter{
       int numOfRecs = last - first;
 
       double[][] 
-         chan_edges = new double[numOfRecs][5],
-         lc_scaled = new double[4][numOfRecs];
+         chan_edges = new double[numOfRecs][5];
+      int[][] 
+         lc_scaled = new int[4][numOfRecs];
       double scint_temp = 20, dpu_temp = 20, peak = -1;
       
       int[] 
@@ -810,15 +811,6 @@ public class LevelTwo extends CDFWriter{
       long[] epoch = new long[numOfRecs];
 
       System.out.println("\nSaving FSPC...");
-
-      String srcName = 
-         "cdf_skels/l2/barCLL_PP_S_l2_fspc_YYYYMMDD_v++.cdf";
-      String destName = 
-         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn 
-         + "_l2_" + "fspc" + "_20" + date +  "_v" + revNum + ".cdf";
-      copyFile(new File(srcName), new File(destName), false);
-
-      cdf = openCDF(destName);
       
       //convert the light curves counts to cnts/sec and 
       //figure out the channel width
@@ -849,24 +841,24 @@ public class LevelTwo extends CDFWriter{
 
          //write the spectrum to the new array
          if(CDF_Gen.data.lc1[lc_rec + first] != Constants.FSPC_RAW_FILL){
-            lc_scaled[0][lc_rec] = CDF_Gen.data.lc1[lc_rec + first] * 20;
+            lc_scaled[0][lc_rec] = CDF_Gen.data.lc1[lc_rec + first];
          }else{
-            lc_scaled[0][lc_rec] = Constants.DOUBLE_FILL;
+            lc_scaled[0][lc_rec] = Constants.INT4_FILL;
          }
          if(CDF_Gen.data.lc2[lc_rec + first] != Constants.FSPC_RAW_FILL){
-            lc_scaled[1][lc_rec] = CDF_Gen.data.lc2[lc_rec + first] * 20;
+            lc_scaled[1][lc_rec] = CDF_Gen.data.lc2[lc_rec + first];
          }else{
-            lc_scaled[1][lc_rec] = Constants.DOUBLE_FILL;
+            lc_scaled[1][lc_rec] = Constants.INT4_FILL;
          }
          if(CDF_Gen.data.lc3[lc_rec + first] != Constants.FSPC_RAW_FILL){
-            lc_scaled[2][lc_rec] = CDF_Gen.data.lc3[lc_rec + first] * 20;
+            lc_scaled[2][lc_rec] = CDF_Gen.data.lc3[lc_rec + first];
          }else{
-            lc_scaled[2][lc_rec] = Constants.DOUBLE_FILL;
+            lc_scaled[2][lc_rec] = Constants.INT4_FILL;
          }
          if(CDF_Gen.data.lc4[lc_rec + first] != Constants.FSPC_RAW_FILL){
-            lc_scaled[3][lc_rec] = CDF_Gen.data.lc4[lc_rec + first] * 20;
+            lc_scaled[3][lc_rec] = CDF_Gen.data.lc4[lc_rec + first];
          }else{
-            lc_scaled[3][lc_rec] = Constants.DOUBLE_FILL;
+            lc_scaled[3][lc_rec] = Constants.INT4_FILL;
          }
       }
 
@@ -876,78 +868,27 @@ public class LevelTwo extends CDFWriter{
          q[rec_i] = CDF_Gen.data.fspc_q[data_i];
       }
 
-      var = cdf.getVariable("LC1");
-      System.out.println("LC1...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         lc_scaled[0]
-      );
-      
-      var = cdf.getVariable("LC2");
-      System.out.println("LC2...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         lc_scaled[1]
-      );
+      String destName = 
+         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn 
+         + "_l2_" + "fspc" + "_20" + date +  "_v" + revNum + ".cdf";
 
-      var = cdf.getVariable("LC3");
-      System.out.println("LC3...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         lc_scaled[2]
-      );
+      FSPC fspc = new FSPC(destName, date, 2);
+      System.out.println("LC1");
+      fspc.writeData("LC1", lc_scaled[0]);
+      System.out.println("LC1");
+      fspc.writeData("LC2", lc_scaled[1]);
+      System.out.println("LC1");
+      fspc.writeData("LC3", lc_scaled[2]);
+      System.out.println("LC1");
+      fspc.writeData("LC4", lc_scaled[3]);
+      System.out.println("FrameGroup");
+      fspc.writeData("FrameGroup", frameGroup);
+      System.out.println("Epoch");
+      fspc.writeData("Epoch", epoch);
+      System.out.println("Q");
+      fspc.writeData("Q", q);
 
-      var = cdf.getVariable("LC4");
-      System.out.println("LC4...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         lc_scaled[3]
-      );
-
-      var = cdf.getVariable("FrameGroup");
-      System.out.println("FrameGroup...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         frameGroup
-      );
-
-      var = cdf.getVariable("Epoch");
-      System.out.println("Epoch...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         epoch
-      );
-
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         q
-      );
-
-      cdf.close();
-
+      fspc.close();
    }
 
    public void doMspcCdf(int first, int last, int date) throws CDFException{
