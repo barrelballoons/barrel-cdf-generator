@@ -262,5 +262,34 @@ public class SSPC extends BarrelCDF{
             0L, new long[] {bin_i}, BIN_WIDTHS[bin_i] * scale / 2
          );
       }
+
+      //Create a variable that will track the 511 line peak
+      var = 
+         Variable.create(
+            cdf, "Peak_511", CDF_DOUBLE, 1L, 0L, new  long[] {1}, 
+            VARY, new long[] {NOVARY}
+         );
+      id = var.getID();
+
+      setAttribute("FIELDNAM", "Peak_511", VARIABLE_SCOPE, id);
+      setAttribute("CATDESC", "Location of the 511 line", VARIABLE_SCOPE, id);
+      setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
+      setAttribute(
+         "VAR_NOTES", 
+         "This is the detector channel (0-4096) " + 
+         "which appears to contain the 511",
+         VARIABLE_SCOPE, id
+      );
+      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
+      setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
+      setAttribute("UNITS", "ch", VARIABLE_SCOPE, id);
+      setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
+      setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
+      setAttribute("VALIDMIN", 0.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
+      setAttribute("VALIDMAX", 4096.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
+      setAttribute(
+         "FILLVAL", Constants.DOUBLE_FILL, VARIABLE_SCOPE, id, CDF_DOUBLE
+      );
+      setAttribute("LABLAXIS", "Peak_511", VARIABLE_SCOPE, id);  
    }
 }
