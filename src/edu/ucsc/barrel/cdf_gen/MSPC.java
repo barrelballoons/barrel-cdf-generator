@@ -112,8 +112,8 @@ public class MSPC extends BarrelCDF{
 
    private void addMspcVars() throws CDFException{
       //create MSPC variable
-      //This variable will contain the slow spectrum that is returned over
-      //32 frames.
+      //This variable will contain the medium spectrum that is returned over
+      //4 frames.
       var = 
          Variable.create(
             cdf, "MSPC", CDF_DOUBLE, 1L, 1L, new  long[] {BIN_CENTERS.length}, 
@@ -195,8 +195,8 @@ public class MSPC extends BarrelCDF{
       setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
       setAttribute("UNITS", "keV", VARIABLE_SCOPE, id);
       setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", 4.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
-      setAttribute("VALIDMAX", 128.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
+      setAttribute("VALIDMIN", 3.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
+      setAttribute("VALIDMAX", 157.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
       setAttribute(
          "FILLVAL", Constants.DOUBLE_FILL, VARIABLE_SCOPE, id, CDF_DOUBLE
       );
