@@ -52,7 +52,7 @@ public class MSPC extends BarrelCDF{
 
    private double scale = 2.4414; // keV/bin
 
-   private double[] 
+   public final static double[] 
       BIN_EDGES = {
          42, 46, 50, 53, 57, 60, 64, 70, 78, 84, 92, 100, 
          106, 114, 120, 128, 140, 156, 168, 184, 200, 212, 
@@ -61,17 +61,17 @@ public class MSPC extends BarrelCDF{
          1024, 1120, 1248, 1344, 1472, 1600, 1696
       },
       BIN_CENTERS = {
-         4, 4, 3, 4, 3, 4, 6, 8, 6, 8, 8, 6, 8, 6, 8, 12, 16, 
-         12, 16, 16, 12, 16, 12, 16, 24, 32, 24, 32, 32, 24, 
-         32, 24, 32, 48, 64, 48, 64, 64, 48, 64, 48, 64, 96, 
-         128, 96, 128, 128, 96
-      },
-      BIN_WIDTHS = {
          44, 48, 51.5, 55, 58.5, 62, 67, 74, 81, 88, 96, 103, 
          110, 117, 124, 134, 148, 162, 176, 192, 206, 220, 234, 
          248, 268, 296, 324, 352, 384, 412, 440, 468, 496, 536, 
          592, 648, 704, 768, 824, 880, 936, 992, 1072, 1184, 1296, 
          1408, 1536, 1648
+      },
+      BIN_WIDTHS = {
+         4, 4, 3, 4, 3, 4, 6, 8, 6, 8, 8, 6, 8, 6, 8, 12, 16, 
+         12, 16, 16, 12, 16, 12, 16, 24, 32, 24, 32, 32, 24, 
+         32, 24, 32, 48, 64, 48, 64, 64, 48, 64, 48, 64, 96, 
+         128, 96, 128, 128, 96
       };
 
    public MSPC(final String p, final int d, final int l){
@@ -133,10 +133,10 @@ public class MSPC extends BarrelCDF{
       setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
       setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
       setAttribute("UNITS", "cnts/keV/sec", VARIABLE_SCOPE, id);
-      setAttribute("SCALETYP", "log", VARIABLE_SCOPE, id);
+      setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
       setAttribute("DISPLAY_TYPE", "spectrogram", VARIABLE_SCOPE, id);
       setAttribute("VALIDMIN", 0.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
-      setAttribute("VALIDMAX", 59391.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
+      setAttribute("VALIDMAX", 1707.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
       setAttribute(
          "FILLVAL", Constants.DOUBLE_FILL, VARIABLE_SCOPE, id, CDF_DOUBLE
       );
@@ -162,9 +162,9 @@ public class MSPC extends BarrelCDF{
       setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
       setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
       setAttribute("UNITS", "keV", VARIABLE_SCOPE, id);
-      setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", 0.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
-      setAttribute("VALIDMAX", 10000.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
+      setAttribute("SCALETYP", "log", VARIABLE_SCOPE, id);
+      setAttribute("VALIDMIN", 100.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
+      setAttribute("VALIDMAX", 4100.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
       setAttribute(
          "FILLVAL", Constants.DOUBLE_FILL, VARIABLE_SCOPE, id, CDF_DOUBLE
       );
@@ -195,8 +195,8 @@ public class MSPC extends BarrelCDF{
       setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
       setAttribute("UNITS", "keV", VARIABLE_SCOPE, id);
       setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", 0.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
-      setAttribute("VALIDMAX", 200.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
+      setAttribute("VALIDMIN", 4.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
+      setAttribute("VALIDMAX", 128.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
       setAttribute(
          "FILLVAL", Constants.DOUBLE_FILL, VARIABLE_SCOPE, id, CDF_DOUBLE
       );

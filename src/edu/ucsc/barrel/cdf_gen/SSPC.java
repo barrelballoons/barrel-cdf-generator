@@ -52,7 +52,7 @@ public class SSPC extends BarrelCDF{
 
    private double scale = 2.4414; // keV/bin
 
-   private double[] 
+   public final static double[] 
       BIN_EDGES = {
          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 
          16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 
@@ -187,10 +187,10 @@ public class SSPC extends BarrelCDF{
       setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
       setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
       setAttribute("UNITS", "cnts/keV/sec", VARIABLE_SCOPE, id);
-      setAttribute("SCALETYP", "log", VARIABLE_SCOPE, id);
+      setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
       setAttribute("DISPLAY_TYPE", "spectrogram", VARIABLE_SCOPE, id);
       setAttribute("VALIDMIN", 0.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
-      setAttribute("VALIDMAX", 59391.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
+      setAttribute("VALIDMAX", 855.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
       setAttribute(
          "FILLVAL", Constants.DOUBLE_FILL, VARIABLE_SCOPE, id, CDF_DOUBLE
       );
@@ -201,8 +201,8 @@ public class SSPC extends BarrelCDF{
       //This variable lists the starting energy for each channel in keV
       var = 
          Variable.create(
-            cdf, "energy", CDF_DOUBLE, 1L, 1L, new  long[] {BIN_CENTERS.length}, 
-            NOVARY, new long[] {VARY}
+            cdf, "energy", CDF_DOUBLE, 1L, 1L, 
+            new  long[] {BIN_CENTERS.length}, NOVARY, new long[] {VARY}
          );
       id = var.getID();
 
@@ -216,9 +216,9 @@ public class SSPC extends BarrelCDF{
       setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
       setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
       setAttribute("UNITS", "keV", VARIABLE_SCOPE, id);
-      setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
+      setAttribute("SCALETYP", "log", VARIABLE_SCOPE, id);
       setAttribute("VALIDMIN", 0.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
-      setAttribute("VALIDMAX", 2000.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
+      setAttribute("VALIDMAX", 10000.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
       setAttribute(
          "FILLVAL", Constants.DOUBLE_FILL, VARIABLE_SCOPE, id, CDF_DOUBLE
       );
@@ -236,8 +236,8 @@ public class SSPC extends BarrelCDF{
       //Create a variable that will track each energy channel width
       var = 
          Variable.create(
-            cdf, "HalfBinWidth", CDF_DOUBLE, 1L, 1L, new  long[] {256}, 
-            NOVARY, new long[] {VARY}
+            cdf, "HalfBinWidth", CDF_DOUBLE, 1L, 1L, 
+            new  long[] {BIN_CENTERS.length}, NOVARY, new long[] {VARY}
          );
       id = var.getID();
 

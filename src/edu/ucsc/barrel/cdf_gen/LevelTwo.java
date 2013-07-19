@@ -1015,7 +1015,7 @@ public class LevelTwo extends CDFWriter{
          for(int bin_i = 0; bin_i < mspc_rebin[mspc_rec].length; bin_i++){
             if(mspc_rebin[mspc_rec][bin_i] != Constants.DOUBLE_FILL){
                mspc_rebin[mspc_rec][bin_i] /= 
-                  std_edges[bin_i + 1] - std_edges[bin_i];
+                  MSPC.BIN_WIDTHS[bin_i];
                mspc_rebin[mspc_rec][bin_i] /= 4;
             }
          }
