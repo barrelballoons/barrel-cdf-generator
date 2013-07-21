@@ -42,22 +42,23 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
+import java.util.LinkedList;
+
 
 public class HKPG extends BarrelCDF{
    private CDF cdf;
-   private Variable var;
-   private long id;
    private String path;
    private int date, lvl;
    
    //define a data object to hold housekeeping variable attirbutes
    private class HkpgVar {
       private String name, desc, units;
+      private long type;
       private int mod_index;
       private float min, max;
       public HkpgVar(
          final String n, final String d, final String u,
-         final int i, final float mi, final float ma
+         final int i, final float mi, final float ma, final long t 
       ){
          name = n;
          desc = d;
@@ -65,6 +66,7 @@ public class HKPG extends BarrelCDF{
          mod_index = i;
          min = mi;
          max = ma;
+         type = t;
       }
 
       public String getName(){return name;}
@@ -73,9 +75,10 @@ public class HKPG extends BarrelCDF{
       public int getModIndex(){return mod_index;}
       public float getMin(){return min;}
       public float getMax(){return max;}
+      public long getType(){return type;}
    }
-   
-   private HkpgVar[] vars;
+
+   List<HkpgVar> vars;   
 
    public HKPG(final String p, final int d, final int l){
       super(p, l);
@@ -83,8 +86,6 @@ public class HKPG extends BarrelCDF{
       date = d;
       lvl = l;
       
-      fillHkpgObjects();
-
       try{
          cdf = super.getCDF();
       
@@ -95,137 +96,173 @@ public class HKPG extends BarrelCDF{
       }
    }
 
-   private void fillHkpgObjects(){
-      vars = new HkpgVar[36];
+   private void fillVarArray(){
+      vars = new LinkedList<HkpgVar>();
 
-      vars[0] = new HkpgVar(
-         "V0_VoltAtLoad", "Volatge at load", "V", 0, 0, 50
-      );
-      vars[1] = new HkpgVar(
-         "V1_Battery", "Battery Voltage", "V", 2, 0, 50
-      );
-      vars[2] = new HkpgVar(
+      vars.add(new HkpgVar(
+         "V0_VoltAtLoad", "Volatge at load", "V", 0, 0, 50, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
+         "V1_Battery", "Battery Voltage", "V", 2, 0, 50, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
          "V2_Solar1",
-         "Solar Panel One Voltage", "V", 4, 0, 50
-      );
-      vars[3] = new HkpgVar(
+         "Solar Panel One Voltage", "V", 4, 0, 50, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
          "V3_POS_DPU", 
-         "DPU Voltage (Positive)", "V", 6, 0, 50
-      );
-      vars[4] = new HkpgVar(
+         "DPU Voltage (Positive)", "V", 6, 0, 50, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
          "V4_POS_XRayDet", 
-         "X-ray Detector Voltage (Positive)", "V", 8, 0, 50
-      );
-      vars[5] = new HkpgVar(
+         "X-ray Detector Voltage (Positive)", "V", 8, 0, 50, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
          "V5_Modem", 
-         "Modem Voltage", "V", 10, 0, 50
-      );
-      vars[6] = new HkpgVar(
+         "Modem Voltage", "V", 10, 0, 50, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
          "V6_NEG_XRayDet", 
-         "X-ray Detector Voltage (Negative)", "V", 12, -50, 0
-      );
-      vars[7] = new HkpgVar(
+         "X-ray Detector Voltage (Negative)", "V", 12, -50, 0, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
          "V7_NEG_DPU", 
-         "DPU Voltage (Negative)", "V", 14, -50, 0
-      );
-      vars[8] = new HkpgVar(
+         "DPU Voltage (Negative)", "V", 14, -50, 0, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
          "V8_Mag", 
-         "Magnetometer Voltage", "V", 32, 0, 50
-      );
-      vars[9] = new HkpgVar(
+         "Magnetometer Voltage", "V", 32, 0, 50, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
          "V9_Solar2", 
-         "Solar Panel Two Voltage", "V", 33, 0, 50
-      );
-      vars[10] = new HkpgVar(
+         "Solar Panel Two Voltage", "V", 33, 0, 50, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
          "V10_Solar3", 
-         "Solar Panel Three Voltage", "V", 34, 0, 50
-      );
-      vars[11] = new HkpgVar(
+         "Solar Panel Three Voltage", "V", 34, 0, 50, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
          "V11_Solar4", 
-         "Solar Panel Four Voltage", "V", 35, 0, 50
-      );
-      vars[12] = new HkpgVar(
+         "Solar Panel Four Voltage", "V", 35, 0, 50, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
          "I0_TotalLoad", 
-         "Total Load Current", "mA", 1, 0, 20000
-      );
-      vars[13] = new HkpgVar(
+         "Total Load Current", "mA", 1, 0, 20000, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
          "I1_TotalSolar", 
-         "Total Solar Current", "mA", 3, 0, 20000
-      );
-      vars[14] = new HkpgVar(
+         "Total Solar Current", "mA", 3, 0, 20000, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
          "I2_Solar1", 
-         "Solar Panel One Current", "mA", 5, 0, 20000
-      );
-      vars[15] = new HkpgVar(
+         "Solar Panel One Current", "mA", 5, 0, 20000, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
          "I3_POS_DPU", 
-         "DPU Current (Positive)", "mA", 7, 0, 20000
-      );
-      vars[16] = new HkpgVar(
+         "DPU Current (Positive)", "mA", 7, 0, 20000, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
          "I4_POS_XRayDet", 
-         "X-ray Detector Current (Positive)", "mA", 9, 0, 20000
-      );
-      vars[17] = new HkpgVar(
+         "X-ray Detector Current (Positive)", "mA", 9, 0, 20000, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
          "I5_Modem", 
-         "Modem Current", "mA", 11, 0, 20000
-      );
-      vars[18] = new HkpgVar(
+         "Modem Current", "mA", 11, 0, 20000, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
          "I6_NEG_XRayDet", 
-         "X-ray Detector Current (Negative)", "mA", 13, -20000, 0
-      );
-      vars[19] = new HkpgVar(
+         "X-ray Detector Current (Negative)", "mA", 13, -20000, 0, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
          "I7_NEG_DPU", 
-         "DPU Current (Negative)", "mA", 15, -20000, 0
-      );
-      vars[20] = new HkpgVar(
+         "DPU Current (Negative)", "mA", 15, -20000, 0, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
          "T0_Scint", 
-         "Scintillator Temperature", "deg. C", 16, -273, 273
-      );
-      vars[21] = new HkpgVar(
+         "Scintillator Temperature", "deg. C", 16, -273, 273, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
          "T1_Mag", 
-         "Magnetometer Temperature", "deg. C", 18, -273, 273
-      );
-      vars[22] = new HkpgVar(
-         "T2_ChargeCont", "Charge Controller Temperature", "deg. C", 20, -273, 273
-      );
-      vars[23] = new HkpgVar(
-         "T3_Battery", "Battery Temperature", "deg. C", 22, -273, 273
-      );
-      vars[24] = new HkpgVar(
-         "T4_PowerConv", "Power Converter Temperature", "deg. C", 24, -273, 273
-      );
-      vars[25] = new HkpgVar(
-         "T5_DPU", "DPU Temperature", "deg. C", 26, -273, 273
-      );
-      vars[26] = new HkpgVar(
-         "T6_Modem", "Modem Temperature", "deg. C", 28, -273, 273
-      );
-      vars[27] = new HkpgVar(
-         "T7_Structure", "Structure Temperature", "deg. C", 30, -273, 273
-      );
-      vars[28] = new HkpgVar(
-         "T8_Solar1", "Solar Panel One Temperature", "deg. C", 17, -273, 273
-      );
-      vars[29] = new HkpgVar(
-         "T9_Solar2", "Solar Panel Two Temperature", "deg. C", 19, -273, 273
-      );
-      vars[30] = new HkpgVar(
-         "T10_Solar3", "Solar Panel Three Temperature", "deg. C", 21, -273, 273
-      );
-      vars[31] = new HkpgVar(
-         "T11_Solar4", "Solar Panel Four Temperature", "deg. C", 23, -273, 273
-      );
-      vars[32] = new HkpgVar(
-         "T12_TermTemp", "Terminate Temperature", "deg. C", 25, -273, 273
-      );
-      vars[33] = new HkpgVar(
-         "T13_TermBatt", "Terminate Battery", " ", 27, -273, 273
-      );
-      vars[34] = new HkpgVar(
-         "T14_TermCap", "Terminate Capacitor", " ", 29, -273, 273
-      );
-      vars[35] = new HkpgVar(
-         "T15_CCStat", "CC Status", " ", 31, -273, 273
-      );
+         "Magnetometer Temperature", "deg. C", 18, -273, 273, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
+         "T2_ChargeCont", "Charge Controller Temperature", 
+         "deg. C", 20, -273, 273, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
+         "T3_Battery", "Battery Temperature", 
+         "deg. C", 22, -273, 273, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
+         "T4_PowerConv", "Power Converter Temperature", 
+         "deg. C", 24, -273, 273, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
+         "T5_DPU", "DPU Temperature", 
+         "deg. C", 26, -273, 273, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
+         "T6_Modem", "Modem Temperature",
+         "deg. C", 28, -273, 273, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
+         "T7_Structure", "Structure Temperature",
+         "deg. C", 30, -273, 273, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
+         "T8_Solar1", "Solar Panel One Temperature",
+         "deg. C", 17, -273, 273, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
+         "T9_Solar2", "Solar Panel Two Temperature",
+         "deg. C", 19, -273, 273, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
+         "T10_Solar3", "Solar Panel Three Temperature",
+         "deg. C", 21, -273, 273, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
+         "T11_Solar4", "Solar Panel Four Temperature",
+         "deg. C", 23, -273, 273, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
+         "T12_TermTemp", "Terminate Temperature",
+         "deg. C", 25, -273, 273, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
+         "T13_TermBatt", "Terminate Battery", "deg. C", 
+         27, -273, 273, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
+         "T14_TermCap", "Terminate Capacitor", " deg. C", 
+         29, -273, 273, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
+         "T15_CCStat", "CC Status", "deg. C",
+         31, -273, 273, CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
+         "numOfSats", "Number of GPS Satellites", " ", 0, 0, 31, CDF_INT2
+      ));
+      vars.add(new HkpgVar(
+         "timeOffset", "Leap Seconds", "s", 0, 0, 255, CDF_INT2
+      ));
+      vars.add(new HkpgVar(
+         "termStatus", "Terminate Status", " ", 0, 0, 1, CDF_INT2
+      ));
+      vars.add(new HkpgVar(
+         "cmdCounter", "Command Counter", " ", 0, 0, 255, CDF_INT2
+      ));
+      vars.add(new HkpgVar(
+         "modemCounter", "Modem Reset Counter", " ", 0, 0, 255, CDF_INT2
+      ));
+      vars.add(new HkpgVar(
+         "dcdCounter", "Numebr of time the DCD has been de-asserted.", 
+         "", 0, 0, 255, CDF_INT2
+      ));
+      vars.add(new HkpgVar(
+         "weeks", "Weeks Since 6 Jan 1980", "weeks", 0, 0, 65535, CDF_INT4
+      ));
    }
 
    private void addHkpgGlobalAtts() throws CDFException{
@@ -249,33 +286,53 @@ public class HKPG extends BarrelCDF{
    }
 
    private void addHkpgVars() throws CDFException{
+      //create an array containing the details of these variables
+      fillVarArray();
+
       //loop through all of the hkpg variables
-      for(int var_i = 0; var_i < vars.length; var_i++){
-         var = 
-            Variable.create(
-               cdf, vars[var_i].getName(), CDF_FLOAT, 
-               1L, 0L, new  long[] {1}, VARY, new long[] {NOVARY}
-            ); 
-         id = var.getID();
-      
-         setAttribute("FIELDNAM", vars[var_i].getName(), VARIABLE_SCOPE, id);
-         setAttribute("CATDESC", vars[var_i].getDesc(), VARIABLE_SCOPE, id);
-         setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
-         setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
-         setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
-         setAttribute("UNITS", vars[var_i].getUnits(), VARIABLE_SCOPE, id);
-         setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
-         setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
-         setAttribute(
-            "VALIDMIN", vars[var_i].getMin(), VARIABLE_SCOPE, id, CDF_FLOAT
-         );
-         setAttribute(
-            "VALIDMAX", vars[var_i].getMax(), VARIABLE_SCOPE, id, CDF_FLOAT
-         );
-         setAttribute(
-            "FILLVAL", Constants.FLOAT_FILL, VARIABLE_SCOPE, id, CDF_FLOAT
-         );
-         setAttribute("LABLAXIS", vars[var_i].getName(), VARIABLE_SCOPE, id);
+      ListIterator var_i = vars.iterator();
+      while(var_i.hasNext()){
+         createVar(var_i.next());
       }
+   }
+
+   private void createVar(final HkpgVar v){
+      String format;
+      Object fill;
+
+      Variable var = 
+         Variable.create(
+            cdf, v.getName(), v.getType(), 
+            1L, 0L, new  long[] {1}, VARY, new long[] {NOVARY}
+         ); 
+      long id = var.getID();
+
+      switch(v.getType()){
+         case CDF_FLOAT:
+            fill = Constants.FLOAT_FILL;
+            format = "%f";
+         break;
+         case CDF_INT4:
+            fill = Constants.INT4_FILL;
+            format = "%i";
+         break;
+         case CDF_INT2:
+            fill = Constants.INT2_FILL;
+            format = "%i";
+         break;
+      }
+
+      setAttribute("FIELDNAM", v.getName(), VARIABLE_SCOPE, id);
+      setAttribute("CATDESC", v.getDesc(), VARIABLE_SCOPE, id);
+      setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
+      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
+      setAttribute("FORMAT", format, VARIABLE_SCOPE, id);
+      setAttribute("UNITS", v.getUnits(), VARIABLE_SCOPE, id);
+      setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
+      setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
+      setAttribute("VALIDMIN", v.getMin(), VARIABLE_SCOPE, id, t);
+      setAttribute("VALIDMAX", v.getMax(), VARIABLE_SCOPE, id, t);
+      setAttribute("FILLVAL", fill, VARIABLE_SCOPE, id, t);
+      setAttribute("LABLAXIS", v.getName(), VARIABLE_SCOPE, id);
    }
 }
