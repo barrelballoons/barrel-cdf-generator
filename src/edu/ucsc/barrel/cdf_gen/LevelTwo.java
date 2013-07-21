@@ -678,8 +678,6 @@ public class LevelTwo extends CDFWriter{
          );
       }
       
-      HKPG hkpg = new HKPG("/home/warren/test.cdf", date, 2);
-hkpg.close();
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          sats[rec_i] = CDF_Gen.data.sats[data_i];
          offset[rec_i] = CDF_Gen.data.offset[data_i];
