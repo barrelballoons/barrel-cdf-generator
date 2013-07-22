@@ -58,6 +58,7 @@ public class DataHolder{
       mspc_frames = 0;
 
    public short[]  
+      pps = new short[MAX_FRAMES],
       payID = new short[MAX_FRAMES], 
       ver = new short[MAX_FRAMES],
       sats = new short[MAX_FRAMES / 40],
@@ -95,9 +96,7 @@ public class DataHolder{
       frame_mod40 = new int[MAX_FRAMES / 40];
    public int[] 
       weeks = new int[MAX_FRAMES / 40],
-      pps = new int[MAX_FRAMES],
-      cmdCnt = new int[MAX_FRAMES / 40];
-   public int[]
+      cmdCnt = new int[MAX_FRAMES / 40],
       gps_q = new int[MAX_FRAMES / 4],
       pps_q = new int[MAX_FRAMES],
       magn_q = new int[MAX_FRAMES * 4],
@@ -585,7 +584,7 @@ public class DataHolder{
 
       //GPS PPS
       pps[rec_num_1Hz] = 
-         frame.shiftRight(1616).and(BigInteger.valueOf(65535)).intValue();
+         frame.shiftRight(1616).and(BigInteger.valueOf(65535)).shortValue();
       if(
          (pps[rec_num_1Hz] < Constants.PPS_MIN) ||
          (pps[rec_num_1Hz] > Constants.PPS_MAX)

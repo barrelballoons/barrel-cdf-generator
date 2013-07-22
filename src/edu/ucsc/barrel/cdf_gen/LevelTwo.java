@@ -98,28 +98,28 @@ public class LevelTwo extends CDFWriter{
       //convert lat, lon, and alt values and select values for this date
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          //convert mm to km
-         alt[rec_i] = (float)CDF_Gen.data.gps[Constants.ALT_I][data_i];
+         alt[rec_i] = CDF_Gen.data.gps[Constants.ALT_I][data_i];
          if(alt[rec_i] != Constants.ALT_RAW_FILL){
             alt[rec_i] /= 1000000;
          }else{
-            alt[rec_i] = (float)Constants.ALT_FILL;
+            alt[rec_i] = Constants.ALT_FILL;
          }
 
          //convert lat and lon to physical units
-         lat[rec_i] = (float)CDF_Gen.data.gps[Constants.LAT_I][data_i];
+         lat[rec_i] = CDF_Gen.data.gps[Constants.LAT_I][data_i];
          if(lat[rec_i] != Constants.LAT_RAW_FILL){
             lat[rec_i] *= 
                Float.intBitsToFloat(Integer.valueOf("33B40000", 16).intValue());
          }else{
-            lat[rec_i] = (float)Constants.LAT_FILL;
+            lat[rec_i] = Constants.LAT_FILL;
          }
 
-         lon[rec_i] = (float)CDF_Gen.data.gps[Constants.LON_I][data_i];
+         lon[rec_i] = CDF_Gen.data.gps[Constants.LON_I][data_i];
          if(lon[rec_i] != Constants.LON_RAW_FILL){
             lon[rec_i] *= 
                Float.intBitsToFloat(Integer.valueOf("33B40000", 16).intValue());
          }else{
-            lon[rec_i] = (float)Constants.LON_FILL;
+            lon[rec_i] = Constants.LON_FILL;
          }
 
          //calculate the GPS time
@@ -259,130 +259,34 @@ public class LevelTwo extends CDFWriter{
 
       //make sure there is a CDF file to open
       //(copyFile will not clobber an existing file)
-      String srcName = 
-         "cdf_skels/l2/barCLL_PP_S_l2_ephm_YYYYMMDD_v++.cdf";
       String destName = 
          outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
          "_l2_" + "ephm" + "_20" + date +  "_v" + revNum + ".cdf";
+     
+      Ephm ephm = new Ephm(destName, date, 2);
 
-      copyFile(new File(srcName), new File(destName), false);
+      System.out.println("GPS_Alt");
+      ephm.writeData("GPS_Alt", alt);
+      System.out.println("GPS_Lat");
+      ephm.writeData("GPS_Lon", lat);
+      System.out.println("GPS_Lon");
+      ephm.writeData("GPS_Lon", lon);
+      System.out.println("MLT_Kp2");
+      ephm.writeData("MLT_Kp2", mlt2);
+      System.out.println("MLT_Kp6");
+      ephm.writeData("MLT_Kp6", mlt6);
+      System.out.println("L_Kp2");
+      ephm.writeData("L_Kp2", l2);
+      System.out.println("L_Kp6");
+      ephm.writeData("L_Kp6", l6);
+      System.out.println("FrameGroup");
+      ephm.writeData("FrameGroup", frameGroup);
+      System.out.println("Epoch");
+      ephm.writeData("Epoch", epoch);
+      System.out.println("Q");
+      ephm.writeData("Q", q);
 
-      //open EPHM CDF and save the reference in the cdf variable
-      cdf = openCDF(destName);
-      
-      var = cdf.getVariable("GPS_Alt");
-      System.out.println("GPS_Alt...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1,
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         alt
-      );
-
-      var = cdf.getVariable("GPS_Time");
-      System.out.println("GPS_Time");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         gps_time
-      );
-
-      var = cdf.getVariable("GPS_Lat");
-      System.out.println("GPS_Lat...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         lat 
-      );
-
-      var = cdf.getVariable("GPS_Lon");
-      System.out.println("GPS_Lon...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         lon
-      );
-
-      var = cdf.getVariable("L_Kp2");
-      System.out.println("L_Kp2...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         l2
-      );
-
-      var = cdf.getVariable("MLT_Kp2");
-      System.out.println("MLT_Kp2...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         mlt2
-      );
-
-      var = cdf.getVariable("L_Kp6");
-      System.out.println("L_Kp6...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         l6
-      );
-
-      var = cdf.getVariable("MLT_Kp6");
-      System.out.println("MLT_Kp6...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         mlt6
-      );
-
-      var = cdf.getVariable("FrameGroup");
-      System.out.println("FrameGroup...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         frameGroup
-      );
-
-      var = cdf.getVariable("Epoch");
-      System.out.println("Epoch...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         epoch
-      );
-      
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         q
-      );
-
-      System.out.println("Done with EPHM!");
-      //close current cdf
-      cdf.close();
+      ephm.close();
    }
    
    //write the pps file, no processing needed
@@ -393,17 +297,17 @@ public class LevelTwo extends CDFWriter{
       int numOfRecs = last - first;
       short[] 
          version = new short[numOfRecs],
-         payID = new short[numOfRecs];
+         payID = new short[numOfRecs],
+         pps_vals = new short[numOfRecs];
       int[] 
          frameGroup = new int[numOfRecs],
-         q = new int[numOfRecs],
-         pps = new int[numOfRecs];
+         q = new int[numOfRecs];
       long[] epoch = new long[numOfRecs];
 
       System.out.println("\nSaving PPS Level Two CDF...");
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-        pps[rec_i] = CDF_Gen.data.pps[data_i];
+        pps_vals[rec_i] = CDF_Gen.data.pps[data_i];
         version[rec_i] = CDF_Gen.data.ver[data_i];
         payID[rec_i] = CDF_Gen.data.payID[data_i];
         frameGroup[rec_i] = CDF_Gen.data.frame_1Hz[data_i];
@@ -411,75 +315,26 @@ public class LevelTwo extends CDFWriter{
         q[rec_i] = CDF_Gen.data.pps_q[data_i];
       }
 
-      String srcName = 
-         "cdf_skels/l2/barCLL_PP_S_l2_pps-_YYYYMMDD_v++.cdf";
       String destName = 
          outputPath  + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
          "_l2_" + "pps-" + "_20" + date +  "_v" + revNum + ".cdf";
-      copyFile(new File(srcName), new File(destName), false);
+     
+      Pps pps = new Pps(destName, date, 2);
 
-      cdf = openCDF(destName);
-      
-      var = cdf.getVariable("GPS_PPS");
-      System.out.println("GPS_PPS...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1L, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         pps
-      );
+      System.out.println("GPS_PPS");
+      pps.writeData("GPS_PPS", pps_vals);
+      System.out.println("Version");
+      pps.writeData("Version", version);
+      System.out.println("Payload_ID");
+      pps.writeData("Payload_ID", payID);
+      System.out.println("FrameGroup");
+      pps.writeData("FrameGroup", frameGroup);
+      System.out.println("Epoch");
+      pps.writeData("Epoch", epoch);
+      System.out.println("Q");
+      pps.writeData("Q", q);
 
-      var = cdf.getVariable("Version");
-      System.out.println("Version...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1L, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         version
-      );
-
-      var = cdf.getVariable("Payload_ID");
-      System.out.println("Payload_ID...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1L, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         payID
-      );
-
-      var = cdf.getVariable("FrameGroup");
-      System.out.println("FrameGroup...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1L, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         frameGroup 
-      );
-      var = cdf.getVariable("Epoch");
-      System.out.println("Epoch...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1L,
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         epoch
-      );
-
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1L, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         q
-      );
-
-      cdf.close();
+      pps.close();
    }
    
    public void doMagCdf(int first, int last, int date) throws CDFException{
