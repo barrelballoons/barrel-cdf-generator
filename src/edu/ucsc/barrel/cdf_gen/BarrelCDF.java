@@ -227,6 +227,16 @@ public class BarrelCDF implements CDFConstants{
       setAttribute(key, val, GLOBAL_SCOPE, 0);
    }
 
+   public void writeData(String name, short[] data) throws CDFException{
+      Variable var = this.cdf.getVariable(name);
+      long start = var.getNumWrittenRecords();
+      long size = data.length;
+      var.putHyperData(
+         start, size, 1, 
+         new long[] {0}, new long[] {1}, new long[] {1},
+         data
+      );
+   }
    public void writeData(String name, int[] data) throws CDFException{
       Variable var = this.cdf.getVariable(name);
       long start = var.getNumWrittenRecords();

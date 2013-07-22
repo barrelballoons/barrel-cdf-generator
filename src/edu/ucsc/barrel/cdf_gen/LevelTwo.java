@@ -642,19 +642,15 @@ public class LevelTwo extends CDFWriter{
 
       System.out.println("\nSaving HKPG...");
 
-      String srcName = 
-         "cdf_skels/l2/barCLL_PP_S_l2_hkpg_YYYYMMDD_v++.cdf";
       String destName = 
          outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn 
          + "_l2_" + "hkpg" + "_20" + date +  "_v" + revNum + ".cdf";
 
-      copyFile(new File(srcName), new File(destName), false);
-
-      cdf = openCDF(destName);
+      HKPG hkpg = new HKPG(destName, date, 2);
          
       for(int var_i = 0; var_i < 36; var_i++){
          //scale all the records for this variable
-         double[] hkpg_scaled = new double[numOfRecs];
+         float[] hkpg_scaled = new float[numOfRecs];
          for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
             if(CDF_Gen.data.hkpg[var_i][data_i] != Constants.HKPG_FILL){
                hkpg_scaled[rec_i] = 
@@ -663,19 +659,12 @@ public class LevelTwo extends CDFWriter{
                      CDF_Gen.data.hkpg_scale[var_i]
                   ) + CDF_Gen.data.hkpg_offset[var_i];
             }else{
-               hkpg_scaled[rec_i] = Constants.DOUBLE_FILL;
+               hkpg_scaled[rec_i] = Constants.FLOAT_FILL;
             }
          }
 
-         var = cdf.getVariable(CDF_Gen.data.hkpg_label[var_i]);
          System.out.println(CDF_Gen.data.hkpg_label[var_i] + "...");
-         var.putHyperData(
-            var.getNumWrittenRecords(), numOfRecs, 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            hkpg_scaled
-         );
+         hkpg.writeData(CDF_Gen.data.hkpg_label[var_i], hkpg_scaled);
       }
       
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
@@ -691,107 +680,28 @@ public class LevelTwo extends CDFWriter{
          q[rec_i] = CDF_Gen.data.hkpg_q[data_i];
       }
 
-      var = cdf.getVariable("numOfSats");
       System.out.println("numOfSats...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         sats
-      );
-
-      var = cdf.getVariable("timeOffset");
+      hkpg.writeData("numOfSats", sats);
       System.out.println("timeOffset...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         offset
-      );
-      
-      var = cdf.getVariable("termStatus");
+      hkpg.writeData("timeOffset", offset);
       System.out.println("termStatus...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         termStat
-      );
-
-      var = cdf.getVariable("cmdCounter");
+      hkpg.writeData("termStatus", termStat);
       System.out.println("cmdCounter...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         cmdCnt
-      );
-
-      var = cdf.getVariable("modemCounter");
+      hkpg.writeData("cmdCounter", cmdCnt);
       System.out.println("modemCounter...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         modemCnt
-      );
-
-      var = cdf.getVariable("dcdCounter");
+      hkpg.writeData("modemCounter", modemCnt);
       System.out.println("dcdCounter...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         dcdCnt
-      );
-
-      var = cdf.getVariable("weeks");
+      hkpg.writeData("dcdCounter", dcdCnt);
       System.out.println("weeks...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         weeks
-      );
-
-      var = cdf.getVariable("FrameGroup");
+      hkpg.writeData("weeks", weeks);
       System.out.println("FrameGroup...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         frameGroup
-      );
-
-      var = cdf.getVariable("Epoch");
+      hkpg.writeData("FrameGroup", frameGroup);
       System.out.println("Epoch...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         epoch
-      );
-
-      var = cdf.getVariable("Q");
+      hkpg.writeData("Epoch", epoch);
       System.out.println("Q...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         q
-      );
+      hkpg.writeData("Q", q);
 
-      cdf.close();
+      hkpg.close();
    }
 
    public void doFspcCdf(int first, int last, int date) throws CDFException{

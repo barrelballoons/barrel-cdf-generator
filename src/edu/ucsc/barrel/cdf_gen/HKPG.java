@@ -42,7 +42,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
+import java.util.List;
 import java.util.LinkedList;
+import java.util.ListIterator;
 
 
 public class HKPG extends BarrelCDF{
@@ -147,35 +149,35 @@ public class HKPG extends BarrelCDF{
       ));
       vars.add(new HkpgVar(
          "I0_TotalLoad", 
-         "Total Load Current", "mA", 1, 0, 20000, CDF_FLOAT
+         "Total Load Current", "mA", 1, 0, 2000, CDF_FLOAT
       ));
       vars.add(new HkpgVar(
          "I1_TotalSolar", 
-         "Total Solar Current", "mA", 3, 0, 20000, CDF_FLOAT
+         "Total Solar Current", "mA", 3, 0, 2000, CDF_FLOAT
       ));
       vars.add(new HkpgVar(
          "I2_Solar1", 
-         "Solar Panel One Current", "mA", 5, 0, 20000, CDF_FLOAT
+         "Solar Panel One Current", "mA", 5, 0, 2000, CDF_FLOAT
       ));
       vars.add(new HkpgVar(
          "I3_POS_DPU", 
-         "DPU Current (Positive)", "mA", 7, 0, 20000, CDF_FLOAT
+         "DPU Current (Positive)", "mA", 7, 0, 2000, CDF_FLOAT
       ));
       vars.add(new HkpgVar(
          "I4_POS_XRayDet", 
-         "X-ray Detector Current (Positive)", "mA", 9, 0, 20000, CDF_FLOAT
+         "X-ray Detector Current (Positive)", "mA", 9, 0, 2000, CDF_FLOAT
       ));
       vars.add(new HkpgVar(
          "I5_Modem", 
-         "Modem Current", "mA", 11, 0, 20000, CDF_FLOAT
+         "Modem Current", "mA", 11, 0, 2000, CDF_FLOAT
       ));
       vars.add(new HkpgVar(
          "I6_NEG_XRayDet", 
-         "X-ray Detector Current (Negative)", "mA", 13, -20000, 0, CDF_FLOAT
+         "X-ray Detector Current (Negative)", "mA", 13, -2000, 0, CDF_FLOAT
       ));
       vars.add(new HkpgVar(
          "I7_NEG_DPU", 
-         "DPU Current (Negative)", "mA", 15, -20000, 0, CDF_FLOAT
+         "DPU Current (Negative)", "mA", 15, -2000, 0, CDF_FLOAT
       ));
       vars.add(new HkpgVar(
          "T0_Scint", 
@@ -242,26 +244,32 @@ public class HKPG extends BarrelCDF{
          31, -273, 273, CDF_FLOAT
       ));
       vars.add(new HkpgVar(
-         "numOfSats", "Number of GPS Satellites", " ", 0, 0, 31, CDF_INT2
+         "numOfSats", "Number of GPS Satellites", "sats", 
+         0, 0, 31, CDF_INT2
       ));
       vars.add(new HkpgVar(
-         "timeOffset", "Leap Seconds", "s", 0, 0, 255, CDF_INT2
+         "timeOffset", "Leap Seconds", "s", 
+         0, 0, 255, CDF_INT2
       ));
       vars.add(new HkpgVar(
-         "termStatus", "Terminate Status", " ", 0, 0, 1, CDF_INT2
+         "termStatus", "Terminate Status", " ", 
+         0, 0, 1, CDF_INT2
       ));
       vars.add(new HkpgVar(
-         "cmdCounter", "Command Counter", " ", 0, 0, 255, CDF_INT2
+         "cmdCounter", "Command Counter", "commands", 
+         0, 0, 32767, CDF_INT4
       ));
       vars.add(new HkpgVar(
-         "modemCounter", "Modem Reset Counter", " ", 0, 0, 255, CDF_INT2
+         "modemCounter", "Modem Reset Counter", "resets", 
+         0, 0, 255, CDF_INT2
       ));
       vars.add(new HkpgVar(
-         "dcdCounter", "Numebr of time the DCD has been de-asserted.", 
-         "", 0, 0, 255, CDF_INT2
+         "dcdCounter", "Numebr of time the DCD has been de-asserted.", "calls", 
+         0, 0, 255, CDF_INT2
       ));
       vars.add(new HkpgVar(
-         "weeks", "Weeks Since 6 Jan 1980", "weeks", 0, 0, 65535, CDF_INT4
+         "weeks", "Weeks Since 6 Jan 1980", "weeks", 
+         0, 0, 65535, CDF_INT4
       ));
    }
 
@@ -290,49 +298,51 @@ public class HKPG extends BarrelCDF{
       fillVarArray();
 
       //loop through all of the hkpg variables
-      ListIterator var_i = vars.iterator();
+      ListIterator<HkpgVar> var_i = vars.listIterator();
       while(var_i.hasNext()){
          createVar(var_i.next());
       }
    }
 
-   private void createVar(final HkpgVar v){
-      String format;
-      Object fill;
-
+   private void createVar(final HkpgVar v) throws CDFException{
+      long type = v.getType();
       Variable var = 
          Variable.create(
-            cdf, v.getName(), v.getType(), 
+            cdf, v.getName(), type,
             1L, 0L, new  long[] {1}, VARY, new long[] {NOVARY}
          ); 
       long id = var.getID();
 
-      switch(v.getType()){
-         case CDF_FLOAT:
-            fill = Constants.FLOAT_FILL;
-            format = "%f";
-         break;
-         case CDF_INT4:
-            fill = Constants.INT4_FILL;
-            format = "%i";
-         break;
-         case CDF_INT2:
-            fill = Constants.INT2_FILL;
-            format = "%i";
-         break;
+      if(type == CDF_INT4){
+         setAttribute("FORMAT", "%i", VARIABLE_SCOPE, id);
+         setAttribute("VALIDMIN", v.getMin(), VARIABLE_SCOPE, id, type);
+         setAttribute("VALIDMAX", v.getMax(), VARIABLE_SCOPE, id, type);
+         setAttribute(
+            "FILLVAL", Constants.INT4_FILL, VARIABLE_SCOPE, id, type
+         );
+      }else if(type == CDF_INT2){
+         setAttribute("FORMAT", "%i", VARIABLE_SCOPE, id);
+         setAttribute("VALIDMIN", (short)v.getMin(), VARIABLE_SCOPE, id, type);
+         setAttribute("VALIDMAX", (short)v.getMax(), VARIABLE_SCOPE, id, type);
+         setAttribute(
+            "FILLVAL", Constants.INT2_FILL, VARIABLE_SCOPE, id, type
+         );
+      }else{
+         setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
+         setAttribute("VALIDMIN", v.getMin(), VARIABLE_SCOPE, id, type);
+         setAttribute("VALIDMAX", v.getMax(), VARIABLE_SCOPE, id, type);
+         setAttribute(
+            "FILLVAL", Constants.FLOAT_FILL, VARIABLE_SCOPE, id, type
+         );
       }
 
       setAttribute("FIELDNAM", v.getName(), VARIABLE_SCOPE, id);
       setAttribute("CATDESC", v.getDesc(), VARIABLE_SCOPE, id);
       setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
       setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
-      setAttribute("FORMAT", format, VARIABLE_SCOPE, id);
       setAttribute("UNITS", v.getUnits(), VARIABLE_SCOPE, id);
       setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
       setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", v.getMin(), VARIABLE_SCOPE, id, t);
-      setAttribute("VALIDMAX", v.getMax(), VARIABLE_SCOPE, id, t);
-      setAttribute("FILLVAL", fill, VARIABLE_SCOPE, id, t);
       setAttribute("LABLAXIS", v.getName(), VARIABLE_SCOPE, id);
    }
 }
