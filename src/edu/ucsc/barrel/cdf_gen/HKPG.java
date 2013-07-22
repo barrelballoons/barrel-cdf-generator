@@ -1,8 +1,8 @@
 /*
-FSPC.java
+HKPG.java
 
 Description:
-   Creates FSPC CDF files.
+   Creates HKPG CDF files.
 
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    This file is part of The BARREL CDF Generator.
