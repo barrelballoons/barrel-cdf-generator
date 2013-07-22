@@ -500,15 +500,6 @@ public class LevelTwo extends CDFWriter{
 
       System.out.println("\nSaving Magnetometer Level Two CDF...");
 
-      String srcName = 
-         "cdf_skels/l2/barCLL_PP_S_l2_magn_YYYYMMDD_v++.cdf";
-      String destName = 
-         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
-         "_l2_" + "magn" + "_20" + date +  "_v" + revNum + ".cdf";
-      copyFile(new File(srcName), new File(destName), false);
-
-      cdf = openCDF(destName);
-     
       //extract the nominal magnetometer value and calculate |B|
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          if(CDF_Gen.data.magx[data_i] != Constants.FLOAT_FILL){
@@ -548,78 +539,27 @@ public class LevelTwo extends CDFWriter{
       }
 
       //store the nominal mag values
-      var = cdf.getVariable("MAG_X");
-      System.out.println("MAG_X... ");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         magx 
-      );
-
-      var = cdf.getVariable("MAG_Y");
+      String destName = 
+         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
+         "_l2_" + "magn" + "_20" + date +  "_v" + revNum + ".cdf";
+     
+      Magn magn = new Magn(destName, date, 2);
+      System.out.println("MAG_X");
+      magn.writeData("MAG_X", magx);
       System.out.println("MAG_Y...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         magy
-      );
-
-      var = cdf.getVariable("MAG_Z");
+      magn.writeData("MAG_Y", magy);
       System.out.println("MAG_Z...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         magz
-      );
-
-      var = cdf.getVariable("Total");
-      System.out.println("Field Magnitude...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         magTot 
-      );
-
-      var = cdf.getVariable("FrameGroup");
+      magn.writeData("MAG_Z", magz);
+      System.out.println("Total...");
+      magn.writeData("Total", magTot);
       System.out.println("FrameGroup...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         frameGroup
-      );
-
-      var = cdf.getVariable("Epoch");
+      magn.writeData("FrameGroup", frameGroup);
       System.out.println("Epoch...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         epoch
-      );
-
-      var = cdf.getVariable("Q");
+      magn.writeData("Epoch", epoch);
       System.out.println("Q...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         q
-      );
+      magn.writeData("Q", q);
 
-      cdf.close();
-
+      magn.close();
    }
    
    public void doHkpgCdf(int first, int last, int date) throws CDFException{
