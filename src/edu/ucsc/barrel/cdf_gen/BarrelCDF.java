@@ -44,132 +44,119 @@ import java.util.Vector;
 import java.util.Arrays;
 
 public class BarrelCDF implements CDFConstants{
-      private CDF cdf;
+      private CDFFile cdf;
       private String path;
       private int lvl;
       private int lastRec;
 
    public BarrelCDF(final String p, final int l){
-      path = p;
-      lvl = l;
-      
-      try{
-         //create a new CDF or open an existing one. 
-         if(!(new File(path)).exists()){cdf = CDF.create(path);}
-         if(cdf == null){cdf = CDF.open(path);}
-
-         addGlobalAtts();
-         addVars();
-      }catch(CDFException e){
-         System.out.println(e.getMessage());
-      }
-   }
-
-   private void addGlobalAtts() throws CDFException{
-      //get today's date
-      DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
-      Calendar cal = Calendar.getInstance();
-      String date = dateFormat.format(cal.getTime());
-      
-      //fill global_attrs HashMap with attribute info used by all CDFs
-      setAttribute("File_naming_convention", "source_datatype_descriptor");
-      setAttribute("Data_type", "l" + lvl + ">Level-" + lvl);
-      setAttribute("PI_name", "Robyn Millan");
-      setAttribute("PI_affiliation","Dartmouth College");
-      setAttribute("Mission_group", "RBSP");
-      setAttribute("Project","LWS>Living With a Star>BARREL");
-      setAttribute("Source_name", "Payload_ID");
-      setAttribute("Data_version", CDF_Gen.getSetting("rev"));
-      setAttribute("Discipline", "Space Physics>Magnetospheric Science");
-      setAttribute("HTTP_LINK","http://barreldata.ucsc.edu");
-      setAttribute("LINK_TITLE", "BARREL Data Repository");
-      setAttribute("Generation_date", String.valueOf(date));
-      setAttribute("Generated_by", "BARREL CDF Generator");
-      setAttribute(
-         "Rules_of_use",  
-         "BARREL will make all its scientific data products quickly and " +
-         "publicly available but all users are expected to read and follow " +
-         "the \"BARREL Mission Data Usage Policy\" which can be found in " +
-         "the BARREL data repository or obtained by contacting " + 
-         "barrelballoons@gmail.com"
-      );
-   }
-
-   public void addVars() throws CDFException{
-      //create variables used by all CDFs
       Variable var;
       long id;
 
-      //calculate min and max epochs
-      long min_epoch = CDFTT2000.fromUTCparts(2012, 00, 01);
-      long max_epoch = CDFTT2000.fromUTCparts(2015, 11, 31);
-      
+      lvl = l;
+      path = p;
 
-      var = 
-         Variable.create(
-            cdf, "Epoch", CDF_TIME_TT2000, 1L, 0L, new  long[] {1}, 
-            VARY, new long[] {NOVARY}
-      ); 
-      id = var.getID();
-      setAttribute("FIELDNAM", "Epoch", VARIABLE_SCOPE, id);
-      setAttribute("CATDESC", "Default time", VARIABLE_SCOPE, id);
-      setAttribute("VAR_TYPE", "support_data", VARIABLE_SCOPE, id);
-      setAttribute("UNITS", "ns", VARIABLE_SCOPE, id);
-      setAttribute("SCALETYPE", "linear", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", min_epoch, VARIABLE_SCOPE, id, CDF_TIME_TT2000);
-      setAttribute("VALIDMAX", max_epoch, VARIABLE_SCOPE, id, CDF_TIME_TT2000);
-      setAttribute(
-         "FILLVAL", Long.MIN_VALUE, VARIABLE_SCOPE, id, CDF_TIME_TT2000
-      );
-      setAttribute("LABLAXIS", "Epoch", VARIABLE_SCOPE, id);
-      setAttribute("MONOTON", "INCREASE", VARIABLE_SCOPE, id);
-      setAttribute("TIME_BASE", "J2000", VARIABLE_SCOPE, id);
-      setAttribute("TIME_SCALE", "Terrestrial Time", VARIABLE_SCOPE, id);
-      setAttribute(
-         "REFERENCE_POSITION", "Rotating Earch Geoid", VARIABLE_SCOPE, id
-      );
+      try{
+         //calculate min and max epochs
+         long min_epoch = CDFTT2000.fromUTCparts(2012, 00, 01);
+         long max_epoch = CDFTT2000.fromUTCparts(2015, 11, 31);
+         
 
-      var = 
-         Variable.create(
-            cdf, "FrameGroup", CDF_INT4, 1L, 0L, new  long[] {1}, 
-            VARY, new long[] {NOVARY}
-      );
-      id = var.getID();
-      setAttribute("FIELDNAM", "Frame Number", VARIABLE_SCOPE, id);
-      setAttribute("CATDESC", "DPU Frame Counter", VARIABLE_SCOPE, id);
-      setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
-      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
-      setAttribute("FORMAT", "%u", VARIABLE_SCOPE, id);
-      setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", 0, VARIABLE_SCOPE, id, CDF_INT4);
-      setAttribute("VALIDMAX", 2147483647, VARIABLE_SCOPE, id, CDF_INT4);
-      setAttribute(
-         "FILLVAL", Constants.INT4_FILL, VARIABLE_SCOPE, id, CDF_INT4
-      );
-      setAttribute("LABLAXIS", "Frame", VARIABLE_SCOPE, id);
+         //get today's date
+         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+         Calendar cal = Calendar.getInstance();
+         String date = dateFormat.format(cal.getTime());
+         
+         //create or open a cdf and fill it with default global variables
+         cdf = new CDFFile(path);
 
-      var = 
-         Variable.create(
-            cdf, "Q", CDF_INT4, 1L, 0L, new  long[] {1}, 
-            VARY, new long[] {NOVARY}
-      );
-      id = var.getID();
-      setAttribute("FIELDNAM", "Data Quality", VARIABLE_SCOPE, id);
-      setAttribute(
-         "CATDESC", "32bit flag used to indicate data quality", 
-         VARIABLE_SCOPE, id
-      );
-      setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
-      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
-      setAttribute("FORMAT", "%u", VARIABLE_SCOPE, id);
-      setAttribute("SCALETYPE", "linear", VARIABLE_SCOPE, id);
-      setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", 0, VARIABLE_SCOPE, id, CDF_INT4);
-      setAttribute("VALIDMAX", 2147483647, VARIABLE_SCOPE, id, CDF_INT4);
-      setAttribute(
-         "FILLVAL", Constants.INT4_FILL, VARIABLE_SCOPE, id, CDF_INT4
-      );
-      setAttribute("LABLAXIS", "Q", VARIABLE_SCOPE, id);
+         cdf.setAttribute(
+            "File_naming_convention", "source_datatype_descriptor"
+         );
+         cdf.setAttribute("Data_type", "l" + lvl + ">Level-" + lvl);
+         cdf.setAttribute("PI_name", "Robyn Millan");
+         cdf.setAttribute("PI_affiliation","Dartmouth College");
+         cdf.setAttribute("Mission_group", "RBSP");
+         cdf.setAttribute("Project","LWS>Living With a Star>BARREL");
+         cdf.setAttribute("Source_name", "Payload_ID");
+         cdf.setAttribute("Data_version", CDF_Gen.getSetting("rev"));
+         cdf.setAttribute(
+            "Discipline", "Space Physics>Magnetospheric Science"
+         );
+         cdf.setAttribute("HTTP_LINK","http://barreldata.ucsc.edu");
+         cdf.setAttribute("LINK_TITLE", "BARREL Data Repository");
+         cdf.setAttribute("Generation_date", String.valueOf(date));
+         cdf.setAttribute("Generated_by", "BARREL CDF Generator");
+         cdf.setAttribute(
+            "Rules_of_use",  
+            "BARREL will make all its scientific data products quickly and " +
+            "publicly available but all users are expected to read and follow "+
+            "the \"BARREL Mission Data Usage Policy\" which can be found in " +
+            "the BARREL data repository or obtained by contacting " + 
+            "barrelballoons@gmail.com"
+         );
+         
+         //set all default varialbes
+         CDFVar var = new CDFVar(cdf,"Epoch", CDF_TIME_TT2000, 1, VARY);
+         var.setAttribute("FIELDNAM", "Epoch");
+         var.setAttribute("CATDESC", "Default time");
+         var.setAttribute("VAR_TYPE", "support_data");
+         var.setAttribute("UNITS", "ns");
+         var.setAttribute("SCALETYPE", "linear");
+         var.setAttribute("VALIDMIN", min_epoch, CDF_TIME_TT2000);
+         var.setAttribute("VALIDMAX", max_epoch, CDF_TIME_TT2000);
+         var.setAttribute("FILLVAL", Long.MIN_VALUE, CDF_TIME_TT2000);
+         var.setAttribute("LABLAXIS", "Epoch");
+         var.setAttribute("MONOTON", "INCREASE");
+         var.setAttribute("TIME_BASE", "J2000");
+         var.setAttribute("TIME_SCALE", "Terrestrial Time");
+         var.setAttribute("REFERENCE_POSITION", "Rotating Earch Geoid");
+
+         var = 
+            Variable.create(
+               cdf, "FrameGroup", CDF_INT4, 1L, 0L, new  long[] {1}, 
+               VARY, new long[] {NOVARY}
+         );
+         id = var.getID();
+         setAttribute("FIELDNAM", "Frame Number", VARIABLE_SCOPE, id);
+         setAttribute("CATDESC", "DPU Frame Counter", VARIABLE_SCOPE, id);
+         setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
+         setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
+         setAttribute("FORMAT", "%u", VARIABLE_SCOPE, id);
+         setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
+         setAttribute("VALIDMIN", 0, VARIABLE_SCOPE, id, CDF_INT4);
+         setAttribute("VALIDMAX", 2147483647, VARIABLE_SCOPE, id, CDF_INT4);
+         setAttribute(
+            "FILLVAL", Constants.INT4_FILL, VARIABLE_SCOPE, id, CDF_INT4
+         );
+         setAttribute("LABLAXIS", "Frame", VARIABLE_SCOPE, id);
+
+         var = 
+            Variable.create(
+               cdf, "Q", CDF_INT4, 1L, 0L, new  long[] {1}, 
+               VARY, new long[] {NOVARY}
+         );
+         id = var.getID();
+         setAttribute("FIELDNAM", "Data Quality", VARIABLE_SCOPE, id);
+         setAttribute(
+            "CATDESC", "32bit flag used to indicate data quality", 
+            VARIABLE_SCOPE, id
+         );
+         setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
+         setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
+         setAttribute("FORMAT", "%u", VARIABLE_SCOPE, id);
+         setAttribute("SCALETYPE", "linear", VARIABLE_SCOPE, id);
+         setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
+         setAttribute("VALIDMIN", 0, VARIABLE_SCOPE, id, CDF_INT4);
+         setAttribute("VALIDMAX", 2147483647, VARIABLE_SCOPE, id, CDF_INT4);
+         setAttribute(
+            "FILLVAL", Constants.INT4_FILL, VARIABLE_SCOPE, id, CDF_INT4
+         );
+         setAttribute("LABLAXIS", "Q", VARIABLE_SCOPE, id);
+
+      }catch(CDFException e){
+         System.out.println(e.getMessage());
+      }
    }
 
    public CDF getCDF(){return cdf;}
