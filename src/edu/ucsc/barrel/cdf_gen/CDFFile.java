@@ -33,64 +33,75 @@ import gsfc.nssdc.cdf.Entry;
 
 import java.io.File;
 
-public class CDFFile extends CDFComponent{
-   CDF cdf;
+public class CDFFile implements CDFComponent{
+   private static long type = CDFConstants.CDF_;
+   private CDF cdf;
+   private String name;
+   private String path;
 
-   public CDFFile(final String path){
+   public CDFFile(final String p){
+      this.path = p;
+
+      String[] path_parts = p.split("/");
+      this.name = path_parts[path_parts.length - 1];
+
       //create a new CDF or open an existing one. 
       try{
-         if(!(new File(path)).exists()){cdf = CDF.create(path);}
-         if(cdf == null){cdf = CDF.open(path);}
+         if(!(new File(p)).exists()){this.cdf = CDF.create(path);}
+         if(this.cdf == null){this.cdf = CDF.open(path);}
       }catch(CDFException e){
+         System.out.println("Could not create/open CDF file '" + path + "':");
          System.out.println(e.getMessage());
       }
    }
+   
+   public CDF getCDF(){return this.cdf;}
+   public CDF getID(){return this.cdf.getID();}
+   public long getType(){return this.type;} 
+   public String getName(){return this.name;}
+   public String getPath(){return this.path;}
 
-   public void setAttribute(final String name, final String value, long id){
-      Attribute attr = getAttribute(name);
+   //forwarding functions for creating and selecting attributes in this CDF file
+   public CDFAttribute attribute(
+      final String name, final String value, long type
+   ){
+      CDFAttribute attr = new CDFAttribute(this, name, value, type);
 
-      try{
-         Entry.create(attr, id, CDFConstants.CDF_CHAR, value);
-      }catch(CDFException e){
-         System.out.println(
-            "Could not create entry '" + value + 
-            "' for attribute '" + name + "':"
-         );
-         System.out.println(e.getMessage());
-      }
+      return attr;
    }
-   public void setAttribute(final String name, final String value){
-      Attribute attr = getAttribute(name);
-      long entry = (attr == null) ? 0 : attr.getNumEntries();
-      setAttribute(name, value, entry);
+   public CDFAttribute attribute(final String name, final String value){
+      CDFAttribute attr = new CDFAttribute(this, name, value);
+
+      return attr;
+   }
+   public CDFAttribute attribute(final String name){
+      CDFAttribute attr = new CDFAttribute(this, name);
+
+      return attr;
    }
 
+   //functions for over writing current attribute values in this CDF file
+   public void editAttribute(final String name, final String value, long entry){
+      CDFAttribute attr = new CDFAttribute(this, name);
+      attr.setValue(value, entry);
+   }
+   public void editAttribute(final String name, final String value){
+      //assume the last entry for this attribute
+      long entry = attribute(this, name).getNumEntries() - 1L;
+      editAttribute(name, value, entry);
+   }
+   
+
+   //functions for creating new variables
+
+
+   //close the CDF file. This must be done before the program exits
    public void close(){
       try{cdf.close();}
       catch(CDFException e){
-         System.out.println("Could not close CDF file:");
+         System.out.println("Could not close CDF file '" + this.name + "':");
          System.out.println(e.getMessage());
       }
-   }
-
-   public CDF getCDF(){return cdf;}
-
-   private Attribute getAttribute(final String name){
-      Attribute attr;
-      long id;
-      try{
-         //figure out what the id number should be for this attribute
-         id = cdf.getAttributeID(name);
-         attr = (id != -1L) ? 
-            cdf.getAttribute(name) :
-            Attribute.create(cdf, name, CDFConstants.GLOBAL_SCOPE);
-      }catch(CDFException e){
-         attr = null;
-         System.out.println("Could not get attribute: ");
-         System.out.println(e.getMessage());
-      }
-      
-      return attr;
    }
 
 }

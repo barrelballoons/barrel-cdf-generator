@@ -33,77 +33,93 @@ import gsfc.nssdc.cdf.Variable;
 import gsfc.nssdc.cdf.Attribute;
 import gsfc.nssdc.cdf.Entry;
 
-public class CDFVar extends CDFComponent{
-   CDF cdf;
-   Variable var;
-   String name;
-   long var_type;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Collections;
 
-   public CDFVar(final CDF c, final String n, long t, int r_size, long r_vary){
-      cdf = c;
-      name = n;
-      var_type = t;
-      
+public class CDFVar implements CDFComponent{
+   private CDF cdf;
+   private long type;
+   private String name;
+   private long[] dim_sizes;
+   private long num_of_dims;
+   private Variable var;
+
+   //create a list of ISTP compliant limits and fill values
+   private static final Map<String, Number> ISTP_CONSTANTS;
+   static {
+      Map<String, Number> map = new HashMap<String, Number>();
+      map.put("FLOAT_FILL", -1e31f);
+      map.put("DOUBLE_FILL", -1e31);
+      map.put("INT1_FILL",-128);
+      map.put("INT2_FILL", -32768);
+      map.put("INT4_FILL", -2147483648);
+      ISTP_CONSTANTS = Collections.unmodifiableMap(map);
+   }
+   static public Number getIstpVal(String key){
+      return ISTP_CONSTANTS.get(key);
+   }
+
+   public CDFVar(
+      final CDF c, final String n, long t, boolean r_v, final long[] s
+   ){
+      this.cdf = c;
+      this.name = n;
+      this.type = t;
+      this.dim_sizes = s;
+
+      //figure out the number of dimensions
+      this.num_of_dims = 
+         (dim_sizes.length == 0 && dim_sizes[0] == 0L) ? 0L : dim_sizes.length;
+ 
+      this.rec_vary = r_v ? CDFConstants.VARY : CDFConstants.NOVARY;
+     
       try{
-         var = Variable.create(
-            cdf, name, var_type, 1L, 0L, new long[]{r_size}, 
-            r_vary, new long[]{CDFConstants.VARY}
+         this.var = Variable.create(
+            c, n, t, 1L, this.num_of_dims, s, r_v, new long[]{CDFConstants.VARY}
          );
       }catch(CDFException e){
          System.out.println("Could not create variable " + name + ":");
          System.out.println(e.getMessage());
       }
    }
+
+   public CDFVar(final CDF c, final String n, long t, boolean r_v){
+      //assume this is a scalar if there is no size specified
+      this(c, n, t, r_v, new long[]{0L});
+   }
    
-   public String getName(){return name;}
-   public long getType(){return var_type;}
+   public CDFVar(final CDF c, final String n, long t){
+      //assume this is a scalar with record variance = VARY 
+      this(c, n, t, true, new long[]{0L});
+   }
    
-   public void setAttribute(
-      final String attr_name, final Object value, long attr_type
+   public CDF getCDF(){return this.cdf;}
+   public CDF getID(){return this.var.getID();}
+   public String getName(){return this.name;}
+   public long getType(){return this.type;}
+   
+   //forwarding functions for creating and selecting attributes in this variable
+   public CDFAttribute attribute(
+      final String name, final String value, long type
    ){
-      Attribute attr = getAttribute(attr_name);
-      long id;
+      CDFAttribute attr = new CDFAttribute(this, name, value, type);
 
-      try{
-         id = var.getID();
-         Entry.create(attr, id, attr_type, value);
-      }catch(CDFException e){
-         System.out.println(
-            "Could not create entry '" + value + 
-            "' for attribute '" + attr_name + 
-            "' in variable '" + name  + "':"
-         );
-         System.out.println(e.getMessage());
-      }
-   }
-
-   public void setAttribute(final String attr_name, final Object value){
-      long attr_type;
-
-      if(value instanceof Number){
-         attr_type = var_type;
-      }else{
-         attr_type = CDFConstants.CDF_CHAR;
-      }
-
-      setAttribute(attr_name, value, attr_type);
-   }
-
-   private Attribute getAttribute(final String name){
-      Attribute attr;
-      long id;
-      try{
-         //figure out what the id number should be for this attribute
-         id = cdf.getAttributeID(name);
-         attr = (id != -1L) ? 
-            cdf.getAttribute(name) :
-            Attribute.create(cdf, name, CDFConstants.VARIABLE_SCOPE);
-      }catch(CDFException e){
-         attr = null;
-         System.out.println("Could not get attribute: ");
-         System.out.println(e.getMessage());
-      }
-      
       return attr;
+   }
+   public CDFAttribute attribute(final String name, final String value){
+      CDFAttribute attr = new CDFAttribute(this, name, value);
+
+      return attr;
+   }
+   public CDFAttribute attribute(final String name){
+      CDFAttribute attr = new CDFAttribute(this, name);
+
+      return attr;
+   }
+
+   //functions for over writing current attribute values in this variable 
+   public void editAttribute(final String name, final String value){
+      new CDFAttribute(this, name, value);
    }
 }

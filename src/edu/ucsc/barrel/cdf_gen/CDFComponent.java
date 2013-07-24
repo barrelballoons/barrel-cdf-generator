@@ -2,8 +2,7 @@
 CDFComponents.java
 
 Description:
-   Group of classes describing the various "CDFComponents" (which are either a 
-   file or variable at this point).
+   Define an interface for all CDF components (file, variable, attribute)
 
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    This file is part of The BARREL CDF Generator.
@@ -26,27 +25,10 @@ Description:
 package edu.ucsc.barrel.cdf_gen;
 
 import gsfc.nssdc.cdf.CDF;
-import gsfc.nssdc.cdf.Attribute;
-import gsfc.nssdc.cdf.CDFConstants;
-import gsfc.nssdc.cdf.CDFException;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Collections;
-
-abstract public class CDFComponent{
-   //create a list of ISTP compliant limits and fill values
-   private static final Map<String, Number> ISTP_CONSTANTS;
-   static {
-      Map<String, Number> map = new HashMap<String, Number>();
-      map.put("FLOAT_FILL", -1e31f);
-      map.put("DOUBLE_FILL", -1e31);
-      map.put("INT1_FILL",-128);
-      map.put("INT2_FILL", -32768);
-      map.put("INT4_FILL", -2147483648);
-      ISTP_CONSTANTS = Collections.unmodifiableMap(map);
-   }
-   static public Number getIstpVal(String key){
-      return ISTP_CONSTANTS.get(key);
-   }
+public interface CDFComponent{
+   public CDF getCDF();
+   public CDF getID();
+   public String getName();
+   public long getType();
 }
