@@ -43,7 +43,9 @@ public class CDFVar implements CDFComponent{
    private String name;
    private long[] dim_sizes;
    private long num_of_dims;
+   private long rec_vary;
    private Variable var;
+   private CDFFile owner;
 
    //create a list of ISTP compliant limits and fill values
    private static final Map<String, Number> ISTP_CONSTANTS;
@@ -61,9 +63,10 @@ public class CDFVar implements CDFComponent{
    }
 
    public CDFVar(
-      final CDF c, final String n, long t, boolean r_v, final long[] s
+      final CDFFile o, final String n, long t, boolean r_v, final long[] s
    ){
-      this.cdf = c;
+      this.owner = o;
+      this.cdf = o.getCDF();
       this.name = n;
       this.type = t;
       this.dim_sizes = s;
@@ -76,7 +79,8 @@ public class CDFVar implements CDFComponent{
      
       try{
          this.var = Variable.create(
-            c, n, t, 1L, this.num_of_dims, s, r_v, new long[]{CDFConstants.VARY}
+            c, n, t, 1L, this.num_of_dims,
+            s, this.rec_vary, new long[]{CDFConstants.VARY}
          );
       }catch(CDFException e){
          System.out.println("Could not create variable " + name + ":");
@@ -84,30 +88,33 @@ public class CDFVar implements CDFComponent{
       }
    }
 
-   public CDFVar(final CDF c, final String n, long t, boolean r_v){
+   public CDFVar(final CDFFile c, final String n, long t, boolean r_v){
       //assume this is a scalar if there is no size specified
       this(c, n, t, r_v, new long[]{0L});
    }
    
-   public CDFVar(final CDF c, final String n, long t){
+   public CDFVar(final CDFFile c, final String n, long t){
       //assume this is a scalar with record variance = VARY 
       this(c, n, t, true, new long[]{0L});
    }
    
    public CDF getCDF(){return this.cdf;}
-   public CDF getID(){return this.var.getID();}
+   public long getID(){return this.var.getID();}
    public String getName(){return this.name;}
    public long getType(){return this.type;}
+   public boolean getRecordVariance(){
+      return this.rec_vary == CDFConstants.VARY ? true : false;
+   }
    
    //forwarding functions for creating and selecting attributes in this variable
    public CDFAttribute attribute(
-      final String name, final String value, long type
+      final String name, final Object value, long type
    ){
       CDFAttribute attr = new CDFAttribute(this, name, value, type);
 
       return attr;
    }
-   public CDFAttribute attribute(final String name, final String value){
+   public CDFAttribute attribute(final String name, final Object value){
       CDFAttribute attr = new CDFAttribute(this, name, value);
 
       return attr;

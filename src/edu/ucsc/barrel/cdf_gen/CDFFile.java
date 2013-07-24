@@ -56,7 +56,7 @@ public class CDFFile implements CDFComponent{
    }
    
    public CDF getCDF(){return this.cdf;}
-   public CDF getID(){return this.cdf.getID();}
+   public long getID(){return this.cdf.getID();}
    public long getType(){return this.type;} 
    public String getName(){return this.name;}
    public String getPath(){return this.path;}
@@ -87,7 +87,7 @@ public class CDFFile implements CDFComponent{
    }
    public void editAttribute(final String name, final String value){
       //assume the last entry for this attribute
-      long entry = attribute(this, name).getNumEntries() - 1L;
+      long entry = attribute(name).getNumEntries() - 1L;
       editAttribute(name, value, entry);
    }
    

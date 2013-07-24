@@ -24,13 +24,9 @@ Description:
 
 package edu.ucsc.barrel.cdf_gen;
 
-import gsfc.nssdc.cdf.CDF;
-import gsfc.nssdc.cdf.CDFException;
 import gsfc.nssdc.cdf.CDFConstants;
 import gsfc.nssdc.cdf.util.CDFTT2000;
-import gsfc.nssdc.cdf.Variable;
-import gsfc.nssdc.cdf.Attribute;
-import gsfc.nssdc.cdf.Entry;
+import gsfc.nssdc.cdf.CDFException;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +39,7 @@ import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
 
-public class BarrelCDF implements CDFConstants{
+public class BarrelCDF{
       private CDFFile cdf;
       private String path;
       private int lvl;
@@ -51,153 +47,94 @@ public class BarrelCDF implements CDFConstants{
 
    public BarrelCDF(final String p, final int l){
       CDFVar var;
-      long id;
+      long min_epoch;
+      long max_epoch;
 
-      lvl = l;
-      path = p;
+      this.lvl = l;
+      this.path = p;
 
+      //get today's date
+      DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+      Calendar cal = Calendar.getInstance();
+      String date = dateFormat.format(cal.getTime());
+         
       try{
          //calculate min and max epochs
-         long min_epoch = CDFTT2000.fromUTCparts(2012, 00, 01);
-         long max_epoch = CDFTT2000.fromUTCparts(2015, 11, 31);
+         min_epoch = CDFTT2000.fromUTCparts(2012, 00, 01);
+         max_epoch = CDFTT2000.fromUTCparts(2015, 11, 31);
          
-
-         //get today's date
-         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
-         Calendar cal = Calendar.getInstance();
-         String date = dateFormat.format(cal.getTime());
-         
-         //create or open a cdf and fill it with default global variables
-         cdf = new CDFFile(path);
-
-         cdf.setAttribute(
-            "File_naming_convention", "source_datatype_descriptor"
-         );
-         cdf.setAttribute("Data_type", "l" + lvl + ">Level-" + lvl);
-         cdf.setAttribute("PI_name", "Robyn Millan");
-         cdf.setAttribute("PI_affiliation","Dartmouth College");
-         cdf.setAttribute("Mission_group", "RBSP");
-         cdf.setAttribute("Project","LWS>Living With a Star>BARREL");
-         cdf.setAttribute("Source_name", "Payload_ID");
-         cdf.setAttribute("Data_version", CDF_Gen.getSetting("rev"));
-         cdf.setAttribute(
-            "Discipline", "Space Physics>Magnetospheric Science"
-         );
-         cdf.setAttribute("HTTP_LINK","http://barreldata.ucsc.edu");
-         cdf.setAttribute("LINK_TITLE", "BARREL Data Repository");
-         cdf.setAttribute("Generation_date", String.valueOf(date));
-         cdf.setAttribute("Generated_by", "BARREL CDF Generator");
-         cdf.setAttribute(
-            "Rules_of_use",  
-            "BARREL will make all its scientific data products quickly and " +
-            "publicly available but all users are expected to read and follow "+
-            "the \"BARREL Mission Data Usage Policy\" which can be found in " +
-            "the BARREL data repository or obtained by contacting " + 
-            "barrelballoons@gmail.com"
-         );
-         
-         //set all default varialbes
-         var = new CDFVar(cdf.getCDF(),"Epoch", CDF_TIME_TT2000, 1, VARY);
-         var.setAttribute("FIELDNAM", "Epoch");
-         var.setAttribute("CATDESC", "Default time");
-         var.setAttribute("VAR_TYPE", "support_data");
-         var.setAttribute("UNITS", "ns");
-         var.setAttribute("SCALETYPE", "linear");
-         var.setAttribute("VALIDMIN", min_epoch, CDF_TIME_TT2000);
-         var.setAttribute("VALIDMAX", max_epoch, CDF_TIME_TT2000);
-         var.setAttribute("FILLVAL", Long.MIN_VALUE, CDF_TIME_TT2000);
-         var.setAttribute("LABLAXIS", "Epoch");
-         var.setAttribute("MONOTON", "INCREASE");
-         var.setAttribute("TIME_BASE", "J2000");
-         var.setAttribute("TIME_SCALE", "Terrestrial Time");
-         var.setAttribute("REFERENCE_POSITION", "Rotating Earch Geoid");
-
-         var = new CDFVar(cdf.getCDF(),"FrameGroup", CDF_INT4, 1, VARY);
-         var.setAttribute("FIELDNAM", "Frame Number");
-         var.setAttribute("CATDESC", "DPU Frame Counter");
-         var.setAttribute("VAR_TYPE", "data");
-         var.setAttribute("DEPEND_0", "Epoch");
-         var.setAttribute("FORMAT", "%u");
-         var.setAttribute("DISPLAY_TYPE", "time_series");
-         var.setAttribute("VALIDMIN", 0);
-         var.setAttribute("VALIDMAX", 2147483647);
-         var.setAttribute("FILLVAL", var.getIstpVal("INT4_FILL"));
-         var.setAttribute("LABLAXIS", "Frame");
-
-         var = new CDFVar(cdf.getCDF(),"Q", CDF_INT4, 1, VARY);
-         var.setAttribute("FIELDNAM", "Data Quality");
-         var.setAttribute(
-            "CATDESC", "32bit flag used to indicate data quality"
-         );
-         var.setAttribute("VAR_TYPE", "data");
-         var.setAttribute("DEPEND_0", "Epoch");
-         var.setAttribute("FORMAT", "%u");
-         var.setAttribute("SCALETYPE", "linear");
-         var.setAttribute("DISPLAY_TYPE", "time_series");
-         var.setAttribute("VALIDMIN", 0);
-         var.setAttribute("VALIDMAX", 2147483647);
-         var.setAttribute("FILLVAL", var.getIstpVal("INT4_FILL"));
-         var.setAttribute("LABLAXIS", "Q");
-
       }catch(CDFException e){
          System.out.println(e.getMessage());
       }
-   }
 
-   public CDF getCDF(){return cdf.getCDF();}
-   public String getPath(){return path;}
+      //create or open a cdf file
+      cdf = new CDFFile(p);
 
-   public void setAttribute(
-      final String key, final Object val, final long scope, 
-      final long id, final long type
-   )throws CDFException{
-      Attribute attr;
-
-      //either create or get the attirbute
-      try{
-         attr = Attribute.create(
-            cdf.getCDF(), String.valueOf(key), scope 
-         );
-      }catch(CDFException e){
-         if(e.getCurrentStatus() == ATTR_EXISTS){
-            attr = cdf.getCDF().getAttribute(key);
-         }else{
-            System.out.println("Error getting CDF attriubute: " + key);
-            System.out.println("Error code = " + e.getCurrentStatus());
-            return;
-         }
-      }
+      cdf.attribute("File_naming_convention", "source_datatype_descriptor");
+      cdf.attribute("Data_type", "l" + lvl + ">Level-" + lvl);
+      cdf.attribute("PI_name", "Robyn Millan");
+      cdf.attribute("PI_affiliation","Dartmouth College");
+      cdf.attribute("Mission_group", "RBSP");
+      cdf.attribute("Project","LWS>Living With a Star>BARREL");
+      cdf.attribute("Source_name", "Payload_ID");
+      cdf.attribute("Data_version", CDF_Gen.getSetting("rev"));
+      cdf.attribute("Discipline", "Space Physics>Magnetospheric Science");
+      cdf.attribute("HTTP_LINK","http://barreldata.ucsc.edu");
+      cdf.attribute("LINK_TITLE", "BARREL Data Repository");
+      cdf.attribute("Generation_date", String.valueOf(date));
+      cdf.attribute("Generated_by", "BARREL CDF Generator");
+      cdf.attribute(
+         "Rules_of_use",  
+         "BARREL will make all its scientific data products quickly and " +
+         "publicly available but all users are expected to read and follow "+
+         "the \"BARREL Mission Data Usage Policy\" which can be found in " +
+         "the BARREL data repository or obtained by contacting " + 
+         "barrelballoons@gmail.com"
+      );
       
-      Entry.create(attr, id, type, val);
-   }
-   public void setAttribute(
-      final String key, final Object val, final long scope, final long id
-   )throws CDFException{
-      long type;
+      //set all default varialbes
+      var = new CDFVar(cdf, "Epoch", CDFConstants.CDF_TIME_TT2000);
+      var.attribute("FIELDNAM", "Epoch");
+      var.attribute("CATDESC", "Default time");
+      var.attribute("VAR_TYPE", "support_data");
+      var.attribute("UNITS", "ns");
+      var.attribute("SCALETYPE", "linear");
+      var.attribute("VALIDMIN", min_epoch);
+      var.attribute("VALIDMAX", max_epoch);
+      var.attribute("FILLVAL", Long.MIN_VALUE);
+      var.attribute("LABLAXIS", "Epoch");
+      var.attribute("MONOTON", "INCREASE");
+      var.attribute("TIME_BASE", "J2000");
+      var.attribute("TIME_SCALE", "Terrestrial Time");
+      var.attribute("REFERENCE_POSITION", "Rotating Earch Geoid");
 
-      //figure out what type of variable to store this as
-      if(val instanceof String){type = CDF_CHAR;}
-      else{
-         double test_val = Double.valueOf(val.toString());
-         if(test_val == (long)test_val){
-            if(test_val < Integer.MAX_VALUE && test_val > Integer.MIN_VALUE){
-               type = CDF_INT4;
-            }
-            else{type = CDF_INT8;}
-         }else{
-            type = CDF_DOUBLE;
-         }
-      }
+      var = new CDFVar(cdf, "FrameGroup", CDFConstants.CDF_INT4);
+      var.attribute("FIELDNAM", "Frame Number");
+      var.attribute("CATDESC", "DPU Frame Counter");
+      var.attribute("VAR_TYPE", "data");
+      var.attribute("DEPEND_0", "Epoch");
+      var.attribute("FORMAT", "%u");
+      var.attribute("DISPLAY_TYPE", "time_series");
+      var.attribute("VALIDMIN", 0);
+      var.attribute("VALIDMAX", 2147483647);
+      var.attribute("FILLVAL", var.getIstpVal("INT4_FILL"));
+      var.attribute("LABLAXIS", "Frame");
 
-      setAttribute(key, val, scope, id, type);
+      var = new CDFVar(cdf.getCDF(),"Q", CDFConstants.CDF_INT4);
+      var.attribute("FIELDNAM", "Data Quality");
+      var.attribute("CATDESC", "32bit flag used to indicate data quality");
+      var.attribute("VAR_TYPE", "data");
+      var.attribute("DEPEND_0", "Epoch");
+      var.attribute("FORMAT", "%u");
+      var.attribute("SCALETYPE", "linear");
+      var.attribute("DISPLAY_TYPE", "time_series");
+      var.attribute("VALIDMIN", 0);
+      var.attribute("VALIDMAX", 2147483647);
+      var.attribute("FILLVAL", var.getIstpVal("INT4_FILL"));
+      var.attribute("LABLAXIS", "Q");
    }
 
-   public void setAttribute(
-      final String key, final Object val
-   )throws CDFException{
-      //attributes without id or scope are assumed to be single instance globals
-      setAttribute(key, val, GLOBAL_SCOPE, 0);
-   }
+   public String getPath(){return path;}
 
    public void writeData(String name, short[] data) throws CDFException{
       Variable var = cdf.getCDF().getVariable(name);

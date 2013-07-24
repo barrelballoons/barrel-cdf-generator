@@ -34,11 +34,11 @@ import gsfc.nssdc.cdf.Entry;
 
 public class CDFAttribute implements CDFComponent{
    private CDF cdf;
-   private long type;
+   private long type = -1;
    private String name;
    private Object value;
    private Attribute attr;
-   private CDFConponent owner;
+   private CDFComponent owner;
    
    //create and set the attribute all at once
    public CDFAttribute(
@@ -71,7 +71,7 @@ public class CDFAttribute implements CDFComponent{
    
    //public getters and setters
    public CDF getCDF(){return this.cdf;}
-   public CDF getID(){return this.attr.getID();}
+   public long getID(){return this.attr.getID();}
    public String getName(){return this.name;}
    public long getNumEntries(){return this.attr.getNumEntries();}
 
@@ -83,7 +83,7 @@ public class CDFAttribute implements CDFComponent{
       //set this value and attribute id in the CDFAttribute object
       this.value = v;
 
-      if(this.type == null){guessType();}
+      if(this.type == -1){guessType();}
 
       try{
          Entry.create(this.attr, id, this.type, this.value);
@@ -137,7 +137,7 @@ public class CDFAttribute implements CDFComponent{
    
    private void guessType(){
       //no type was set try to determine it from value and type of owner
-      if(this.type instanceof String){
+      if(this.value instanceof String){
          //string values must be CDF_CHAR
          this.type = CDFConstants.CDF_CHAR;
       }

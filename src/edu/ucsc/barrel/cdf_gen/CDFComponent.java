@@ -28,7 +28,7 @@ import gsfc.nssdc.cdf.CDF;
 
 public interface CDFComponent{
    public CDF getCDF();
-   public CDF getID();
+   public long getID();
    public String getName();
    public long getType();
 }
