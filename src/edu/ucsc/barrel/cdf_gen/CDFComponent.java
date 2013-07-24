@@ -31,7 +31,6 @@ import gsfc.nssdc.cdf.CDFConstants;
 import gsfc.nssdc.cdf.CDFException;
 
 import java.util.Map;
-import java.util.Vector;
 import java.util.HashMap;
 import java.util.Collections;
 
@@ -49,18 +48,5 @@ abstract public class CDFComponent{
    }
    static public Number getIstpVal(String key){
       return ISTP_CONSTANTS.get(key);
-   }
-
-   static public Vector getAttributeEntries(final CDF cdf, final String name){
-      Vector entries;
-      Attribute attr = getAttribute(cdf, name);
-
-      try{
-         entries = attr.getEntries();
-      }catch(CDFException e){
-         entries = new Vector(0);
-      }
-
-      return entries;
    }
 }

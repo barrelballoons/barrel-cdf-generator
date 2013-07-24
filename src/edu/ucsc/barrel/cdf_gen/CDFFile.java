@@ -47,7 +47,7 @@ public class CDFFile extends CDFComponent{
    }
 
    public void setAttribute(final String name, final String value, long id){
-      Attribute attr = getAttribute(cdf, name);
+      Attribute attr = getAttribute(name);
 
       try{
          Entry.create(attr, id, CDFConstants.CDF_CHAR, value);
@@ -60,13 +60,20 @@ public class CDFFile extends CDFComponent{
       }
    }
    public void setAttribute(final String name, final String value){
-      Attribute attr = getAttribute(cdf, name);
+      Attribute attr = getAttribute(name);
       long entry = (attr == null) ? 0 : attr.getNumEntries();
       setAttribute(name, value, entry);
    }
+
    public void close(){
-      cdf.close();
+      try{cdf.close();}
+      catch(CDFException e){
+         System.out.println("Could not close CDF file:");
+         System.out.println(e.getMessage());
+      }
    }
+
+   public CDF getCDF(){return cdf;}
 
    private Attribute getAttribute(final String name){
       Attribute attr;

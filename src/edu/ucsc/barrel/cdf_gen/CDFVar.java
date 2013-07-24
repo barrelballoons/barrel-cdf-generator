@@ -43,11 +43,16 @@ public class CDFVar extends CDFComponent{
       cdf = c;
       name = n;
       var_type = t;
-
-      var = Variable.create(
-         cdf, name, var_type, 1L, 0L, new long[]{r_size}, 
-         r_vary, new long[]{VARY}
-      );
+      
+      try{
+         var = Variable.create(
+            cdf, name, var_type, 1L, 0L, new long[]{r_size}, 
+            r_vary, new long[]{CDFConstants.VARY}
+         );
+      }catch(CDFException e){
+         System.out.println("Could not create variable " + name + ":");
+         System.out.println(e.getMessage());
+      }
    }
    
    public String getName(){return name;}
@@ -56,7 +61,7 @@ public class CDFVar extends CDFComponent{
    public void setAttribute(
       final String attr_name, final Object value, long attr_type
    ){
-      Attribute attr = getAttribute(cdf, attr_name);
+      Attribute attr = getAttribute(attr_name);
       long id;
 
       try{
@@ -78,14 +83,10 @@ public class CDFVar extends CDFComponent{
       if(value instanceof Number){
          attr_type = var_type;
       }else{
-         attr_type = CDF_CHAR;
+         attr_type = CDFConstants.CDF_CHAR;
       }
 
       setAttribute(attr_name, value, attr_type);
-   }
-
-   public void close(){
-      cdf.close();
    }
 
    private Attribute getAttribute(final String name){

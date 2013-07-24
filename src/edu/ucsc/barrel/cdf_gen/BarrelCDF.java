@@ -50,7 +50,7 @@ public class BarrelCDF implements CDFConstants{
       private int lastRec;
 
    public BarrelCDF(final String p, final int l){
-      Variable var;
+      CDFVar var;
       long id;
 
       lvl = l;
@@ -97,7 +97,7 @@ public class BarrelCDF implements CDFConstants{
          );
          
          //set all default varialbes
-         CDFVar var = new CDFVar(cdf,"Epoch", CDF_TIME_TT2000, 1, VARY);
+         var = new CDFVar(cdf.getCDF(),"Epoch", CDF_TIME_TT2000, 1, VARY);
          var.setAttribute("FIELDNAM", "Epoch");
          var.setAttribute("CATDESC", "Default time");
          var.setAttribute("VAR_TYPE", "support_data");
@@ -112,54 +112,39 @@ public class BarrelCDF implements CDFConstants{
          var.setAttribute("TIME_SCALE", "Terrestrial Time");
          var.setAttribute("REFERENCE_POSITION", "Rotating Earch Geoid");
 
-         var = 
-            Variable.create(
-               cdf, "FrameGroup", CDF_INT4, 1L, 0L, new  long[] {1}, 
-               VARY, new long[] {NOVARY}
-         );
-         id = var.getID();
-         setAttribute("FIELDNAM", "Frame Number", VARIABLE_SCOPE, id);
-         setAttribute("CATDESC", "DPU Frame Counter", VARIABLE_SCOPE, id);
-         setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
-         setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
-         setAttribute("FORMAT", "%u", VARIABLE_SCOPE, id);
-         setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
-         setAttribute("VALIDMIN", 0, VARIABLE_SCOPE, id, CDF_INT4);
-         setAttribute("VALIDMAX", 2147483647, VARIABLE_SCOPE, id, CDF_INT4);
-         setAttribute(
-            "FILLVAL", Constants.INT4_FILL, VARIABLE_SCOPE, id, CDF_INT4
-         );
-         setAttribute("LABLAXIS", "Frame", VARIABLE_SCOPE, id);
+         var = new CDFVar(cdf.getCDF(),"FrameGroup", CDF_INT4, 1, VARY);
+         var.setAttribute("FIELDNAM", "Frame Number");
+         var.setAttribute("CATDESC", "DPU Frame Counter");
+         var.setAttribute("VAR_TYPE", "data");
+         var.setAttribute("DEPEND_0", "Epoch");
+         var.setAttribute("FORMAT", "%u");
+         var.setAttribute("DISPLAY_TYPE", "time_series");
+         var.setAttribute("VALIDMIN", 0);
+         var.setAttribute("VALIDMAX", 2147483647);
+         var.setAttribute("FILLVAL", var.getIstpVal("INT4_FILL"));
+         var.setAttribute("LABLAXIS", "Frame");
 
-         var = 
-            Variable.create(
-               cdf, "Q", CDF_INT4, 1L, 0L, new  long[] {1}, 
-               VARY, new long[] {NOVARY}
+         var = new CDFVar(cdf.getCDF(),"Q", CDF_INT4, 1, VARY);
+         var.setAttribute("FIELDNAM", "Data Quality");
+         var.setAttribute(
+            "CATDESC", "32bit flag used to indicate data quality"
          );
-         id = var.getID();
-         setAttribute("FIELDNAM", "Data Quality", VARIABLE_SCOPE, id);
-         setAttribute(
-            "CATDESC", "32bit flag used to indicate data quality", 
-            VARIABLE_SCOPE, id
-         );
-         setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
-         setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
-         setAttribute("FORMAT", "%u", VARIABLE_SCOPE, id);
-         setAttribute("SCALETYPE", "linear", VARIABLE_SCOPE, id);
-         setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
-         setAttribute("VALIDMIN", 0, VARIABLE_SCOPE, id, CDF_INT4);
-         setAttribute("VALIDMAX", 2147483647, VARIABLE_SCOPE, id, CDF_INT4);
-         setAttribute(
-            "FILLVAL", Constants.INT4_FILL, VARIABLE_SCOPE, id, CDF_INT4
-         );
-         setAttribute("LABLAXIS", "Q", VARIABLE_SCOPE, id);
+         var.setAttribute("VAR_TYPE", "data");
+         var.setAttribute("DEPEND_0", "Epoch");
+         var.setAttribute("FORMAT", "%u");
+         var.setAttribute("SCALETYPE", "linear");
+         var.setAttribute("DISPLAY_TYPE", "time_series");
+         var.setAttribute("VALIDMIN", 0);
+         var.setAttribute("VALIDMAX", 2147483647);
+         var.setAttribute("FILLVAL", var.getIstpVal("INT4_FILL"));
+         var.setAttribute("LABLAXIS", "Q");
 
       }catch(CDFException e){
          System.out.println(e.getMessage());
       }
    }
 
-   public CDF getCDF(){return cdf;}
+   public CDF getCDF(){return cdf.getCDF();}
    public String getPath(){return path;}
 
    public void setAttribute(
@@ -171,11 +156,11 @@ public class BarrelCDF implements CDFConstants{
       //either create or get the attirbute
       try{
          attr = Attribute.create(
-            cdf, String.valueOf(key), scope 
+            cdf.getCDF(), String.valueOf(key), scope 
          );
       }catch(CDFException e){
          if(e.getCurrentStatus() == ATTR_EXISTS){
-            attr = cdf.getAttribute(key);
+            attr = cdf.getCDF().getAttribute(key);
          }else{
             System.out.println("Error getting CDF attriubute: " + key);
             System.out.println("Error code = " + e.getCurrentStatus());
@@ -215,7 +200,7 @@ public class BarrelCDF implements CDFConstants{
    }
 
    public void writeData(String name, short[] data) throws CDFException{
-      Variable var = this.cdf.getVariable(name);
+      Variable var = cdf.getCDF().getVariable(name);
       long start = var.getNumWrittenRecords();
       long size = data.length;
       var.putHyperData(
@@ -225,7 +210,7 @@ public class BarrelCDF implements CDFConstants{
       );
    }
    public void writeData(String name, int[] data) throws CDFException{
-      Variable var = this.cdf.getVariable(name);
+      Variable var = cdf.getCDF().getVariable(name);
       long start = var.getNumWrittenRecords();
       long size = data.length;
       var.putHyperData(
@@ -235,7 +220,7 @@ public class BarrelCDF implements CDFConstants{
       );
    }
    public void writeData(String name, long[] data) throws CDFException{
-      Variable var = this.cdf.getVariable(name);
+      Variable var = this.cdf.getCDF().getVariable(name);
       long start = var.getNumWrittenRecords();
       long size = data.length;
       var.putHyperData(
@@ -245,7 +230,7 @@ public class BarrelCDF implements CDFConstants{
       );
    }
    public void writeData(String name, float[] data) throws CDFException{
-      Variable var = this.cdf.getVariable(name);
+      Variable var = this.cdf.getCDF().getVariable(name);
       long start = var.getNumWrittenRecords();
       long size = data.length;
       var.putHyperData(
@@ -255,7 +240,7 @@ public class BarrelCDF implements CDFConstants{
       );
    }
    public void writeData(String name, double[] data) throws CDFException{
-      Variable var = this.cdf.getVariable(name);
+      Variable var = this.cdf.getCDF().getVariable(name);
       long start = var.getNumWrittenRecords();
       long size = data.length;
       var.putHyperData(
@@ -265,7 +250,7 @@ public class BarrelCDF implements CDFConstants{
       );
    }
    public void writeData(String name, String[] data) throws CDFException{
-      Variable var = this.cdf.getVariable(name);
+      Variable var = this.cdf.getCDF().getVariable(name);
       long start = var.getNumWrittenRecords();
       long size = data.length;
       var.putHyperData(
@@ -275,7 +260,7 @@ public class BarrelCDF implements CDFConstants{
       );
    }
    public void writeData(String name, int[][] data) throws CDFException{
-      Variable var = this.cdf.getVariable(name);
+      Variable var = this.cdf.getCDF().getVariable(name);
       long start = var.getNumWrittenRecords();
       long size = data.length;
       long[] dimCnts = {data[0].length, 1};
@@ -286,7 +271,7 @@ public class BarrelCDF implements CDFConstants{
       );
    }
    public void writeData(String name, long[][] data) throws CDFException{
-      Variable var = this.cdf.getVariable(name);
+      Variable var = this.cdf.getCDF().getVariable(name);
       long start = var.getNumWrittenRecords();
       long size = data.length;
       long[] dimCnts = {data[0].length, 1};
@@ -297,7 +282,7 @@ public class BarrelCDF implements CDFConstants{
       );
    }
    public void writeData(String name, float[][] data) throws CDFException{
-      Variable var = this.cdf.getVariable(name);
+      Variable var = this.cdf.getCDF().getVariable(name);
       long start = var.getNumWrittenRecords();
       long size = data.length;
       long[] dimCnts = {data[0].length, 1};
@@ -308,7 +293,7 @@ public class BarrelCDF implements CDFConstants{
       );
    }
    public void writeData(String name, double[][] data) throws CDFException{
-      Variable var = this.cdf.getVariable(name);
+      Variable var = this.cdf.getCDF().getVariable(name);
       long start = var.getNumWrittenRecords();
       long size = data.length;
       long[] dimCnts = {data[0].length, 1};
@@ -321,7 +306,7 @@ public class BarrelCDF implements CDFConstants{
 
    public void close(){
       try{
-         cdf.close();
+         cdf.getCDF().close();
       }catch(CDFException e){
          System.out.println(e.getMessage());
       }
