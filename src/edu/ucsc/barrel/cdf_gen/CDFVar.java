@@ -79,8 +79,8 @@ public class CDFVar implements CDFComponent{
      
       try{
          this.var = Variable.create(
-            c, n, t, 1L, this.num_of_dims,
-            s, this.rec_vary, new long[]{CDFConstants.VARY}
+            this.cdf, this.name, this.type, 1L, this.num_of_dims,
+            this.dim_sizes, this.rec_vary, new long[]{CDFConstants.VARY}
          );
       }catch(CDFException e){
          System.out.println("Could not create variable " + name + ":");
@@ -128,5 +128,100 @@ public class CDFVar implements CDFComponent{
    //functions for over writing current attribute values in this variable 
    public void editAttribute(final String name, final String value){
       new CDFAttribute(this, name, value);
+   }
+
+   public void writeData(String name, short[] data) throws CDFException{
+      long start = var.getNumWrittenRecords();
+      long size = data.length;
+      var.putHyperData(
+         start, size, 1, 
+         new long[] {0}, new long[] {1}, new long[] {1},
+         data
+      );
+   }
+   public void writeData(String name, int[] data) throws CDFException{
+      long start = var.getNumWrittenRecords();
+      long size = data.length;
+      var.putHyperData(
+         start, size, 1, 
+         new long[] {0}, new long[] {1}, new long[] {1},
+         data
+      );
+   }
+   public void writeData(String name, long[] data) throws CDFException{
+      long start = var.getNumWrittenRecords();
+      long size = data.length;
+      var.putHyperData(
+         start, size, 1, 
+         new long[] {0}, new long[] {1}, new long[] {1},
+         data
+      );
+   }
+   public void writeData(String name, float[] data) throws CDFException{
+      long start = var.getNumWrittenRecords();
+      long size = data.length;
+      var.putHyperData(
+         start, size, 1, 
+         new long[] {0}, new long[] {1}, new long[] {1},
+         data
+      );
+   }
+   public void writeData(String name, double[] data) throws CDFException{
+      long start = var.getNumWrittenRecords();
+      long size = data.length;
+      var.putHyperData(
+         start, size, 1, 
+         new long[] {0}, new long[] {1}, new long[] {1},
+         data
+      );
+   }
+   public void writeData(String name, String[] data) throws CDFException{
+      long start = var.getNumWrittenRecords();
+      long size = data.length;
+      var.putHyperData(
+         start, size, 1, 
+         new long[] {0}, new long[] {1}, new long[] {1},
+         data
+      );
+   }
+   public void writeData(String name, int[][] data) throws CDFException{
+      long start = var.getNumWrittenRecords();
+      long size = data.length;
+      long[] dimCnts = {data[0].length, 1};
+      var.putHyperData(
+         start, size, 1, 
+         new long[] {0}, dimCnts, new long[] {1},
+         data
+      );
+   }
+   public void writeData(String name, long[][] data) throws CDFException{
+      long start = var.getNumWrittenRecords();
+      long size = data.length;
+      long[] dimCnts = {data[0].length, 1};
+      var.putHyperData(
+         start, size, 1, 
+         new long[] {0}, dimCnts, new long[] {1},
+         data
+      );
+   }
+   public void writeData(String name, float[][] data) throws CDFException{
+      long start = var.getNumWrittenRecords();
+      long size = data.length;
+      long[] dimCnts = {data[0].length, 1};
+      var.putHyperData(
+         start, size, 1, 
+         new long[] {0}, dimCnts, new long[] {1},
+         data
+      );
+   }
+   public void writeData(String name, double[][] data) throws CDFException{
+      long start = var.getNumWrittenRecords();
+      long size = data.length;
+      long[] dimCnts = {data[0].length, 1};
+      var.putHyperData(
+         start, size, 1, 
+         new long[] {0}, dimCnts, new long[] {1},
+         data
+      );
    }
 }
