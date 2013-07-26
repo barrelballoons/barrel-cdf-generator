@@ -24,13 +24,7 @@ Description:
 
 package edu.ucsc.barrel.cdf_gen;
 
-import gsfc.nssdc.cdf.CDF;
-import gsfc.nssdc.cdf.CDFException;
 import gsfc.nssdc.cdf.CDFConstants;
-import gsfc.nssdc.cdf.util.CDFTT2000;
-import gsfc.nssdc.cdf.Variable;
-import gsfc.nssdc.cdf.Attribute;
-import gsfc.nssdc.cdf.Entry;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,10 +37,8 @@ import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
 
-public class MSPC extends BarrelCDF{
-   private CDF cdf;
-   private Variable var;
-   private long id;
+public class MSPC{
+   private BarrelCDF cdf;
    private String path;
    private int date, lvl;
 
@@ -75,102 +67,87 @@ public class MSPC extends BarrelCDF{
       };
 
    public MSPC(final String p, final int d, final int l){
-      super(p, l);
-      path = p;
-      date = d;
-      lvl = l;
+      this.cdf = new BarrelCDF(p, l);
+      this.path = p;
+      this.date = d;
+      this.lvl = l;
 
-      try{
-         cdf = super.getCDF();
-      
-         addMspcGlobalAtts();
-         addMspcVars();
-      }catch(CDFException e){
-         System.out.println(e.getMessage());
-      }
+      addMspcGlobalAtts();
+      addMspcVars();
    }
 
-   private void addMspcGlobalAtts() throws CDFException{
+   private void addMspcGlobalAtts(){
       //Set global attributes specific to this type of CDF
-      setAttribute(
+      this.cdf.attribute(
          "Logical_source_description", "Slow time resolution X-ray spectrum"
       );
-      setAttribute(
+      this.cdf.attribute(
          "TEXT",
          "X-ray spectra each made of 48 energy bins transmitted over 4 frames." 
       );
-      setAttribute("Instrument_type", "Gamma and X-Rays");
-      setAttribute("Descriptor", "Scintillator");
-      setAttribute("Time_resolution", "4s");
-      setAttribute("Logical_source", "payload_id_l" + lvl + "_scintillator");
-      setAttribute(
+      this.cdf.attribute("Instrument_type", "Gamma and X-Rays");
+      this.cdf.attribute("Descriptor", "Scintillator");
+      this.cdf.attribute("Time_resolution", "4s");
+      this.cdf.attribute(
+         "Logical_source", "payload_id_l" + lvl + "_scintillator"
+      );
+      this.cdf.attribute(
          "Logical_file_id",
          "payload_id_l" + lvl + "_scintillator_20" + date  + 
          "_V" + CDF_Gen.getSetting("rev")
       );
    }
 
-   private void addMspcVars() throws CDFException{
+   private void addMspcVars(){
+      CDFVar var;
       //create MSPC variable
       //This variable will contain the medium spectrum that is returned over
       //4 frames.
-      var = 
-         Variable.create(
-            cdf, "MSPC", CDF_DOUBLE, 1L, 1L, new  long[] {BIN_CENTERS.length}, 
-            VARY, new long[] {VARY}
-         );   
-      id = var.getID();
+      var = new CDFVar(
+         this.cdf, "MSPC", CDFConstants.CDF_DOUBLE,
+         true, new long[] {BIN_CENTERS.length}
+      );
 
-      setAttribute("FIELDNAM", "MSPC", VARIABLE_SCOPE, id);
-      setAttribute("CATDESC", "MSPC", VARIABLE_SCOPE, id);
-      setAttribute(
+      var.attribute("FIELDNAM", "MSPC");
+      var.attribute("CATDESC", "MSPC");
+      var.attribute(
          "VAR_NOTES", 
          "Rebinned, divided by energy bin widths and " +
-         "adjusted to /sec time scale.", 
-         VARIABLE_SCOPE, id
+         "adjusted to /sec time scale." 
       );
-      setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
-      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
-      setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
-      setAttribute("UNITS", "cnts/keV/sec", VARIABLE_SCOPE, id);
-      setAttribute("SCALETYP", "log", VARIABLE_SCOPE, id);
-      setAttribute("DISPLAY_TYPE", "spectrogram", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", 0.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
-      setAttribute("VALIDMAX", 1707.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
-      setAttribute(
-         "FILLVAL", Constants.DOUBLE_FILL, VARIABLE_SCOPE, id, CDF_DOUBLE
-      );
-      setAttribute("LABLAXIS", "MSPC", VARIABLE_SCOPE, id);
-      setAttribute("DEPEND_1", "energy", VARIABLE_SCOPE, id);
+      var.attribute("VAR_TYPE", "data");
+      var.attribute("DEPEND_0", "Epoch");
+      var.attribute("FORMAT", "%f");
+      var.attribute("UNITS", "cnts/keV/sec");
+      var.attribute("SCALETYP", "log");
+      var.attribute("DISPLAY_TYPE", "spectrogram");
+      var.attribute("VALIDMIN", 0.0);
+      var.attribute("VALIDMAX", 1707.0);
+      var.attribute("FILLVAL", Constants.DOUBLE_FILL);
+      var.attribute("LABLAXIS", "MSPC");
+      var.attribute("DEPEND_1", "energy");
 
       //Create the "energy" variable
       //This variable lists the starting energy for each channel in keV
-      var = 
-         Variable.create(
-            cdf, "energy", CDF_DOUBLE, 1L, 1L, new  long[] {BIN_CENTERS.length}, 
-            NOVARY, new long[] {VARY}
-         );
-      id = var.getID();
+      var = new CDFVar(
+         this.cdf, "energy", CDFConstants.CDF_DOUBLE,
+         false, new long[] {BIN_CENTERS.length}
+      );
 
-      setAttribute("FIELDNAM", "Energy Level", VARIABLE_SCOPE, id);
-      setAttribute("CATDESC", "Energy Level", VARIABLE_SCOPE, id);
-      setAttribute(
-         "VAR_NOTES", "Start of each slow spectrum var channel.",
-         VARIABLE_SCOPE, id
-      );
-      setAttribute("VAR_TYPE", "support_data", VARIABLE_SCOPE, id);
-      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
-      setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
-      setAttribute("UNITS", "keV", VARIABLE_SCOPE, id);
-      setAttribute("SCALETYP", "log", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", 100.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
-      setAttribute("VALIDMAX", 4100.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
-      setAttribute(
-         "FILLVAL", Constants.DOUBLE_FILL, VARIABLE_SCOPE, id, CDF_DOUBLE
-      );
-      setAttribute("LABLAXIS", "Energy", VARIABLE_SCOPE, id);
-      setAttribute("DELTA_PLUS_VAR", "HalfBinWidth", VARIABLE_SCOPE, id);
-      setAttribute("DELTA_MINUS_VAR", "HalfBinWidth", VARIABLE_SCOPE, id);
+      var.attribute("FIELDNAM", "Energy Level");
+      var.attribute("CATDESC", "Energy Level");
+      var.attribute("VAR_NOTES", "Start of each slow spectrum var channel.");
+      var.attribute("VAR_TYPE", "support_data");
+      var.attribute("DEPEND_0", "Epoch");
+      var.attribute("FORMAT", "%f");
+      var.attribute("UNITS", "keV");
+      var.attribute("SCALETYP", "log");
+      var.attribute("VALIDMIN", 100.0);
+      var.attribute("VALIDMAX", 4100.0);
+      var.attribute("FILLVAL", Constants.DOUBLE_FILL);
+      var.attribute("LABLAXIS", "Energy");
+      var.attribute("DELTA_PLUS_VAR", "HalfBinWidth");
+      var.attribute("DELTA_MINUS_VAR", "HalfBinWidth");
 
       //Fill the "energy" variable
       for(int bin_i = 0; bin_i < BIN_CENTERS.length; bin_i++){
@@ -180,27 +157,22 @@ public class MSPC extends BarrelCDF{
       }
 
       //Create a variable that will track each energy channel width
-      var = 
-         Variable.create(
-            cdf, "HalfBinWidth", CDF_DOUBLE, 1L, 1L, 
-            new  long[] {BIN_WIDTHS.length}, NOVARY, new long[] {VARY}
-         );
-      id = var.getID();
-
-      setAttribute("FIELDNAM", "Bin Width", VARIABLE_SCOPE, id);
-      setAttribute("CATDESC", "Width of energy channel", VARIABLE_SCOPE, id);
-      
-      setAttribute("VAR_TYPE", "support_data", VARIABLE_SCOPE, id);
-      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
-      setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
-      setAttribute("UNITS", "keV", VARIABLE_SCOPE, id);
-      setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", 3.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
-      setAttribute("VALIDMAX", 157.0, VARIABLE_SCOPE, id, CDF_DOUBLE);
-      setAttribute(
-         "FILLVAL", Constants.DOUBLE_FILL, VARIABLE_SCOPE, id, CDF_DOUBLE
+      var = new CDFVar(
+         this.cdf, "HalfBinWidth", CDFConstants.CDF_DOUBLE,
+         false, new long[] {BIN_WIDTHS.length}
       );
-      setAttribute("LABLAXIS", "Width", VARIABLE_SCOPE, id);
+
+      var.attribute("FIELDNAM", "Bin Width");
+      var.attribute("CATDESC", "Width of energy channel");
+      var.attribute("VAR_TYPE", "support_data");
+      var.attribute("DEPEND_0", "Epoch");
+      var.attribute("FORMAT", "%f");
+      var.attribute("UNITS", "keV");
+      var.attribute("SCALETYP", "linear");
+      var.attribute("VALIDMIN", 3.0);
+      var.attribute("VALIDMAX", 157.0);
+      var.attribute("FILLVAL", Constants.DOUBLE_FILL);
+      var.attribute("LABLAXIS", "Width");
 
       //Fill the "BinWidth" variable
       for(int bin_i = 0; bin_i < BIN_WIDTHS.length; bin_i++){

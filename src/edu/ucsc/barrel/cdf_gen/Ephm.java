@@ -24,13 +24,7 @@ Description:
 
 package edu.ucsc.barrel.cdf_gen;
 
-import gsfc.nssdc.cdf.CDF;
-import gsfc.nssdc.cdf.CDFException;
 import gsfc.nssdc.cdf.CDFConstants;
-import gsfc.nssdc.cdf.util.CDFTT2000;
-import gsfc.nssdc.cdf.Variable;
-import gsfc.nssdc.cdf.Attribute;
-import gsfc.nssdc.cdf.Entry;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,230 +37,142 @@ import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
 
-public class Ephm extends BarrelCDF{
-   private CDF cdf;
-   private Variable var;
-   private long id;
+public class Ephm {
+   private BarrelCDF cdf;
+   private CDFVar var;
    private String path;
    private int date, lvl;
 
    public Ephm(final String p, final int d, final int l){
-      super(p, l);
-      path = p;
-      date = d;
-      lvl = l;
+      this.path = p;
+      this.date = d;
+      this.lvl = l;
 
-      try{
-         cdf = super.getCDF();
-      
-         addEphmGlobalAtts();
-         addEphmVars();
-      }catch(CDFException e){
-         System.out.println(e.getMessage());
-      }
+      cdf = new BarrelCDF(p, l);
+      addEphmGlobalAtts();
+      addEphmVars();
    }
 
-   private void addEphmGlobalAtts() throws CDFException{
+   private void addEphmGlobalAtts(){
       //Set global attributes specific to this type of CDF
-      setAttribute(
-         "Logical_source_description", "Coordinates"
-      );
-      setAttribute(
-         "TEXT", 
-         "Geographic and magnetic corrdinates." 
-      );
-      setAttribute("Instrument_type", "GPS");
-      setAttribute("Descriptor", "ephm>EPHeMeris");
-      setAttribute("Time_resolution", "4s");
-      setAttribute("Logical_source", "payload_id_l" + lvl  + "_ephm");
-      setAttribute(
+      cdf.attribute("Logical_source_description", "Coordinates");
+      cdf.attribute("TEXT", "Geographic and magnetic corrdinates.");
+      cdf.attribute("Instrument_type", "GPS");
+      cdf.attribute("Descriptor", "ephm>EPHeMeris");
+      cdf.attribute("Time_resolution", "4s");
+      cdf.attribute("Logical_source", "payload_id_l" + lvl  + "_ephm");
+      cdf.attribute(
          "Logical_file_id",
-         "payload_id_l" + lvl  + "_ephm_20" + date  +
+         "payload_id_l" + lvl  + "_ephm_20" + date +
          "_V" + CDF_Gen.getSetting("rev")
       );
    }
 
-   private void addEphmVars() throws CDFException{
-      var = 
-         Variable.create(
-            cdf, "GPS_Lat", CDF_FLOAT, 1L, 0L, new  long[] {1}, 
-            VARY, new long[] {NOVARY}
-         );   
-      id = var.getID();
-      setAttribute("FIELDNAM", "GPS_Lat", VARIABLE_SCOPE, id);
-      setAttribute(
-         "CATDESC", "GPS Latitude returned every four seconds.", 
-         VARIABLE_SCOPE, id
-      );
-      setAttribute(
+   private void addEphmVars(){
+      var = new CDFVar(cdf, "GPS_Lat", CDFConstants.CDF_FLOAT);
+      var.attribute("FIELDNAM", "GPS_Lat");
+      var.attribute("CATDESC", "GPS Latitude returned every four seconds.");
+      var.attribute(
          "VAR_NOTES", 
          "Converted from raw int value by multiplying by scaling factor " +
-         "8.38190317154 * 10^-8", 
-         VARIABLE_SCOPE, id
+         "8.38190317154 * 10^-8" 
       );
-      setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
-      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
-      setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
-      setAttribute("UNITS", "deg.", VARIABLE_SCOPE, id);
-      setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
-      setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", -180f, VARIABLE_SCOPE, id, CDF_FLOAT);
-      setAttribute("VALIDMAX", 180f, VARIABLE_SCOPE, id, CDF_FLOAT);
-      setAttribute(
-         "FILLVAL", Constants.FLOAT_FILL, VARIABLE_SCOPE, id, CDF_FLOAT
-      );
-      setAttribute("LABLAXIS", "Lat", VARIABLE_SCOPE, id);
+      var.attribute("VAR_TYPE", "data");
+      var.attribute("DEPEND_0", "Epoch");
+      var.attribute("FORMAT", "%f");
+      var.attribute("UNITS", "deg.");
+      var.attribute("SCALETYP", "linear");
+      var.attribute("DISPLAY_TYPE", "time_series");
+      var.attribute("VALIDMIN", -180f);
+      var.attribute("VALIDMAX", 180f);
+      var.attribute("FILLVAL", Constants.FLOAT_FILL);
+      var.attribute("LABLAXIS", "Lat");
 
-      var = 
-         Variable.create(
-            cdf, "GPS_Lon", CDF_FLOAT, 1L, 0L, new  long[] {1}, 
-            VARY, new long[] {NOVARY}
-         );   
-      id = var.getID();
-      setAttribute("FIELDNAM", "GPS_Lon", VARIABLE_SCOPE, id);
-      setAttribute(
-         "CATDESC", "GPS Longitude returned every four seconds.", 
-         VARIABLE_SCOPE, id
-      );
-      setAttribute(
+      var = new CDFVar(cdf, "GPS_Lon", CDFConstants.CDF_FLOAT);
+      var.attribute("FIELDNAM", "GPS_Lon");
+      var.attribute("CATDESC", "GPS Longitude returned every four seconds.");
+      var.attribute(
          "VAR_NOTES", 
          "Converted from raw int value by multiplying by scaling factor " +
-         "8.38190317154 * 10^-8", 
-         VARIABLE_SCOPE, id
+         "8.38190317154 * 10^-8"
       );
-      setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
-      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
-      setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
-      setAttribute("UNITS", "deg.", VARIABLE_SCOPE, id);
-      setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
-      setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", -180f, VARIABLE_SCOPE, id, CDF_FLOAT);
-      setAttribute("VALIDMAX", 180f, VARIABLE_SCOPE, id, CDF_FLOAT);
-      setAttribute(
-         "FILLVAL", Constants.FLOAT_FILL, VARIABLE_SCOPE, id, CDF_FLOAT
-      );
-      setAttribute("LABLAXIS", "Lon", VARIABLE_SCOPE, id);
+      var.attribute("VAR_TYPE", "data");
+      var.attribute("DEPEND_0", "Epoch");
+      var.attribute("FORMAT", "%f");
+      var.attribute("UNITS", "deg.");
+      var.attribute("SCALETYP", "linear");
+      var.attribute("DISPLAY_TYPE", "time_series");
+      var.attribute("VALIDMIN", -180f);
+      var.attribute("VALIDMAX", 180f);
+      var.attribute("FILLVAL", Constants.FLOAT_FILL);
+      var.attribute("LABLAXIS", "Lon");
 
-      var = 
-         Variable.create(
-            cdf, "GPS_Alt", CDF_FLOAT, 1L, 0L, new  long[] {1}, 
-            VARY, new long[] {NOVARY}
-         );   
-      id = var.getID();
-      setAttribute("FIELDNAM", "GPS_Alt", VARIABLE_SCOPE, id);
-      setAttribute(
-         "CATDESC", "GPS Altitude returned every four seconds.", 
-         VARIABLE_SCOPE, id
-      );
-      setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
-      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
-      setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
-      setAttribute("UNITS", "km", VARIABLE_SCOPE, id);
-      setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
-      setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", 0f, VARIABLE_SCOPE, id, CDF_FLOAT);
-      setAttribute("VALIDMAX", 50f, VARIABLE_SCOPE, id, CDF_FLOAT);
-      setAttribute(
-         "FILLVAL", Constants.FLOAT_FILL, VARIABLE_SCOPE, id, CDF_FLOAT
-      );
-      setAttribute("LABLAXIS", "Alt", VARIABLE_SCOPE, id);
+      var = new CDFVar(cdf, "GPS_Alt", CDFConstants.CDF_FLOAT);
+      var.attribute("FIELDNAM", "GPS_Alt");
+      var.attribute("CATDESC", "GPS Altitude returned every four seconds.");
+      var.attribute("VAR_TYPE", "data");
+      var.attribute("DEPEND_0", "Epoch");
+      var.attribute("FORMAT", "%f");
+      var.attribute("UNITS", "km");
+      var.attribute("SCALETYP", "linear");
+      var.attribute("DISPLAY_TYPE", "time_series");
+      var.attribute("VALIDMIN", 0f, CDFConstants.CDF_FLOAT);
+      var.attribute("VALIDMAX", 50f, CDFConstants.CDF_FLOAT);
+      var.attribute("FILLVAL", Constants.FLOAT_FILL);
+      var.attribute("LABLAXIS", "Alt");
 
-      var = 
-         Variable.create(
-            cdf, "MLT_Kp2", CDF_FLOAT, 1L, 0L, new  long[] {1}, 
-            VARY, new long[] {NOVARY}
-         );   
-      id = var.getID();
-      setAttribute(
-         "FIELDNAM", "MLT for Kp=2", VARIABLE_SCOPE, id
-      );
-      setAttribute(
-         "CATDESC", "Magnetic local time for Kp=2 in hours.", VARIABLE_SCOPE, id
-      );
-      setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
-      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
-      setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
-      setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
-      setAttribute("UNITS", "hr", VARIABLE_SCOPE, id);
-      setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", 0f, VARIABLE_SCOPE, id, CDF_FLOAT);
-      setAttribute("VALIDMAX", 1e27f, VARIABLE_SCOPE, id, CDF_FLOAT);
-      setAttribute(
-         "FILLVAL", Constants.FLOAT_FILL, VARIABLE_SCOPE, id, CDF_FLOAT
-      );
-      setAttribute("LABLAXIS", "MLT_Kp2", VARIABLE_SCOPE, id);
+      var = new CDFVar(cdf, "MLT_Kp2", CDFConstants.CDF_FLOAT);
+      var.attribute("FIELDNAM", "MLT for Kp=2");
+      var.attribute("CATDESC", "Magnetic local time for Kp=2 in hours.");
+      var.attribute("VAR_TYPE", "data");
+      var.attribute("DEPEND_0", "Epoch");
+      var.attribute("FORMAT", "%f");
+      var.attribute("SCALETYP", "linear");
+      var.attribute("UNITS", "hr");
+      var.attribute("DISPLAY_TYPE", "time_series");
+      var.attribute("VALIDMIN", 0f);
+      var.attribute("VALIDMAX", 1e27f);
+      var.attribute("FILLVAL", Constants.FLOAT_FILL);
+      var.attribute("LABLAXIS", "MLT_Kp2");
 
-      var = 
-         Variable.create(
-            cdf, "MLT_Kp6", CDF_FLOAT, 1L, 0L, new  long[] {1}, 
-            VARY, new long[] {NOVARY}
-         );   
-      id = var.getID();
-      setAttribute(
-         "FIELDNAM", "MLT for Kp=6", VARIABLE_SCOPE, id
-      );
-      setAttribute(
-         "CATDESC", "Magnetic local time for Kp=6 in hours", VARIABLE_SCOPE, id
-      );
-      setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
-      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
-      setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
-      setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
-      setAttribute("UNITS", "hr", VARIABLE_SCOPE, id);
-      setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", 0f, VARIABLE_SCOPE, id, CDF_FLOAT);
-      setAttribute("VALIDMAX", 1e27f, VARIABLE_SCOPE, id, CDF_FLOAT);
-      setAttribute(
-         "FILLVAL", Constants.FLOAT_FILL, VARIABLE_SCOPE, id, CDF_FLOAT
-      );
-      setAttribute("LABLAXIS", "MLT_Kp6", VARIABLE_SCOPE, id);
+      var = new CDFVar(cdf, "MLT_Kp6", CDFConstants.CDF_FLOAT);
+      var.attribute("FIELDNAM", "MLT for Kp=6");
+      var.attribute("CATDESC", "Magnetic local time for Kp=6 in hours");
+      var.attribute("VAR_TYPE", "data");
+      var.attribute("DEPEND_0", "Epoch");
+      var.attribute("FORMAT", "%f");
+      var.attribute("SCALETYP", "linear");
+      var.attribute("UNITS", "hr");
+      var.attribute("DISPLAY_TYPE", "time_series");
+      var.attribute("VALIDMIN", 0f, CDFConstants.CDF_FLOAT);
+      var.attribute("VALIDMAX", 1e27f, CDFConstants.CDF_FLOAT);
+      var.attribute("FILLVAL", Constants.FLOAT_FILL);
+      var.attribute("LABLAXIS", "MLT_Kp6");
 
-      var = 
-         Variable.create(
-            cdf, "L_Kp2", CDF_FLOAT, 1L, 0L, new  long[] {1}, 
-            VARY, new long[] {NOVARY}
-         );   
-      id = var.getID();
-      setAttribute(
-         "FIELDNAM", "L for Kp=2", VARIABLE_SCOPE, id
-      );
-      setAttribute(
-         "CATDESC", "L shell for Kp=2", VARIABLE_SCOPE, id
-      );
-      setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
-      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
-      setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
-      setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
-      setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", 0f, VARIABLE_SCOPE, id, CDF_FLOAT);
-      setAttribute("VALIDMAX", 1e27f, VARIABLE_SCOPE, id, CDF_FLOAT);
-      setAttribute(
-         "FILLVAL", Constants.FLOAT_FILL, VARIABLE_SCOPE, id, CDF_FLOAT
-      );
-      setAttribute("LABLAXIS", "L_Kp2", VARIABLE_SCOPE, id);
+      var = new CDFVar(cdf, "L_Kp2", CDFConstants.CDF_FLOAT);
+      var.attribute("FIELDNAM", "L for Kp=2");
+      var.attribute("CATDESC", "L shell for Kp=2");
+      var.attribute("VAR_TYPE", "data");
+      var.attribute("DEPEND_0", "Epoch");
+      var.attribute("FORMAT", "%f");
+      var.attribute("SCALETYP", "linear");
+      var.attribute("DISPLAY_TYPE", "time_series");
+      var.attribute("VALIDMIN", 0f, CDFConstants.CDF_FLOAT);
+      var.attribute("VALIDMAX", 1e27f, CDFConstants.CDF_FLOAT);
+      var.attribute("FILLVAL", Constants.FLOAT_FILL);
+      var.attribute("LABLAXIS", "L_Kp2");
 
-      var = 
-         Variable.create(
-            cdf, "L_Kp6", CDF_FLOAT, 1L, 0L, new  long[] {1}, 
-            VARY, new long[] {NOVARY}
-         );   
-      id = var.getID();
-      setAttribute(
-         "FIELDNAM", "L for Kp=6", VARIABLE_SCOPE, id
-      );
-      setAttribute(
-         "CATDESC", "L shell for Kp=6", VARIABLE_SCOPE, id
-      );
-      setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
-      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
-      setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
-      setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
-      setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", 0f, VARIABLE_SCOPE, id, CDF_FLOAT);
-      setAttribute("VALIDMAX", 1e27f, VARIABLE_SCOPE, id, CDF_FLOAT);
-      setAttribute(
-         "FILLVAL", Constants.FLOAT_FILL, VARIABLE_SCOPE, id, CDF_FLOAT
-      );
-      setAttribute("LABLAXIS", "L_Kp6", VARIABLE_SCOPE, id);
+      var = new CDFVar(cdf, "L_Kp6", CDFConstants.CDF_FLOAT);
+      var.attribute("FIELDNAM", "L for Kp=6");
+      var.attribute("CATDESC", "L shell for Kp=6");
+      var.attribute("VAR_TYPE", "data");
+      var.attribute("DEPEND_0", "Epoch");
+      var.attribute("FORMAT", "%f");
+      var.attribute("SCALETYP", "linear");
+      var.attribute("DISPLAY_TYPE", "time_series");
+      var.attribute("VALIDMIN", 0f);
+      var.attribute("VALIDMAX", 1e27f);
+      var.attribute("FILLVAL", Constants.FLOAT_FILL);
+      var.attribute("LABLAXIS", "L_Kp6");
    }
 }

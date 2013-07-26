@@ -24,13 +24,7 @@ Description:
 
 package edu.ucsc.barrel.cdf_gen;
 
-import gsfc.nssdc.cdf.CDF;
-import gsfc.nssdc.cdf.CDFException;
 import gsfc.nssdc.cdf.CDFConstants;
-import gsfc.nssdc.cdf.util.CDFTT2000;
-import gsfc.nssdc.cdf.Variable;
-import gsfc.nssdc.cdf.Attribute;
-import gsfc.nssdc.cdf.Entry;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,115 +37,96 @@ import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
 
-public class Magn extends BarrelCDF{
-   private CDF cdf;
-   private Variable var;
+public class Magn{
+   private BarrelCDF cdf;
+   private CDFVar var;
    private long id;
    private String path;
    private int date, lvl;
 
    public Magn(final String p, final int d, final int l){
-      super(p, l);
-      path = p;
-      date = d;
-      lvl = l;
+      this.cdf = new BarrelCDF(p, l);
+      this.path = p;
+      this.date = d;
+      this.lvl = l;
 
-      try{
-         cdf = super.getCDF();
-      
-         addMagGlobalAtts();
-         addMagVar("X");
-         addMagVar("Y");
-         addMagVar("Z");
-         addTotalVar();
-      }catch(CDFException e){
-         System.out.println(e.getMessage());
-      }
+      addMagGlobalAtts();
+      addMagVar("X");
+      addMagVar("Y");
+      addMagVar("Z");
+      addTotalVar();
    }
 
-   private void addMagGlobalAtts() throws CDFException{
+   private void addMagGlobalAtts(){
       //Set global attributes specific to this type of CDF
-      setAttribute(
+      this.cdf.attribute(
          "Logical_source_description", "MAG X, Y, and Z"
       );
-      setAttribute(
+      this.cdf.attribute(
          "TEXT", "Three axis magnetometer reading with nominal conversion. " +
          "Data are neither gain corrected nor despun."
       );
-      setAttribute("Instrument_type", "Magnetic Fields (space)");
-      setAttribute("Descriptor", "Magnetometer");
-      setAttribute("Time_resolution", "4Hz");
-      setAttribute("Logical_source", "payload_id_l" + lvl  + "_magnetometer");
-      setAttribute(
+      this.cdf.attribute("Instrument_type", "Magnetic Fields (space)");
+      this.cdf.attribute("Descriptor", "Magnetometer");
+      this.cdf.attribute("Time_resolution", "4Hz");
+      this.cdf.attribute(
+         "Logical_source", "payload_id_l" + lvl  + "_magnetometer"
+      );
+      this.cdf.attribute(
          "Logical_file_id",
          "payload_id_l" + lvl  + "_magnetometer_20" + date  + 
          "_V" + CDF_Gen.getSetting("rev")
       );
    }
 
-   private void addMagVar(final String axis) throws CDFException{
+   private void addMagVar(final String axis){
       //create mag variable
-      var = 
-         Variable.create(
-            cdf, "MAG_" + axis, CDF_FLOAT, 1L, 0L, new  long[] {1}, 
-            VARY, new long[] {NOVARY}
-         );   
-      id = var.getID();
+      var = new CDFVar(cdf, "MAG_" + axis, CDFConstants.CDF_FLOAT);
 
-      setAttribute("FIELDNAM", axis + "_axis", VARIABLE_SCOPE, id);
-      setAttribute(
-         "CATDESC", axis + " axis of magnetic field", VARIABLE_SCOPE, id
+      var.attribute("FIELDNAM", axis + "_axis");
+      var.attribute(
+         "CATDESC", axis + " axis of magnetic field"
       );
-      setAttribute(
+      var.attribute(
          "VAR_NOTES", 
          "Calculated as (raw_value - 8388608) / 83886.070. " +
-         "Contains fluctuations due to payload rotations.", 
-         VARIABLE_SCOPE, id
+         "Contains fluctuations due to payload rotations." 
       );
-      setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
-      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
-      setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
-      setAttribute("UNITS", "uT", VARIABLE_SCOPE, id);
-      setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
-      setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", -1e31f, VARIABLE_SCOPE, id, CDF_FLOAT);
-      setAttribute("VALIDMAX", 1e31f, VARIABLE_SCOPE, id, CDF_FLOAT);
-      setAttribute(
-         "FILLVAL", Constants.FLOAT_FILL, VARIABLE_SCOPE, id, CDF_FLOAT
+      var.attribute("VAR_TYPE", "data");
+      var.attribute("DEPEND_0", "Epoch");
+      var.attribute("FORMAT", "%f");
+      var.attribute("UNITS", "uT");
+      var.attribute("SCALETYP", "linear");
+      var.attribute("DISPLAY_TYPE", "time_series");
+      var.attribute("VALIDMIN", -1e31f);
+      var.attribute("VALIDMAX", 1e31f);
+      var.attribute(
+         "FILLVAL", Constants.FLOAT_FILL
       );
-      setAttribute("LABLAXIS", "B_" + axis, VARIABLE_SCOPE, id);
+      var.attribute("LABLAXIS", "B_" + axis);
    }
 
-   private void addTotalVar() throws CDFException{
-      var = 
-         Variable.create(
-            cdf, "Total", CDF_FLOAT, 1L, 0L, new  long[] {1}, 
-            VARY, new long[] {NOVARY}
-         );   
-      id = var.getID();
+   private void addTotalVar(){
+      var = new CDFVar(cdf, "Total", CDFConstants.CDF_FLOAT);
 
-      setAttribute("FIELDNAM", "Total Magnetic Field", VARIABLE_SCOPE, id);
-      setAttribute(
-         "CATDESC", "Magnitude of magnetic field.", 
-         VARIABLE_SCOPE, id
+      var.attribute("FIELDNAM", "Total Magnetic Field");
+      var.attribute(
+         "CATDESC", "Magnitude of magnetic field." 
       );
-      setAttribute(
+      var.attribute(
          "VAR_NOTES", 
          "Bt = sqrt(Bx^2 + By^2 + Bz^2)..Value has variations due to payload" +
-         " rotations and Bx, By, and Bz not being gain corrected.", 
-         VARIABLE_SCOPE, id
+         " rotations and Bx, By, and Bz not being gain corrected." 
       );
-      setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
-      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
-      setAttribute("FORMAT", "%f", VARIABLE_SCOPE, id);
-      setAttribute("UNITS", "uT", VARIABLE_SCOPE, id);
-      setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
-      setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", -1e31f, VARIABLE_SCOPE, id, CDF_FLOAT);
-      setAttribute("VALIDMAX", 1e31f, VARIABLE_SCOPE, id, CDF_FLOAT);
-      setAttribute(
-         "FILLVAL", Constants.FLOAT_FILL, VARIABLE_SCOPE, id, CDF_FLOAT
-      );
-      setAttribute("LABLAXIS", "B_tot", VARIABLE_SCOPE, id);
+      var.attribute("VAR_TYPE", "data");
+      var.attribute("DEPEND_0", "Epoch");
+      var.attribute("FORMAT", "%f");
+      var.attribute("UNITS", "uT");
+      var.attribute("SCALETYP", "linear");
+      var.attribute("DISPLAY_TYPE", "time_series");
+      var.attribute("VALIDMIN", -1e31f);
+      var.attribute("VALIDMAX", 1e31f);
+      var.attribute("FILLVAL", Constants.FLOAT_FILL);
+      var.attribute("LABLAXIS", "B_tot");
    }
 }

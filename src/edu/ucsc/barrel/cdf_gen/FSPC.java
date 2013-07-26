@@ -24,13 +24,7 @@ Description:
 
 package edu.ucsc.barrel.cdf_gen;
 
-import gsfc.nssdc.cdf.CDF;
-import gsfc.nssdc.cdf.CDFException;
 import gsfc.nssdc.cdf.CDFConstants;
-import gsfc.nssdc.cdf.util.CDFTT2000;
-import gsfc.nssdc.cdf.Variable;
-import gsfc.nssdc.cdf.Attribute;
-import gsfc.nssdc.cdf.Entry;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,10 +37,9 @@ import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
 
-public class FSPC extends BarrelCDF{
-   private CDF cdf;
-   private Variable var;
-   private long id;
+public class FSPC{
+   private BarrelCDF cdf;
+   private CDFVar var;
    private String path;
    private int date, lvl;
 
@@ -58,65 +51,52 @@ public class FSPC extends BarrelCDF{
       BIN_WIDTHS = {75, 155, 120, 250};
 
    public FSPC(final String p, final int d, final int l){
-      super(p, l);
-      path = p;
-      date = d;
-      lvl = l;
+      this.cdf = new BarrelCDF(p, l);
+      this.path = p;
+      this.date = d;
+      this.lvl = l;
 
-      try{
-         cdf = super.getCDF();
-      
-         addFspcGlobalAtts();
-         addLC(1);
-         addLC(2);
-         addLC(3);
-         addLC(4);
-      }catch(CDFException e){
-         System.out.println(e.getMessage());
-      }
+      addFspcGlobalAtts();
+      addLC(1);
+      addLC(2);
+      addLC(3);
+      addLC(4);
    }
 
-   private void addFspcGlobalAtts() throws CDFException{
+   private void addFspcGlobalAtts(){
       //Set global attributes specific to this type of CDF
-      setAttribute(
+      cdf.attribute(
          "Logical_source_description", "Fast time resolution X-ray spectrum"
       );
-      setAttribute(
+      cdf.attribute(
          "TEXT", "Four channels of fast spectral data are returned at 20Hz." 
       );
-      setAttribute("Instrument_type", "Gamma and X-Rays");
-      setAttribute("Descriptor", "Scintillator");
-      setAttribute("Time_resolution", "20Hz");
-      setAttribute("Logical_source", "payload_id_l" + lvl  + "_scintillator");
-      setAttribute(
+      cdf.attribute("Instrument_type", "Gamma and X-Rays");
+      cdf.attribute("Descriptor", "Scintillator");
+      cdf.attribute("Time_resolution", "20Hz");
+      cdf.attribute("Logical_source", "payload_id_l" + lvl  + "_scintillator");
+      cdf.attribute(
          "Logical_file_id",
          "payload_id_l" + lvl  + "_scintillator_20" + date  + 
          "_V" + CDF_Gen.getSetting("rev")
       );
    }
 
-   private void addLC(final int ch) throws CDFException{
+   private void addLC(final int ch){
       //create FSPC variable
-      var = 
-         Variable.create(
-            cdf, "LC" + ch, CDF_INT4, 1L, 0L, new  long[] {1}, 
-            VARY, new long[] {NOVARY}
-         );   
-      id = var.getID();
+      var = new CDFVar(cdf, "LC" + ch, CDFConstants.CDF_INT4);
 
-      setAttribute("FIELDNAM", "LC" + ch, VARIABLE_SCOPE, id);
-      setAttribute("CATDESC", "FSPC channel " + ch, VARIABLE_SCOPE, id);
-      setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
-      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
-      setAttribute("FORMAT", "%u", VARIABLE_SCOPE, id);
-      setAttribute("UNITS", "cnts/50ms", VARIABLE_SCOPE, id);
-      setAttribute("SCALETYP", "log", VARIABLE_SCOPE, id);
-      setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", 0.0, VARIABLE_SCOPE, id, CDF_INT4);
-      setAttribute("VALIDMAX", 65535, VARIABLE_SCOPE, id, CDF_INT4);
-      setAttribute(
-         "FILLVAL", Constants.INT4_FILL, VARIABLE_SCOPE, id, CDF_INT4
-      );
-      setAttribute("LABLAXIS", "LC" + ch, VARIABLE_SCOPE, id);
+      var.attribute("FIELDNAM", "LC" + ch);
+      var.attribute("CATDESC", "FSPC channel " + ch);
+      var.attribute("VAR_TYPE", "data");
+      var.attribute("DEPEND_0", "Epoch");
+      var.attribute("FORMAT", "%u");
+      var.attribute("UNITS", "cnts/50ms");
+      var.attribute("SCALETYP", "log");
+      var.attribute("DISPLAY_TYPE", "time_series");
+      
+      var.attribute("VALIDMAX", 65535);
+      var.attribute("FILLVAL", Constants.INT4_FILL);
+      var.attribute("LABLAXIS", "LC" + ch);
    }
 }

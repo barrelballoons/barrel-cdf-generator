@@ -24,13 +24,7 @@ Description:
 
 package edu.ucsc.barrel.cdf_gen;
 
-import gsfc.nssdc.cdf.CDF;
-import gsfc.nssdc.cdf.CDFException;
 import gsfc.nssdc.cdf.CDFConstants;
-import gsfc.nssdc.cdf.util.CDFTT2000;
-import gsfc.nssdc.cdf.Variable;
-import gsfc.nssdc.cdf.Attribute;
-import gsfc.nssdc.cdf.Entry;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,115 +37,87 @@ import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
 
-public class Pps extends BarrelCDF{
-   private CDF cdf;
-   private Variable var;
-   private long id;
+public class Pps{
+   private BarrelCDF cdf;
+   private CDFVar var;
    private String path;
    private int date, lvl;
 
    public Pps(final String p, final int d, final int l){
-      super(p, l);
-      path = p;
-      date = d;
-      lvl = l;
-
-      try{
-         cdf = super.getCDF();
+      cdf = new BarrelCDF(p, l);
       
-         addPpsGlobalAtts();
-         addPpsVars();
-      }catch(CDFException e){
-         System.out.println(e.getMessage());
-      }
+      this.path = p;
+      this.date = d;
+      this.lvl = l;
+
+      addPpsGlobalAtts();
+      addPpsVars();
    }
 
-   private void addPpsGlobalAtts() throws CDFException{
+   private void addPpsGlobalAtts(){
       //Set global attributes specific to this type of CDF
-      setAttribute(
+      this.cdf.attribute(
          "Logical_source_description", "Pulse Per Second"
       );
-      setAttribute(
+      this.cdf.attribute(
          "TEXT", 
          "Number of milliseconds into the frame when " + 
          "the GPS pulse per second arrived."
       );
-      setAttribute("Instrument_type", "GPS");
-      setAttribute("Descriptor", "GPS");
-      setAttribute("Time_resolution", "1Hz");
-      setAttribute("Logical_source", "payload_id_l" + lvl  + "_gps");
-      setAttribute(
+      this.cdf.attribute("Instrument_type", "GPS");
+      this.cdf.attribute("Descriptor", "GPS");
+      this.cdf.attribute("Time_resolution", "1Hz");
+      this.cdf.attribute("Logical_source", "payload_id_l" + lvl  + "_gps");
+      this.cdf.attribute(
          "Logical_file_id",
          "payload_id_l" + lvl  + "_gps_20" + date  + 
          "_V" + CDF_Gen.getSetting("rev")
       );
    }
 
-   private void addPpsVars() throws CDFException{
-      var = 
-         Variable.create(
-            cdf, "GPS_PPS", CDF_INT2, 1L, 0L, new  long[] {1}, 
-            VARY, new long[] {NOVARY}
-         );   
-      id = var.getID();
-      setAttribute("FIELDNAM", "Pulse Per Second", VARIABLE_SCOPE, id);
-      setAttribute(
-         "CATDESC", "Milliseconds before GPS pulse arrived.", 
-         VARIABLE_SCOPE, id
+   private void addPpsVars(){
+      var = new CDFVar(cdf, "GPS_PPS", CDFConstants.CDF_INT2);
+      var.attribute("FIELDNAM", "Pulse Per Second");
+      var.attribute(
+         "CATDESC", "Milliseconds before GPS pulse arrived." 
       );
-      setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
-      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
-      setAttribute("FORMAT", "%i", VARIABLE_SCOPE, id);
-      setAttribute("UNITS", "ms", VARIABLE_SCOPE, id);
-      setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
-      setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", 0, VARIABLE_SCOPE, id, CDF_INT2);
-      setAttribute("VALIDMAX", 1000, VARIABLE_SCOPE, id, CDF_INT2);
-      setAttribute(
-         "FILLVAL", Constants.INT2_FILL, VARIABLE_SCOPE, id, CDF_INT2
-      );
-      setAttribute("LABLAXIS", "PPS", VARIABLE_SCOPE, id);
+      var.attribute("VAR_TYPE", "data");
+      var.attribute("DEPEND_0", "Epoch");
+      var.attribute("FORMAT", "%i");
+      var.attribute("UNITS", "ms");
+      var.attribute("SCALETYP", "linear");
+      var.attribute("DISPLAY_TYPE", "time_series");
+      var.attribute("VALIDMIN", 0);
+      var.attribute("VALIDMAX", 1000);
+      var.attribute("FILLVAL", Constants.INT2_FILL);
+      var.attribute("LABLAXIS", "PPS");
 
-      var = 
-         Variable.create(
-            cdf, "Version", CDF_INT2, 1L, 0L, new  long[] {1}, 
-            VARY, new long[] {NOVARY}
-         );   
-      id = var.getID();
-      setAttribute("FIELDNAM", "Software Version", VARIABLE_SCOPE, id);
-      setAttribute("CATDESC", "Software Version.", VARIABLE_SCOPE, id);
-      setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
-      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
-      setAttribute("FORMAT", "%i", VARIABLE_SCOPE, id);
-      setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
-      setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", 0, VARIABLE_SCOPE, id, CDF_INT2);
-      setAttribute("VALIDMAX", 32, VARIABLE_SCOPE, id, CDF_INT2);
-      setAttribute(
-         "FILLVAL", Constants.INT2_FILL, VARIABLE_SCOPE, id, CDF_INT2
-      );
-      setAttribute("LABLAXIS", "Version", VARIABLE_SCOPE, id);
+      var = new CDFVar(cdf, "Version", CDFConstants.CDF_INT2);
+      var.attribute("FIELDNAM", "Software Version");
+      var.attribute("CATDESC", "Software Version.");
+      var.attribute("VAR_TYPE", "data");
+      var.attribute("DEPEND_0", "Epoch");
+      var.attribute("FORMAT", "%i");
+      var.attribute("SCALETYP", "linear");
+      var.attribute("DISPLAY_TYPE", "time_series");
+      var.attribute("VALIDMIN", 0);
+      var.attribute("VALIDMAX", 32);
+      var.attribute("FILLVAL", Constants.INT2_FILL);
+      var.attribute("LABLAXIS", "Version");
 
-      var = 
-         Variable.create(
-            cdf, "Payload_ID", CDF_INT2, 1L, 0L, new  long[] {1}, 
-            VARY, new long[] {NOVARY}
-         );   
-      id = var.getID();
-      setAttribute("FIELDNAM", "Payload ID", VARIABLE_SCOPE, id);
-      setAttribute(
-         "CATDESC", "ID transmitted by the payload's DPU.", VARIABLE_SCOPE, id
+      var = new CDFVar(cdf, "Payload_ID", CDFConstants.CDF_INT2);
+      var.attribute("FIELDNAM", "Payload ID");
+      var.attribute(
+         "CATDESC", "ID transmitted by the payload's DPU."
       );
-      setAttribute("VAR_TYPE", "data", VARIABLE_SCOPE, id);
-      setAttribute("DEPEND_0", "Epoch", VARIABLE_SCOPE, id);
-      setAttribute("FORMAT", "%i", VARIABLE_SCOPE, id);
-      setAttribute("SCALETYP", "linear", VARIABLE_SCOPE, id);
-      setAttribute("DISPLAY_TYPE", "time_series", VARIABLE_SCOPE, id);
-      setAttribute("VALIDMIN", 0, VARIABLE_SCOPE, id, CDF_INT2);
-      setAttribute("VALIDMAX", 64, VARIABLE_SCOPE, id, CDF_INT2);
-      setAttribute(
-         "FILLVAL", Constants.INT2_FILL, VARIABLE_SCOPE, id, CDF_INT2
-      );
-      setAttribute("LABLAXIS", "ID", VARIABLE_SCOPE, id);
+      var.attribute("VAR_TYPE", "data");
+      var.attribute("DEPEND_0", "Epoch");
+      var.attribute("FORMAT", "%i");
+      var.attribute("SCALETYP", "linear");
+      var.attribute("DISPLAY_TYPE", "time_series");
+      var.attribute("VALIDMIN", 0);
+      var.attribute("VALIDMAX", 64);
+      var.attribute("FILLVAL", Constants.INT2_FILL);
+      var.attribute("LABLAXIS", "ID");
    }
 }
