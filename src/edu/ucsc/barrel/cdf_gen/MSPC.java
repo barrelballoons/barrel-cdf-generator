@@ -150,11 +150,12 @@ public class MSPC{
       var.attribute("DELTA_MINUS_VAR", "HalfBinWidth");
 
       //Fill the "energy" variable
+      double[][] energy = new double[1][BIN_CENTERS.length];
       for(int bin_i = 0; bin_i < BIN_CENTERS.length; bin_i++){
-         var.putSingleData(
-            0L, new long[] {bin_i}, BIN_CENTERS[bin_i] * scale
-         );
+         energy[0][bin_i] = BIN_CENTERS[bin_i] * scale / 2;
       }
+      var.writeData("energy", energy);
+      energy = null;
 
       //Create a variable that will track each energy channel width
       var = new CDFVar(
@@ -175,11 +176,15 @@ public class MSPC{
       var.attribute("LABLAXIS", "Width");
 
       //Fill the "BinWidth" variable
+      double[][] bin_width = new double[1][BIN_WIDTHS.length];
       for(int bin_i = 0; bin_i < BIN_WIDTHS.length; bin_i++){
-         var.putSingleData(
-            0L, new long[] {bin_i}, BIN_WIDTHS[bin_i] * scale / 2
-         );
+         bin_width[0][bin_i] = BIN_WIDTHS[bin_i] * scale / 2;
       }
+      var.writeData("HalfBinWidth", bin_width);
+      bin_width = null;
+   }
 
+   public void close(){
+      this.cdf.close();
    }
 }

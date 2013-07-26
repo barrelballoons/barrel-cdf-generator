@@ -317,4 +317,8 @@ public class HKPG{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("LABLAXIS", v.getName());
    }
+
+   public void close(){
+      this.cdf.close();
+   }
 }

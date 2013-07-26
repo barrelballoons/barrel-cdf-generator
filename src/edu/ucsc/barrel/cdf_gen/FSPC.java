@@ -99,4 +99,8 @@ public class FSPC{
       var.attribute("FILLVAL", Constants.INT4_FILL);
       var.attribute("LABLAXIS", "LC" + ch);
    }
+
+   public void close(){
+      this.cdf.close();
+   }
 }

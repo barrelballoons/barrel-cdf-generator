@@ -175,4 +175,8 @@ public class Ephm {
       var.attribute("FILLVAL", Constants.FLOAT_FILL);
       var.attribute("LABLAXIS", "L_Kp6");
    }
+
+   public void close(){
+      this.cdf.close();
+   }
 }
