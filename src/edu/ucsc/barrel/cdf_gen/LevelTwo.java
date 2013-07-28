@@ -55,8 +55,8 @@ public class LevelTwo extends CDFWriter{
    
    //Convert the EPHM data and save it to CDF files
    public void doGpsCdf(int first, int last, int date) throws CDFException{
-      CDF cdf;
-      Variable var;
+      BarrelCDF cdf;
+      CDFVar var;
       Calendar d = Calendar.getInstance();
       Logger geo_coord_file = new Logger("pay" + id + "_" + date + "_gps.txt");
 

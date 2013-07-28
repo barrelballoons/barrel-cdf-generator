@@ -120,7 +120,11 @@ public class Pps{
       var.attribute("FILLVAL", Constants.INT2_FILL);
       var.attribute("LABLAXIS", "ID");
    }
-
+   
+   public CDFFile getCDF(){
+      return this.cdf;
+   }
+   
    public void close(){
       this.cdf.close();
    }

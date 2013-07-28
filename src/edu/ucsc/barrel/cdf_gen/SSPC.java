@@ -259,6 +259,10 @@ public class SSPC{
       var.attribute("LABLAXIS", "Peak_511");  
    }
 
+   public CDFFile getCDF(){
+      return this.cdf;
+   }
+   
    public void close(){
       this.cdf.close();
    }

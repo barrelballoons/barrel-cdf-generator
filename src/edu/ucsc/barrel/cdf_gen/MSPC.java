@@ -183,6 +183,10 @@ public class MSPC{
       var.writeData("HalfBinWidth", bin_width);
       bin_width = null;
    }
+   
+   public CDFFile getCDF(){
+      return this.cdf;
+   }
 
    public void close(){
       this.cdf.close();

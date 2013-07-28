@@ -129,6 +129,10 @@ public class Magn{
       var.attribute("FILLVAL", Constants.FLOAT_FILL);
       var.attribute("LABLAXIS", "B_tot");
    }
+   
+   public CDFFile getCDF(){
+      return this.cdf;
+   }
 
    public void close(){
       this.cdf.close();

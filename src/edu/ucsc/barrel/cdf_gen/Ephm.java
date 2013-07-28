@@ -48,7 +48,7 @@ public class Ephm {
       this.date = d;
       this.lvl = l;
 
-      cdf = new BarrelCDF(p, l);
+      this.cdf = new BarrelCDF(p, l);
       addEphmGlobalAtts();
       addEphmVars();
    }
@@ -69,7 +69,7 @@ public class Ephm {
    }
 
    private void addEphmVars(){
-      var = new CDFVar(cdf, "GPS_Lat", CDFConstants.CDF_FLOAT);
+      var = new CDFVar(this.cdf, "GPS_Lat", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "GPS_Lat");
       var.attribute("CATDESC", "GPS Latitude returned every four seconds.");
       var.attribute(
@@ -88,7 +88,7 @@ public class Ephm {
       var.attribute("FILLVAL", Constants.FLOAT_FILL);
       var.attribute("LABLAXIS", "Lat");
 
-      var = new CDFVar(cdf, "GPS_Lon", CDFConstants.CDF_FLOAT);
+      var = new CDFVar(this.cdf, "GPS_Lon", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "GPS_Lon");
       var.attribute("CATDESC", "GPS Longitude returned every four seconds.");
       var.attribute(
@@ -107,7 +107,7 @@ public class Ephm {
       var.attribute("FILLVAL", Constants.FLOAT_FILL);
       var.attribute("LABLAXIS", "Lon");
 
-      var = new CDFVar(cdf, "GPS_Alt", CDFConstants.CDF_FLOAT);
+      var = new CDFVar(this.cdf, "GPS_Alt", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "GPS_Alt");
       var.attribute("CATDESC", "GPS Altitude returned every four seconds.");
       var.attribute("VAR_TYPE", "data");
@@ -121,7 +121,7 @@ public class Ephm {
       var.attribute("FILLVAL", Constants.FLOAT_FILL);
       var.attribute("LABLAXIS", "Alt");
 
-      var = new CDFVar(cdf, "MLT_Kp2", CDFConstants.CDF_FLOAT);
+      var = new CDFVar(this.cdf, "MLT_Kp2", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "MLT for Kp=2");
       var.attribute("CATDESC", "Magnetic local time for Kp=2 in hours.");
       var.attribute("VAR_TYPE", "data");
@@ -135,7 +135,7 @@ public class Ephm {
       var.attribute("FILLVAL", Constants.FLOAT_FILL);
       var.attribute("LABLAXIS", "MLT_Kp2");
 
-      var = new CDFVar(cdf, "MLT_Kp6", CDFConstants.CDF_FLOAT);
+      var = new CDFVar(this.cdf, "MLT_Kp6", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "MLT for Kp=6");
       var.attribute("CATDESC", "Magnetic local time for Kp=6 in hours");
       var.attribute("VAR_TYPE", "data");
@@ -149,7 +149,7 @@ public class Ephm {
       var.attribute("FILLVAL", Constants.FLOAT_FILL);
       var.attribute("LABLAXIS", "MLT_Kp6");
 
-      var = new CDFVar(cdf, "L_Kp2", CDFConstants.CDF_FLOAT);
+      var = new CDFVar(this.cdf, "L_Kp2", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "L for Kp=2");
       var.attribute("CATDESC", "L shell for Kp=2");
       var.attribute("VAR_TYPE", "data");
@@ -162,7 +162,7 @@ public class Ephm {
       var.attribute("FILLVAL", Constants.FLOAT_FILL);
       var.attribute("LABLAXIS", "L_Kp2");
 
-      var = new CDFVar(cdf, "L_Kp6", CDFConstants.CDF_FLOAT);
+      var = new CDFVar(this.cdf, "L_Kp6", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "L for Kp=6");
       var.attribute("CATDESC", "L shell for Kp=6");
       var.attribute("VAR_TYPE", "data");
@@ -174,6 +174,10 @@ public class Ephm {
       var.attribute("VALIDMAX", 1e27f);
       var.attribute("FILLVAL", Constants.FLOAT_FILL);
       var.attribute("LABLAXIS", "L_Kp6");
+   }
+   
+   public CDFFile getCDF(){
+      return this.cdf;
    }
 
    public void close(){
