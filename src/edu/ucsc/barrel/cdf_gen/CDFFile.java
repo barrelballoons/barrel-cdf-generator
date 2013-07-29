@@ -95,7 +95,8 @@ public class CDFFile implements CDFComponent{
    //functions for writing data to its variables
    public void addData(String name, Object data){
       //get a reference to the variable
-      
+      CDFVar var = new CDFVar(this, "Epoch");
+      var.writeData(data);
    }
 
    //close the CDF file. This must be done before the program exits
