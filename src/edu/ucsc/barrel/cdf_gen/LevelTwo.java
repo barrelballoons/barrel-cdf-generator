@@ -266,25 +266,25 @@ public class LevelTwo extends CDFWriter{
       Ephm ephm = new Ephm(destName, date, 2);
 
       System.out.println("GPS_Alt");
-      ephm.addData("GPS_Alt", alt);
+      ephm.getCDF().addData("GPS_Alt", alt);
       System.out.println("GPS_Lat");
-      ephm.addData("GPS_Lon", lat);
+      ephm.getCDF().addData("GPS_Lon", lat);
       System.out.println("GPS_Lon");
-      ephm.addData("GPS_Lon", lon);
+      ephm.getCDF().addData("GPS_Lon", lon);
       System.out.println("MLT_Kp2");
-      ephm.addData("MLT_Kp2", mlt2);
+      ephm.getCDF().addData("MLT_Kp2", mlt2);
       System.out.println("MLT_Kp6");
-      ephm.addData("MLT_Kp6", mlt6);
+      ephm.getCDF().addData("MLT_Kp6", mlt6);
       System.out.println("L_Kp2");
-      ephm.addData("L_Kp2", l2);
+      ephm.getCDF().addData("L_Kp2", l2);
       System.out.println("L_Kp6");
-      ephm.addData("L_Kp6", l6);
+      ephm.getCDF().addData("L_Kp6", l6);
       System.out.println("FrameGroup");
-      ephm.addData("FrameGroup", frameGroup);
+      ephm.getCDF().addData("FrameGroup", frameGroup);
       System.out.println("Epoch");
-      ephm.addData("Epoch", epoch);
+      ephm.getCDF().addData("Epoch", epoch);
       System.out.println("Q");
-      ephm.addData("Q", q);
+      ephm.getCDF().addData("Q", q);
 
       ephm.close();
    }
@@ -322,17 +322,17 @@ public class LevelTwo extends CDFWriter{
       Pps pps = new Pps(destName, date, 2);
 
       System.out.println("GPS_PPS");
-      pps.addData("GPS_PPS", pps_vals);
+      pps.getCDF().addData("GPS_PPS", pps_vals);
       System.out.println("Version");
-      pps.addData("Version", version);
+      pps.getCDF().addData("Version", version);
       System.out.println("Payload_ID");
-      pps.addData("Payload_ID", payID);
+      pps.getCDF().addData("Payload_ID", payID);
       System.out.println("FrameGroup");
-      pps.addData("FrameGroup", frameGroup);
+      pps.getCDF().addData("FrameGroup", frameGroup);
       System.out.println("Epoch");
-      pps.addData("Epoch", epoch);
+      pps.getCDF().addData("Epoch", epoch);
       System.out.println("Q");
-      pps.addData("Q", q);
+      pps.getCDF().addData("Q", q);
 
       pps.close();
    }
@@ -400,19 +400,19 @@ public class LevelTwo extends CDFWriter{
      
       Magn magn = new Magn(destName, date, 2);
       System.out.println("MAG_X");
-      magn.addData("MAG_X", magx);
+      magn.getCDF().addData("MAG_X", magx);
       System.out.println("MAG_Y...");
-      magn.addData("MAG_Y", magy);
+      magn.getCDF().addData("MAG_Y", magy);
       System.out.println("MAG_Z...");
-      magn.addData("MAG_Z", magz);
+      magn.getCDF().addData("MAG_Z", magz);
       System.out.println("Total...");
-      magn.addData("Total", magTot);
+      magn.getCDF().addData("Total", magTot);
       System.out.println("FrameGroup...");
-      magn.addData("FrameGroup", frameGroup);
+      magn.getCDF().addData("FrameGroup", frameGroup);
       System.out.println("Epoch...");
-      magn.addData("Epoch", epoch);
+      magn.getCDF().addData("Epoch", epoch);
       System.out.println("Q...");
-      magn.addData("Q", q);
+      magn.getCDF().addData("Q", q);
 
       magn.close();
    }
@@ -459,7 +459,7 @@ public class LevelTwo extends CDFWriter{
          }
 
          System.out.println(CDF_Gen.data.hkpg_label[var_i] + "...");
-         hkpg.addData(CDF_Gen.data.hkpg_label[var_i], hkpg_scaled);
+         hkpg.getCDF().addData(CDF_Gen.data.hkpg_label[var_i], hkpg_scaled);
       }
       
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
@@ -476,25 +476,25 @@ public class LevelTwo extends CDFWriter{
       }
 
       System.out.println("numOfSats...");
-      hkpg.addData("numOfSats", sats);
+      hkpg.getCDF().addData("numOfSats", sats);
       System.out.println("timeOffset...");
-      hkpg.addData("timeOffset", offset);
+      hkpg.getCDF().addData("timeOffset", offset);
       System.out.println("termStatus...");
-      hkpg.addData("termStatus", termStat);
+      hkpg.getCDF().addData("termStatus", termStat);
       System.out.println("cmdCounter...");
-      hkpg.addData("cmdCounter", cmdCnt);
+      hkpg.getCDF().addData("cmdCounter", cmdCnt);
       System.out.println("modemCounter...");
-      hkpg.addData("modemCounter", modemCnt);
+      hkpg.getCDF().addData("modemCounter", modemCnt);
       System.out.println("dcdCounter...");
-      hkpg.addData("dcdCounter", dcdCnt);
+      hkpg.getCDF().addData("dcdCounter", dcdCnt);
       System.out.println("weeks...");
-      hkpg.addData("weeks", weeks);
+      hkpg.getCDF().addData("weeks", weeks);
       System.out.println("FrameGroup...");
-      hkpg.addData("FrameGroup", frameGroup);
+      hkpg.getCDF().addData("FrameGroup", frameGroup);
       System.out.println("Epoch...");
-      hkpg.addData("Epoch", epoch);
+      hkpg.getCDF().addData("Epoch", epoch);
       System.out.println("Q...");
-      hkpg.addData("Q", q);
+      hkpg.getCDF().addData("Q", q);
 
       hkpg.close();
    }
@@ -579,19 +579,19 @@ public class LevelTwo extends CDFWriter{
 
       FSPC fspc = new FSPC(destName, date, 2);
       System.out.println("LC1");
-      fspc.addData("LC1", lc_scaled[0]);
+      fspc.getCDF().addData("LC1", lc_scaled[0]);
       System.out.println("LC1");
-      fspc.addData("LC2", lc_scaled[1]);
+      fspc.getCDF().addData("LC2", lc_scaled[1]);
       System.out.println("LC1");
-      fspc.addData("LC3", lc_scaled[2]);
+      fspc.getCDF().addData("LC3", lc_scaled[2]);
       System.out.println("LC1");
-      fspc.addData("LC4", lc_scaled[3]);
+      fspc.getCDF().addData("LC4", lc_scaled[3]);
       System.out.println("FrameGroup");
-      fspc.addData("FrameGroup", frameGroup);
+      fspc.getCDF().addData("FrameGroup", frameGroup);
       System.out.println("Epoch");
-      fspc.addData("Epoch", epoch);
+      fspc.getCDF().addData("Epoch", epoch);
       System.out.println("Q");
-      fspc.addData("Q", q);
+      fspc.getCDF().addData("Q", q);
 
       fspc.close();
    }
@@ -681,13 +681,13 @@ public class LevelTwo extends CDFWriter{
 
       MSPC mspc = new MSPC(destName, date, 2);
       System.out.println("mspc");
-      mspc.addData("MSPC", mspc_rebin);
+      mspc.getCDF().addData("MSPC", mspc_rebin);
       System.out.println("FrameGroup");
-      mspc.addData("FrameGroup", frameGroup);
+      mspc.getCDF().addData("FrameGroup", frameGroup);
       System.out.println("Epoch");
-      mspc.addData("Epoch", epoch);
+      mspc.getCDF().addData("Epoch", epoch);
       System.out.println("Q");
-      mspc.addData("Q", q);
+      mspc.getCDF().addData("Q", q);
 
       mspc.close();
    }
@@ -767,15 +767,15 @@ public class LevelTwo extends CDFWriter{
 
       SSPC sspc = new SSPC(destName, date, 2);
       System.out.println("sspc");
-      sspc.addData("SSPC", sspc_rebin);
+      sspc.getCDF().addData("SSPC", sspc_rebin);
       System.out.println("Peak_511");
-      sspc.addData("Peak_511", peak);
+      sspc.getCDF().addData("Peak_511", peak);
       System.out.println("FrameGroup");
-      sspc.addData("FrameGroup", frameGroup);
+      sspc.getCDF().addData("FrameGroup", frameGroup);
       System.out.println("Epoch");
-      sspc.addData("Epoch", epoch);
+      sspc.getCDF().addData("Epoch", epoch);
       System.out.println("Q");
-      sspc.addData("Q", q);
+      sspc.getCDF().addData("Q", q);
 
       sspc.close();
 /*

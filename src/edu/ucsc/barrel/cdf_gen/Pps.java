@@ -91,6 +91,7 @@ public class Pps{
       var.attribute("VALIDMAX", 1000);
       var.attribute("FILLVAL", Constants.INT2_FILL);
       var.attribute("LABLAXIS", "PPS");
+      this.cdf.addVar("GPS_PPS", var);
 
       var = new CDFVar(cdf, "Version", CDFConstants.CDF_INT2);
       var.attribute("FIELDNAM", "Software Version");
@@ -104,6 +105,7 @@ public class Pps{
       var.attribute("VALIDMAX", 32);
       var.attribute("FILLVAL", Constants.INT2_FILL);
       var.attribute("LABLAXIS", "Version");
+      this.cdf.addVar("Version", var);
 
       var = new CDFVar(cdf, "Payload_ID", CDFConstants.CDF_INT2);
       var.attribute("FIELDNAM", "Payload ID");
@@ -119,6 +121,7 @@ public class Pps{
       var.attribute("VALIDMAX", 64);
       var.attribute("FILLVAL", Constants.INT2_FILL);
       var.attribute("LABLAXIS", "ID");
+      this.cdf.addVar("Payload_ID", var);
    }
    
    public CDFFile getCDF(){

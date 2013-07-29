@@ -293,7 +293,7 @@ public class HKPG{
 
    private void createVar(final HkpgVar v){
       long type = v.getType();
-      CDFVar var = new CDFVar(this.cdf, v.getName(), this.type);
+      CDFVar var = new CDFVar(this.cdf, v.getName(), v.getType());
 
       if(type == CDFConstants.CDF_INT4){
          var.attribute("FORMAT", "%i");
@@ -316,6 +316,7 @@ public class HKPG{
       var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("LABLAXIS", v.getName());
+      this.cdf.addVar(v.getName(), var);
    }
    
    public CDFFile getCDF(){

@@ -90,12 +90,12 @@ public class CDFVar implements CDFComponent{
 
    public CDFVar(final CDFFile c, final String n, long t, boolean r_v){
       //assume this is a scalar if there is no size specified
-      this(c, n, t, r_v, new long[]{0L});
+      this(c, n, t, r_v, new long[]{1L});
    }
    
    public CDFVar(final CDFFile c, final String n, long t){
       //assume this is a scalar with record variance = VARY 
-      this(c, n, t, true, new long[]{0L});
+      this(c, n, t, true, new long[]{1L});
    }
    
    public CDF getCDF(){return this.cdf;}
@@ -130,98 +130,178 @@ public class CDFVar implements CDFComponent{
       new CDFAttribute(this, name, value);
    }
 
-   public void writeData(String name, short[] data) throws CDFException{
-      long start = var.getNumWrittenRecords();
-      long size = data.length;
-      var.putHyperData(
-         start, size, 1, 
-         new long[] {0}, new long[] {1}, new long[] {1},
-         data
-      );
+   public void writeData(String name, short[] data){
+      try{
+         long start = var.getNumWrittenRecords();
+         long size = data.length;
+         var.putHyperData(
+            start, size, 1, 
+            new long[] {0L}, new long[] {1L}, new long[] {1L},
+            data
+         );
+      }catch(CDFException e){
+         System.out.println("Could not fill variable " + name + ":");
+         System.out.println(e.getMessage());
+      }
    }
-   public void writeData(String name, int[] data) throws CDFException{
-      long start = var.getNumWrittenRecords();
-      long size = data.length;
-      var.putHyperData(
-         start, size, 1, 
-         new long[] {0}, new long[] {1}, new long[] {1},
-         data
-      );
+   public void writeData(String name, int[] data){
+      try{
+         long start = var.getNumWrittenRecords();
+         long size = data.length;
+         var.putHyperData(
+            start, size, 1, 
+            new long[] {0L}, new long[] {1L}, new long[] {1L},
+            data
+         );
+      }catch(CDFException e){
+         System.out.println("Could not fill variable " + name + ":");
+         System.out.println(e.getMessage());
+      }
    }
-   public void writeData(String name, long[] data) throws CDFException{
-      long start = var.getNumWrittenRecords();
-      long size = data.length;
-      var.putHyperData(
-         start, size, 1, 
-         new long[] {0}, new long[] {1}, new long[] {1},
-         data
-      );
+   public void writeData(String name, long[] data){
+      try{
+         long start = var.getNumWrittenRecords();
+         long size = data.length;
+         var.putHyperData(
+            start, size, 1, 
+            new long[] {0L}, new long[] {1L}, new long[] {1L},
+            data
+         );
+      }catch(CDFException e){
+         System.out.println("Could not fill variable " + name + ":");
+         System.out.println(e.getMessage());
+      }
    }
-   public void writeData(String name, float[] data) throws CDFException{
-      long start = var.getNumWrittenRecords();
-      long size = data.length;
-      var.putHyperData(
-         start, size, 1, 
-         new long[] {0}, new long[] {1}, new long[] {1},
-         data
-      );
+   public void writeData(String name, float[] data){
+      try{
+         long start = var.getNumWrittenRecords();
+         long size = data.length;
+         var.putHyperData(
+            start, size, 1, 
+            new long[] {0L}, new long[] {1L}, new long[] {1L},
+            data
+         );
+      }catch(CDFException e){
+         System.out.println("Could not fill variable " + name + ":");
+         System.out.println(e.getMessage());
+      }
    }
-   public void writeData(String name, double[] data) throws CDFException{
-      long start = var.getNumWrittenRecords();
-      long size = data.length;
-      var.putHyperData(
-         start, size, 1, 
-         new long[] {0}, new long[] {1}, new long[] {1},
-         data
-      );
+   public void writeData(String name, double[] data){
+      try{
+         long start = var.getNumWrittenRecords();
+         long size = data.length;
+         var.putHyperData(
+            start, size, 1, 
+            new long[] {0L}, new long[] {1L}, new long[] {1L},
+            data
+         );
+      }catch(CDFException e){
+         System.out.println("Could not fill variable " + name + ":");
+         System.out.println(e.getMessage());
+      }
    }
-   public void writeData(String name, String[] data) throws CDFException{
-      long start = var.getNumWrittenRecords();
-      long size = data.length;
-      var.putHyperData(
-         start, size, 1, 
-         new long[] {0}, new long[] {1}, new long[] {1},
-         data
-      );
+   public void writeData(String name, String[] data){
+      try{
+         long start = var.getNumWrittenRecords();
+         long size = data.length;
+         var.putHyperData(
+            start, size, 1, 
+            new long[] {0L}, new long[] {1L}, new long[] {1L},
+            data
+         );
+      }catch(CDFException e){
+         System.out.println("Could not fill variable " + name + ":");
+         System.out.println(e.getMessage());
+      }
    }
-   public void writeData(String name, int[][] data) throws CDFException{
-      long start = var.getNumWrittenRecords();
-      long size = data.length;
-      long[] dimCnts = {data[0].length, 1};
-      var.putHyperData(
-         start, size, 1, 
-         new long[] {0}, dimCnts, new long[] {1},
-         data
-      );
+   public void writeData(String name, short[][] data){
+      try{
+         long start = var.getNumWrittenRecords();
+         long size = data.length;
+         long[] dimCnts = {data[0].length, 1};
+         var.putHyperData(
+            start, size, 1, 
+            new long[] {0L}, dimCnts, new long[] {1L},
+            data
+         );
+      }catch(CDFException e){
+         System.out.println("Could not fill variable " + name + ":");
+         System.out.println(e.getMessage());
+      }
    }
-   public void writeData(String name, long[][] data) throws CDFException{
-      long start = var.getNumWrittenRecords();
-      long size = data.length;
-      long[] dimCnts = {data[0].length, 1};
-      var.putHyperData(
-         start, size, 1, 
-         new long[] {0}, dimCnts, new long[] {1},
-         data
-      );
+   public void writeData(String name, int[][] data){
+      try{
+         long start = var.getNumWrittenRecords();
+         long size = data.length;
+         long[] dimCnts = {data[0].length, 1};
+         var.putHyperData(
+            start, size, 1, 
+            new long[] {0L}, dimCnts, new long[] {1L},
+            data
+         );
+      }catch(CDFException e){
+         System.out.println("Could not fill variable " + name + ":");
+         System.out.println(e.getMessage());
+      }
    }
-   public void writeData(String name, float[][] data) throws CDFException{
-      long start = var.getNumWrittenRecords();
-      long size = data.length;
-      long[] dimCnts = {data[0].length, 1};
-      var.putHyperData(
-         start, size, 1, 
-         new long[] {0}, dimCnts, new long[] {1},
-         data
-      );
+   public void writeData(String name, long[][] data){
+      try{
+         long start = var.getNumWrittenRecords();
+         long size = data.length;
+         long[] dimCnts = {data[0].length, 1};
+         var.putHyperData(
+            start, size, 1, 
+            new long[] {0L}, dimCnts, new long[] {1L},
+            data
+         );
+      }catch(CDFException e){
+         System.out.println("Could not fill variable " + name + ":");
+         System.out.println(e.getMessage());
+      }
    }
-   public void writeData(String name, double[][] data) throws CDFException{
-      long start = var.getNumWrittenRecords();
-      long size = data.length;
-      long[] dimCnts = {data[0].length, 1};
-      var.putHyperData(
-         start, size, 1, 
-         new long[] {0}, dimCnts, new long[] {1},
-         data
-      );
+   public void writeData(String name, float[][] data){
+      try{
+         long start = var.getNumWrittenRecords();
+         long size = data.length;
+         long[] dimCnts = {data[0].length, 1};
+         var.putHyperData(
+            start, size, 1, 
+            new long[] {0L}, dimCnts, new long[] {1L},
+            data
+         );
+      }catch(CDFException e){
+         System.out.println("Could not fill variable " + name + ":");
+         System.out.println(e.getMessage());
+      }
+   }
+   public void writeData(String name, double[][] data){
+      try{
+         long start = var.getNumWrittenRecords();
+         long size = data.length;
+         long[] dimCnts = {data[0].length, 1};
+         var.putHyperData(
+            start, size, 1, 
+            new long[] {0L}, dimCnts, new long[] {1L},
+            data
+         );
+      }catch(CDFException e){
+         System.out.println("Could not fill variable " + name + ":");
+         System.out.println(e.getMessage());
+      }
+   }
+   public void writeData(String name, String[][] data){
+      try{
+         long start = var.getNumWrittenRecords();
+         long size = data.length;
+         long[] dimCnts = {data[0].length, 1};
+         var.putHyperData(
+            start, size, 1, 
+            new long[] {0L}, dimCnts, new long[] {1L},
+            data
+         );
+      }catch(CDFException e){
+         System.out.println("Could not fill variable " + name + ":");
+         System.out.println(e.getMessage());
+      }
    }
 }

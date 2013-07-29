@@ -104,12 +104,13 @@ public class Magn{
          "FILLVAL", Constants.FLOAT_FILL
       );
       var.attribute("LABLAXIS", "B_" + axis);
+      this.cdf.addVar("MAG_" + axis, var);
    }
 
    private void addTotalVar(){
       var = new CDFVar(cdf, "Total", CDFConstants.CDF_FLOAT);
 
-      var.attribute("FIELDNAM", "Total Magnetic Field");
+      var.attribute("FIELDNAM", "B_Tot");
       var.attribute(
          "CATDESC", "Magnitude of magnetic field." 
       );
@@ -128,6 +129,7 @@ public class Magn{
       var.attribute("VALIDMAX", 1e31f);
       var.attribute("FILLVAL", Constants.FLOAT_FILL);
       var.attribute("LABLAXIS", "B_tot");
+      this.cdf.addVar("Total", var);
    }
    
    public CDFFile getCDF(){

@@ -98,6 +98,8 @@ public class FSPC{
       var.attribute("VALIDMAX", 65535);
       var.attribute("FILLVAL", Constants.INT4_FILL);
       var.attribute("LABLAXIS", "LC" + ch);
+
+      this.cdf.addVar("LC" + ch, var);
    }
    
    public CDFFile getCDF(){
