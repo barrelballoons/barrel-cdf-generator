@@ -38,23 +38,20 @@ import java.util.Vector;
 import java.util.Arrays;
 
 public class Pps{
-   private BarrelCDF cdf;
-   private CDFVar var;
-   private String path;
    private int date, lvl;
 
    public Pps(final String p, final int d, final int l){
-      cdf = new BarrelCDF(p, l);
+      setCDF(new BarrelCDF(p, l));
       
-      this.path = p;
       this.date = d;
       this.lvl = l;
 
-      addPpsGlobalAtts();
-      addPpsVars();
+      addGAttributes();
+      addVars();
    }
 
-   private void addPpsGlobalAtts(){
+   @Override
+   private void addGAttributes(){
       //Set global attributes specific to this type of CDF
       this.cdf.attribute(
          "Logical_source_description", "Pulse Per Second"
@@ -75,7 +72,10 @@ public class Pps{
       );
    }
 
-   private void addPpsVars(){
+   @Override
+   private void addVars(){
+      CDFVar var;
+      
       var = new CDFVar(cdf, "GPS_PPS", CDFConstants.CDF_INT2);
       var.attribute("FIELDNAM", "Pulse Per Second");
       var.attribute("CATDESC", "Milliseconds before GPS pulse arrived.");
@@ -118,13 +118,5 @@ public class Pps{
       var.attribute("VALIDMAX", 64);
       var.attribute("FILLVAL", CDFVar.getIstpVal("INT2_FILL"));
       this.cdf.addVar("Payload_ID", var);
-   }
-   
-   public CDFFile getCDF(){
-      return this.cdf;
-   }
-   
-   public void close(){
-      this.cdf.close();
    }
 }

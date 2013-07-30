@@ -38,9 +38,6 @@ import java.util.Vector;
 import java.util.Arrays;
 
 public class SSPC{
-   private BarrelCDF cdf;
-   private CDFVar var;
-   private String path;
    private int date, lvl;
 
    private double scale = 2.4414; // keV/bin
@@ -121,16 +118,17 @@ public class SSPC{
       };
 
    public SSPC(final String p, final int d, final int l){
-      cdf = new BarrelCDF(p, l);
-      this.path = p;
+      setCDF(new BarrelCDF(p, l));
+
       this.date = d;
       this.lvl = l;
 
-      addSspcGlobalAtts();
-      addSspcVars();
+      addGAttributes();
+      addVars();
    }
 
-   private void addSspcGlobalAtts(){
+   @Override
+   private void addGAttributes(){
       //Set global attributes specific to this type of CDF
       this.cdf.attribute(
          "Logical_source_description", "Slow time resolution X-ray spectrum"
@@ -153,7 +151,10 @@ public class SSPC{
       );
    }
 
-   private void addSspcVars(){
+   @Override
+   private void addVars(){
+      CDFVar var;
+
       //create SSPC variable
       //This variable will contain the slow spectrum that is returned over
       //32 frames.
@@ -260,13 +261,5 @@ public class SSPC{
       var.attribute("VALIDMAX", 4096.0);
       var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
       this.cdf.addVar("Peak_511", var);
-   }
-
-   public CDFFile getCDF(){
-      return this.cdf;
-   }
-   
-   public void close(){
-      this.cdf.close();
    }
 }

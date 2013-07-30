@@ -38,26 +38,20 @@ import java.util.Vector;
 import java.util.Arrays;
 
 public class Magn{
-   private BarrelCDF cdf;
-   private CDFVar var;
-   private long id;
-   private String path;
    private int date, lvl;
 
    public Magn(final String p, final int d, final int l){
-      this.cdf = new BarrelCDF(p, l);
-      this.path = p;
+      setCDF(new BarrelCDF(p, l));
+
       this.date = d;
       this.lvl = l;
 
-      addMagGlobalAtts();
-      addMagVar("X");
-      addMagVar("Y");
-      addMagVar("Z");
-      addTotalVar();
+      addGAttributes();
+      addVars();
    }
-
-   private void addMagGlobalAtts(){
+   
+   @Override
+   private void addGAttributes(){
       //Set global attributes specific to this type of CDF
       this.cdf.attribute(
          "Logical_source_description", "MAG X, Y, and Z"
@@ -79,9 +73,16 @@ public class Magn{
       );
    }
 
-   private void addMagVar(final String axis){
-      //create mag variable
-      var = new CDFVar(cdf, "MAG_" + axis, CDFConstants.CDF_FLOAT);
+   @Override
+   private void addVars{
+      addAxisVar("X");
+      addAxisVar("Y");
+      addAxisVar("Z");
+      addTotalVar();
+   }
+
+   private void addAxisVar(final String axis){
+      CDFVar = new CDFVar(cdf, "MAG_" + axis, CDFConstants.CDF_FLOAT);
 
       var.attribute("FIELDNAM", axis + "_axis");
       var.attribute(
@@ -106,7 +107,7 @@ public class Magn{
    }
 
    private void addTotalVar(){
-      var = new CDFVar(cdf, "Total", CDFConstants.CDF_FLOAT);
+      CDFVar var = new CDFVar(cdf, "Total", CDFConstants.CDF_FLOAT);
 
       var.attribute("FIELDNAM", "B_Tot");
       var.attribute(
@@ -129,13 +130,5 @@ public class Magn{
       var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       var.attribute("LABLAXIS", "B_tot");
       this.cdf.addVar("Total", var);
-   }
-   
-   public CDFFile getCDF(){
-      return this.cdf;
-   }
-
-   public void close(){
-      this.cdf.close();
    }
 }

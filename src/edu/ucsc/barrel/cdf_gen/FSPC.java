@@ -38,8 +38,6 @@ import java.util.Vector;
 import java.util.Arrays;
 
 public class FSPC{
-   private BarrelCDF cdf;
-   private CDFVar var;
    private String path;
    private int date, lvl;
 
@@ -51,19 +49,17 @@ public class FSPC{
       BIN_WIDTHS = {75, 155, 120, 250};
 
    public FSPC(final String p, final int d, final int l){
-      this.cdf = new BarrelCDF(p, l);
-      this.path = p;
+      setCDF(new BarrelCDF(p, l));
+
       this.date = d;
       this.lvl = l;
 
-      addFspcGlobalAtts();
-      addLC(1);
-      addLC(2);
-      addLC(3);
-      addLC(4);
+      addGAttributes();
+      addVars();
    }
 
-   private void addFspcGlobalAtts(){
+   @Override
+   protected void addGAttributes(){
       //Set global attributes specific to this type of CDF
       cdf.attribute(
          "Logical_source_description", 
@@ -83,7 +79,17 @@ public class FSPC{
       );
    }
 
+   @Override
+   protected void addVars(){
+      addLC(1);
+      addLC(2);
+      addLC(3);
+      addLC(4);
+   }
+
    private void addLC(final int ch){
+      CDFVar var;
+
       //create FSPC variable
       var = new CDFVar(cdf, "LC" + ch, CDFConstants.CDF_INT4);
 
@@ -99,13 +105,5 @@ public class FSPC{
       var.attribute("VALIDMAX", 65535);
       var.attribute("FILLVAL", CDFVar.getIstpVal("INT4_FILL"));
       this.cdf.addVar("LC" + ch, var);
-   }
-   
-   public CDFFile getCDF(){
-      return this.cdf;
-   }
-
-   public void close(){
-      this.cdf.close();
    }
 }

@@ -42,8 +42,6 @@ import java.util.ListIterator;
 
 
 public class HKPG{
-   private BarrelCDF cdf;
-   private String path;
    private int date, lvl;
    List<HkpgVar> vars;   
    
@@ -53,7 +51,7 @@ public class HKPG{
       private long type;
       private int mod_index;
       private float min, max;
-      public HkpgVar(
+      private HkpgVar(
          final String n, final String d, final String u,
          final int i, final float mi, final float ma, final long t 
       ){
@@ -66,23 +64,55 @@ public class HKPG{
          this.type = t;
       }
 
-      public String getName(){return name;}
-      public String getDesc(){return desc;}
-      public String getUnits(){return units;}
-      public int getModIndex(){return mod_index;}
-      public float getMin(){return min;}
-      public float getMax(){return max;}
-      public long getType(){return type;}
+      private String getName(){return name;}
+      private String getDesc(){return desc;}
+      private String getUnits(){return units;}
+      private int getModIndex(){return mod_index;}
+      private float getMin(){return min;}
+      private float getMax(){return max;}
+      private long getType(){return type;}
    }
 
    public HKPG(final String p, final int d, final int l){
-      cdf = new BarrelCDF(p, l);
-      this.path = p;
+      setCDF(new BarrelCDF(p, l));
+
       this.date = d;
       this.lvl = l;
       
-      addHkpgGlobalAtts();
-      addHkpgVars();
+      addGAttributes();
+      addVars();
+   }
+
+   @Override
+   private void addGAttributes(){
+      //Set global attributes specific to this type of CDF
+      this.cdf.attribute(
+         "Logical_source_description", "Analog Housekeeping Data"
+      );
+      this.cdf.attribute(
+         "TEXT", 
+         "Voltage, temperature, current, and payload status values returned " + 
+         "every 40s." 
+      );
+      this.cdf.attribute("Instrument_type", "Housekeeping");
+      this.cdf.attribute("Descriptor", "EDI");
+      this.cdf.attribute("Time_resolution", "40s");
+      this.cdf.attribute("Logical_source", "payload_id_l" + lvl  + "_edi");
+      this.cdf.attribute(
+         "Logical_file_id",
+         "payload_id_l" + lvl  + "_edi_20" + date  + 
+         "_V" + CDF_Gen.getSetting("rev")
+      );
+   }
+
+   @Override
+   private void addVars(){
+      //create an array containing the details of these variables
+      fillVarArray();
+
+      //loop through all of the hkpg variables
+      ListIterator<HkpgVar> var_i = vars.listIterator();
+      while(var_i.hasNext()){createVar(var_i.next());}
    }
 
    private void fillVarArray(){
@@ -262,36 +292,6 @@ public class HKPG{
       ));
    }
 
-   private void addHkpgGlobalAtts(){
-      //Set global attributes specific to this type of CDF
-      this.cdf.attribute(
-         "Logical_source_description", "Analog Housekeeping Data"
-      );
-      this.cdf.attribute(
-         "TEXT", 
-         "Voltage, temperature, current, and payload status values returned " + 
-         "every 40s." 
-      );
-      this.cdf.attribute("Instrument_type", "Housekeeping");
-      this.cdf.attribute("Descriptor", "EDI");
-      this.cdf.attribute("Time_resolution", "40s");
-      this.cdf.attribute("Logical_source", "payload_id_l" + lvl  + "_edi");
-      this.cdf.attribute(
-         "Logical_file_id",
-         "payload_id_l" + lvl  + "_edi_20" + date  + 
-         "_V" + CDF_Gen.getSetting("rev")
-      );
-   }
-
-   private void addHkpgVars(){
-      //create an array containing the details of these variables
-      fillVarArray();
-
-      //loop through all of the hkpg variables
-      ListIterator<HkpgVar> var_i = vars.listIterator();
-      while(var_i.hasNext()){createVar(var_i.next());}
-   }
-
    private void createVar(final HkpgVar v){
       CDFVar var = new CDFVar(this.cdf, v.getName(), v.getType());
 
@@ -316,13 +316,5 @@ public class HKPG{
       var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
       this.cdf.addVar(v.getName(), var);
-   }
-   
-   public CDFFile getCDF(){
-      return this.cdf;
-   }
-
-   public void close(){
-      this.cdf.close();
    }
 }

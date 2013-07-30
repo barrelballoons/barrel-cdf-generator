@@ -37,23 +37,20 @@ import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
 
-public class Ephm {
-   private BarrelCDF cdf;
-   private CDFVar var;
-   private String path;
+public class Ephm extends DataProduct{
    private int date, lvl;
 
    public Ephm(final String p, final int d, final int l){
-      this.path = p;
       this.date = d;
       this.lvl = l;
 
-      this.cdf = new BarrelCDF(p, l);
-      addEphmGlobalAtts();
-      addEphmVars();
+      setCDF(new BarrelCDF(p, l));
+      addGAttributess();
+      addVars();
    }
-
-   private void addEphmGlobalAtts(){
+   
+   @Override
+   protected void addGAttributes(){
       //Set global attributes specific to this type of CDF
       cdf.attribute("Logical_source_description", "Coordinates");
       cdf.attribute(
@@ -74,8 +71,11 @@ public class Ephm {
          "_V" + CDF_Gen.getSetting("rev")
       );
    }
-
-   private void addEphmVars(){
+   
+   @Override
+   protected void addVars(){
+      CDFVar var;
+      
       var = new CDFVar(this.cdf, "GPS_Lat", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "GPS Lat");
       var.attribute("CATDESC", "GPS Latitude.");
@@ -192,13 +192,5 @@ public class Ephm {
       var.attribute("VALIDMAX", 1e27f);
       var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       this.cdf.addVar("L_Kp6", var);
-   }
-
-   public CDFFile getCDF(){
-      return this.cdf;
-   }
-
-   public void close(){
-      this.cdf.close();
    }
 }

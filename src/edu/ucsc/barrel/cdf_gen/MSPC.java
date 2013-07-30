@@ -38,8 +38,6 @@ import java.util.Vector;
 import java.util.Arrays;
 
 public class MSPC{
-   private BarrelCDF cdf;
-   private String path;
    private int date, lvl;
 
    private double scale = 2.4414; // keV/bin
@@ -67,16 +65,17 @@ public class MSPC{
       };
 
    public MSPC(final String p, final int d, final int l){
-      this.cdf = new BarrelCDF(p, l);
-      this.path = p;
+      setCDF(new BarrelCDF(p, l));
+
       this.date = d;
       this.lvl = l;
 
-      addMspcGlobalAtts();
-      addMspcVars();
+      addGAttributes();
+      addVars();
    }
 
-   private void addMspcGlobalAtts(){
+   @Override
+   private void addGAttributes(){
       //Set global attributes specific to this type of CDF
       this.cdf.attribute(
          "Logical_source_description", "Slow time resolution X-ray spectrum"
@@ -99,7 +98,8 @@ public class MSPC{
       );
    }
 
-   private void addMspcVars(){
+   @Override
+   private void addVars(){
       CDFVar var;
       //create MSPC variable
       //This variable will contain the medium spectrum that is returned over
@@ -186,13 +186,5 @@ public class MSPC{
       }
       var.writeData("HalfBinWidth", bin_width);
       bin_width = null;
-   }
-   
-   public CDFFile getCDF(){
-      return this.cdf;
-   }
-
-   public void close(){
-      this.cdf.close();
    }
 }
