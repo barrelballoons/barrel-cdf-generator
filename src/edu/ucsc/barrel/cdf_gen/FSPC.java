@@ -66,7 +66,8 @@ public class FSPC{
    private void addFspcGlobalAtts(){
       //Set global attributes specific to this type of CDF
       cdf.attribute(
-         "Logical_source_description", "Fast time resolution X-ray spectrum"
+         "Logical_source_description", 
+         "Fast time resolution Bremsstrahlung X-ray spectrum."
       );
       cdf.attribute(
          "TEXT", "Four channels of fast spectral data are returned at 20Hz." 
@@ -87,7 +88,8 @@ public class FSPC{
       var = new CDFVar(cdf, "LC" + ch, CDFConstants.CDF_INT4);
 
       var.attribute("FIELDNAM", "LC" + ch);
-      var.attribute("CATDESC", "FSPC channel " + ch);
+      var.attribute("CATDESC", "Light Curve channel " + ch);
+      var.attribute("LABLAXIS", "LC" + ch);
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "%u");
@@ -96,8 +98,7 @@ public class FSPC{
       var.attribute("DISPLAY_TYPE", "time_series");
       
       var.attribute("VALIDMAX", 65535);
-      var.attribute("FILLVAL", Constants.INT4_FILL);
-      var.attribute("LABLAXIS", "LC" + ch);
+      var.attribute("FILLVAL", CDFVar.getIstpVal("INT4_FILL"));
    }
    
    public CDFFile getCDF(){

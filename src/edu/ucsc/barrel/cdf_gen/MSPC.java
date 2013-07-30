@@ -83,7 +83,8 @@ public class MSPC{
       );
       this.cdf.attribute(
          "TEXT",
-         "X-ray spectra each made of 48 energy bins transmitted over 4 frames." 
+         "Bremsstrahlung X-ray spectra each made of 48 energy bins " +
+         "transmitted over 4 frames." 
       );
       this.cdf.attribute("Instrument_type", "Gamma and X-Rays");
       this.cdf.attribute("Descriptor", "Scintillator");
@@ -115,17 +116,17 @@ public class MSPC{
          "Rebinned, divided by energy bin widths and " +
          "adjusted to /sec time scale." 
       );
+      var.attribute("LABLAXIS", "MSPC");
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
+      var.attribute("DEPEND_1", "energy");
       var.attribute("FORMAT", "%f");
       var.attribute("UNITS", "cnts/keV/sec");
       var.attribute("SCALETYP", "log");
       var.attribute("DISPLAY_TYPE", "spectrogram");
       var.attribute("VALIDMIN", 0.0);
       var.attribute("VALIDMAX", 1707.0);
-      var.attribute("FILLVAL", Constants.DOUBLE_FILL);
-      var.attribute("LABLAXIS", "MSPC");
-      var.attribute("DEPEND_1", "energy");
+      var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
 
       //Create the "energy" variable
       //This variable lists the starting energy for each channel in keV
@@ -136,7 +137,8 @@ public class MSPC{
 
       var.attribute("FIELDNAM", "Energy Level");
       var.attribute("CATDESC", "Energy Level");
-      var.attribute("VAR_NOTES", "Start of each slow spectrum var channel.");
+      var.attribute("LABLAXIS", "Energy");
+      var.attribute("VAR_NOTES", "Center of each medium spectrum channel.");
       var.attribute("VAR_TYPE", "support_data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "%f");
@@ -144,8 +146,7 @@ public class MSPC{
       var.attribute("SCALETYP", "log");
       var.attribute("VALIDMIN", 100.0);
       var.attribute("VALIDMAX", 4100.0);
-      var.attribute("FILLVAL", Constants.DOUBLE_FILL);
-      var.attribute("LABLAXIS", "Energy");
+      var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
       var.attribute("DELTA_PLUS_VAR", "HalfBinWidth");
       var.attribute("DELTA_MINUS_VAR", "HalfBinWidth");
 
@@ -165,6 +166,7 @@ public class MSPC{
 
       var.attribute("FIELDNAM", "Bin Width");
       var.attribute("CATDESC", "Width of energy channel");
+      var.attribute("LABLAXIS", "Width");
       var.attribute("VAR_TYPE", "support_data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "%f");
@@ -172,8 +174,7 @@ public class MSPC{
       var.attribute("SCALETYP", "linear");
       var.attribute("VALIDMIN", 3.0);
       var.attribute("VALIDMAX", 157.0);
-      var.attribute("FILLVAL", Constants.DOUBLE_FILL);
-      var.attribute("LABLAXIS", "Width");
+      var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
 
       //Fill the "BinWidth" variable
       double[][] bin_width = new double[1][BIN_WIDTHS.length];

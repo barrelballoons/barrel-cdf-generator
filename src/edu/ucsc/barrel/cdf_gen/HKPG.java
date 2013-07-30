@@ -268,8 +268,9 @@ public class HKPG{
          "Logical_source_description", "Analog Housekeeping Data"
       );
       this.cdf.attribute(
-         "TEXT", "Voltage, temperature, current, and payload status values " +
-         "returned every 40 sec " 
+         "TEXT", 
+         "Voltage, temperature, current, and payload status values returned " + 
+         "every 40s." 
       );
       this.cdf.attribute("Instrument_type", "Housekeeping");
       this.cdf.attribute("Descriptor", "EDI");
@@ -292,30 +293,29 @@ public class HKPG{
    }
 
    private void createVar(final HkpgVar v){
-      long type = v.getType();
       CDFVar var = new CDFVar(this.cdf, v.getName(), this.type);
 
-      if(type == CDFConstants.CDF_INT4){
+      if(v.getType() == CDFConstants.CDF_INT4){
          var.attribute("FORMAT", "%i");
-         var.attribute("FILLVAL", Constants.INT4_FILL);
+         var.attribute("FILLVAL", CDFVar.getIstpVal("INT4_FILL"));
       }else if(type == CDFConstants.CDF_INT2){
          var.attribute("FORMAT", "%i");
-         var.attribute("FILLVAL", Constants.INT2_FILL);
+         var.attribute("FILLVAL", CDFVar.getIstpVal("INT2_FILL"));
       }else{
          var.attribute("FORMAT", "%f");
-         var.attribute("FILLVAL", Constants.FLOAT_FILL);
+         var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       }
 
       var.attribute("VALIDMIN", v.getMin());
       var.attribute("VALIDMAX", v.getMax());
       var.attribute("FIELDNAM", v.getName());
       var.attribute("CATDESC", v.getDesc());
+      var.attribute("LABLAXIS", v.getName());
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("UNITS", v.getUnits());
       var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
-      var.attribute("LABLAXIS", v.getName());
    }
    
    public CDFFile getCDF(){

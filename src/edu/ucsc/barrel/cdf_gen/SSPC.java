@@ -137,7 +137,7 @@ public class SSPC{
       );
       this.cdf.attribute(
          "TEXT", 
-         "X-ray spectra each made of 256 energy bins " + 
+         "Bremsstrahlung X-ray spectra each made of 256 energy bins " + 
          "transmitted over 32 frames."
       );
       this.cdf.attribute("Instrument_type", "Gamma and X-Rays");
@@ -164,6 +164,7 @@ public class SSPC{
 
       var.attribute("FIELDNAM", "SSPC");
       var.attribute("CATDESC", "SSPC");
+      var.attribute("LABLAXIS", "SSPC");
       var.attribute(
          "VAR_NOTES", 
          "Rebinned, divided by energy bin widths and " +
@@ -177,8 +178,7 @@ public class SSPC{
       var.attribute("DISPLAY_TYPE", "spectrogram");
       var.attribute("VALIDMIN", 0.0);
       var.attribute("VALIDMAX", 855.0);
-      var.attribute("FILLVAL", Constants.DOUBLE_FILL);
-      var.attribute("LABLAXIS", "SSPC");
+      var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
       var.attribute("DEPEND_1", "energy");
 
       //Create the "energy" variable
@@ -190,7 +190,8 @@ public class SSPC{
 
       var.attribute("FIELDNAM", "Energy Level");
       var.attribute("CATDESC", "Energy Level");
-      var.attribute("VAR_NOTES", "Start of each slow spectrum var channel.");
+      var.attribute("LABLAXIS", "Energy");
+      var.attribute("VAR_NOTES", "Center of each slow spectrum channel.");
       var.attribute("VAR_TYPE", "support_data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "%f");
@@ -198,8 +199,7 @@ public class SSPC{
       var.attribute("SCALETYP", "log");
       var.attribute("VALIDMIN", 0.0);
       var.attribute("VALIDMAX", 10000.0);
-      var.attribute("FILLVAL", Constants.DOUBLE_FILL);
-      var.attribute("LABLAXIS", "Energy");
+      var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
       var.attribute("DELTA_PLUS_VAR", "HalfBinWidth");
       var.attribute("DELTA_MINUS_VAR", "HalfBinWidth");
 
@@ -219,7 +219,7 @@ public class SSPC{
 
       var.attribute("FIELDNAM", "Bin Width");
       var.attribute("CATDESC", "Width of energy channel");
-      
+      var.attribute("LABLAXIS", "Width");
       var.attribute("VAR_TYPE", "support_data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "%f");
@@ -227,8 +227,7 @@ public class SSPC{
       var.attribute("SCALETYP", "linear");
       var.attribute("VALIDMIN", 0.0);
       var.attribute("VALIDMAX", 200.0);
-      var.attribute("FILLVAL", Constants.DOUBLE_FILL);
-      var.attribute("LABLAXIS", "Width");
+      var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
 
       //Fill the "BinWidth" variable
       double[][] bin_width = new double[1][BIN_WIDTHS.length];
@@ -243,6 +242,7 @@ public class SSPC{
       var.attribute("FIELDNAM", "Peak_511");
       var.attribute("CATDESC", "Location of the 511 line");
       var.attribute("VAR_TYPE", "data");
+      var.attribute("LABLAXIS", "Peak_511");  
       var.attribute(
          "VAR_NOTES", 
          "This is the detector channel (0-4096) " + 
@@ -255,8 +255,7 @@ public class SSPC{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0.0);
       var.attribute("VALIDMAX", 4096.0);
-      var.attribute("FILLVAL", Constants.DOUBLE_FILL);
-      var.attribute("LABLAXIS", "Peak_511");  
+      var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
    }
 
    public CDFFile getCDF(){

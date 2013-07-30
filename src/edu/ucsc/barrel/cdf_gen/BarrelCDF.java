@@ -114,18 +114,19 @@ public class BarrelCDF extends CDFFile{
       var = new CDFVar(this, "FrameGroup", CDFConstants.CDF_INT4);
       var.attribute("FIELDNAM", "Frame Number");
       var.attribute("CATDESC", "DPU Frame Counter");
+      var.attribute("LABLAXIS", "Frame");
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "%u");
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0);
       var.attribute("VALIDMAX", 2147483647);
-      var.attribute("FILLVAL", var.getIstpVal("INT4_FILL"));
-      var.attribute("LABLAXIS", "Frame");
+      var.attribute("FILLVAL", CDFVar.getIstpVal("INT4_FILL"));
 
       var = new CDFVar(this, "Q", CDFConstants.CDF_INT4);
       var.attribute("FIELDNAM", "Data Quality");
-      var.attribute("CATDESC", "32bit flag used to indicate data quality");
+      var.attribute("CATDESC", "32bit flag used to indicate data quality.");
+      var.attribute("LABLAXIS", "Q");
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "%u");
@@ -133,7 +134,6 @@ public class BarrelCDF extends CDFFile{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0);
       var.attribute("VALIDMAX", 2147483647);
-      var.attribute("FILLVAL", var.getIstpVal("INT4_FILL"));
-      var.attribute("LABLAXIS", "Q");
+      var.attribute("FILLVAL", CDFVar.getIstpVal("INT4_FILL"));
    }
 }

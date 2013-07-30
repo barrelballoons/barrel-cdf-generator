@@ -87,6 +87,7 @@ public class Magn{
       var.attribute(
          "CATDESC", axis + " axis of magnetic field"
       );
+      var.attribute("LABLAXIS", "B_" + axis);
       var.attribute(
          "VAR_NOTES", 
          "Calculated as (raw_value - 8388608) / 83886.070. " +
@@ -101,9 +102,8 @@ public class Magn{
       var.attribute("VALIDMIN", -1e31f);
       var.attribute("VALIDMAX", 1e31f);
       var.attribute(
-         "FILLVAL", Constants.FLOAT_FILL
+         "FILLVAL", CDFVar.getIstpVal("FLOAT_FILL")
       );
-      var.attribute("LABLAXIS", "B_" + axis);
    }
 
    private void addTotalVar(){
@@ -113,6 +113,7 @@ public class Magn{
       var.attribute(
          "CATDESC", "Magnitude of magnetic field." 
       );
+      var.attribute("LABLAXIS", "B_tot");
       var.attribute(
          "VAR_NOTES", 
          "Bt = sqrt(Bx^2 + By^2 + Bz^2)..Value has variations due to payload" +
@@ -126,8 +127,7 @@ public class Magn{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", -1e31f);
       var.attribute("VALIDMAX", 1e31f);
-      var.attribute("FILLVAL", Constants.FLOAT_FILL);
-      var.attribute("LABLAXIS", "B_tot");
+      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
    }
    
    public CDFFile getCDF(){

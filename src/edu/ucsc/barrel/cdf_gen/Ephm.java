@@ -56,7 +56,14 @@ public class Ephm {
    private void addEphmGlobalAtts(){
       //Set global attributes specific to this type of CDF
       cdf.attribute("Logical_source_description", "Coordinates");
-      cdf.attribute("TEXT", "Geographic and magnetic corrdinates.");
+      cdf.attribute(
+         "TEXT", 
+         "Geographic and magnetic corrdinates. Geographic coordinates are " +
+         "obtained from onboard GPS unit, magnegic coordinates are derived " +
+         "using the IRBEM FORTRAN library. Ephemeris data products " +
+         "(Lat, Long, Alt, and Time) are each returned once every 4s."
+         
+      );
       cdf.attribute("Instrument_type", "GPS");
       cdf.attribute("Descriptor", "ephm>EPHeMeris");
       cdf.attribute("Time_resolution", "4s");
@@ -70,8 +77,9 @@ public class Ephm {
 
    private void addEphmVars(){
       var = new CDFVar(this.cdf, "GPS_Lat", CDFConstants.CDF_FLOAT);
-      var.attribute("FIELDNAM", "GPS_Lat");
-      var.attribute("CATDESC", "GPS Latitude returned every four seconds.");
+      var.attribute("FIELDNAM", "GPS Lat");
+      var.attribute("CATDESC", "GPS Latitude.");
+      var.attribute("LABLAXIS", "Lat");
       var.attribute(
          "VAR_NOTES", 
          "Converted from raw int value by multiplying by scaling factor " +
@@ -85,12 +93,12 @@ public class Ephm {
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", -180f);
       var.attribute("VALIDMAX", 180f);
-      var.attribute("FILLVAL", Constants.FLOAT_FILL);
-      var.attribute("LABLAXIS", "Lat");
+      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
 
       var = new CDFVar(this.cdf, "GPS_Lon", CDFConstants.CDF_FLOAT);
-      var.attribute("FIELDNAM", "GPS_Lon");
-      var.attribute("CATDESC", "GPS Longitude returned every four seconds.");
+      var.attribute("FIELDNAM", "GPS Lon");
+      var.attribute("CATDESC", "GPS Longitude.");
+      var.attribute("LABLAXIS", "Lon");
       var.attribute(
          "VAR_NOTES", 
          "Converted from raw int value by multiplying by scaling factor " +
@@ -104,12 +112,12 @@ public class Ephm {
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", -180f);
       var.attribute("VALIDMAX", 180f);
-      var.attribute("FILLVAL", Constants.FLOAT_FILL);
-      var.attribute("LABLAXIS", "Lon");
+      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
 
       var = new CDFVar(this.cdf, "GPS_Alt", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "GPS_Alt");
-      var.attribute("CATDESC", "GPS Altitude returned every four seconds.");
+      var.attribute("CATDESC", "GPS Altitude.");
+      var.attribute("LABLAXIS", "Alt");
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "%f");
@@ -118,12 +126,13 @@ public class Ephm {
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0f, CDFConstants.CDF_FLOAT);
       var.attribute("VALIDMAX", 50f, CDFConstants.CDF_FLOAT);
-      var.attribute("FILLVAL", Constants.FLOAT_FILL);
-      var.attribute("LABLAXIS", "Alt");
+      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
 
       var = new CDFVar(this.cdf, "MLT_Kp2", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "MLT for Kp=2");
       var.attribute("CATDESC", "Magnetic local time for Kp=2 in hours.");
+      var.attribute("LABLAXIS", "MLT_Kp2");
+      var.attribute("VAR_NOTES", "Calculated using IRBEM FORTRAN library"); 
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "%f");
@@ -132,12 +141,12 @@ public class Ephm {
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0f);
       var.attribute("VALIDMAX", 1e27f);
-      var.attribute("FILLVAL", Constants.FLOAT_FILL);
-      var.attribute("LABLAXIS", "MLT_Kp2");
+      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
 
       var = new CDFVar(this.cdf, "MLT_Kp6", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "MLT for Kp=6");
       var.attribute("CATDESC", "Magnetic local time for Kp=6 in hours");
+      var.attribute("VAR_NOTES", "Calculated using IRBEM FORTRAN library"); 
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "%f");
@@ -146,12 +155,13 @@ public class Ephm {
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0f, CDFConstants.CDF_FLOAT);
       var.attribute("VALIDMAX", 1e27f, CDFConstants.CDF_FLOAT);
-      var.attribute("FILLVAL", Constants.FLOAT_FILL);
+      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       var.attribute("LABLAXIS", "MLT_Kp6");
 
       var = new CDFVar(this.cdf, "L_Kp2", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "L for Kp=2");
       var.attribute("CATDESC", "L shell for Kp=2");
+      var.attribute("VAR_NOTES", "Calculated using IRBEM FORTRAN library"); 
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "%f");
@@ -159,12 +169,13 @@ public class Ephm {
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0f, CDFConstants.CDF_FLOAT);
       var.attribute("VALIDMAX", 1e27f, CDFConstants.CDF_FLOAT);
-      var.attribute("FILLVAL", Constants.FLOAT_FILL);
+      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       var.attribute("LABLAXIS", "L_Kp2");
 
       var = new CDFVar(this.cdf, "L_Kp6", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "L for Kp=6");
       var.attribute("CATDESC", "L shell for Kp=6");
+      var.attribute("VAR_NOTES", "Calculated using IRBEM FORTRAN library"); 
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "%f");
@@ -172,7 +183,7 @@ public class Ephm {
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0f);
       var.attribute("VALIDMAX", 1e27f);
-      var.attribute("FILLVAL", Constants.FLOAT_FILL);
+      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       var.attribute("LABLAXIS", "L_Kp6");
    }
    
