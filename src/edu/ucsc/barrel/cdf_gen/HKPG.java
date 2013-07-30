@@ -298,7 +298,7 @@ public class HKPG{
       if(v.getType() == CDFConstants.CDF_INT4){
          var.attribute("FORMAT", "%i");
          var.attribute("FILLVAL", CDFVar.getIstpVal("INT4_FILL"));
-      }else if(type == CDFConstants.CDF_INT2){
+      }else if(v.getType() == CDFConstants.CDF_INT2){
          var.attribute("FORMAT", "%i");
          var.attribute("FILLVAL", CDFVar.getIstpVal("INT2_FILL"));
       }else{
