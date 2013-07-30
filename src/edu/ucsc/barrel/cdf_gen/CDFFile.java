@@ -32,12 +32,15 @@ import gsfc.nssdc.cdf.Attribute;
 import gsfc.nssdc.cdf.Entry;
 
 import java.io.File;
+import java.util.Map;
+import java.util.HashMap;
 
 public class CDFFile implements CDFComponent{
    private static long type = CDFConstants.CDF_;
    private CDF cdf;
    private String name;
    private String path;
+   private Map<String, CDFVar> vars;
 
    public CDFFile(final String p){
       this.path = p;
@@ -53,6 +56,9 @@ public class CDFFile implements CDFComponent{
          System.out.println("Could not create/open CDF file '" + path + "':");
          System.out.println(e.getMessage());
       }
+
+      //create a map in which to store teh CDFVariables
+      vars = new HashMap<String, CDFVar>();
    }
    
    public CDF getCDF(){return this.cdf;}
@@ -79,7 +85,7 @@ public class CDFFile implements CDFComponent{
 
       return attr;
    }
-
+   
    //functions for over writing current attribute values in this CDF file
    public void editAttribute(final String name, final String value, long entry){
       CDFAttribute attr = new CDFAttribute(this, name);
@@ -91,12 +97,62 @@ public class CDFFile implements CDFComponent{
       editAttribute(name, value, entry);
    }
    
+   //accessor for the vars HashMap
+   public CDFVar getVar(String name){
+      return vars.get(name);
+   }
+   public void addVar(String name, CDFVar var){
+      vars.put(name, var);
+   }
 
    //functions for writing data to its variables
-   public void addData(String name, Object data){
-      //get a reference to the variable
-      CDFVar var = new CDFVar(this, "Epoch");
-      var.writeData(data);
+   public void addData(String name, short[] data){
+      CDFVar var = vars.get(name);
+      var.writeData(name, data);
+   }
+   public void addData(String name, int[] data){
+      CDFVar var = vars.get(name);
+      var.writeData(name, data);
+   }
+   public void addData(String name, long[] data){
+      CDFVar var = vars.get(name);
+      var.writeData(name, data);
+   }
+   public void addData(String name, float[] data){
+      CDFVar var = vars.get(name);
+      var.writeData(name, data);
+   }
+   public void addData(String name, double[] data){
+      CDFVar var = vars.get(name);
+      var.writeData(name, data);
+   }
+   public void addData(String name, String[] data){
+      CDFVar var = vars.get(name);
+      var.writeData(name, data);
+   }
+   public void addData(String name, short[][] data){
+      CDFVar var = vars.get(name);
+      var.writeData(name, data);
+   }
+   public void addData(String name, int[][] data){
+      CDFVar var = vars.get(name);
+      var.writeData(name, data);
+   }
+   public void addData(String name, long[][] data){
+      CDFVar var = vars.get(name);
+      var.writeData(name, data);
+   }
+   public void addData(String name, float[][] data){
+      CDFVar var = vars.get(name);
+      var.writeData(name, data);
+   }
+   public void addData(String name, double[][] data){
+      CDFVar var = vars.get(name);
+      var.writeData(name, data);
+   }
+   public void addData(String name, String[][] data){
+      CDFVar var = vars.get(name);
+      var.writeData(name, data);
    }
 
    //close the CDF file. This must be done before the program exits
@@ -107,5 +163,4 @@ public class CDFFile implements CDFComponent{
          System.out.println(e.getMessage());
       }
    }
-
 }

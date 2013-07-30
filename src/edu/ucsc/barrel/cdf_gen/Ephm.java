@@ -94,6 +94,7 @@ public class Ephm {
       var.attribute("VALIDMIN", -180f);
       var.attribute("VALIDMAX", 180f);
       var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      this.cdf.addVar("GPS_Lat", var);
 
       var = new CDFVar(this.cdf, "GPS_Lon", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "GPS Lon");
@@ -113,6 +114,7 @@ public class Ephm {
       var.attribute("VALIDMIN", -180f);
       var.attribute("VALIDMAX", 180f);
       var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      this.cdf.addVar("GPS_Lon", var);
 
       var = new CDFVar(this.cdf, "GPS_Alt", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "GPS_Alt");
@@ -127,6 +129,7 @@ public class Ephm {
       var.attribute("VALIDMIN", 0f, CDFConstants.CDF_FLOAT);
       var.attribute("VALIDMAX", 50f, CDFConstants.CDF_FLOAT);
       var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      this.cdf.addVar("GPS_Alt", var);
 
       var = new CDFVar(this.cdf, "MLT_Kp2", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "MLT for Kp=2");
@@ -142,10 +145,12 @@ public class Ephm {
       var.attribute("VALIDMIN", 0f);
       var.attribute("VALIDMAX", 1e27f);
       var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      this.cdf.addVar("MLT_Kp2", var);
 
       var = new CDFVar(this.cdf, "MLT_Kp6", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "MLT for Kp=6");
       var.attribute("CATDESC", "Magnetic local time for Kp=6 in hours");
+      var.attribute("LABLAXIS", "MLT_Kp6");
       var.attribute("VAR_NOTES", "Calculated using IRBEM FORTRAN library"); 
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
@@ -156,11 +161,12 @@ public class Ephm {
       var.attribute("VALIDMIN", 0f, CDFConstants.CDF_FLOAT);
       var.attribute("VALIDMAX", 1e27f, CDFConstants.CDF_FLOAT);
       var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
-      var.attribute("LABLAXIS", "MLT_Kp6");
+      this.cdf.addVar("MLT_Kp6", var);
 
       var = new CDFVar(this.cdf, "L_Kp2", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "L for Kp=2");
       var.attribute("CATDESC", "L shell for Kp=2");
+      var.attribute("LABLAXIS", "L_Kp2");
       var.attribute("VAR_NOTES", "Calculated using IRBEM FORTRAN library"); 
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
@@ -170,11 +176,12 @@ public class Ephm {
       var.attribute("VALIDMIN", 0f, CDFConstants.CDF_FLOAT);
       var.attribute("VALIDMAX", 1e27f, CDFConstants.CDF_FLOAT);
       var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
-      var.attribute("LABLAXIS", "L_Kp2");
+      this.cdf.addVar("L_Kp2", var);
 
       var = new CDFVar(this.cdf, "L_Kp6", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "L for Kp=6");
       var.attribute("CATDESC", "L shell for Kp=6");
+      var.attribute("LABLAXIS", "L_Kp6");
       var.attribute("VAR_NOTES", "Calculated using IRBEM FORTRAN library"); 
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
@@ -184,9 +191,9 @@ public class Ephm {
       var.attribute("VALIDMIN", 0f);
       var.attribute("VALIDMAX", 1e27f);
       var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
-      var.attribute("LABLAXIS", "L_Kp6");
+      this.cdf.addVar("L_Kp6", var);
    }
-   
+
    public CDFFile getCDF(){
       return this.cdf;
    }

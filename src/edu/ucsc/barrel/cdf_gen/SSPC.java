@@ -172,6 +172,7 @@ public class SSPC{
       );
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
+      var.attribute("DEPEND_1", "energy");
       var.attribute("FORMAT", "%f");
       var.attribute("UNITS", "cnts/keV/sec");
       var.attribute("SCALETYP", "log");
@@ -179,7 +180,7 @@ public class SSPC{
       var.attribute("VALIDMIN", 0.0);
       var.attribute("VALIDMAX", 855.0);
       var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
-      var.attribute("DEPEND_1", "energy");
+      this.cdf.addVar("SSPC", var);
 
       //Create the "energy" variable
       //This variable lists the starting energy for each channel in keV
@@ -202,6 +203,7 @@ public class SSPC{
       var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
       var.attribute("DELTA_PLUS_VAR", "HalfBinWidth");
       var.attribute("DELTA_MINUS_VAR", "HalfBinWidth");
+      this.cdf.addVar("energy", var);
 
       //Fill the "energy" variable
       double[][] energy = new double[1][BIN_CENTERS.length];
@@ -228,6 +230,7 @@ public class SSPC{
       var.attribute("VALIDMIN", 0.0);
       var.attribute("VALIDMAX", 200.0);
       var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
+      this.cdf.addVar("HalfBinWidth", var);
 
       //Fill the "BinWidth" variable
       double[][] bin_width = new double[1][BIN_WIDTHS.length];
@@ -256,6 +259,7 @@ public class SSPC{
       var.attribute("VALIDMIN", 0.0);
       var.attribute("VALIDMAX", 4096.0);
       var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
+      this.cdf.addVar("Peak_511", var);
    }
 
    public CDFFile getCDF(){

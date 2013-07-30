@@ -78,9 +78,8 @@ public class Pps{
    private void addPpsVars(){
       var = new CDFVar(cdf, "GPS_PPS", CDFConstants.CDF_INT2);
       var.attribute("FIELDNAM", "Pulse Per Second");
-      var.attribute(
-         "CATDESC", "Milliseconds before GPS pulse arrived." 
-      );
+      var.attribute("CATDESC", "Milliseconds before GPS pulse arrived.");
+      var.attribute("LABLAXIS", "PPS");
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "%i");
@@ -89,12 +88,13 @@ public class Pps{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0);
       var.attribute("VALIDMAX", 1000);
-      var.attribute("FILLVAL", Constants.INT2_FILL);
-      var.attribute("LABLAXIS", "PPS");
+      var.attribute("FILLVAL", CDFVar.getIstpVal("INT2_FILL"));
+      this.cdf.addVar("GPS_PPS", var);
 
       var = new CDFVar(cdf, "Version", CDFConstants.CDF_INT2);
       var.attribute("FIELDNAM", "Software Version");
       var.attribute("CATDESC", "Software Version.");
+      var.attribute("LABLAXIS", "Version");
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "%i");
@@ -102,14 +102,13 @@ public class Pps{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0);
       var.attribute("VALIDMAX", 32);
-      var.attribute("FILLVAL", Constants.INT2_FILL);
-      var.attribute("LABLAXIS", "Version");
+      var.attribute("FILLVAL", CDFVar.getIstpVal("INT2_FILL"));
+      this.cdf.addVar("Version", var);
 
       var = new CDFVar(cdf, "Payload_ID", CDFConstants.CDF_INT2);
       var.attribute("FIELDNAM", "Payload ID");
-      var.attribute(
-         "CATDESC", "ID transmitted by the payload's DPU."
-      );
+      var.attribute("CATDESC", "ID transmitted by the payload's DPU.");
+      var.attribute("LABLAXIS", "ID");
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "%i");
@@ -117,8 +116,8 @@ public class Pps{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0);
       var.attribute("VALIDMAX", 64);
-      var.attribute("FILLVAL", Constants.INT2_FILL);
-      var.attribute("LABLAXIS", "ID");
+      var.attribute("FILLVAL", CDFVar.getIstpVal("INT2_FILL"));
+      this.cdf.addVar("Payload_ID", var);
    }
    
    public CDFFile getCDF(){

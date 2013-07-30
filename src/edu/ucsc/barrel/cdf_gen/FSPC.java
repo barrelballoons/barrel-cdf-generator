@@ -96,9 +96,9 @@ public class FSPC{
       var.attribute("UNITS", "cnts/50ms");
       var.attribute("SCALETYP", "log");
       var.attribute("DISPLAY_TYPE", "time_series");
-      
       var.attribute("VALIDMAX", 65535);
       var.attribute("FILLVAL", CDFVar.getIstpVal("INT4_FILL"));
+      this.cdf.addVar("LC" + ch, var);
    }
    
    public CDFFile getCDF(){

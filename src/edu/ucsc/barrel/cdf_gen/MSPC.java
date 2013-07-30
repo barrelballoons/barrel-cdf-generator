@@ -127,6 +127,7 @@ public class MSPC{
       var.attribute("VALIDMIN", 0.0);
       var.attribute("VALIDMAX", 1707.0);
       var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
+      this.cdf.addVar("MSPC", var);
 
       //Create the "energy" variable
       //This variable lists the starting energy for each channel in keV
@@ -135,7 +136,7 @@ public class MSPC{
          false, new long[] {BIN_CENTERS.length}
       );
 
-      var.attribute("FIELDNAM", "Energy Level");
+      var.attribute("FIELDNAM", "energy");
       var.attribute("CATDESC", "Energy Level");
       var.attribute("LABLAXIS", "Energy");
       var.attribute("VAR_NOTES", "Center of each medium spectrum channel.");
@@ -149,6 +150,7 @@ public class MSPC{
       var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
       var.attribute("DELTA_PLUS_VAR", "HalfBinWidth");
       var.attribute("DELTA_MINUS_VAR", "HalfBinWidth");
+      this.cdf.addVar("energy", var);
 
       //Fill the "energy" variable
       double[][] energy = new double[1][BIN_CENTERS.length];
@@ -175,6 +177,7 @@ public class MSPC{
       var.attribute("VALIDMIN", 3.0);
       var.attribute("VALIDMAX", 157.0);
       var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
+      this.cdf.addVar("HalfBinWidth", var);
 
       //Fill the "BinWidth" variable
       double[][] bin_width = new double[1][BIN_WIDTHS.length];

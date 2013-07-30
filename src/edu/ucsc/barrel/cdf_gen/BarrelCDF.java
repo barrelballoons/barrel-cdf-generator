@@ -110,6 +110,7 @@ public class BarrelCDF extends CDFFile{
       var.attribute("TIME_BASE", "J2000");
       var.attribute("TIME_SCALE", "Terrestrial Time");
       var.attribute("REFERENCE_POSITION", "Rotating Earch Geoid");
+      this.addVar("Epoch", var);
 
       var = new CDFVar(this, "FrameGroup", CDFConstants.CDF_INT4);
       var.attribute("FIELDNAM", "Frame Number");
@@ -122,6 +123,7 @@ public class BarrelCDF extends CDFFile{
       var.attribute("VALIDMIN", 0);
       var.attribute("VALIDMAX", 2147483647);
       var.attribute("FILLVAL", CDFVar.getIstpVal("INT4_FILL"));
+      this.addVar("FrameGroup", var);
 
       var = new CDFVar(this, "Q", CDFConstants.CDF_INT4);
       var.attribute("FIELDNAM", "Data Quality");
@@ -135,5 +137,6 @@ public class BarrelCDF extends CDFFile{
       var.attribute("VALIDMIN", 0);
       var.attribute("VALIDMAX", 2147483647);
       var.attribute("FILLVAL", CDFVar.getIstpVal("INT4_FILL"));
+      this.addVar("Q", var);
    }
 }

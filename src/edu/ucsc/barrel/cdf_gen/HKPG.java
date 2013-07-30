@@ -293,7 +293,7 @@ public class HKPG{
    }
 
    private void createVar(final HkpgVar v){
-      CDFVar var = new CDFVar(this.cdf, v.getName(), this.type);
+      CDFVar var = new CDFVar(this.cdf, v.getName(), v.getType());
 
       if(v.getType() == CDFConstants.CDF_INT4){
          var.attribute("FORMAT", "%i");
@@ -305,7 +305,6 @@ public class HKPG{
          var.attribute("FORMAT", "%f");
          var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       }
-
       var.attribute("VALIDMIN", v.getMin());
       var.attribute("VALIDMAX", v.getMax());
       var.attribute("FIELDNAM", v.getName());
@@ -316,6 +315,7 @@ public class HKPG{
       var.attribute("UNITS", v.getUnits());
       var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
+      this.cdf.addVar(v.getName(), var);
    }
    
    public CDFFile getCDF(){
