@@ -135,7 +135,7 @@ public class MSPC extends DataProduct{
       //This variable lists the starting energy for each channel in keV
       var = new CDFVar(
          this.cdf, "energy", CDFConstants.CDF_DOUBLE,
-         false, new long[] {BIN_CENTERS.length}
+         true, new long[] {BIN_CENTERS.length}
       );
 
       var.attribute("FIELDNAM", "energy");
