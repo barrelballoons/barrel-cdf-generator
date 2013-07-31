@@ -37,7 +37,7 @@ import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
 
-public class Pps{
+public class Pps extends DataProduct{
    private int date, lvl;
 
    public Pps(final String p, final int d, final int l){
@@ -51,7 +51,7 @@ public class Pps{
    }
 
    @Override
-   private void addGAttributes(){
+   protected void addGAttributes(){
       //Set global attributes specific to this type of CDF
       this.cdf.attribute(
          "Logical_source_description", "Pulse Per Second"
@@ -73,7 +73,7 @@ public class Pps{
    }
 
    @Override
-   private void addVars(){
+   protected void addVars(){
       CDFVar var;
       
       var = new CDFVar(cdf, "GPS_PPS", CDFConstants.CDF_INT2);

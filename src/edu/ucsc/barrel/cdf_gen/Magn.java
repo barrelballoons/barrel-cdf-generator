@@ -37,7 +37,7 @@ import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
 
-public class Magn{
+public class Magn extends DataProduct{
    private int date, lvl;
 
    public Magn(final String p, final int d, final int l){
@@ -51,7 +51,7 @@ public class Magn{
    }
    
    @Override
-   private void addGAttributes(){
+   protected void addGAttributes(){
       //Set global attributes specific to this type of CDF
       this.cdf.attribute(
          "Logical_source_description", "MAG X, Y, and Z"
@@ -74,7 +74,7 @@ public class Magn{
    }
 
    @Override
-   private void addVars{
+   protected void addVars(){
       addAxisVar("X");
       addAxisVar("Y");
       addAxisVar("Z");
@@ -82,7 +82,7 @@ public class Magn{
    }
 
    private void addAxisVar(final String axis){
-      CDFVar = new CDFVar(cdf, "MAG_" + axis, CDFConstants.CDF_FLOAT);
+      CDFVar var = new CDFVar(cdf, "MAG_" + axis, CDFConstants.CDF_FLOAT);
 
       var.attribute("FIELDNAM", axis + "_axis");
       var.attribute(

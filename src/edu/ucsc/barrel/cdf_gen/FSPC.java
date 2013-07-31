@@ -37,8 +37,7 @@ import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
 
-public class FSPC{
-   private String path;
+public class FSPC extends DataProduct{
    private int date, lvl;
 
    private double scale = 2.4414; // keV/bin

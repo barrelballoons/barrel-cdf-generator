@@ -41,7 +41,7 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 
 
-public class HKPG{
+public class HKPG extends DataProduct{
    private int date, lvl;
    List<HkpgVar> vars;   
    
@@ -84,7 +84,7 @@ public class HKPG{
    }
 
    @Override
-   private void addGAttributes(){
+   protected void addGAttributes(){
       //Set global attributes specific to this type of CDF
       this.cdf.attribute(
          "Logical_source_description", "Analog Housekeeping Data"
@@ -106,7 +106,7 @@ public class HKPG{
    }
 
    @Override
-   private void addVars(){
+   protected void addVars(){
       //create an array containing the details of these variables
       fillVarArray();
 

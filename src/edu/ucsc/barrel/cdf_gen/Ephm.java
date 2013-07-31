@@ -45,7 +45,7 @@ public class Ephm extends DataProduct{
       this.lvl = l;
 
       setCDF(new BarrelCDF(p, l));
-      addGAttributess();
+      addGAttributes();
       addVars();
    }
    

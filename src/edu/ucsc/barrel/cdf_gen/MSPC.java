@@ -37,7 +37,7 @@ import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
 
-public class MSPC{
+public class MSPC extends DataProduct{
    private int date, lvl;
 
    private double scale = 2.4414; // keV/bin
@@ -75,7 +75,7 @@ public class MSPC{
    }
 
    @Override
-   private void addGAttributes(){
+   protected void addGAttributes(){
       //Set global attributes specific to this type of CDF
       this.cdf.attribute(
          "Logical_source_description", "Slow time resolution X-ray spectrum"
@@ -99,7 +99,7 @@ public class MSPC{
    }
 
    @Override
-   private void addVars(){
+   protected void addVars(){
       CDFVar var;
       //create MSPC variable
       //This variable will contain the medium spectrum that is returned over

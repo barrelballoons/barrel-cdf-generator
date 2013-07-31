@@ -37,7 +37,7 @@ import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
 
-public class SSPC{
+public class SSPC extends DataProduct{
    private int date, lvl;
 
    private double scale = 2.4414; // keV/bin
@@ -128,7 +128,7 @@ public class SSPC{
    }
 
    @Override
-   private void addGAttributes(){
+   protected void addGAttributes(){
       //Set global attributes specific to this type of CDF
       this.cdf.attribute(
          "Logical_source_description", "Slow time resolution X-ray spectrum"
@@ -152,7 +152,7 @@ public class SSPC{
    }
 
    @Override
-   private void addVars(){
+   protected void addVars(){
       CDFVar var;
 
       //create SSPC variable
