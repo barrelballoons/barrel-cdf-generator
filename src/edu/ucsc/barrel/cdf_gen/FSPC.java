@@ -103,6 +103,26 @@ public class FSPC extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMAX", 65535);
       var.attribute("FILLVAL", CDFVar.getIstpVal("INT4_FILL"));
+      var.attribute("DELTA_PLUS_VAR", "cnt_error" + ch);
+      var.attribute("DELTA_MINUS_VAR", "cnt_error" + ch);
       this.cdf.addVar("LC" + ch, var);
+
+      //Create the count error variable
+      var = new CDFVar(cdf, "cnt_error" + ch, CDFConstants.CDF_DOUBLE);
+      var.attribute("FIELDNAM", "Count Error " + ch);
+      var.attribute(
+         "CATDESC", "Count error based on Poisson statistics for LC " + ch + "."
+      );
+      var.attribute("LABLAXIS", "Error");
+      var.attribute("VAR_NOTES", "Error only valid for large count values.");
+      var.attribute("VAR_TYPE", "support_data");
+      var.attribute("DEPEND_0", "Epoch");
+      var.attribute("FORMAT", "%f");
+      var.attribute("UNITS", "keV");
+      var.attribute("SCALETYP", "linear");
+      var.attribute("VALIDMIN", 0.0);
+      var.attribute("VALIDMAX", 10000.0);
+      var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
+      this.cdf.addVar("cnt_error" + ch, var);
    }
 }

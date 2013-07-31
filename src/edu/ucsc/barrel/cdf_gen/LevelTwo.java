@@ -203,7 +203,7 @@ public class LevelTwo extends CDFWriter{
             rec_i = 0,
             this_frame = 0,
             last_frame = 0;
-
+         float fill = CDFVar.getIstpVal("FLOAT_FILL").floatValue();
          while((line = mag_coord_file.readLine()) != null){
             line = line.trim();
             mag_coords = line.split("\\s+");
@@ -215,31 +215,31 @@ public class LevelTwo extends CDFWriter{
                if(mag_coords[8].indexOf("*") == -1){
                   l2[rec_i] = Math.abs(Float.parseFloat(mag_coords[8]));
                }else{
-                  l2[rec_i] = Constants.FLOAT_FILL;
+                  l2[rec_i] = fill;
                }
                if(mag_coords[9].indexOf("*") == -1){
                   mlt2[rec_i] = Float.parseFloat(mag_coords[9]);
                }else{
-                  mlt2[rec_i] = Constants.FLOAT_FILL;
+                  mlt2[rec_i] = fill;
                }
                if(mag_coords[11].indexOf("*") == -1){
                   l6[rec_i] = Math.abs(Float.parseFloat(mag_coords[11]));
                }else{
-                  l6[rec_i] = Constants.FLOAT_FILL;
+                  l6[rec_i] = fill;
                }
                if(mag_coords[12].indexOf("*") == -1){
                   mlt6[rec_i] = Float.parseFloat(mag_coords[12]);
                }else{
-                  mlt6[rec_i] = Constants.FLOAT_FILL;
+                  mlt6[rec_i] = fill;
                }
 
                last_frame = this_frame;
             }
             else{
-               l2[rec_i] = Constants.FLOAT_FILL; 
-               l6[rec_i] = Constants.FLOAT_FILL; 
-               mlt2[rec_i] = Constants.FLOAT_FILL; 
-               mlt6[rec_i] = Constants.FLOAT_FILL; 
+               l2[rec_i] = fill; 
+               l6[rec_i] = fill; 
+               mlt2[rec_i] = fill; 
+               mlt6[rec_i] = fill; 
             } 
 
             rec_i++;
@@ -356,28 +356,25 @@ public class LevelTwo extends CDFWriter{
       System.out.println("\nSaving Magnetometer Level Two CDF...");
 
       //extract the nominal magnetometer value and calculate |B|
+      float fill = CDFVar.getIstpVal("FLOAT_FILL").floatValue();
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-         if(CDF_Gen.data.magx[data_i] != Constants.FLOAT_FILL){
+         if(CDF_Gen.data.magx[data_i] != fill){
             magx[rec_i] = (CDF_Gen.data.magx[data_i] - 8388608.0f) / 83886.070f;
          }else{
-            magx[rec_i] = Constants.FLOAT_FILL;
+            magx[rec_i] = fill;
          }
-         if(CDF_Gen.data.magy[data_i] != Constants.FLOAT_FILL){
+         if(CDF_Gen.data.magy[data_i] != fill){
             magy[rec_i] = (CDF_Gen.data.magy[data_i] - 8388608.0f) / 83886.070f;
          }else{
-            magx[rec_i] = Constants.FLOAT_FILL;
+            magx[rec_i] = fill;
          }
-         if(CDF_Gen.data.magz[data_i] != Constants.FLOAT_FILL){
+         if(CDF_Gen.data.magz[data_i] != fill){
             magz[rec_i] = (CDF_Gen.data.magz[data_i] - 8388608.0f) / 83886.070f;
          }else{
-            magx[rec_i] = Constants.FLOAT_FILL;
+            magx[rec_i] = fill;
          }
          
-         if(
-            magx[rec_i] != Constants.FLOAT_FILL &&
-            magy[rec_i] != Constants.FLOAT_FILL &&
-            magz[rec_i] != Constants.FLOAT_FILL 
-         ){
+         if(magx[rec_i] != fill && magy[rec_i] != fill && magz[rec_i] != fill){
             magTot[rec_i] = 
                (float)Math.sqrt(
                   (magx[rec_i] * magx[rec_i]) + 
@@ -385,7 +382,7 @@ public class LevelTwo extends CDFWriter{
                   (magz[rec_i] * magz[rec_i]) 
                );
          }else{
-            magTot[rec_i] = Constants.FLOAT_FILL;
+            magTot[rec_i] = fill;
          }
 
          frameGroup[rec_i] = CDF_Gen.data.frame_4Hz[data_i];
@@ -442,7 +439,8 @@ public class LevelTwo extends CDFWriter{
          + "_l2_" + "hkpg" + "_20" + date +  "_v" + revNum + ".cdf";
 
       HKPG hkpg = new HKPG(destName, date, 2);
-         
+      float fill = CDFVar.getIstpVal("FLOAT_FILL").floatValue();
+
       for(int var_i = 0; var_i < 36; var_i++){
          //scale all the records for this variable
          float[] hkpg_scaled = new float[numOfRecs];
@@ -454,7 +452,7 @@ public class LevelTwo extends CDFWriter{
                      CDF_Gen.data.hkpg_scale[var_i]
                   ) + CDF_Gen.data.hkpg_offset[var_i];
             }else{
-               hkpg_scaled[rec_i] = Constants.FLOAT_FILL;
+               hkpg_scaled[rec_i] = fill;
             }
          }
 
@@ -505,7 +503,8 @@ public class LevelTwo extends CDFWriter{
       int numOfRecs = last - first;
 
       double[][] 
-         chan_edges = new double[numOfRecs][5];
+         chan_edges = new double[numOfRecs][5],
+         lc_error = new double[4][numOfRecs];
       int[][] 
          lc_scaled = new int[4][numOfRecs];
       double scint_temp = 20, dpu_temp = 20, peak = -1;
@@ -519,11 +518,13 @@ public class LevelTwo extends CDFWriter{
       
       //convert the light curves counts to cnts/sec and 
       //figure out the channel width
+      double double_fill = CDFVar.getIstpVal("DOUBLE_FILL").doubleValue();
+      int int4_fill = CDFVar.getIstpVal("INT4_FILL").intValue();
       for(int lc_rec = 0, hkpg_rec = 0; lc_rec < numOfRecs; lc_rec++){
 
          //get temperatures
          hkpg_rec = (lc_rec + first) / 20 / 40; //convert from 20Hz to mod40
-         if(CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] != Constants.DOUBLE_FILL){
+         if(CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] != int4_fill){
             scint_temp = 
                (CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] * 
                CDF_Gen.data.hkpg_scale[Constants.T0]) + 
@@ -531,7 +532,7 @@ public class LevelTwo extends CDFWriter{
          }else{
             scint_temp = 20;
          }
-         if(CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] != Constants.DOUBLE_FILL){
+         if(CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] != int4_fill){
             dpu_temp = 
                (CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] * 
                CDF_Gen.data.hkpg_scale[Constants.T5]) + 
@@ -547,23 +548,31 @@ public class LevelTwo extends CDFWriter{
          //write the spectrum to the new array
          if(CDF_Gen.data.lc1[lc_rec + first] != Constants.FSPC_RAW_FILL){
             lc_scaled[0][lc_rec] = CDF_Gen.data.lc1[lc_rec + first];
+            lc_error[0][lc_rec] = Math.sqrt(CDF_Gen.data.lc1[lc_rec + first]);
          }else{
-            lc_scaled[0][lc_rec] = Constants.INT4_FILL;
+            lc_scaled[0][lc_rec] = int4_fill;
+            lc_error[0][lc_rec] = double_fill;
          }
          if(CDF_Gen.data.lc2[lc_rec + first] != Constants.FSPC_RAW_FILL){
             lc_scaled[1][lc_rec] = CDF_Gen.data.lc2[lc_rec + first];
+            lc_error[1][lc_rec] = Math.sqrt(CDF_Gen.data.lc2[lc_rec + first]);
          }else{
-            lc_scaled[1][lc_rec] = Constants.INT4_FILL;
+            lc_scaled[1][lc_rec] = int4_fill;
+            lc_error[1][lc_rec] = double_fill;
          }
          if(CDF_Gen.data.lc3[lc_rec + first] != Constants.FSPC_RAW_FILL){
             lc_scaled[2][lc_rec] = CDF_Gen.data.lc3[lc_rec + first];
+            lc_error[2][lc_rec] = Math.sqrt(CDF_Gen.data.lc3[lc_rec + first]);
          }else{
-            lc_scaled[2][lc_rec] = Constants.INT4_FILL;
+            lc_scaled[2][lc_rec] = int4_fill;
+            lc_error[2][lc_rec] = double_fill;
          }
          if(CDF_Gen.data.lc4[lc_rec + first] != Constants.FSPC_RAW_FILL){
             lc_scaled[3][lc_rec] = CDF_Gen.data.lc4[lc_rec + first];
+            lc_error[3][lc_rec] = Math.sqrt(CDF_Gen.data.lc4[lc_rec + first]);
          }else{
-            lc_scaled[3][lc_rec] = Constants.INT4_FILL;
+            lc_scaled[3][lc_rec] = int4_fill;
+            lc_error[3][lc_rec] = double_fill;
          }
       }
 
@@ -580,12 +589,16 @@ public class LevelTwo extends CDFWriter{
       FSPC fspc = new FSPC(destName, date, 2);
       System.out.println("LC1");
       fspc.getCDF().addData("LC1", lc_scaled[0]);
+      fspc.getCDF().addData("cnt_error1", lc_error[0]);
       System.out.println("LC1");
       fspc.getCDF().addData("LC2", lc_scaled[1]);
+      fspc.getCDF().addData("cnt_error2", lc_error[1]);
       System.out.println("LC1");
       fspc.getCDF().addData("LC3", lc_scaled[2]);
+      fspc.getCDF().addData("cnt_error3", lc_error[2]);
       System.out.println("LC1");
       fspc.getCDF().addData("LC4", lc_scaled[3]);
+      fspc.getCDF().addData("cnt_error4", lc_error[3]);
       System.out.println("FrameGroup");
       fspc.getCDF().addData("FrameGroup", frameGroup);
       System.out.println("Epoch");
@@ -610,7 +623,9 @@ public class LevelTwo extends CDFWriter{
          q = new int[numOfRecs];
       long[] epoch = new long[numOfRecs];
 
-      double[][] mspc_rebin = new double[numOfRecs][48];
+      double[][] 
+         mspc_rebin = new double[numOfRecs][48],
+         mspc_error = new double[numOfRecs][48];
       double[] old_edges = new double[48];
       double[] std_edges = SpectrumExtract.stdEdges(1, 2.4414);
 
@@ -657,12 +672,17 @@ public class LevelTwo extends CDFWriter{
             CDF_Gen.data.mspc[mspc_rec + first], old_edges, std_edges 
          );
 
-         //divide counts by bin width and adjust the time scale
+         double fill = CDFVar.getIstpVal("DOUBLE_FILL").doubleValue();
          for(int bin_i = 0; bin_i < mspc_rebin[mspc_rec].length; bin_i++){
-            if(mspc_rebin[mspc_rec][bin_i] != Constants.DOUBLE_FILL){
+            if(mspc_rebin[mspc_rec][bin_i] != fill){
+               //get the count error
+               mspc_error[mspc_rec][bin_i] = 
+                  Math.sqrt(mspc_rebin[mspc_rec][bin_i])
+                  / MSPC.BIN_WIDTHS[bin_i] / 4;
+
+               //divide counts by bin width and adjust the time scale
                mspc_rebin[mspc_rec][bin_i] /= 
-                  MSPC.BIN_WIDTHS[bin_i];
-               mspc_rebin[mspc_rec][bin_i] /= 4;
+                  MSPC.BIN_WIDTHS[bin_i] / 4;
             }
          }
       }
@@ -682,6 +702,8 @@ public class LevelTwo extends CDFWriter{
       MSPC mspc = new MSPC(destName, date, 2);
       System.out.println("mspc");
       mspc.getCDF().addData("MSPC", mspc_rebin);
+      System.out.println("mspc error");
+      mspc.getCDF().addData("cnt_error", mspc_error);
       System.out.println("FrameGroup");
       mspc.getCDF().addData("FrameGroup", frameGroup);
       System.out.println("Epoch");
@@ -699,7 +721,9 @@ public class LevelTwo extends CDFWriter{
       double scint_temp = 0, dpu_temp = 0;
 
       int numOfRecs = last - first;
-      double[][] sspc_rebin = new double[numOfRecs][256];
+      double[][] 
+         sspc_rebin = new double[numOfRecs][256],
+         sspc_error = new double[numOfRecs][256];
       double[] 
          old_edges, 
          std_edges = SpectrumExtract.stdEdges(2, 2.4414);
@@ -744,12 +768,17 @@ public class LevelTwo extends CDFWriter{
             CDF_Gen.data.sspc[sspc_rec + first], old_edges, std_edges
          );
 
-         //divide counts by bin width and convert the time scale to /sec
+         double fill = CDFVar.getIstpVal("DOUBLE_FILL").doubleValue();
          for(int bin_i = 0; bin_i < sspc_rebin[sspc_rec].length; bin_i++){
-            if(sspc_rebin[sspc_rec][bin_i] != Constants.DOUBLE_FILL){
+            if(sspc_rebin[sspc_rec][bin_i] != fill){
+               //get the count error
+               sspc_error[sspc_rec][bin_i] = 
+                  Math.sqrt(sspc_rebin[sspc_rec][bin_i])
+                  / SSPC.BIN_WIDTHS[bin_i] / 32;
+
+               //divide counts by bin width and adjust the time scale
                sspc_rebin[sspc_rec][bin_i] /= 
-                  std_edges[bin_i + 1] - std_edges[bin_i];
-               sspc_rebin[sspc_rec][bin_i] /= 32;
+                  SSPC.BIN_WIDTHS[bin_i] / 32;
             }
          }
       }
@@ -768,6 +797,8 @@ public class LevelTwo extends CDFWriter{
       SSPC sspc = new SSPC(destName, date, 2);
       System.out.println("sspc");
       sspc.getCDF().addData("SSPC", sspc_rebin);
+      System.out.println("sspc error");
+      sspc.getCDF().addData("cnt_error", sspc_error);
       System.out.println("Peak_511");
       sspc.getCDF().addData("Peak_511", peak);
       System.out.println("FrameGroup");
@@ -860,13 +891,14 @@ public class LevelTwo extends CDFWriter{
       long[] epoch = new long[numOfRecs];
 
       //change all the units from cnts/4sec to cnts/sec
+      double fill = CDFVar.getIstpVal("DOUBLE_FILL").doubleValue();
       for(int var_i = 0; var_i < 4; var_i++){
          for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
             if(CDF_Gen.data.rcnt[var_i][rec_i + first] != Constants.RCNT_FILL){
                rc_timeScaled[var_i][rec_i] = 
                   CDF_Gen.data.rcnt[var_i][rec_i + first] / 4;
             }else{
-               rc_timeScaled[var_i][rec_i] = Constants.DOUBLE_FILL;
+               rc_timeScaled[var_i][rec_i] = fill;
             }
          }
       }

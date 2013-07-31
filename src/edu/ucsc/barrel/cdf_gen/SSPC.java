@@ -181,6 +181,8 @@ public class SSPC extends DataProduct{
       var.attribute("VALIDMIN", 0.0);
       var.attribute("VALIDMAX", 855.0);
       var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
+      var.attribute("DELTA_PLUS_VAR", "cnt_error");
+      var.attribute("DELTA_MINUS_VAR", "cnt_error");
       this.cdf.addVar("SSPC", var);
 
       //Create the "energy" variable
@@ -261,5 +263,32 @@ public class SSPC extends DataProduct{
       var.attribute("VALIDMAX", 4096.0);
       var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
       this.cdf.addVar("Peak_511", var);
+
+      //Create the count error variable
+      var = new CDFVar(
+            cdf, "cnt_error", CDFConstants.CDF_DOUBLE, 
+            true, new  long[] {BIN_CENTERS.length} 
+         );   
+
+      var.attribute("FIELDNAM", "Count Error");
+      var.attribute("CATDESC", "Count error based on Poisson statistics.");
+      var.attribute("LABLAXIS", "Error");
+      var.attribute("VAR_NOTES", "Error only valid for large count values.");
+      var.attribute("VAR_TYPE", "support_data");
+      var.attribute("DEPEND_0", "Epoch");
+      var.attribute("FORMAT", "%f");
+      var.attribute("UNITS", "keV");
+      var.attribute("SCALETYP", "linear");
+      var.attribute("VALIDMIN", 0.0);
+      var.attribute("VALIDMAX", 10000.0);
+      var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
+      this.cdf.addVar("cnt_error", var);
+
+      //Create a variable that will track each energy channel width
+      var = new CDFVar(
+            cdf, "HalfBinWidth", CDFConstants.CDF_DOUBLE, 
+            false, new  long[] {BIN_CENTERS.length} 
+         );   
+
    }
 }
