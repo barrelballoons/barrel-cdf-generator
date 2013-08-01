@@ -216,22 +216,22 @@ public class LevelTwo extends CDFWriter{
                if(mag_coords[8].indexOf("*") == -1){
                   l2[rec_i] = Math.abs(Float.parseFloat(mag_coords[8]));
                }else{
-                  l2[rec_i] = fill;
+                  l2[rec_i] = 9999;
                }
                if(mag_coords[9].indexOf("*") == -1){
                   mlt2[rec_i] = Float.parseFloat(mag_coords[9]);
                }else{
-                  mlt2[rec_i] = fill;
+                  mlt2[rec_i] = 9999;
                }
                if(mag_coords[11].indexOf("*") == -1){
                   l6[rec_i] = Math.abs(Float.parseFloat(mag_coords[11]));
                }else{
-                  l6[rec_i] = fill;
+                  l6[rec_i] = 9999;
                }
                if(mag_coords[12].indexOf("*") == -1){
                   mlt6[rec_i] = Float.parseFloat(mag_coords[12]);
                }else{
-                  mlt6[rec_i] = fill;
+                  mlt6[rec_i] = 9999;
                }
 
                last_frame = this_frame;

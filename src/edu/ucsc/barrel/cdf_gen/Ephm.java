@@ -142,8 +142,8 @@ public class Ephm extends DataProduct{
       var.attribute("SCALETYP", "linear");
       var.attribute("UNITS", "hr");
       var.attribute("DISPLAY_TYPE", "time_series");
-      var.attribute("VALIDMIN", 0f);
-      var.attribute("VALIDMAX", 1e27f);
+      var.attribute("VALIDMIN", 0.0f);
+      var.attribute("VALIDMAX", 24.0f);
       var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       this.cdf.addVar("MLT_Kp2", var);
 
@@ -158,8 +158,8 @@ public class Ephm extends DataProduct{
       var.attribute("SCALETYP", "linear");
       var.attribute("UNITS", "hr");
       var.attribute("DISPLAY_TYPE", "time_series");
-      var.attribute("VALIDMIN", 0f, CDFConstants.CDF_FLOAT);
-      var.attribute("VALIDMAX", 1e27f, CDFConstants.CDF_FLOAT);
+      var.attribute("VALIDMIN", 0.0f, CDFConstants.CDF_FLOAT);
+      var.attribute("VALIDMAX", 24.0f, CDFConstants.CDF_FLOAT);
       var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       this.cdf.addVar("MLT_Kp6", var);
 
@@ -174,7 +174,7 @@ public class Ephm extends DataProduct{
       var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0f, CDFConstants.CDF_FLOAT);
-      var.attribute("VALIDMAX", 1e27f, CDFConstants.CDF_FLOAT);
+      var.attribute("VALIDMAX", 1000.0f, CDFConstants.CDF_FLOAT);
       var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       this.cdf.addVar("L_Kp2", var);
 
@@ -189,7 +189,7 @@ public class Ephm extends DataProduct{
       var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0f);
-      var.attribute("VALIDMAX", 1e27f);
+      var.attribute("VALIDMAX", 1000.0f);
       var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       this.cdf.addVar("L_Kp6", var);
    }
