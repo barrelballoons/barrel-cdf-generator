@@ -81,9 +81,9 @@ public class Magn extends DataProduct{
 
       CDFVar var = new CDFVar(cdf, "Total", CDFConstants.CDF_FLOAT);
 
-      var.attribute("FIELDNAM", "B_Tot");
+      var.attribute("FIELDNAM", "B_Tot *Uncalibrated*");
       var.attribute(
-         "CATDESC", "Magnitude of magnetic field." 
+         "CATDESC", "Magnitude of magnetic field. *Uncalibrated*" 
       );
       var.attribute("LABLAXIS", "B_tot");
       var.attribute(
@@ -102,6 +102,7 @@ public class Magn extends DataProduct{
       var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       this.cdf.addVar("Total", var);
 
+      /*
       var = new CDFVar(cdf, "error", CDFConstants.CDF_FLOAT, false);
       var.attribute("FIELDNAM", "Error");
       var.attribute(
@@ -120,6 +121,7 @@ public class Magn extends DataProduct{
       this.cdf.addVar("error", var);
 
       var.writeData("error", new float[] {0.1f});
+      */
    }
 
    private void addAxisVar(final String axis){
@@ -128,9 +130,9 @@ public class Magn extends DataProduct{
       var = new CDFVar(
          cdf, "MAG_" + axis + "_uncalibrated", CDFConstants.CDF_FLOAT
       );
-      var.attribute("FIELDNAM", axis + "_axis");
+      var.attribute("FIELDNAM", axis + "_axis *Uncalibrated*");
       var.attribute(
-         "CATDESC", "Uncalibrated " + axis + " axis of magnetic field."
+         "CATDESC", axis + " axis of magnetic field. *Uncalibrated*"
       );
       var.attribute("LABLAXIS", "B_" + axis);
       var.attribute(
@@ -146,8 +148,8 @@ public class Magn extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", -1e31f);
       var.attribute("VALIDMAX", 1e31f);
-      var.attribute("DELTA_PLUS_VAR", "error");
-      var.attribute("DELTA_MINUS_VAR", "error");
+      //var.attribute("DELTA_PLUS_VAR", "error");
+      //var.attribute("DELTA_MINUS_VAR", "error");
       var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       this.cdf.addVar("MAG_" + axis, var);
    }
