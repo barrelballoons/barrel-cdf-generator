@@ -204,6 +204,7 @@ public class LevelTwo extends CDFWriter{
             this_frame = 0,
             last_frame = 0;
          float fill = CDFVar.getIstpVal("FLOAT_FILL").floatValue();
+
          while((line = mag_coord_file.readLine()) != null){
             line = line.trim();
             mag_coords = line.split("\\s+");
@@ -251,7 +252,6 @@ public class LevelTwo extends CDFWriter{
          geo_coord_file.delete();
          (new File("pay" + id + "_" + date + "_gps_out.txt")).delete();
 
-         CDF_Gen.log.writeln("test");
       }catch(IOException ex){
          System.out.println("Could not read magnetic coordinate file:");
          System.out.println(ex.getMessage());
