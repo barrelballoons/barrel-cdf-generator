@@ -78,35 +78,7 @@ public class Magn extends DataProduct{
       addAxisVar("X");
       addAxisVar("Y");
       addAxisVar("Z");
-      addTotalVar();
-   }
 
-   private void addAxisVar(final String axis){
-      CDFVar var = new CDFVar(cdf, "MAG_" + axis, CDFConstants.CDF_FLOAT);
-
-      var.attribute("FIELDNAM", axis + "_axis");
-      var.attribute(
-         "CATDESC", axis + " axis of magnetic field"
-      );
-      var.attribute("LABLAXIS", "B_" + axis);
-      var.attribute(
-         "VAR_NOTES", 
-         "Calculated as (raw_value - 8388608) / 83886.070. " +
-         "Contains fluctuations due to payload rotations." 
-      );
-      var.attribute("VAR_TYPE", "data");
-      var.attribute("DEPEND_0", "Epoch");
-      var.attribute("FORMAT", "%f");
-      var.attribute("UNITS", "uT");
-      var.attribute("SCALETYP", "linear");
-      var.attribute("DISPLAY_TYPE", "time_series");
-      var.attribute("VALIDMIN", -1e31f);
-      var.attribute("VALIDMAX", 1e31f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
-      this.cdf.addVar("MAG_" + axis, var);
-   }
-
-   private void addTotalVar(){
       CDFVar var = new CDFVar(cdf, "Total", CDFConstants.CDF_FLOAT);
 
       var.attribute("FIELDNAM", "B_Tot");
@@ -128,7 +100,55 @@ public class Magn extends DataProduct{
       var.attribute("VALIDMIN", -1e31f);
       var.attribute("VALIDMAX", 1e31f);
       var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
-      var.attribute("LABLAXIS", "B_tot");
       this.cdf.addVar("Total", var);
+   }
+
+   private void addAxisVar(final String axis){
+      CDFVar var;
+
+      var = new CDFVar(
+         cdf, "MAG_" + axis + "_uncalibrated", CDFConstants.CDF_FLOAT
+      );
+      var.attribute("FIELDNAM", axis + "_axis");
+      var.attribute(
+         "CATDESC", "Uncalibrated " + axis + " axis of magnetic field."
+      );
+      var.attribute("LABLAXIS", "B_" + axis);
+      var.attribute(
+         "VAR_NOTES", 
+         "Calculated as (raw_value - 8388608) / 83886.070. " +
+         "Contains fluctuations due to payload rotations." 
+      );
+      var.attribute("VAR_TYPE", "data");
+      var.attribute("DEPEND_0", "Epoch");
+      var.attribute("FORMAT", "%f");
+      var.attribute("UNITS", "uT");
+      var.attribute("SCALETYP", "linear");
+      var.attribute("DISPLAY_TYPE", "time_series");
+      var.attribute("VALIDMIN", -1e31f);
+      var.attribute("VALIDMAX", 1e31f);
+      var.attribute("DELTA_PLUS_VAR", "error" + axis);
+      var.attribute("DELTA_MINUS_VAR", "error" + axis);
+      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      this.cdf.addVar("MAG_" + axis, var);
+
+      var = new CDFVar(cdf, "error_" + axis, CDFConstants.CDF_FLOAT, false);
+      var.attribute("FIELDNAM", "Error");
+      var.attribute(
+         "CATDESC", "Standard error according to the manufacturer's spec." 
+      );
+      var.attribute("LABLAXIS", "Error");
+      var.attribute("VAR_TYPE", "support_data");
+      var.attribute("DEPEND_0", "Epoch");
+      var.attribute("FORMAT", "%f");
+      var.attribute("UNITS", "uT");
+      var.attribute("SCALETYP", "linear");
+      var.attribute("DISPLAY_TYPE", "time_series");
+      var.attribute("VALIDMIN", 0f);
+      var.attribute("VALIDMAX", 1e31f);
+      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      this.cdf.addVar("error_" + axis, var);
+
+      var.writeData("error_" + axis, new float[] {1.0f});
    }
 }

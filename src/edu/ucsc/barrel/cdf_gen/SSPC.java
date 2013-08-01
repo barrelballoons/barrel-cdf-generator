@@ -283,12 +283,5 @@ public class SSPC extends DataProduct{
       var.attribute("VALIDMAX", 10000.0);
       var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
       this.cdf.addVar("cnt_error", var);
-
-      //Create a variable that will track each energy channel width
-      var = new CDFVar(
-            cdf, "HalfBinWidth", CDFConstants.CDF_DOUBLE, 
-            false, new  long[] {BIN_CENTERS.length} 
-         );   
-
    }
 }
