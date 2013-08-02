@@ -179,7 +179,7 @@ public class SSPC extends DataProduct{
       var.attribute("SCALETYP", "log");
       var.attribute("DISPLAY_TYPE", "spectrogram");
       var.attribute("VALIDMIN", 0.0);
-      var.attribute("VALIDMAX", 10000.0);
+      var.attribute("VALIDMAX", 1e30);
       var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
       var.attribute("DELTA_PLUS_VAR", "cnt_error");
       var.attribute("DELTA_MINUS_VAR", "cnt_error");
