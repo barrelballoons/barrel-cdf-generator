@@ -76,12 +76,19 @@ public class CDFVar implements CDFComponent{
          (dim_sizes.length == 0 && dim_sizes[0] == 0L) ? 0L : dim_sizes.length;
  
       this.rec_vary = r_v ? CDFConstants.VARY : CDFConstants.NOVARY;
-     
+      
       try{
-         this.var = Variable.create(
-            this.cdf, this.name, this.type, 1L, this.num_of_dims,
-            this.dim_sizes, this.rec_vary, new long[]{CDFConstants.VARY}
-         );
+         if(this.cdf.getVariableID(this.name) != -1L){
+            //variable already exists, open it
+            this.var = this.cdf.getVariable(this.name);
+            System.out.println("Using existing var:" + this.name);
+         }else{
+            //this variable is new, create it.
+            this.var = Variable.create(
+               this.cdf, this.name, this.type, 1L, this.num_of_dims,
+               this.dim_sizes, this.rec_vary, new long[]{CDFConstants.VARY}
+            );
+         }
       }catch(CDFException e){
          System.out.println("Could not create variable " + name + ":");
          System.out.println(e.getMessage());
