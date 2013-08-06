@@ -98,18 +98,21 @@ public class CDFAttribute implements CDFComponent{
    }
    //overload the setValue() function with the option to not provide an id
    public void setValue(final Object v){
-      long entry;
+      long id;
 
       //figure out the attribute entry id
       if(this.owner.getType() == CDFConstants.CDF_){
          //use the number of entries for this attribute as the entry id
-         entry = this.getNumEntries();
+         id = this.getNumEntries();
+
+         //use 0 as the entry number for global variables
+         //id = 0L;
       }else{
          //use the variable id as the entry id
-         entry = this.owner.getID();
+         id = this.owner.getID();
       }
 
-      setValue(v, entry);
+      setValue(v, id);
    }
 
    //try to create an attribute for the owner. If an attribute with that name

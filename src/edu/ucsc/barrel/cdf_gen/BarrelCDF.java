@@ -43,8 +43,13 @@ public class BarrelCDF extends CDFFile{
 
    public BarrelCDF(final String p, final int l){
       super(p);
+      
 
-      defaultAttributes(l);
+      //if this is a new cdf file, fill it with the default attributes
+      if(this.newFile == true){
+         defaultAttributes(l);
+      }
+
       defaultVariables();
    }
 

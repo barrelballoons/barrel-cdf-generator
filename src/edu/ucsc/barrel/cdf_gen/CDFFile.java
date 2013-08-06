@@ -41,10 +41,13 @@ public class CDFFile implements CDFComponent{
    private String name;
    private String path;
    private Map<String, CDFVar> vars;
+   protected boolean newFile;
 
    public CDFFile(final String p){
       this.path = p;
 
+      if((new File(this.path).exists())){this.newFile = true;}
+ 
       String[] path_parts = p.split("/");
       this.name = path_parts[path_parts.length - 1];
 
