@@ -73,7 +73,7 @@ public class CDFVar implements CDFComponent{
 
       //figure out the number of dimensions
       this.num_of_dims = 
-         (dim_sizes.length == 0 && dim_sizes[0] == 0L) ? 0L : dim_sizes.length;
+         (dim_sizes.length == 1 && dim_sizes[0] == 0L) ? 0L : dim_sizes.length;
  
       this.rec_vary = r_v ? CDFConstants.VARY : CDFConstants.NOVARY;
       
@@ -97,12 +97,12 @@ public class CDFVar implements CDFComponent{
 
    public CDFVar(final CDFFile c, final String n, long t, boolean r_v){
       //assume this is a scalar if there is no size specified
-      this(c, n, t, r_v, new long[]{1L});
+      this(c, n, t, r_v, new long[]{0L});
    }
    
    public CDFVar(final CDFFile c, final String n, long t){
       //assume this is a scalar with record variance = VARY 
-      this(c, n, t, true, new long[]{1L});
+      this(c, n, t, true, new long[]{0L});
    }
    
    public CDF getCDF(){return this.cdf;}
