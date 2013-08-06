@@ -162,8 +162,8 @@ public class LevelOne extends CDFWriter{
       cdf.close();
    }
    
-   //write the pps file
-   public void doPpsCdf(int first, int last, int date) throws CDFException{
+   //write the misc file
+   public void doMiscCdf(int first, int last, int date) throws CDFException{
       CDF cdf;
       Variable var;
       
@@ -181,7 +181,7 @@ public class LevelOne extends CDFWriter{
          slope = new double[numOfRecs],
          intercept = new double[numOfRecs];
 
-      System.out.println("\nSaving PPS Level One CDF...");
+      System.out.println("\nSaving MISC Level One CDF...");
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
         pps[rec_i] = CDF_Gen.data.pps[data_i];
@@ -195,10 +195,10 @@ public class LevelOne extends CDFWriter{
       }
 
       String srcName = 
-         "cdf_skels/l1/barCLL_PP_S_l1_pps-_YYYYMMDD_v++.cdf";
+         "cdf_skels/l1/barCLL_PP_S_l1_misc_YYYYMMDD_v++.cdf";
       String destName = 
          outputPath  + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
-         "_l1_" + "pps-" + "_20" + date +  "_v" + revNum + ".cdf";
+         "_l1_" + "misc" + "_20" + date +  "_v" + revNum + ".cdf";
       copyFile(new File(srcName), new File(destName), false);
 
       cdf = openCDF(destName);

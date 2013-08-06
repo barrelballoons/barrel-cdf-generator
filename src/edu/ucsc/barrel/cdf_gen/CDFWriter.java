@@ -149,7 +149,7 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
       //make sure we have a valid start and stop index and 
       //that there are some records to process
       if(first_i != -1 && (last_i - first_i) > 0){
-         doPpsCdf(first_i, last_i, date);
+         doMiscCdf(first_i, last_i, date);
       }
 
       //...for the mod4 file

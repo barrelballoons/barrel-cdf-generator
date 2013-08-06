@@ -289,8 +289,8 @@ public class LevelTwo extends CDFWriter{
       ephm.close();
    }
    
-   //write the pps file, no processing needed
-   public void doPpsCdf(int first, int last, int date) throws CDFException{
+   //write the misc file, no processing needed
+   public void doMiscCdf(int first, int last, int date) throws CDFException{
       CDF cdf;
       Variable var;
       
@@ -304,7 +304,7 @@ public class LevelTwo extends CDFWriter{
          q = new int[numOfRecs];
       long[] epoch = new long[numOfRecs];
 
-      System.out.println("\nSaving PPS Level Two CDF...");
+      System.out.println("\nSaving MISC Level Two CDF...");
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
         pps_vals[rec_i] = CDF_Gen.data.pps[data_i];
@@ -317,24 +317,24 @@ public class LevelTwo extends CDFWriter{
 
       String destName = 
          outputPath  + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
-         "_l2_" + "pps-" + "_20" + date +  "_v" + revNum + ".cdf";
+         "_l2_" + "misc" + "_20" + date +  "_v" + revNum + ".cdf";
      
-      Pps pps = new Pps(destName, date, 2);
+      Misc misc = new Misc(destName, date, 2);
 
       System.out.println("GPS_PPS");
-      pps.getCDF().addData("GPS_PPS", pps_vals);
+      misc.getCDF().addData("GPS_PPS", pps_vals);
       System.out.println("Version");
-      pps.getCDF().addData("Version", version);
+      misc.getCDF().addData("Version", version);
       System.out.println("Payload_ID");
-      pps.getCDF().addData("Payload_ID", payID);
+      misc.getCDF().addData("Payload_ID", payID);
       System.out.println("FrameGroup");
-      pps.getCDF().addData("FrameGroup", frameGroup);
+      misc.getCDF().addData("FrameGroup", frameGroup);
       System.out.println("Epoch");
-      pps.getCDF().addData("Epoch", epoch);
+      misc.getCDF().addData("Epoch", epoch);
       System.out.println("Q");
-      pps.getCDF().addData("Q", q);
+      misc.getCDF().addData("Q", q);
 
-      pps.close();
+      misc.close();
    }
    
    public void doMagCdf(int first, int last, int date) throws CDFException{
@@ -795,6 +795,7 @@ public class LevelTwo extends CDFWriter{
          "_l2_" + "sspc" + "_20" + date +  "_v" + revNum + ".cdf";
 
       SSPC sspc = new SSPC(destName, date, 2);
+
       System.out.println("sspc");
       sspc.getCDF().addData("SSPC", sspc_rebin);
       System.out.println("sspc error");
@@ -884,17 +885,17 @@ public class LevelTwo extends CDFWriter{
       Variable var;
       
       int numOfRecs = last - first;
-      double[][] rc_timeScaled = new double[4][numOfRecs];
+      float[][] rc_timeScaled = new float[4][numOfRecs];
       int[] 
          frameGroup = new int[numOfRecs],
          q = new int[numOfRecs];
       long[] epoch = new long[numOfRecs];
 
       //change all the units from cnts/4sec to cnts/sec
-      double fill = CDFVar.getIstpVal("DOUBLE_FILL").doubleValue();
+      float fill = CDFVar.getIstpVal("FLOAT_FILL").floatValue();
       for(int var_i = 0; var_i < 4; var_i++){
          for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
-            if(CDF_Gen.data.rcnt[var_i][rec_i + first] != Constants.RCNT_FILL){
+            if(CDF_Gen.data.rcnt[var_i][rec_i + first] != Constants.FLOAT_FILL){
                rc_timeScaled[var_i][rec_i] = 
                   CDF_Gen.data.rcnt[var_i][rec_i + first] / 4;
             }else{
@@ -911,86 +912,20 @@ public class LevelTwo extends CDFWriter{
          
       System.out.println("\nSaving RCNT...");
 
-      String srcName = 
-         "cdf_skels/l2/barCLL_PP_S_l2_rcnt_YYYYMMDD_v++.cdf";
       String destName = 
          outputPath + "/" + date + "/"  + "bar1" + flt + "_" + id + "_" + stn
          + "_l2_" + "rcnt" + "_20" + date +  "_v" + revNum + ".cdf";
+       DataProduct rcnt = new Rcnt(destName, date, 2);
 
-      copyFile(new File(srcName), new File(destName), false);
+      System.out.println("Interrupt");
+      rcnt.getCDF().addData("Interrupt", rc_timeScaled[0]);
+      System.out.println("LowLevel");
+      rcnt.getCDF().addData("LowLevel", rc_timeScaled[1]);
+      System.out.println("HighLevel");
+      rcnt.getCDF().addData("HighLevel", rc_timeScaled[3]);
+      System.out.println("PeakDet");
+      rcnt.getCDF().addData("PeakDet", rc_timeScaled[2]);
 
-      cdf = openCDF(destName);
-
-      var = cdf.getVariable("Interrupt");
-      System.out.println("Interrupt...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         rc_timeScaled[0]
-      );
-
-      var = cdf.getVariable("LowLevel");
-      System.out.println("LowLevel...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         rc_timeScaled[1]
-      );
-
-      var = cdf.getVariable("PeakDet");
-      System.out.println("PeakDet...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         rc_timeScaled[2]
-      );
-
-      var = cdf.getVariable("HighLevel");
-      System.out.println("HighLevel...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         rc_timeScaled[3]
-      );
-
-      var = cdf.getVariable("FrameGroup");
-      System.out.println("FrameGroup...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         frameGroup
-      );
-
-      var = cdf.getVariable("Epoch");
-      System.out.println("Epoch...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1},
-         epoch
-      );
-
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         q
-      );
-
-      cdf.close();
+      rcnt.close();
    }
  }

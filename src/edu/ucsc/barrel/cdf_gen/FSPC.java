@@ -101,6 +101,7 @@ public class FSPC extends DataProduct{
       var.attribute("UNITS", "cnts/50ms");
       var.attribute("SCALETYP", "log");
       var.attribute("DISPLAY_TYPE", "time_series");
+      var.attribute("VALIDMIN", 0);
       var.attribute("VALIDMAX", 65535);
       var.attribute("FILLVAL", CDFVar.getIstpVal("INT4_FILL"));
       var.attribute("DELTA_PLUS_VAR", "cnt_error" + ch);

@@ -1,5 +1,5 @@
 /*
-Pps.java
+Misc.java
 
 Description:
    Creates Magnetometer CDF files.
@@ -37,10 +37,10 @@ import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
 
-public class Pps extends DataProduct{
+public class Misc extends DataProduct{
    private int date, lvl;
 
-   public Pps(final String p, final int d, final int l){
+   public Misc(final String p, final int d, final int l){
       setCDF(new BarrelCDF(p, l));
       
       this.date = d;
