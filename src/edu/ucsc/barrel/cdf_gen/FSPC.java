@@ -53,7 +53,10 @@ public class FSPC extends DataProduct{
       this.date = d;
       this.lvl = l;
 
-      addGAttributes();
+      //if this is a new cdf file, fill it with the default attributes
+      if(getCDF().newFile == true){
+         addGAttributes();
+      }
       addVars();
    }
 
@@ -70,10 +73,12 @@ public class FSPC extends DataProduct{
       cdf.attribute("Instrument_type", "Gamma and X-Rays");
       cdf.attribute("Descriptor", "Scintillator");
       cdf.attribute("Time_resolution", "20Hz");
-      cdf.attribute("Logical_source", "payload_id_l" + lvl  + "_scintillator");
+      cdf.attribute(
+         "Logical_source", "payload_id_l" + this.lvl  + "_scintillator"
+      );
       cdf.attribute(
          "Logical_file_id",
-         "payload_id_l" + lvl  + "_scintillator_20" + date  + 
+         "payload_id_l" + this.lvl  + "_scintillator_20" + this.date  + 
          "_V" + CDF_Gen.getSetting("rev")
       );
    }

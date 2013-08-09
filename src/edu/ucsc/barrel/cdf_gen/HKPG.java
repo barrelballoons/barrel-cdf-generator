@@ -79,7 +79,10 @@ public class HKPG extends DataProduct{
       this.date = d;
       this.lvl = l;
       
-      addGAttributes();
+      //if this is a new cdf file, fill it with the default attributes
+      if(getCDF().newFile == true){
+         addGAttributes();
+      }
       addVars();
    }
 
@@ -97,10 +100,10 @@ public class HKPG extends DataProduct{
       this.cdf.attribute("Instrument_type", "Housekeeping");
       this.cdf.attribute("Descriptor", "EDI");
       this.cdf.attribute("Time_resolution", "40s");
-      this.cdf.attribute("Logical_source", "payload_id_l" + lvl  + "_edi");
+      this.cdf.attribute("Logical_source", "payload_id_l" + this.lvl  + "_edi");
       this.cdf.attribute(
          "Logical_file_id",
-         "payload_id_l" + lvl  + "_edi_20" + date  + 
+         "payload_id_l" + this.lvl  + "_edi_20" + this.date  + 
          "_V" + CDF_Gen.getSetting("rev")
       );
    }

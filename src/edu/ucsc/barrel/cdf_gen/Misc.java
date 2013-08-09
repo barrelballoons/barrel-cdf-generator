@@ -46,7 +46,10 @@ public class Misc extends DataProduct{
       this.date = d;
       this.lvl = l;
 
-      addGAttributes();
+      //if this is a new cdf file, fill it with the default attributes
+      if(getCDF().newFile == true){
+         addGAttributes();
+      }
       addVars();
    }
 
@@ -64,10 +67,10 @@ public class Misc extends DataProduct{
       this.cdf.attribute("Instrument_type", "GPS");
       this.cdf.attribute("Descriptor", "GPS");
       this.cdf.attribute("Time_resolution", "1Hz");
-      this.cdf.attribute("Logical_source", "payload_id_l" + lvl  + "_gps");
+      this.cdf.attribute("Logical_source", "payload_id_l" + this.lvl  + "_gps");
       this.cdf.attribute(
          "Logical_file_id",
-         "payload_id_l" + lvl  + "_gps_20" + date  + 
+         "payload_id_l" + this.lvl  + "_gps_20" + this.date  + 
          "_V" + CDF_Gen.getSetting("rev")
       );
    }

@@ -41,19 +41,23 @@ public class CDFFile implements CDFComponent{
    private String name;
    private String path;
    private Map<String, CDFVar> vars;
-   protected boolean newFile;
+   protected boolean newFile = false;
 
    public CDFFile(final String p){
       this.path = p;
 
-      if((new File(this.path).exists())){this.newFile = true;}
  
       String[] path_parts = p.split("/");
       this.name = path_parts[path_parts.length - 1];
 
       //create a new CDF or open an existing one. 
       try{
-         if(!(new File(p)).exists()){this.cdf = CDF.create(path);}
+         if((new File(p)).exists()){
+            this.newFile = false;
+         }else{
+            this.newFile = true;
+            this.cdf = CDF.create(path);
+         }
          if(this.cdf == null){this.cdf = CDF.open(path);}
       }catch(CDFException e){
          System.out.println("Could not create/open CDF file '" + path + "':");

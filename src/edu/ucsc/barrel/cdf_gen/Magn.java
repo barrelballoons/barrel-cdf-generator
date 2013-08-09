@@ -46,7 +46,10 @@ public class Magn extends DataProduct{
       this.date = d;
       this.lvl = l;
 
-      addGAttributes();
+      //if this is a new cdf file, fill it with the default attributes
+      if(getCDF().newFile == true){
+         addGAttributes();
+      }
       addVars();
    }
    
@@ -64,11 +67,11 @@ public class Magn extends DataProduct{
       this.cdf.attribute("Descriptor", "Magnetometer");
       this.cdf.attribute("Time_resolution", "4Hz");
       this.cdf.attribute(
-         "Logical_source", "payload_id_l" + lvl  + "_magnetometer"
+         "Logical_source", "payload_id_l" + this.lvl  + "_magnetometer"
       );
       this.cdf.attribute(
          "Logical_file_id",
-         "payload_id_l" + lvl  + "_magnetometer_20" + date  + 
+         "payload_id_l" + this.lvl  + "_magnetometer_20" + this.date  + 
          "_V" + CDF_Gen.getSetting("rev")
       );
    }
