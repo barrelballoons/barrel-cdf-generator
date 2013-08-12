@@ -42,6 +42,8 @@ import java.nio.channels.FileChannel;
 import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 
 public class LevelTwo extends CDFWriter{
 
@@ -59,7 +61,6 @@ public class LevelTwo extends CDFWriter{
       CDFVar var;
       Calendar d = Calendar.getInstance();
       Logger geo_coord_file = new Logger("pay" + id + "_" + date + "_gps.txt");
-
       int 
          year, month, day, day_of_year, hour, min, sec,
          numOfRecs = last - first;
@@ -83,6 +84,8 @@ public class LevelTwo extends CDFWriter{
          epoch_parts = new long[9],
          epoch = new long[numOfRecs],
          gps_time = new long[numOfRecs];
+      Map<Integer, Boolean> complete_gps = 
+         new HashMap<Integer, Boolean>(numOfRecs);
 
       System.out.println("\nSaving EPHM Level Two CDF...");
 
@@ -143,35 +146,36 @@ public class LevelTwo extends CDFWriter{
          epoch[rec_i] = CDF_Gen.data.epoch_mod4[data_i] - Constants.SING_ACCUM;
          q[rec_i] = CDF_Gen.data.gps_q[data_i];
 
-         //make sure we have a complete gps record before generating mag coords
+         //keep track of which frames have complete GPS values
          if(
             (alt[rec_i] != Constants.ALT_FILL) && 
             (lat[rec_i] != Constants.LAT_FILL) && 
             (lon[rec_i] != Constants.LON_FILL)
          ){
-         
-            //calculate the current time in seconds of day
-            epoch_parts = CDFTT2000.breakdown(epoch[rec_i]);
-            sec_of_day = 
-               (epoch_parts[3] * 3600) + // hours
-               (epoch_parts[4] * 60) + //minutes
-               epoch_parts[5] + //seconds
-               (epoch_parts[6] * 0.001) + //ms
-               (epoch_parts[7] * 0.000001) + //us
-               (epoch_parts[8] * 0.000000001); //ns
-            //convert signed longitude to east longitude
-            east_lon = (lon[rec_i] > 0) ? lon[rec_i] : lon[rec_i] + 360;
-
-            geo_coord_file.writeln(
-               String.format(
-                  "%07d %02.6f %03.6f %03.6f %04d %03d %02.3f", 
-                  frameGroup[rec_i], alt[rec_i], lat[rec_i], lon[rec_i],
-                  (year + 2000), day_of_year, sec_of_day
-               )
-            );
+            complete_gps.put(frameGroup[rec_i], true); 
          }else{
-            geo_coord_file.writeln("NaN NaN NaN NaN NaN NaN NaN");
+            complete_gps.put(frameGroup[rec_i], false); 
          }
+
+         //calculate the current time in seconds of day
+         epoch_parts = CDFTT2000.breakdown(epoch[rec_i]);
+         sec_of_day = 
+            (epoch_parts[3] * 3600) + // hours
+            (epoch_parts[4] * 60) + //minutes
+            epoch_parts[5] + //seconds
+            (epoch_parts[6] * 0.001) + //ms
+            (epoch_parts[7] * 0.000001) + //us
+            (epoch_parts[8] * 0.000000001); //ns
+         //convert signed longitude to east longitude
+         east_lon = (lon[rec_i] > 0) ? lon[rec_i] : lon[rec_i] + 360;
+
+         geo_coord_file.writeln(
+            String.format(
+               "%07d %02.6f %03.6f %03.6f %04d %03d %02.3f", 
+               frameGroup[rec_i], alt[rec_i], lat[rec_i], lon[rec_i],
+               (year + 2000), day_of_year, sec_of_day
+            )
+         );
       }
       geo_coord_file.close();
 
@@ -211,8 +215,11 @@ public class LevelTwo extends CDFWriter{
 
             //check for repeated frame
             this_frame = Integer.parseInt(mag_coords[0]);
-            if(this_frame != last_frame){
-            //make sure the mag coordinates were calculated correctly
+            if(
+               (this_frame != last_frame) && 
+               (complete_gps.get(this_frame) == true)
+            ){
+               //make sure the mag coordinates were calculated correctly
                if(mag_coords[8].indexOf("*") == -1){
                   l2[rec_i] = Math.abs(Float.parseFloat(mag_coords[8]));
                }else{
@@ -233,8 +240,6 @@ public class LevelTwo extends CDFWriter{
                }else{
                   mlt6[rec_i] = 9999;
                }
-
-               last_frame = this_frame;
             }
             else{
                l2[rec_i] = fill; 
@@ -243,6 +248,7 @@ public class LevelTwo extends CDFWriter{
                mlt6[rec_i] = fill; 
             } 
 
+            last_frame = this_frame;
             rec_i++;
          }
 
