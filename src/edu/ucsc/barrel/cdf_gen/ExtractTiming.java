@@ -58,8 +58,7 @@ public class ExtractTiming {
          frame = fc;
 
          //calculate the number of milliseconds since J2000 
-         ms = 
-            weeks_in_ms + msw + extra_ms - pps + GPS_EPOCH;
+         ms = weeks_in_ms + msw + extra_ms - pps + GPS_EPOCH;
       }
       
       public long getMS(){return ms;}
@@ -120,8 +119,8 @@ public class ExtractTiming {
          //check if fc is a fill value
          if(fc == Constants.FC_FILL){continue;}
 
-         //figure out the offset from mod4 fc and 1Hz fc
-         fc -= ((fc % 4) - Constants.TIME_I); 
+         //Offset the frame number to be that of the GPS_Time frame
+         fc = fc - (fc % 4) + Constants.TIME_I; 
          
          //get the indices of other cadence data
          rec_1Hz_i = data.convertIndex(rec_mod4_i, fc, "mod4", "1Hz");

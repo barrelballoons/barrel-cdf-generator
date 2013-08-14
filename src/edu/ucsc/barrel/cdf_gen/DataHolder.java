@@ -303,9 +303,10 @@ public class DataHolder{
       }
    }
   
-   public int convertIndex(int old_i, long fc, String old_cad, String new_cad){
-      long target_fc;
-      int fc_offset = 0, new_i;
+   public int convertIndex(
+      int old_i, long fc, final String old_cad, final String new_cad
+   ){
+      int fc_offset = 0, new_i, step;
       double multiplier;
       int[] frames;
 
@@ -314,17 +315,17 @@ public class DataHolder{
       if(new_cad.equals("mod40")){
          multiplier = 0.025;
          frames = frame_mod40;
-         fc_offset = (int)fc % 40;
+         fc -= (int)fc % 40; //find the first frame number in this group
       }
       else if(new_cad.equals("mod32")){
          multiplier = 0.03125;
          frames = frame_mod32;
-         fc_offset = (int)fc % 32;
+         fc -= (int)fc % 32;
       }
       else if(new_cad.equals("mod4")){
          multiplier = 0.25;
          frames = frame_mod4;
-         fc_offset = (int)fc % 4;
+         fc -= (int)fc % 4;
       }
       else if(new_cad.equals("1Hz")){
          multiplier = 1;
@@ -342,22 +343,29 @@ public class DataHolder{
       else if(old_cad.equals("mod32")){multiplier /= 0.03125;}
       else if(old_cad.equals("mod4")){multiplier /= 0.25;}
       else if(old_cad.equals("4Hz")){multiplier /= 4;}
-      else{multiplier /= 20;}
-
-      //figure out the target frame number 
-      //this will determine the first frame number of a multiplexed group
-      target_fc = fc - fc_offset;
+      else if(old_cad.equals("20Hz")){multiplier /= 20;}
 
       //get initial guess for the new index
       new_i = (int)(old_i * multiplier);
 
+      //figure out which direction to move from the initial guess
+      step = (frames[new_i] < fc) ? 1 : -1;
+
       //correct new_i based on frame number
-      while((new_i < frames.length) && (frames[new_i] < target_fc)){
-         new_i++;
-      }
-      if(new_i == frames.length){new_i--;}
-      while((new_i > 0) && (frames[new_i] > target_fc)){
-         new_i--;
+      while((new_i < frames.length - 1) && (new_i > 1)){
+         if(frames[new_i] == fc){
+            //found the target fc. done!
+            break;
+         }
+         else if(step * (fc - frames[new_i]) < 0){
+            //crossed over a gap that contained target fc.
+            //get fc that is just after the gap
+            if(step == -1){new_i++;}
+            break;
+         }else{
+            //have not passed the target fc yet
+            new_i += step;
+         }
       }
 
       return new_i;
