@@ -339,11 +339,13 @@ public class DataHolder{
          multiplier = 20;
          frames = frame_20Hz;
       }
+      /*
       if(old_cad.equals("mod40")){multiplier /= 0.025;}
       else if(old_cad.equals("mod32")){multiplier /= 0.03125;}
       else if(old_cad.equals("mod4")){multiplier /= 0.25;}
       else if(old_cad.equals("4Hz")){multiplier /= 4;}
       else if(old_cad.equals("20Hz")){multiplier /= 20;}
+      */
 
       for(new_i = 0; new_i < getSize(new_cad); new_i++){
          if(frames[new_i] != Constants.FC_FILL){
@@ -352,7 +354,8 @@ public class DataHolder{
       }
 
       return new_i;
-/*
+
+      /*
       //get initial guess for the new index
       new_i = (int)(old_i * multiplier);
       
