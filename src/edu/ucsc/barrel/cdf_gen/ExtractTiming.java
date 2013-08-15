@@ -125,7 +125,13 @@ public class ExtractTiming {
          //get the indices of other cadence data
          rec_1Hz_i = data.convertIndex(rec_mod4_i, fc, "mod4", "1Hz");
          rec_mod40_i = data.convertIndex(rec_mod4_i, fc, "mod4", "mod40");
-
+if((fc - data.frame_1Hz[rec_1Hz_i]) != 0){
+CDF_Gen.log.writeln(
+   rec_mod4_i + ": " + fc + ", " + 
+   rec_1Hz_i + ": " + data.frame_1Hz[rec_1Hz_i] + ", " + 
+   (fc - data.frame_1Hz[rec_1Hz_i]) + ", " + data.pps[rec_1Hz_i]
+);
+}
          //figure out if pps is valid 
          pps = (short)data.pps[rec_1Hz_i];
          if((pps <= MINPPS) || (pps >= MAXPPS)){

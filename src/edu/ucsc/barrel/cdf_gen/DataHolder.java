@@ -345,14 +345,30 @@ public class DataHolder{
       else if(old_cad.equals("4Hz")){multiplier /= 4;}
       else if(old_cad.equals("20Hz")){multiplier /= 20;}
 
+      for(new_i = 0; new_i < getSize(new_cad); new_i++){
+         if(frames[new_i] != Constants.FC_FILL){
+            if(frames[new_i] >= fc){break;}
+         }
+      }
+
+      return new_i;
+/*
       //get initial guess for the new index
       new_i = (int)(old_i * multiplier);
-
-      //figure out which direction to move from the initial guess
-      step = (frames[new_i] < fc) ? 1 : -1;
+      
+      //check if the initial guess was right
+      if(fc == frames[new_i]){return new_i;}
+      else if(frames[new_i] < fc && frames[new_i] != Constants.FC_FILL){
+         step = 1;
+      }
+      else{
+         step = -1;
+         //make sure the guess is within range 
+         new_i = (new_i > frames.length) ? frames.length - 2 : new_i; 
+      }
 
       //correct new_i based on frame number
-      while((new_i < frames.length - 1) && (new_i > 1)){
+      while((new_i < frames.length - 1) && (new_i > 0)){
          if(frames[new_i] == fc){
             //found the target fc. done!
             break;
@@ -367,8 +383,7 @@ public class DataHolder{
             new_i += step;
          }
       }
-
-      return new_i;
+*/
    }
 
    public void addFrame(BigInteger frame, int dpu_id){
