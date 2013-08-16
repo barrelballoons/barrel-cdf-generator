@@ -931,6 +931,12 @@ public class LevelTwo extends CDFWriter{
       rcnt.getCDF().addData("HighLevel", rc_timeScaled[3]);
       System.out.println("PeakDet");
       rcnt.getCDF().addData("PeakDet", rc_timeScaled[2]);
+      System.out.println("FrameGroup");
+      rcnt.getCDF().addData("FrameGroup", frameGroup);
+      System.out.println("Epoch");
+      rcnt.getCDF().addData("Epoch", epoch);
+      System.out.println("Q");
+      rcnt.getCDF().addData("Q", q);
 
       rcnt.close();
    }
