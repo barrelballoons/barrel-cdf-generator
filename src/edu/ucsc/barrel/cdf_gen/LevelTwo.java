@@ -102,28 +102,21 @@ public class LevelTwo extends CDFWriter{
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          //convert mm to km
          alt[rec_i] = CDF_Gen.data.gps[Constants.ALT_I][data_i];
-         if(alt[rec_i] != Constants.ALT_RAW_FILL){
-            alt[rec_i] /= 1000000;
-         }else{
-            alt[rec_i] = Constants.ALT_FILL;
-         }
+         alt[rec_i] = (alt[rec_i] != Constants.ALT_RAW_FILL) ?
+            alt[rec_i] / 1000000 :  Constants.ALT_FILL;
 
          //convert lat and lon to physical units
          lat[rec_i] = CDF_Gen.data.gps[Constants.LAT_I][data_i];
-         if(lat[rec_i] != Constants.LAT_RAW_FILL){
-            lat[rec_i] *= 
-               Float.intBitsToFloat(Integer.valueOf("33B40000", 16).intValue());
-         }else{
-            lat[rec_i] = Constants.LAT_FILL;
-         }
+         lat[rec_i] = (lat[rec_i] != Constants.LAT_RAW_FILL) ? 
+            (lat[rec_i] * 
+            Float.intBitsToFloat(Integer.valueOf("33B40000", 16).intValue())) :
+            Constants.LAT_FILL;
 
          lon[rec_i] = CDF_Gen.data.gps[Constants.LON_I][data_i];
-         if(lon[rec_i] != Constants.LON_RAW_FILL){
-            lon[rec_i] *= 
-               Float.intBitsToFloat(Integer.valueOf("33B40000", 16).intValue());
-         }else{
-            lon[rec_i] = Constants.LON_FILL;
-         }
+         lon[rec_i] = (lon[rec_i] != Constants.LON_RAW_FILL) ?
+            (lon[rec_i] *= 
+            Float.intBitsToFloat(Integer.valueOf("33B40000", 16).intValue())) :
+            Constants.LON_FILL;
 
          //calculate the GPS time
          if(CDF_Gen.data.ms_of_week[data_i] != Constants.MS_WEEK_FILL){
@@ -273,10 +266,10 @@ public class LevelTwo extends CDFWriter{
 
       System.out.println("GPS_Alt");
       ephm.getCDF().addData("GPS_Alt", alt);
-      System.out.println("GPS_Lat");
-      ephm.getCDF().addData("GPS_Lon", lat);
       System.out.println("GPS_Lon");
       ephm.getCDF().addData("GPS_Lon", lon);
+      System.out.println("GPS_Lat");
+      ephm.getCDF().addData("GPS_Lat", lat);
       System.out.println("MLT_Kp2");
       ephm.getCDF().addData("MLT_Kp2", mlt2);
       System.out.println("MLT_Kp6");
