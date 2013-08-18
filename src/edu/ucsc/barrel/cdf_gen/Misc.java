@@ -65,7 +65,7 @@ public class Misc extends DataProduct{
          "the GPS pulse per second arrived."
       );
       this.cdf.attribute("Instrument_type", "GPS");
-      this.cdf.attribute("Descriptor", "GPS");
+      this.cdf.attribute("Descriptor", "MISC>MISCellaneous Data");
       this.cdf.attribute("Time_resolution", "1Hz");
       this.cdf.attribute("Logical_source", "payload_id_l" + this.lvl  + "_gps");
       this.cdf.attribute(

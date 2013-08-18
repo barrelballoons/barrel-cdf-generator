@@ -142,7 +142,7 @@ public class SSPC extends DataProduct{
          "transmitted over 32 frames."
       );
       this.cdf.attribute("Instrument_type", "Gamma and X-Rays");
-      this.cdf.attribute("Descriptor", "Scintillator");
+      this.cdf.attribute("Descriptor", "SSPC>Slow SPeCtrum");
       this.cdf.attribute("Time_resolution", "32s");
       this.cdf.attribute(
          "Logical_source", "payload_id_l" + this.lvl  + "_scintillator"

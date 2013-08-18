@@ -64,7 +64,7 @@ public class Magn extends DataProduct{
          "Data are neither gain corrected nor despun."
       );
       this.cdf.attribute("Instrument_type", "Magnetic Fields (space)");
-      this.cdf.attribute("Descriptor", "Magnetometer");
+      this.cdf.attribute("Descriptor", "MAGN>MAGNetometer");
       this.cdf.attribute("Time_resolution", "4Hz");
       this.cdf.attribute(
          "Logical_source", "payload_id_l" + this.lvl  + "_magnetometer"

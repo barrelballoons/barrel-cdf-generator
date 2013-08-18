@@ -41,10 +41,11 @@ import java.util.Arrays;
 
 public class BarrelCDF extends CDFFile{
 
+   String pay_id;
+
    public BarrelCDF(final String p, final int l){
       super(p);
       
-
       //if this is a new cdf file, fill it with the default attributes
       if(this.newFile == true){
          defaultAttributes(l);
@@ -63,9 +64,9 @@ public class BarrelCDF extends CDFFile{
       this.attribute("Data_type", "l" + lvl + ">Level-" + lvl);
       this.attribute("PI_name", "Robyn Millan");
       this.attribute("PI_affiliation","Dartmouth College");
-      this.attribute("Mission_group", "RBSP");
+      this.attribute("Mission_group", "BARREL");
       this.attribute("Project","LWS>Living With a Star>BARREL");
-      this.attribute("Source_name", "Payload_ID");
+      this.attribute("Source_name", "barCLL_PP_S"); 
       this.attribute("Data_version", CDF_Gen.getSetting("rev"));
       this.attribute("Discipline", "Space Physics>Magnetospheric Science");
       this.attribute("HTTP_LINK","http://barreldata.ucsc.edu");
@@ -130,9 +131,10 @@ public class BarrelCDF extends CDFFile{
       var.attribute("FILLVAL", CDFVar.getIstpVal("INT4_FILL"));
       this.addVar("FrameGroup", var);
 
-      var = new CDFVar(this, "Q", CDFConstants.CDF_INT4);
-      var.attribute("FIELDNAM", "Data Quality");
-      var.attribute("CATDESC", "32bit flag used to indicate data quality.");
+      var = new CDFVar(this, "Qality", CDFConstants.CDF_INT4);
+      var.attribute("FIELDNAM", "Data Quality Flag");
+      var.attribute("CATDESC", "Data Quality Flag");
+      var.attribute("VAR_NOTES", "32bit flag used to indicate data quality.");
       var.attribute("LABLAXIS", "Q");
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");

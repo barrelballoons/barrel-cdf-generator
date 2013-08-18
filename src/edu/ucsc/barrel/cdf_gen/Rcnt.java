@@ -66,7 +66,7 @@ public class Rcnt extends DataProduct{
          "level. Each value is a four second accumulation" 
       );
       cdf.attribute("Instrument_type", "Gamma and X-Rays");
-      cdf.attribute("Descriptor", "Scintillator");
+      cdf.attribute("Descriptor", "RCNT>Rate CouNTers");
       cdf.attribute("Time_resolution", "4s");
       cdf.attribute(
          "Logical_source", "payload_id_l" + this.lvl  + "_scintillator"

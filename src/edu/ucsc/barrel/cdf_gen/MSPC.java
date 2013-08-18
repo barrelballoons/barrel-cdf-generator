@@ -89,7 +89,7 @@ public class MSPC extends DataProduct{
          "transmitted over 4 frames." 
       );
       this.cdf.attribute("Instrument_type", "Gamma and X-Rays");
-      this.cdf.attribute("Descriptor", "Scintillator");
+      this.cdf.attribute("Descriptor", "MSPC>Medium SPeCtrum");
       this.cdf.attribute("Time_resolution", "4s");
       this.cdf.attribute(
          "Logical_source", "payload_id_l" + this.lvl + "_scintillator"

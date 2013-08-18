@@ -68,10 +68,12 @@ public class FSPC extends DataProduct{
          "Fast time resolution Bremsstrahlung X-ray spectrum."
       );
       cdf.attribute(
-         "TEXT", "Four channels of fast spectral data are returned at 20Hz." 
+         "TEXT", 
+         "Fast time resolution Bremsstrahlung X-ray spectrum from " +
+         "NaI Scintillator, four channels at 20 MHz."
       );
       cdf.attribute("Instrument_type", "Gamma and X-Rays");
-      cdf.attribute("Descriptor", "Scintillator");
+      cdf.attribute("Descriptor", "FSPC>Fast SPeCtrum");
       cdf.attribute("Time_resolution", "20Hz");
       cdf.attribute(
          "Logical_source", "payload_id_l" + this.lvl  + "_scintillator"
