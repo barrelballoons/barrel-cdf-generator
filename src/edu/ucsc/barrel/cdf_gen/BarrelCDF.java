@@ -131,7 +131,7 @@ public class BarrelCDF extends CDFFile{
       var.attribute("FILLVAL", CDFVar.getIstpVal("INT4_FILL"));
       this.addVar("FrameGroup", var);
 
-      var = new CDFVar(this, "Qality", CDFConstants.CDF_INT4);
+      var = new CDFVar(this, "Quality", CDFConstants.CDF_INT4);
       var.attribute("FIELDNAM", "Data Quality Flag");
       var.attribute("CATDESC", "Data Quality Flag");
       var.attribute("VAR_NOTES", "32bit flag used to indicate data quality.");
