@@ -25,11 +25,9 @@ Description:
 
 package edu.ucsc.barrel.cdf_gen;
 
-import gsfc.nssdc.cdf.CDF;
 import gsfc.nssdc.cdf.CDFException;
 import gsfc.nssdc.cdf.CDFConstants;
 import gsfc.nssdc.cdf.util.CDFTT2000;
-import gsfc.nssdc.cdf.Variable;
 
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
@@ -57,8 +55,6 @@ public class LevelTwo extends CDFWriter{
    
    //Convert the EPHM data and save it to CDF files
    public void doGpsCdf(int first, int last, int date) throws CDFException{
-      BarrelCDF cdf;
-      CDFVar var;
       Calendar d = Calendar.getInstance();
       Logger geo_coord_file = new Logger("pay" + id + "_" + date + "_gps.txt");
       int 
@@ -290,9 +286,6 @@ public class LevelTwo extends CDFWriter{
    
    //write the misc file, no processing needed
    public void doMiscCdf(int first, int last, int date) throws CDFException{
-      CDF cdf;
-      Variable var;
-      
       int numOfRecs = last - first;
       short[] 
          version = new short[numOfRecs],
@@ -337,9 +330,6 @@ public class LevelTwo extends CDFWriter{
    }
    
    public void doMagCdf(int first, int last, int date) throws CDFException{
-      CDF cdf;
-      Variable var;
-      
       int numOfRecs = last - first;
       int[] 
          frameGroup = new int[numOfRecs],
@@ -414,9 +404,6 @@ public class LevelTwo extends CDFWriter{
    }
    
    public void doHkpgCdf(int first, int last, int date) throws CDFException{
-      CDF cdf;
-      Variable var;
-      
       int numOfRecs = last - first;
       short []
          sats = new short[numOfRecs],
@@ -497,8 +484,6 @@ public class LevelTwo extends CDFWriter{
    }
 
    public void doFspcCdf(int first, int last, int date) throws CDFException{
-      CDF cdf;
-      Variable var;
       int numOfRecs = last - first;
 
       double[][] 
@@ -609,9 +594,6 @@ public class LevelTwo extends CDFWriter{
    }
 
    public void doMspcCdf(int first, int last, int date) throws CDFException{
-      CDF cdf;
-      Variable var;
-      
       double peak = -1, scint_temp = 0, dpu_temp = 0;
       
       int offset = 90;
@@ -714,9 +696,6 @@ public class LevelTwo extends CDFWriter{
    }
 
    public void doSspcCdf(int first, int last, int date) throws CDFException{
-      //CDF cdf;
-      Variable var;
-      
       double scint_temp = 0, dpu_temp = 0;
 
       int numOfRecs = last - first;
@@ -809,80 +788,9 @@ public class LevelTwo extends CDFWriter{
       sspc.getCDF().addData("Q", q);
 
       sspc.close();
-/*
-      String srcName = 
-         "cdf_skels/l2/barCLL_PP_S_l2_sspc_YYYYMMDD_v++.cdf";
-      copyFile(new File(srcName), new File(destName), false);
-      cdf = openCDF(destName);
-
-      var = cdf.getVariable("SSPC");
-      System.out.println("Spectrum Arrays...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {256, 1}, 
-         new long[] {1}, 
-         sspc_rebin
-      );
-
-      var = cdf.getVariable("SSPC_ch");
-      System.out.println("Spectrum Arrays...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {256, 1}, 
-         new long[] {1}, 
-         sspc_rebin
-      );
-
-      var = cdf.getVariable("Peak_511");
-      System.out.println("Peak_511...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {256, 1}, 
-         new long[] {1}, 
-         peak
-      );
-
-      var = cdf.getVariable("FrameGroup");
-      System.out.println("FrameGroup...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         frameGroup
-      );
-
-      var = cdf.getVariable("Epoch");
-      System.out.println("Epoch...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         epoch
-      );
-
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         q
-      );
-
-      cdf.close();
-*/
    }
 
    public void doRcntCdf(int first, int last, int date) throws CDFException{
-      CDF cdf;
-      Variable var;
-      
       int numOfRecs = last - first;
       float[][] rc_timeScaled = new float[4][numOfRecs];
       int[] 
