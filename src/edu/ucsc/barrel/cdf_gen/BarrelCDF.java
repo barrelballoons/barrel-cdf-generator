@@ -41,11 +41,13 @@ import java.util.Arrays;
 
 public class BarrelCDF extends CDFFile{
 
-   String pay_id;
+   private String payload_id;
 
    public BarrelCDF(final String path, final String pay, int l){
       super(path);
       
+      this.payload_id = pay;
+
       //if this is a new cdf file, fill it with the default attributes
       if(this.newFile == true){
          defaultAttributes(l);
@@ -66,7 +68,7 @@ public class BarrelCDF extends CDFFile{
       this.attribute("PI_affiliation","Dartmouth College");
       this.attribute("Mission_group", "BARREL");
       this.attribute("Project","LWS>Living With a Star>BARREL");
-      this.attribute("Source_name", "barCLL_PP_S"); 
+      this.attribute("Source_name", this.payload_id); 
       this.attribute("Data_version", CDF_Gen.getSetting("rev"));
       this.attribute("Discipline", "Space Physics>Magnetospheric Science");
       this.attribute("HTTP_LINK","http://barreldata.ucsc.edu");

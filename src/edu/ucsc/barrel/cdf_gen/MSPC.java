@@ -94,11 +94,11 @@ public class MSPC extends DataProduct{
       this.cdf.attribute("Descriptor", "MSPC>Medium SPeCtrum");
       this.cdf.attribute("Time_resolution", "4s");
       this.cdf.attribute(
-         "Logical_source", "payload_id_l" + this.lvl + "_scintillator"
+         "Logical_source", this.payload_id + "_l" + this.lvl + "_scintillator"
       );
       this.cdf.attribute(
          "Logical_file_id",
-         "payload_id_l" + this.lvl + "_scintillator_20" + this.date  + 
+         this.payload_id + "_l" + this.lvl + "_scintillator_20" + this.date  + 
          "_V" + CDF_Gen.getSetting("rev")
       );
    }

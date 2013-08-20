@@ -70,10 +70,10 @@ public class Ephm extends DataProduct{
       cdf.attribute("Instrument_type", "GPS");
       cdf.attribute("Descriptor", "ephm>EPHeMeris");
       cdf.attribute("Time_resolution", "4s");
-      cdf.attribute("Logical_source", "payload_id_l" + this.lvl  + "_ephm");
+      cdf.attribute("Logical_source", this.payload_id + "_l" + this.lvl  + "_ephm");
       cdf.attribute(
          "Logical_file_id",
-         "payload_id_l" + this.lvl  + "_ephm_20" + this.date +
+         this.payload_id + "_l" + this.lvl  + "_ephm_20" + this.date +
          "_V" + CDF_Gen.getSetting("rev")
       );
    }

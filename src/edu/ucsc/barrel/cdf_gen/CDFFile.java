@@ -64,7 +64,7 @@ public class CDFFile implements CDFComponent{
          System.out.println(e.getMessage());
       }
 
-      //create a map in which to store teh CDFVariables
+      //create a map in which to store the CDFVariables
       vars = new HashMap<String, CDFVar>();
    }
    

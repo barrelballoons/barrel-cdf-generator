@@ -71,11 +71,11 @@ public class Rcnt extends DataProduct{
       cdf.attribute("Descriptor", "RCNT>Rate CouNTers");
       cdf.attribute("Time_resolution", "4s");
       cdf.attribute(
-         "Logical_source", "payload_id_l" + this.lvl  + "_scintillator"
+         "Logical_source", this.payload_id + "_l" + this.lvl  + "_scintillator"
       );
       cdf.attribute(
          "Logical_file_id",
-         "payload_id_l" + this.lvl  + "_scintillator_20" + this.date  + 
+         this.payload_id + "_l" + this.lvl  + "_scintillator_20" + this.date  + 
          "_V" + CDF_Gen.getSetting("rev")
       );
    }

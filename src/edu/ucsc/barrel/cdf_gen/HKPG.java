@@ -102,10 +102,10 @@ public class HKPG extends DataProduct{
       this.cdf.attribute("Instrument_type", "Housekeeping");
       this.cdf.attribute("Descriptor", "HKPG>HousKeePinG");
       this.cdf.attribute("Time_resolution", "40s");
-      this.cdf.attribute("Logical_source", "payload_id_l" + this.lvl  + "_edi");
+      this.cdf.attribute("Logical_source", this.payload_id + "_l" + this.lvl  + "_edi");
       this.cdf.attribute(
          "Logical_file_id",
-         "payload_id_l" + this.lvl  + "_edi_20" + this.date  + 
+         this.payload_id + "_l" + this.lvl  + "_edi_20" + this.date  + 
          "_V" + CDF_Gen.getSetting("rev")
       );
    }
