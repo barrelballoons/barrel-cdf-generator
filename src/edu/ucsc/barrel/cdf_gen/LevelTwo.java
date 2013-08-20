@@ -258,7 +258,7 @@ public class LevelTwo extends CDFWriter{
          outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
          "_l2_" + "ephm" + "_20" + date +  "_v" + revNum + ".cdf";
      
-      Ephm ephm = new Ephm(destName, date, 2);
+      Ephm ephm = new Ephm(destName, "bar_" + id, date, 2);
 
       System.out.println("GPS_Alt");
       ephm.getCDF().addData("GPS_Alt", alt);
@@ -311,7 +311,7 @@ public class LevelTwo extends CDFWriter{
          outputPath  + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
          "_l2_" + "misc" + "_20" + date +  "_v" + revNum + ".cdf";
      
-      Misc misc = new Misc(destName, date, 2);
+      Misc misc = new Misc(destName, "bar_" + id, date, 2);
 
       System.out.println("GPS_PPS");
       misc.getCDF().addData("GPS_PPS", pps_vals);
@@ -384,7 +384,7 @@ public class LevelTwo extends CDFWriter{
          outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
          "_l2_" + "magn" + "_20" + date +  "_v" + revNum + ".cdf";
      
-      Magn magn = new Magn(destName, date, 2);
+      Magn magn = new Magn(destName, "bar_" + id, date, 2);
       System.out.println("MAG_X");
       magn.getCDF().addData("MAG_X", magx);
       System.out.println("MAG_Y...");
@@ -424,7 +424,7 @@ public class LevelTwo extends CDFWriter{
          outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn 
          + "_l2_" + "hkpg" + "_20" + date +  "_v" + revNum + ".cdf";
 
-      HKPG hkpg = new HKPG(destName, date, 2);
+      HKPG hkpg = new HKPG(destName, "bar_" + id, date, 2);
       float fill = CDFVar.getIstpVal("FLOAT_FILL").floatValue();
 
       for(int var_i = 0; var_i < 36; var_i++){
@@ -570,7 +570,7 @@ public class LevelTwo extends CDFWriter{
          outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn 
          + "_l2_" + "fspc" + "_20" + date +  "_v" + revNum + ".cdf";
 
-      FSPC fspc = new FSPC(destName, date, 2);
+      FSPC fspc = new FSPC(destName, "bar_" + id, date, 2);
       System.out.println("LC1");
       fspc.getCDF().addData("LC1", lc_scaled[0]);
       fspc.getCDF().addData("cnt_error1", lc_error[0]);
@@ -680,7 +680,7 @@ public class LevelTwo extends CDFWriter{
          outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn +
          "_l2_" + "mspc" + "_20" + date +  "_v" + revNum + ".cdf";
 
-      MSPC mspc = new MSPC(destName, date, 2);
+      MSPC mspc = new MSPC(destName, "bar_" + id, date, 2);
       System.out.println("mspc");
       mspc.getCDF().addData("MSPC", mspc_rebin);
       System.out.println("mspc error");
@@ -772,7 +772,7 @@ public class LevelTwo extends CDFWriter{
          outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn +
          "_l2_" + "sspc" + "_20" + date +  "_v" + revNum + ".cdf";
 
-      SSPC sspc = new SSPC(destName, date, 2);
+      SSPC sspc = new SSPC(destName, "bar_" + id, date, 2);
 
       System.out.println("sspc");
       sspc.getCDF().addData("SSPC", sspc_rebin);
@@ -822,7 +822,7 @@ public class LevelTwo extends CDFWriter{
       String destName = 
          outputPath + "/" + date + "/"  + "bar1" + flt + "_" + id + "_" + stn
          + "_l2_" + "rcnt" + "_20" + date +  "_v" + revNum + ".cdf";
-       DataProduct rcnt = new Rcnt(destName, date, 2);
+       DataProduct rcnt = new Rcnt(destName, "bar_" + id, date, 2);
 
       System.out.println("Interrupt");
       rcnt.getCDF().addData("Interrupt", rc_timeScaled[0]);

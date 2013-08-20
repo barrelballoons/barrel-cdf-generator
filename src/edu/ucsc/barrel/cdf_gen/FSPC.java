@@ -39,7 +39,7 @@ import java.util.Arrays;
 
 public class FSPC extends DataProduct{
    private int date, lvl;
-
+   private String payload_id;
    private double scale = 2.4414; // keV/bin
 
    public final static double[] 
@@ -47,11 +47,12 @@ public class FSPC extends DataProduct{
       BIN_CENTERS = {37.5, 77.5, 410, 485},
       BIN_WIDTHS = {75, 155, 120, 250};
 
-   public FSPC(final String p, final int d, final int l){
-      setCDF(new BarrelCDF(p, l));
-
+   public FSPC(final String path, final String pay, int d, int l){
       this.date = d;
       this.lvl = l;
+      this.payload_id = pay;
+
+      setCDF(new BarrelCDF(path, this.payload_id, this.lvl));
 
       //if this is a new cdf file, fill it with the default attributes
       if(getCDF().newFile == true){

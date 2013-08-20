@@ -39,12 +39,14 @@ import java.util.Arrays;
 
 public class Ephm extends DataProduct{
    private int date, lvl;
+   private String payload_id;
 
-   public Ephm(final String p, final int d, final int l){
+   public Ephm(final String path, final String pay, int d, int l){
       this.date = d;
       this.lvl = l;
+      this.payload_id = pay;
 
-      setCDF(new BarrelCDF(p, l));
+      setCDF(new BarrelCDF(path, this.payload_id, this.lvl));
 
       //if this is a new cdf file, fill it with the default attributes
       if(getCDF().newFile == true){

@@ -39,6 +39,7 @@ import java.util.Arrays;
 
 public class MSPC extends DataProduct{
    private int date, lvl;
+   private String payload_id;
 
    private double scale = 2.4414; // keV/bin
 
@@ -64,11 +65,12 @@ public class MSPC extends DataProduct{
          128, 96, 128, 128, 96
       };
 
-   public MSPC(final String p, final int d, final int l){
-      setCDF(new BarrelCDF(p, l));
-
+   public MSPC(final String path, final String pay, int d, int l){
+      this.payload_id = pay;
       this.date = d;
       this.lvl = l;
+
+      setCDF(new BarrelCDF(path, this.payload_id, this.lvl));
 
       //if this is a new cdf file, fill it with the default attributes
       if(getCDF().newFile == true){

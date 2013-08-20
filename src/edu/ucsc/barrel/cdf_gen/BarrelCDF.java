@@ -43,8 +43,8 @@ public class BarrelCDF extends CDFFile{
 
    String pay_id;
 
-   public BarrelCDF(final String p, final int l){
-      super(p);
+   public BarrelCDF(final String path, final String pay, int l){
+      super(path);
       
       //if this is a new cdf file, fill it with the default attributes
       if(this.newFile == true){
