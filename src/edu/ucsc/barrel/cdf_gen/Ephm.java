@@ -95,7 +95,7 @@ public class Ephm extends DataProduct{
       );
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
-      var.attribute("FORMAT", "%f");
+      var.attribute("FORMAT", "F6.3");
       var.attribute("UNITS", "deg.");
       var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
@@ -115,7 +115,7 @@ public class Ephm extends DataProduct{
       );
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
-      var.attribute("FORMAT", "%f");
+      var.attribute("FORMAT", "F6.3");
       var.attribute("UNITS", "deg.");
       var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
@@ -130,7 +130,7 @@ public class Ephm extends DataProduct{
       var.attribute("LABLAXIS", "Alt");
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
-      var.attribute("FORMAT", "%f");
+      var.attribute("FORMAT", "F8.3");
       var.attribute("UNITS", "km");
       var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
@@ -146,7 +146,7 @@ public class Ephm extends DataProduct{
       var.attribute("VAR_NOTES", "Calculated using IRBEM FORTRAN library"); 
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
-      var.attribute("FORMAT", "%f");
+      var.attribute("FORMAT", "F4.2");
       var.attribute("SCALETYP", "linear");
       var.attribute("UNITS", "hr");
       var.attribute("DISPLAY_TYPE", "time_series");
@@ -162,7 +162,7 @@ public class Ephm extends DataProduct{
       var.attribute("VAR_NOTES", "Calculated using IRBEM FORTRAN library"); 
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
-      var.attribute("FORMAT", "%f");
+      var.attribute("FORMAT", "F4.2");
       var.attribute("SCALETYP", "linear");
       var.attribute("UNITS", "hr");
       var.attribute("DISPLAY_TYPE", "time_series");
@@ -178,7 +178,7 @@ public class Ephm extends DataProduct{
       var.attribute("VAR_NOTES", "Calculated using IRBEM FORTRAN library"); 
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
-      var.attribute("FORMAT", "%f");
+      var.attribute("FORMAT", "F8.3");
       var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0f, CDFConstants.CDF_FLOAT);
@@ -193,7 +193,7 @@ public class Ephm extends DataProduct{
       var.attribute("VAR_NOTES", "Calculated using IRBEM FORTRAN library"); 
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
-      var.attribute("FORMAT", "%f");
+      var.attribute("FORMAT", "F8.3");
       var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0f);

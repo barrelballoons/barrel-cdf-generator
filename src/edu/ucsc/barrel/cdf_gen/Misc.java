@@ -89,7 +89,7 @@ public class Misc extends DataProduct{
       var.attribute("LABLAXIS", "PPS");
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
-      var.attribute("FORMAT", "%i");
+      var.attribute("FORMAT", "I4");
       var.attribute("UNITS", "ms");
       var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
@@ -104,7 +104,7 @@ public class Misc extends DataProduct{
       var.attribute("LABLAXIS", "Version");
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
-      var.attribute("FORMAT", "%i");
+      var.attribute("FORMAT", "I2");
       var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0);
@@ -118,7 +118,7 @@ public class Misc extends DataProduct{
       var.attribute("LABLAXIS", "ID");
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
-      var.attribute("FORMAT", "%i");
+      var.attribute("FORMAT", "I2");
       var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0);

@@ -92,7 +92,7 @@ public class Rcnt extends DataProduct{
       var.attribute("LABLAXIS", "PeakDet");
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
-      var.attribute("FORMAT", "%f");
+      var.attribute("FORMAT", "F7.3");
       var.attribute("UNITS", "cnts/s");
       var.attribute("SCALETYP", "log");
       var.attribute("DISPLAY_TYPE", "time_series");
@@ -107,7 +107,7 @@ public class Rcnt extends DataProduct{
       var.attribute("LABLAXIS", "LowLevel");
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
-      var.attribute("FORMAT", "%f");
+      var.attribute("FORMAT", "F7.3");
       var.attribute("UNITS", "cnts/s");
       var.attribute("SCALETYP", "log");
       var.attribute("DISPLAY_TYPE", "time_series");
@@ -122,7 +122,7 @@ public class Rcnt extends DataProduct{
       var.attribute("LABLAXIS", "HighLevel");
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
-      var.attribute("FORMAT", "%f");
+      var.attribute("FORMAT", "F7.3");
       var.attribute("UNITS", "cnts/s");
       var.attribute("SCALETYP", "log");
       var.attribute("DISPLAY_TYPE", "time_series");
@@ -137,7 +137,7 @@ public class Rcnt extends DataProduct{
       var.attribute("LABLAXIS", "IRQ");
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
-      var.attribute("FORMAT", "%f");
+      var.attribute("FORMAT", "F7.3");
       var.attribute("UNITS", "cnts/s");
       var.attribute("SCALETYP", "log");
       var.attribute("DISPLAY_TYPE", "time_series");

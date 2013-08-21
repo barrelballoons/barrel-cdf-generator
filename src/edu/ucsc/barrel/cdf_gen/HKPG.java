@@ -303,13 +303,13 @@ public class HKPG extends DataProduct{
       CDFVar var = new CDFVar(this.cdf, v.getName(), v.getType());
 
       if(v.getType() == CDFConstants.CDF_INT4){
-         var.attribute("FORMAT", "%i");
+         var.attribute("FORMAT", "I10");
          var.attribute("FILLVAL", CDFVar.getIstpVal("INT4_FILL"));
       }else if(v.getType() == CDFConstants.CDF_INT2){
-         var.attribute("FORMAT", "%i");
+         var.attribute("FORMAT", "I5");
          var.attribute("FILLVAL", CDFVar.getIstpVal("INT2_FILL"));
       }else{
-         var.attribute("FORMAT", "%f");
+         var.attribute("FORMAT", "F4.3");
          var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       }
       var.attribute("VALIDMIN", v.getMin());

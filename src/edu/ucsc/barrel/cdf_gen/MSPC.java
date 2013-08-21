@@ -127,7 +127,7 @@ public class MSPC extends DataProduct{
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("DEPEND_1", "energy");
-      var.attribute("FORMAT", "%f");
+      var.attribute("FORMAT", "F7.3");
       var.attribute("UNITS", "cnts/keV/sec");
       var.attribute("SCALETYP", "log");
       var.attribute("DISPLAY_TYPE", "spectrogram");
@@ -151,7 +151,7 @@ public class MSPC extends DataProduct{
       var.attribute("VAR_NOTES", "Center of each medium spectrum channel.");
       var.attribute("VAR_TYPE", "support_data");
       var.attribute("DEPEND_0", "Epoch");
-      var.attribute("FORMAT", "%f");
+      var.attribute("FORMAT", "F7.3");
       var.attribute("UNITS", "keV");
       var.attribute("SCALETYP", "log");
       var.attribute("VALIDMIN", 100.0);
@@ -181,7 +181,7 @@ public class MSPC extends DataProduct{
       var.attribute("VAR_NOTES", "Error only valid for large count values.");
       var.attribute("VAR_TYPE", "support_data");
       var.attribute("DEPEND_0", "Epoch");
-      var.attribute("FORMAT", "%f");
+      var.attribute("FORMAT", "F8.3");
       var.attribute("UNITS", "keV");
       var.attribute("SCALETYP", "linear");
       var.attribute("VALIDMIN", 0.0);
@@ -200,7 +200,7 @@ public class MSPC extends DataProduct{
       var.attribute("LABLAXIS", "Width");
       var.attribute("VAR_TYPE", "support_data");
       var.attribute("DEPEND_0", "Epoch");
-      var.attribute("FORMAT", "%f");
+      var.attribute("FORMAT", "F6.3");
       var.attribute("UNITS", "keV");
       var.attribute("SCALETYP", "linear");
       var.attribute("VALIDMIN", 3.0);

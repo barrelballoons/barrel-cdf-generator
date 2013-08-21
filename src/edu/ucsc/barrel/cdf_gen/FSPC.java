@@ -105,7 +105,7 @@ public class FSPC extends DataProduct{
       var.attribute("LABLAXIS", "LC" + ch);
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
-      var.attribute("FORMAT", "%u");
+      var.attribute("FORMAT", "I5");
       var.attribute("UNITS", "cnts/50ms");
       var.attribute("SCALETYP", "log");
       var.attribute("DISPLAY_TYPE", "time_series");
@@ -126,7 +126,7 @@ public class FSPC extends DataProduct{
       var.attribute("VAR_NOTES", "Error only valid for large count values.");
       var.attribute("VAR_TYPE", "support_data");
       var.attribute("DEPEND_0", "Epoch");
-      var.attribute("FORMAT", "%f");
+      var.attribute("FORMAT", "F6.3");
       var.attribute("UNITS", "keV");
       var.attribute("SCALETYP", "linear");
       var.attribute("VALIDMIN", 0.0);

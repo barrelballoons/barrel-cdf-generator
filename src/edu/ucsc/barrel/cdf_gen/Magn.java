@@ -98,7 +98,7 @@ public class Magn extends DataProduct{
       );
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
-      var.attribute("FORMAT", "%f");
+      var.attribute("FORMAT", "F3.3");
       var.attribute("UNITS", "uT");
       var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
@@ -147,7 +147,7 @@ public class Magn extends DataProduct{
       );
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
-      var.attribute("FORMAT", "%f");
+      var.attribute("FORMAT", "F4.3");
       var.attribute("UNITS", "uT");
       var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
