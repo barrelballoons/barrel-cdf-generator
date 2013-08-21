@@ -79,7 +79,7 @@ public class LevelOne extends CDFWriter{
       String srcName = 
          "cdf_skels/l1/barCLL_PP_S_l1_ephm_YYYYMMDD_v++.cdf";
       String destName = 
-         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
+         outputPath + "/" + date + "/" + "bar1_" + id + 
          "_l1_" + "ephm" + "_20" + date +  "_v" + revNum + ".cdf";
 
       copyFile(new File(srcName), new File(destName), false);
@@ -197,7 +197,7 @@ public class LevelOne extends CDFWriter{
       String srcName = 
          "cdf_skels/l1/barCLL_PP_S_l1_misc_YYYYMMDD_v++.cdf";
       String destName = 
-         outputPath  + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
+         outputPath  + "/" + date + "/" + "bar_" + id + 
          "_l1_" + "misc" + "_20" + date +  "_v" + revNum + ".cdf";
       copyFile(new File(srcName), new File(destName), false);
 
@@ -303,7 +303,7 @@ public class LevelOne extends CDFWriter{
       String srcName = 
          "cdf_skels/l1/barCLL_PP_S_l1_magn_YYYYMMDD_v++.cdf";
       String destName = 
-         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
+         outputPath + "/" + date + "/" + "bar_" + id + 
          "_l1_" + "magn" + "_20" + date +  "_v" + revNum + ".cdf";
       copyFile(new File(srcName), new File(destName), false);
 
@@ -406,8 +406,8 @@ public class LevelOne extends CDFWriter{
       String srcName = 
          "cdf_skels/l1/barCLL_PP_S_l1_hkpg_YYYYMMDD_v++.cdf";
       String destName = 
-         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn 
-         + "_l1_" + "hkpg" + "_20" + date +  "_v" + revNum + ".cdf";
+         outputPath + "/" + date + "/" + "bar_" + id + 
+         "_l1_" + "hkpg" + "_20" + date +  "_v" + revNum + ".cdf";
 
       copyFile(new File(srcName), new File(destName), false);
 
@@ -563,8 +563,8 @@ public class LevelOne extends CDFWriter{
       String srcName = 
          "cdf_skels/l1/barCLL_PP_S_l1_fspc_YYYYMMDD_v++.cdf";
       String destName = 
-         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn 
-         + "_l1_" + "fspc" + "_20" + date +  "_v" + revNum + ".cdf";
+         outputPath + "/" + date + "/" + "bar_" + id +  
+         "_l1_" + "fspc" + "_20" + date +  "_v" + revNum + ".cdf";
       copyFile(new File(srcName), new File(destName), false);
 
       cdf = openCDF(destName);
@@ -676,8 +676,8 @@ public class LevelOne extends CDFWriter{
       String srcName = 
          "cdf_skels/l1/barCLL_PP_S_l1_mspc_YYYYMMDD_v++.cdf";
       String destName = 
-         outputPath  + "/" + date + "/"+ "bar1" + flt + "_" + id + "_" + stn 
-         + "_l1_" + "mspc" + "_20" + date +  "_v" + revNum + ".cdf";
+         outputPath  + "/" + date + "/"+ "bar_" + id + 
+         "_l1_" + "mspc" + "_20" + date +  "_v" + revNum + ".cdf";
 
       copyFile(new File(srcName), new File(destName), false);
 
@@ -749,7 +749,7 @@ public class LevelOne extends CDFWriter{
       String srcName = 
          "cdf_skels/l1/barCLL_PP_S_l1_sspc_YYYYMMDD_v++.cdf";
       String destName = 
-         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn +
+         outputPath + "/" + date + "/" + "bar_" + id + 
          "_l1_" + "sspc" + "_20" + date +  "_v" + revNum + ".cdf";
       copyFile(new File(srcName), new File(destName), false);
 
@@ -824,8 +824,8 @@ public class LevelOne extends CDFWriter{
       String srcName = 
          "cdf_skels/l1/barCLL_PP_S_l1_rcnt_YYYYMMDD_v++.cdf";
       String destName = 
-         outputPath + "/" + date + "/"  + "bar1" + flt + "_" + id + "_" + stn
-         + "_l1_" + "rcnt" + "_20" + date +  "_v" + revNum + ".cdf";
+         outputPath + "/" + date + "/"  + "bar_" + id +
+         "_l1_" + "rcnt" + "_20" + date +  "_v" + revNum + ".cdf";
 
       copyFile(new File(srcName), new File(destName), false);
 
