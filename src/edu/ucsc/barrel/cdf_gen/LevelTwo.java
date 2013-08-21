@@ -255,7 +255,7 @@ public class LevelTwo extends CDFWriter{
       //make sure there is a CDF file to open
       //(copyFile will not clobber an existing file)
       String destName = 
-         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
+         outputPath + "/" + date + "/" + "bar_" + id + 
          "_l2_" + "ephm" + "_20" + date +  "_v" + revNum + ".cdf";
      
       Ephm ephm = new Ephm(destName, "bar_" + id, date, 2);
@@ -308,7 +308,7 @@ public class LevelTwo extends CDFWriter{
       }
 
       String destName = 
-         outputPath  + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
+         outputPath  + "/" + date + "/" + "bar_" + id + 
          "_l2_" + "misc" + "_20" + date +  "_v" + revNum + ".cdf";
      
       Misc misc = new Misc(destName, "bar_" + id, date, 2);
@@ -381,7 +381,7 @@ public class LevelTwo extends CDFWriter{
 
       //store the nominal mag values
       String destName = 
-         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
+         outputPath + "/" + date + "/" + "bar_" + id + 
          "_l2_" + "magn" + "_20" + date +  "_v" + revNum + ".cdf";
      
       Magn magn = new Magn(destName, "bar_" + id, date, 2);
@@ -421,8 +421,8 @@ public class LevelTwo extends CDFWriter{
       System.out.println("\nSaving HKPG...");
 
       String destName = 
-         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn 
-         + "_l2_" + "hkpg" + "_20" + date +  "_v" + revNum + ".cdf";
+         outputPath + "/" + date + "/" + "bar_" + id + 
+         "_l2_" + "hkpg" + "_20" + date +  "_v" + revNum + ".cdf";
 
       HKPG hkpg = new HKPG(destName, "bar_" + id, date, 2);
       float fill = CDFVar.getIstpVal("FLOAT_FILL").floatValue();
@@ -567,8 +567,8 @@ public class LevelTwo extends CDFWriter{
       }
 
       String destName = 
-         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn 
-         + "_l2_" + "fspc" + "_20" + date +  "_v" + revNum + ".cdf";
+         outputPath + "/" + date + "/" + "bar_" + id + 
+         "_l2_" + "fspc" + "_20" + date +  "_v" + revNum + ".cdf";
 
       FSPC fspc = new FSPC(destName, "bar_" + id, date, 2);
       System.out.println("LC1");
@@ -677,7 +677,7 @@ public class LevelTwo extends CDFWriter{
       }
 
       String destName = 
-         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn +
+         outputPath + "/" + date + "/" + "bar_" + id +
          "_l2_" + "mspc" + "_20" + date +  "_v" + revNum + ".cdf";
 
       MSPC mspc = new MSPC(destName, "bar_" + id, date, 2);
@@ -769,7 +769,7 @@ public class LevelTwo extends CDFWriter{
       }
 
       String destName = 
-         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn +
+         outputPath + "/" + date + "/" + "bar_" + id + 
          "_l2_" + "sspc" + "_20" + date +  "_v" + revNum + ".cdf";
 
       SSPC sspc = new SSPC(destName, "bar_" + id, date, 2);
@@ -820,8 +820,8 @@ public class LevelTwo extends CDFWriter{
       System.out.println("\nSaving RCNT...");
 
       String destName = 
-         outputPath + "/" + date + "/"  + "bar1" + flt + "_" + id + "_" + stn
-         + "_l2_" + "rcnt" + "_20" + date +  "_v" + revNum + ".cdf";
+         outputPath + "/" + date + "/"  + "bar_" + id +
+         "_l2_" + "rcnt" + "_20" + date +  "_v" + revNum + ".cdf";
        DataProduct rcnt = new Rcnt(destName, "bar_" + id, date, 2);
 
       System.out.println("Interrupt");
