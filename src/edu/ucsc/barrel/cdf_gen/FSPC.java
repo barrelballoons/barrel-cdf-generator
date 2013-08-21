@@ -73,15 +73,15 @@ public class FSPC extends DataProduct{
          "Fast time resolution Bremsstrahlung X-ray spectrum from " +
          "NaI Scintillator, four channels at 20 MHz."
       );
-      cdf.attribute("Instrument_type", "Gamma and X-Rays");
+      cdf.attribute("Instrument_type", "Electron Precipitation Bremsstrahlung");
       cdf.attribute("Descriptor", "FSPC>Fast SPeCtrum");
       cdf.attribute("Time_resolution", "20Hz");
       cdf.attribute(
-         "Logical_source", this.payload_id + "_l" + this.lvl  + "_scintillator"
+         "Logical_source", this.payload_id + "_l" + this.lvl  + "_fspc"
       );
       cdf.attribute(
          "Logical_file_id",
-         this.payload_id + "_l" + this.lvl  + "_scintillator_20" + this.date  + 
+         this.payload_id + "_l" + this.lvl  + "_fspc_20" + this.date  + 
          "_V" + CDF_Gen.getSetting("rev")
       );
    }
@@ -101,7 +101,7 @@ public class FSPC extends DataProduct{
       var = new CDFVar(cdf, "LC" + ch, CDFConstants.CDF_INT4);
 
       var.attribute("FIELDNAM", "LC" + ch);
-      var.attribute("CATDESC", "Light Curve channel " + ch);
+      var.attribute("CATDESC", "Fast spectra ch. " + ch);
       var.attribute("LABLAXIS", "LC" + ch);
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");

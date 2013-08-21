@@ -66,13 +66,15 @@ public class Misc extends DataProduct{
          "Number of milliseconds into the frame when " + 
          "the GPS pulse per second arrived."
       );
-      this.cdf.attribute("Instrument_type", "GPS");
+      this.cdf.attribute("Instrument_type", "Miscellaneous");
       this.cdf.attribute("Descriptor", "MISC>MISCellaneous Data");
       this.cdf.attribute("Time_resolution", "1Hz");
-      this.cdf.attribute("Logical_source", this.payload_id + "_l" + this.lvl  + "_gps");
+      this.cdf.attribute(
+         "Logical_source", this.payload_id + "_l" + this.lvl  + "_misc"
+      );
       this.cdf.attribute(
          "Logical_file_id",
-         this.payload_id + "_l" + this.lvl  + "_gps_20" + this.date  + 
+         this.payload_id + "_l" + this.lvl  + "_misc_20" + this.date  + 
          "_V" + CDF_Gen.getSetting("rev")
       );
    }

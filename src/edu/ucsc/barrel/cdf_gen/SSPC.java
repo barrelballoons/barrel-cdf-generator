@@ -142,15 +142,17 @@ public class SSPC extends DataProduct{
          "Bremsstrahlung X-ray spectra each made of 256 energy bins " + 
          "transmitted over 32 frames."
       );
-      this.cdf.attribute("Instrument_type", "Gamma and X-Rays");
+      this.cdf.attribute(
+         "Instrument_type", "Electron Precipitation Bremsstrahlung"
+      );
       this.cdf.attribute("Descriptor", "SSPC>Slow SPeCtrum");
       this.cdf.attribute("Time_resolution", "32s");
       this.cdf.attribute(
-         "Logical_source", this.payload_id + "_l" + this.lvl  + "_scintillator"
+         "Logical_source", this.payload_id + "_l" + this.lvl  + "_sspc"
       );
       this.cdf.attribute(
          "Logical_file_id",
-         this.payload_id + "_l" + this.lvl  + "_scintillator_20" + this.date  + 
+         this.payload_id + "_l" + this.lvl  + "_sspc_20" + this.date  + 
          "_V" + CDF_Gen.getSetting("rev")
       );
    }

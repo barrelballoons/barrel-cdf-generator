@@ -67,10 +67,12 @@ public class Ephm extends DataProduct{
          "(Lat, Long, Alt, and Time) are each returned once every 4s."
          
       );
-      cdf.attribute("Instrument_type", "GPS");
+      cdf.attribute("Instrument_type", "Ephemeris");
       cdf.attribute("Descriptor", "ephm>EPHeMeris");
       cdf.attribute("Time_resolution", "4s");
-      cdf.attribute("Logical_source", this.payload_id + "_l" + this.lvl  + "_ephm");
+      cdf.attribute(
+         "Logical_source", this.payload_id + "_l" + this.lvl  + "_ephm"
+      );
       cdf.attribute(
          "Logical_file_id",
          this.payload_id + "_l" + this.lvl  + "_ephm_20" + this.date +

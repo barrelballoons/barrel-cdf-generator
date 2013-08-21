@@ -67,15 +67,17 @@ public class Rcnt extends DataProduct{
          "Rate counters record interrupt, low level, peak detect, and high " + 
          "level. Each value is a four second accumulation" 
       );
-      cdf.attribute("Instrument_type", "Gamma and X-Rays");
+      cdf.attribute(
+         "Instrument_type", "Electron Precipitation Bremsstrahlung"
+      );
       cdf.attribute("Descriptor", "RCNT>Rate CouNTers");
       cdf.attribute("Time_resolution", "4s");
       cdf.attribute(
-         "Logical_source", this.payload_id + "_l" + this.lvl  + "_scintillator"
+         "Logical_source", this.payload_id + "_l" + this.lvl  + "_rcnt"
       );
       cdf.attribute(
          "Logical_file_id",
-         this.payload_id + "_l" + this.lvl  + "_scintillator_20" + this.date  + 
+         this.payload_id + "_l" + this.lvl  + "_rcnt_20" + this.date  + 
          "_V" + CDF_Gen.getSetting("rev")
       );
    }

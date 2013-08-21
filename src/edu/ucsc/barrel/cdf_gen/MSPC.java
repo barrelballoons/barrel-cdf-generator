@@ -90,15 +90,17 @@ public class MSPC extends DataProduct{
          "Bremsstrahlung X-ray spectra each made of 48 energy bins " +
          "transmitted over 4 frames." 
       );
-      this.cdf.attribute("Instrument_type", "Gamma and X-Rays");
+      this.cdf.attribute(
+         "Instrument_type", "Electron Precipitation Bremsstrahlung"
+      );
       this.cdf.attribute("Descriptor", "MSPC>Medium SPeCtrum");
       this.cdf.attribute("Time_resolution", "4s");
       this.cdf.attribute(
-         "Logical_source", this.payload_id + "_l" + this.lvl + "_scintillator"
+         "Logical_source", this.payload_id + "_l" + this.lvl + "_mspc"
       );
       this.cdf.attribute(
          "Logical_file_id",
-         this.payload_id + "_l" + this.lvl + "_scintillator_20" + this.date  + 
+         this.payload_id + "_l" + this.lvl + "_mspc_20" + this.date  + 
          "_V" + CDF_Gen.getSetting("rev")
       );
    }

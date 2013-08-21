@@ -65,7 +65,7 @@ public class Magn extends DataProduct{
          "TEXT", "Three axis magnetometer reading with nominal conversion. " +
          "Data are neither gain corrected nor despun."
       );
-      this.cdf.attribute("Instrument_type", "Magnetic Fields (space)");
+      this.cdf.attribute("Instrument_type", "Magnetic Fields (Balloon)");
       this.cdf.attribute("Descriptor", "MAGN>MAGNetometer");
       this.cdf.attribute("Time_resolution", "4Hz");
       this.cdf.attribute(
