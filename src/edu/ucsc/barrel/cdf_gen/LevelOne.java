@@ -79,7 +79,7 @@ public class LevelOne extends CDFWriter{
       String srcName = 
          "cdf_skels/l1/barCLL_PP_S_l1_ephm_YYYYMMDD_v++.cdf";
       String destName = 
-         outputPath + "/" + date + "/" + "bar1_" + id + 
+         outputPath + "/" + date + "/" + "bar_" + id + 
          "_l1_" + "ephm" + "_20" + date +  "_v" + revNum + ".cdf";
 
       copyFile(new File(srcName), new File(destName), false);
@@ -147,8 +147,8 @@ public class LevelOne extends CDFWriter{
          epoch
       );
       
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
+      var = cdf.getVariable("Quality");
+      System.out.println("Quality...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -272,8 +272,8 @@ public class LevelOne extends CDFWriter{
          epoch
       );
 
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
+      var = cdf.getVariable("Quality");
+      System.out.println("Quality...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1L, 
          new long[] {0}, 
@@ -368,8 +368,8 @@ public class LevelOne extends CDFWriter{
          epoch
       );
 
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
+      var = cdf.getVariable("Quality");
+      System.out.println("Quality...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -533,8 +533,8 @@ public class LevelOne extends CDFWriter{
          epoch
       );
 
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
+      var = cdf.getVariable("Quality");
+      System.out.println("Quality...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -639,8 +639,8 @@ public class LevelOne extends CDFWriter{
          epoch
       );
 
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
+      var = cdf.getVariable("Quality");
+      System.out.println("Quality...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -713,8 +713,8 @@ public class LevelOne extends CDFWriter{
          epoch
       );
 
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
+      var = cdf.getVariable("Quality");
+      System.out.println("Quality...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -785,8 +785,8 @@ public class LevelOne extends CDFWriter{
          epoch
       );
 
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
+      var = cdf.getVariable("Quality");
+      System.out.println("Quality...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -891,8 +891,8 @@ public class LevelOne extends CDFWriter{
          epoch
       );
 
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
+      var = cdf.getVariable("Quality");
+      System.out.println("Quality...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
