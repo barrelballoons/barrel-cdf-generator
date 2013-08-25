@@ -32,7 +32,7 @@ public class ExtractTiming {
    //Set some constant values
    private static final int MAX_RECS = 500;// max number of mod4 recs for model
    private static final double NOM_RATE = 999.89;// nominal ms per frame
-   private static final int MSPERWEEK = 604800000;// mseconds in a week
+   private static final long MSPERWEEK = 604800000L;// mseconds in a week
    private static final short MINWK = 1200;
    private static final byte MINPPS = 0;
    private static final byte MINMS = 1;
@@ -41,18 +41,19 @@ public class ExtractTiming {
    private static final short MAXPPS = 1000;
    private static final int MAXMS = 604800000;
    private static final int MAXFC = 2097152;
+   //ms from Jan 6, 1980 to J2000
+   private static final long GPS_EPOCH = -630763148816L;
 
    private class TimeRec{
       private long ms;//frame timestamp
       private long frame;//frame counter
-      private long GPS_EPOCH = -630763148816L;//ms from Jan 6, 1980 to J2000
 
       public TimeRec(long fc, long msw, short weeks, short pps){
          //figure out if we need to add an extra second based on the PPS
          int extra_ms = (pps < 241) ? 0 : 1000;
-         
+
          //get the number of ms between GPS_START_TIME and start of this week
-         long weeks_in_ms = (long)weeks * (long)MSPERWEEK;
+         long weeks_in_ms = weeks * MSPERWEEK;
 
          //save the frame number
          frame = fc;
@@ -140,6 +141,7 @@ public class ExtractTiming {
          if((week <= MINWK) || (week >= MAXWK)){continue;}
          
          time_recs[time_rec_cnt] = new TimeRec(fc, ms, week, pps);
+data.gps_time[rec_mod4_i] = time_recs[time_rec_cnt].getMS() * 1000000;
          time_rec_cnt++;
       }
    }
@@ -222,7 +224,7 @@ public class ExtractTiming {
             ((fc * data.time_model_slope[data_i]) + 
             data.time_model_intercept[data_i]) * 1000000
          );
-            
+
          //save epoch to the various time scales
          //fill the >1Hz times 
          for(int fill_i = 0; fill_i < 4; fill_i++){
@@ -244,6 +246,11 @@ public class ExtractTiming {
             ((fc * models[model_i].getSlope()) + 
             models[model_i].getIntercept()) * 1000000
          );
+CDF_Gen.log.writeln(
+   data.epoch_mod4[data_i] + " " + 
+   data.gps_time[data_i] + " " +
+   ((data.epoch_mod4[data_i] - data.gps_time[data_i])/1000000000) 
+);
       }
 
       //fill mod32 timestamps
