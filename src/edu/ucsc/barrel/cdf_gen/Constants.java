@@ -57,8 +57,8 @@ public class Constants{
       INT1_FILL = -128,
       INT2_FILL = -32768,
       INT4_FILL = -2147483648;
-      INT8_FILL = -9223372036854775808;
    static public final long
+      INT8_FILL = -9223372036854775808L,
       UINT4_FILL = 4294967295L;
    static public final float 
       FLOAT_FILL = -1.0e+31f;
