@@ -39,7 +39,7 @@ public class ExtractTiming {
    private static final byte MINFC = 0;
    private static final short MAXWK = 1880;
    private static final short MAXPPS = 1000;
-   private static final int MAXMS = 604800000;
+   private static final int MAXMS = 691200000;
    private static final int MAXFC = 2097152;
    //ms from Jan 6, 1980 to J2000
    private static final long GPS_EPOCH = -630763148816L;
@@ -112,8 +112,8 @@ public class ExtractTiming {
       for(int rec_mod4_i = 0; rec_mod4_i < time_recs.length; rec_mod4_i++){
          //make sure we have a valid ms
          ms = data.ms_of_week[rec_mod4_i];
-         if((ms <= MINMS) || (ms >= MAXMS)){continue;}
-         
+         if((ms < MINMS) || (ms > MAXMS)){continue;}
+
          //get initial fc from the mod4 framegroup
          fc = data.frame_mod4[rec_mod4_i]; //last good fc from this mod4 group
          
@@ -122,26 +122,24 @@ public class ExtractTiming {
 
          //Offset the frame number to be that of the GPS_Time frame
          fc = fc - (fc % 4) + Constants.TIME_I; 
-         
+
          //get the indices of other cadence data
          rec_1Hz_i = data.convertIndex(rec_mod4_i, fc, "mod4", "1Hz");
          rec_mod40_i = data.convertIndex(rec_mod4_i, fc, "mod4", "mod40");
 
          //figure out if pps is valid 
          pps = (short)data.pps[rec_1Hz_i];
-         if((pps <= MINPPS) || (pps >= MAXPPS)){
+         if((pps < MINPPS) || (pps > MAXPPS)){
             //check if pps is high because it came super early so the
             //dpu didnt have a chance to write "0"
-            if(pps == 65535){pps = 0;} 
+            if(pps == 65535 || pps == 32768){pps = 0;} 
             else{continue;}
          }
 
          //get number of weeks since GPS_START_TIME
          week = (short)data.weeks[rec_mod40_i];
-         if((week <= MINWK) || (week >= MAXWK)){continue;}
-         
+         if((week < MINWK) || (week > MAXWK)){continue;}
          time_recs[time_rec_cnt] = new TimeRec(fc, ms, week, pps);
-data.gps_time[rec_mod4_i] = time_recs[time_rec_cnt].getMS() * 1000000;
          time_rec_cnt++;
       }
    }
@@ -246,11 +244,6 @@ data.gps_time[rec_mod4_i] = time_recs[time_rec_cnt].getMS() * 1000000;
             ((fc * models[model_i].getSlope()) + 
             models[model_i].getIntercept()) * 1000000
          );
-CDF_Gen.log.writeln(
-   data.epoch_mod4[data_i] + " " + 
-   data.gps_time[data_i] + " " +
-   ((data.epoch_mod4[data_i] - data.gps_time[data_i])/1000000000) 
-);
       }
 
       //fill mod32 timestamps
@@ -351,8 +344,8 @@ CDF_Gen.log.writeln(
 
       //Find all the points that are within 200ms from the median offset
       //and add them to the model
-      for (int rec_i = 0; rec_i < cnt; rec_i++){
-         if(Math.abs(offsets[rec_i] - med) < 200){
+      for (int rec_i = first, offset_i = 0; rec_i < last; rec_i++, offset_i++){
+         if(Math.abs(offsets[offset_i] - med) < 200){
             fit.addData(time_recs[rec_i].getFrame(), time_recs[rec_i].getMS());
          }
       }
