@@ -67,6 +67,7 @@ public class DataHolder{
       modemCnt = new short[MAX_FRAMES / 40],
       dcdCnt = new short[MAX_FRAMES / 40];
    public long[]
+      gps_time = new long[MAX_FRAMES/4],
       epoch_1Hz = new long[MAX_FRAMES],
       epoch_4Hz = new long[MAX_FRAMES * 4],
       epoch_20Hz = new long[MAX_FRAMES * 20],
@@ -306,7 +307,7 @@ public class DataHolder{
    public int convertIndex(
       int old_i, long fc, final String old_cad, final String new_cad
    ){
-      int fc_offset = 0, new_i, step;
+      int fc_offset = 0, new_i = 0, step;
       double multiplier;
       int[] frames;
 
@@ -347,13 +348,14 @@ public class DataHolder{
       else if(old_cad.equals("20Hz")){multiplier /= 20;}
       */
 
-      for(new_i = 0; new_i < getSize(new_cad); new_i++){
+      while(new_i < getSize(new_cad)){
          if(frames[new_i] != Constants.FC_FILL){
-            if(frames[new_i] >= fc){break;}
+            if(frames[new_i] >= fc){return new_i;}
          }
+         new_i++;
       }
 
-      return new_i;
+      return new_i - 1;
 
       /*
       //get initial guess for the new index

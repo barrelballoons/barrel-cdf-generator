@@ -107,7 +107,7 @@ public class Constants{
 
    //various accumulation time offsets based on nominal ms/frame
    public static final long 
-      SSPC_ACCUM = 31968000000L,
-      QUAD_ACCUM = 3996000000L,
-      SING_ACCUM = 999000000L;
+      SSPC_ACCUM = 0L,//31968000000L,
+      QUAD_ACCUM = 0L,//3996000000L,
+      SING_ACCUM = 0L;//999000000L;
 }
