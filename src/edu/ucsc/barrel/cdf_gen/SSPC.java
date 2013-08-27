@@ -262,7 +262,7 @@ public class SSPC extends DataProduct{
       );
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "F6.3");
-      var.attribute("UNITS", "ch");
+      var.attribute("UNITS", "channel");
       var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0.0);

@@ -124,7 +124,7 @@ public class BarrelCDF extends CDFFile{
       var.attribute("FIELDNAM", "Frame Number");
       var.attribute("CATDESC", "DPU Frame Counter");
       var.attribute("LABLAXIS", "Frame");
-      var.attribute("VAR_TYPE", "data");
+      var.attribute("VAR_TYPE", "support_data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "I7");
       var.attribute("DISPLAY_TYPE", "time_series");

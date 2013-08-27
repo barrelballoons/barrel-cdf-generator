@@ -274,7 +274,7 @@ public class HKPG extends DataProduct{
          0, 0, 31, CDFConstants.CDF_INT2
       ));
       vars.add(new HkpgVar(
-         "timeOffset", "Leap Seconds", "s", 
+         "timeOffset", "Leap Seconds", "sec", 
          0, 0, 255, CDFConstants.CDF_INT2
       ));
       vars.add(new HkpgVar(

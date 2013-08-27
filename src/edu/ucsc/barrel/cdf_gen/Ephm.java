@@ -96,7 +96,7 @@ public class Ephm extends DataProduct{
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "F6.3");
-      var.attribute("UNITS", "deg.");
+      var.attribute("UNITS", "degrees North");
       var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", -180f);
@@ -116,7 +116,7 @@ public class Ephm extends DataProduct{
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "F6.3");
-      var.attribute("UNITS", "deg.");
+      var.attribute("UNITS", "degrees East");
       var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", -180f);
@@ -175,7 +175,11 @@ public class Ephm extends DataProduct{
       var.attribute("FIELDNAM", "L for Kp=2");
       var.attribute("CATDESC", "L shell for Kp=2");
       var.attribute("LABLAXIS", "L_Kp2");
-      var.attribute("VAR_NOTES", "Calculated using IRBEM FORTRAN library"); 
+      var.attribute(
+         "VAR_NOTES", 
+         "Calculated using IRBEM FORTRAN library. " +
+         "9999.0 indicates an open field line."
+      ); 
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "F8.3");
@@ -190,7 +194,11 @@ public class Ephm extends DataProduct{
       var.attribute("FIELDNAM", "L for Kp=6");
       var.attribute("CATDESC", "L shell for Kp=6");
       var.attribute("LABLAXIS", "L_Kp6");
-      var.attribute("VAR_NOTES", "Calculated using IRBEM FORTRAN library"); 
+      var.attribute(
+         "VAR_NOTES", 
+         "Calculated using IRBEM FORTRAN library. " +
+         "9999.0 indicates an open field line."
+      ); 
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "F8.3");
