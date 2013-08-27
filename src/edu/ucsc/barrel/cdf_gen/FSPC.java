@@ -107,7 +107,7 @@ public class FSPC extends DataProduct{
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "I5");
       var.attribute("UNITS", "cnts/50ms");
-      var.attribute("SCALETYP", "log");
+      var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0);
       var.attribute("VALIDMAX", 65535);
