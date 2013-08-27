@@ -662,8 +662,8 @@ public class LevelTwo extends CDFWriter{
                   / MSPC.BIN_WIDTHS[bin_i] / 4;
 
                //divide counts by bin width and adjust the time scale
-               mspc_rebin[mspc_rec][bin_i] /= 
-                  MSPC.BIN_WIDTHS[bin_i] / 4;
+               mspc_rebin[mspc_rec][bin_i] /= MSPC.BIN_WIDTHS[bin_i];
+               mspc_rebin[mspc_rec][bin_i] /= 4;
             }
          }
       }
@@ -750,13 +750,13 @@ public class LevelTwo extends CDFWriter{
          for(int bin_i = 0; bin_i < sspc_rebin[sspc_rec].length; bin_i++){
             if(sspc_rebin[sspc_rec][bin_i] != fill){
                //get the count error
-               sspc_error[sspc_rec][bin_i] = 
+               sspc_error[sspc_rec][bin_i] =
                   Math.sqrt(sspc_rebin[sspc_rec][bin_i])
                   / SSPC.BIN_WIDTHS[bin_i] / 32;
 
                //divide counts by bin width and adjust the time scale
-               sspc_rebin[sspc_rec][bin_i] /= 
-                  SSPC.BIN_WIDTHS[bin_i] / 32;
+               sspc_rebin[sspc_rec][bin_i] /= SSPC.BIN_WIDTHS[bin_i];
+               sspc_rebin[sspc_rec][bin_i] /= 32;
             }
          }
       }
