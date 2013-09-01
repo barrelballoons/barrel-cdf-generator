@@ -571,17 +571,17 @@ public class LevelTwo extends CDFWriter{
          "_l2_" + "fspc" + "_20" + date +  "_v" + revNum + ".cdf";
 
       FSPC fspc = new FSPC(destName, "bar_" + id, date, 2);
-      System.out.println("LC1");
-      fspc.getCDF().addData("LC1", lc_scaled[0]);
+      System.out.println("FSPC1");
+      fspc.getCDF().addData("FSPC1", lc_scaled[0]);
       fspc.getCDF().addData("cnt_error1", lc_error[0]);
-      System.out.println("LC1");
-      fspc.getCDF().addData("LC2", lc_scaled[1]);
+      System.out.println("FSPC1");
+      fspc.getCDF().addData("FSPC2", lc_scaled[1]);
       fspc.getCDF().addData("cnt_error2", lc_error[1]);
-      System.out.println("LC1");
-      fspc.getCDF().addData("LC3", lc_scaled[2]);
+      System.out.println("FSPC1");
+      fspc.getCDF().addData("FSPC3", lc_scaled[2]);
       fspc.getCDF().addData("cnt_error3", lc_error[2]);
-      System.out.println("LC1");
-      fspc.getCDF().addData("LC4", lc_scaled[3]);
+      System.out.println("FSPC1");
+      fspc.getCDF().addData("FSPC4", lc_scaled[3]);
       fspc.getCDF().addData("cnt_error4", lc_error[3]);
       System.out.println("FrameGroup");
       fspc.getCDF().addData("FrameGroup", frameGroup);

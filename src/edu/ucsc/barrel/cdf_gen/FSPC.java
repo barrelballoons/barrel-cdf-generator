@@ -88,21 +88,21 @@ public class FSPC extends DataProduct{
 
    @Override
    protected void addVars(){
-      addLC(1);
-      addLC(2);
-      addLC(3);
-      addLC(4);
+      addFSPC(1);
+      addFSPC(2);
+      addFSPC(3);
+      addFSPC(4);
    }
 
-   private void addLC(final int ch){
+   private void addFSPC(final int ch){
       CDFVar var;
 
       //create FSPC variable
-      var = new CDFVar(cdf, "LC" + ch, CDFConstants.CDF_INT4);
+      var = new CDFVar(cdf, "FSPC" + ch, CDFConstants.CDF_INT4);
 
-      var.attribute("FIELDNAM", "LC" + ch);
+      var.attribute("FIELDNAM", "FSPC" + ch);
       var.attribute("CATDESC", "Fast spectra ch. " + ch);
-      var.attribute("LABLAXIS", "LC" + ch);
+      var.attribute("LABLAXIS", "FSPC" + ch);
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "I5");
@@ -114,13 +114,14 @@ public class FSPC extends DataProduct{
       var.attribute("FILLVAL", CDFVar.getIstpVal("INT4_FILL"));
       var.attribute("DELTA_PLUS_VAR", "cnt_error" + ch);
       var.attribute("DELTA_MINUS_VAR", "cnt_error" + ch);
-      this.cdf.addVar("LC" + ch, var);
+      this.cdf.addVar("FSPC" + ch, var);
 
       //Create the count error variable
       var = new CDFVar(cdf, "cnt_error" + ch, CDFConstants.CDF_DOUBLE);
       var.attribute("FIELDNAM", "Count Error " + ch);
       var.attribute(
-         "CATDESC", "Count error based on Poisson statistics for LC " + ch + "."
+         "CATDESC", 
+         "Count error based on Poisson statistics for FSPC " + ch + "."
       );
       var.attribute("LABLAXIS", "Error");
       var.attribute("VAR_NOTES", "Error only valid for large count values.");
