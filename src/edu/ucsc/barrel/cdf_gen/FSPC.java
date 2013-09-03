@@ -66,7 +66,7 @@ public class FSPC extends DataProduct{
       //Set global attributes specific to this type of CDF
       cdf.attribute(
          "Logical_source_description", 
-         "Fast time resolution Bremsstrahlung X-ray spectrum."
+         "Fast time resolution (50ms) Bremsstrahlung X-ray spectrum."
       );
       cdf.attribute(
          "TEXT", 
@@ -101,7 +101,7 @@ public class FSPC extends DataProduct{
       var = new CDFVar(cdf, "FSPC" + ch, CDFConstants.CDF_INT4);
 
       var.attribute("FIELDNAM", "FSPC" + ch);
-      var.attribute("CATDESC", "Fast spectra ch. " + ch);
+      var.attribute("CATDESC", "Fast spectra (50ms) ch. " + ch);
       var.attribute("LABLAXIS", "FSPC" + ch);
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");

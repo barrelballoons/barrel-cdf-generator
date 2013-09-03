@@ -83,7 +83,8 @@ public class MSPC extends DataProduct{
    protected void addGAttributes(){
       //Set global attributes specific to this type of CDF
       this.cdf.attribute(
-         "Logical_source_description", "Slow time resolution X-ray spectrum"
+         "Logical_source_description", 
+         "Medium time resolution (4s) X-ray spectrum"
       );
       this.cdf.attribute(
          "TEXT",
@@ -117,7 +118,7 @@ public class MSPC extends DataProduct{
       );
 
       var.attribute("FIELDNAM", "MSPC");
-      var.attribute("CATDESC", "MSPC");
+      var.attribute("CATDESC", "Medium Spectrum (4s)");
       var.attribute(
          "VAR_NOTES", 
          "Rebinned, divided by energy bin widths and " +

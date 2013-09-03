@@ -141,9 +141,14 @@ public class Ephm extends DataProduct{
 
       var = new CDFVar(this.cdf, "MLT_Kp2", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "MLT for Kp=2");
-      var.attribute("CATDESC", "Magnetic local time for Kp=2 in hours.");
+      var.attribute(
+         "CATDESC", "Magnetic local time for Kp=2 in hours (using T89c)."
+      );
       var.attribute("LABLAXIS", "MLT_Kp2");
-      var.attribute("VAR_NOTES", "Calculated using IRBEM FORTRAN library"); 
+      var.attribute(
+         "VAR_NOTES", 
+         "Calculated using T89c model with the IRBEM FORTRAN library"
+      ); 
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "F4.2");
@@ -157,9 +162,14 @@ public class Ephm extends DataProduct{
 
       var = new CDFVar(this.cdf, "MLT_Kp6", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "MLT for Kp=6");
-      var.attribute("CATDESC", "Magnetic local time for Kp=6 in hours");
+      var.attribute(
+         "CATDESC", "Magnetic local time for Kp=6 in hours (using T89c)."
+      );
       var.attribute("LABLAXIS", "MLT_Kp6");
-      var.attribute("VAR_NOTES", "Calculated using IRBEM FORTRAN library"); 
+      var.attribute(
+         "VAR_NOTES", 
+         "Calculated using T89c model with the IRBEM FORTRAN library"
+      ); 
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "F4.2");
@@ -173,11 +183,11 @@ public class Ephm extends DataProduct{
 
       var = new CDFVar(this.cdf, "L_Kp2", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "L for Kp=2");
-      var.attribute("CATDESC", "L shell for Kp=2");
+      var.attribute("CATDESC", "L shell for Kp=2 (using T89c).");
       var.attribute("LABLAXIS", "L_Kp2");
       var.attribute(
          "VAR_NOTES", 
-         "Calculated using IRBEM FORTRAN library. " +
+         "Calculated using T89c model with the IRBEM FORTRAN library. " +
          "9999.0 indicates an open field line."
       ); 
       var.attribute("VAR_TYPE", "data");
@@ -192,11 +202,11 @@ public class Ephm extends DataProduct{
 
       var = new CDFVar(this.cdf, "L_Kp6", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "L for Kp=6");
-      var.attribute("CATDESC", "L shell for Kp=6");
+      var.attribute("CATDESC", "L shell for Kp=6 (using T89c).");
       var.attribute("LABLAXIS", "L_Kp6");
       var.attribute(
          "VAR_NOTES", 
-         "Calculated using IRBEM FORTRAN library. " +
+         "Calculated using T89c model with the IRBEM FORTRAN library. " +
          "9999.0 indicates an open field line."
       ); 
       var.attribute("VAR_TYPE", "data");

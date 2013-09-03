@@ -135,7 +135,8 @@ public class SSPC extends DataProduct{
    protected void addGAttributes(){
       //Set global attributes specific to this type of CDF
       this.cdf.attribute(
-         "Logical_source_description", "Slow time resolution X-ray spectrum"
+         "Logical_source_description", 
+         "Slow time resolution (32s) X-ray spectrum"
       );
       this.cdf.attribute(
          "TEXT", 
@@ -170,7 +171,7 @@ public class SSPC extends DataProduct{
          );   
 
       var.attribute("FIELDNAM", "SSPC");
-      var.attribute("CATDESC", "SSPC");
+      var.attribute("CATDESC", "Slow Spectrum (32s)");
       var.attribute("LABLAXIS", "SSPC");
       var.attribute(
          "VAR_NOTES", 
@@ -252,7 +253,7 @@ public class SSPC extends DataProduct{
       //Create a variable that will track the 511 line peak
       var = new CDFVar(cdf, "Peak_511", CDFConstants.CDF_DOUBLE);
       var.attribute("FIELDNAM", "Peak_511");
-      var.attribute("CATDESC", "Location of the 511 line");
+      var.attribute("CATDESC", "Peak location of the 511keV line.");
       var.attribute("VAR_TYPE", "data");
       var.attribute("LABLAXIS", "Peak_511");  
       var.attribute(
