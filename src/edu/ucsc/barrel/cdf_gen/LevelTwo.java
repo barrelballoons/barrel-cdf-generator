@@ -132,7 +132,7 @@ public class LevelTwo extends CDFWriter{
          
          //save the values from the other variables
          frameGroup[rec_i] = CDF_Gen.data.frame_mod4[data_i];
-         epoch[rec_i] = CDF_Gen.data.epoch_mod4[data_i] - Constants.SING_ACCUM;
+         epoch[rec_i] = CDF_Gen.data.epoch_mod4[data_i];
          q[rec_i] = CDF_Gen.data.gps_q[data_i];
 
          //keep track of which frames have complete GPS values
@@ -303,7 +303,7 @@ public class LevelTwo extends CDFWriter{
         version[rec_i] = CDF_Gen.data.ver[data_i];
         payID[rec_i] = CDF_Gen.data.payID[data_i];
         frameGroup[rec_i] = CDF_Gen.data.frame_1Hz[data_i];
-        epoch[rec_i] = CDF_Gen.data.epoch_1Hz[data_i] - Constants.SING_ACCUM;
+        epoch[rec_i] = CDF_Gen.data.epoch_1Hz[data_i];
         q[rec_i] = CDF_Gen.data.pps_q[data_i];
       }
 
@@ -375,7 +375,7 @@ public class LevelTwo extends CDFWriter{
          }
 
          frameGroup[rec_i] = CDF_Gen.data.frame_4Hz[data_i];
-         epoch[rec_i] = CDF_Gen.data.epoch_4Hz[data_i] - Constants.SING_ACCUM;
+         epoch[rec_i] = CDF_Gen.data.epoch_4Hz[data_i];
          q[rec_i] = CDF_Gen.data.magn_q[data_i];
       }
 
@@ -455,7 +455,7 @@ public class LevelTwo extends CDFWriter{
          cmdCnt[rec_i] = CDF_Gen.data.cmdCnt[data_i];
          frameGroup[rec_i] = CDF_Gen.data.frame_mod40[data_i];
          weeks[rec_i] = CDF_Gen.data.weeks[data_i];
-         epoch[rec_i] = CDF_Gen.data.epoch_mod40[data_i] - Constants.SING_ACCUM;
+         epoch[rec_i] = CDF_Gen.data.epoch_mod40[data_i];
          q[rec_i] = CDF_Gen.data.hkpg_q[data_i];
       }
 
@@ -536,28 +536,32 @@ public class LevelTwo extends CDFWriter{
          //write the spectrum to the new array
          if(CDF_Gen.data.lc1[fspc_rec + first] != Constants.FSPC_RAW_FILL){
             lc_scaled[0][fspc_rec] = CDF_Gen.data.lc1[fspc_rec + first];
-            lc_error[0][fspc_rec] = Math.sqrt(CDF_Gen.data.lc1[fspc_rec + first]);
+            lc_error[0][fspc_rec] = 
+               Math.sqrt(CDF_Gen.data.lc1[fspc_rec + first]);
          }else{
             lc_scaled[0][fspc_rec] = int4_fill;
             lc_error[0][fspc_rec] = double_fill;
          }
          if(CDF_Gen.data.lc2[fspc_rec + first] != Constants.FSPC_RAW_FILL){
             lc_scaled[1][fspc_rec] = CDF_Gen.data.lc2[fspc_rec + first];
-            lc_error[1][fspc_rec] = Math.sqrt(CDF_Gen.data.lc2[fspc_rec + first]);
+            lc_error[1][fspc_rec] = 
+               Math.sqrt(CDF_Gen.data.lc2[fspc_rec + first]);
          }else{
             lc_scaled[1][fspc_rec] = int4_fill;
             lc_error[1][fspc_rec] = double_fill;
          }
          if(CDF_Gen.data.lc3[fspc_rec + first] != Constants.FSPC_RAW_FILL){
             lc_scaled[2][fspc_rec] = CDF_Gen.data.lc3[fspc_rec + first];
-            lc_error[2][fspc_rec] = Math.sqrt(CDF_Gen.data.lc3[fspc_rec + first]);
+            lc_error[2][fspc_rec] = 
+               Math.sqrt(CDF_Gen.data.lc3[fspc_rec + first]);
          }else{
             lc_scaled[2][fspc_rec] = int4_fill;
             lc_error[2][fspc_rec] = double_fill;
          }
          if(CDF_Gen.data.lc4[fspc_rec + first] != Constants.FSPC_RAW_FILL){
             lc_scaled[3][fspc_rec] = CDF_Gen.data.lc4[fspc_rec + first];
-            lc_error[3][fspc_rec] = Math.sqrt(CDF_Gen.data.lc4[fspc_rec + first]);
+            lc_error[3][fspc_rec] = 
+               Math.sqrt(CDF_Gen.data.lc4[fspc_rec + first]);
          }else{
             lc_scaled[3][fspc_rec] = int4_fill;
             lc_error[3][fspc_rec] = double_fill;
@@ -566,7 +570,7 @@ public class LevelTwo extends CDFWriter{
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          frameGroup[rec_i] = CDF_Gen.data.frame_20Hz[data_i];
-         epoch[rec_i] = CDF_Gen.data.epoch_20Hz[data_i] - Constants.SING_ACCUM;
+         epoch[rec_i] = CDF_Gen.data.epoch_20Hz[data_i];
          q[rec_i] = CDF_Gen.data.fspc_q[data_i];
       }
 
@@ -678,7 +682,7 @@ public class LevelTwo extends CDFWriter{
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          frameGroup[rec_i] = CDF_Gen.data.frame_mod4[data_i];
-         epoch[rec_i] = CDF_Gen.data.epoch_mod4[data_i] - Constants.QUAD_ACCUM;
+         epoch[rec_i] = CDF_Gen.data.epoch_mod4[data_i];
          q[rec_i] = CDF_Gen.data.mspc_q[data_i];
       }
 
@@ -770,7 +774,7 @@ public class LevelTwo extends CDFWriter{
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          peak[rec_i] = CDF_Gen.data.peak511_bin[data_i];
          frameGroup[rec_i] = CDF_Gen.data.frame_mod32[data_i];
-         epoch[rec_i] = CDF_Gen.data.epoch_mod32[data_i] - Constants.SSPC_ACCUM;
+         epoch[rec_i] = CDF_Gen.data.epoch_mod32[data_i];
          q[rec_i] = CDF_Gen.data.sspc_q[data_i];
       }
 
@@ -819,7 +823,7 @@ public class LevelTwo extends CDFWriter{
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          frameGroup[rec_i] = CDF_Gen.data.frame_mod4[data_i];
-         epoch[rec_i] = CDF_Gen.data.epoch_mod4[data_i] - Constants.QUAD_ACCUM;
+         epoch[rec_i] = CDF_Gen.data.epoch_mod4[data_i];
          q[rec_i] = CDF_Gen.data.rcnt_q[data_i];
       }
          

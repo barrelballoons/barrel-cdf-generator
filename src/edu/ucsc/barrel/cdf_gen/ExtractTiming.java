@@ -223,6 +223,9 @@ public class ExtractTiming {
             data.time_model_intercept[data_i]) * 1000000
          );
 
+         //offset epoch to the begining of the accumulation period
+         data.epoch_1Hz[data_i] -= Constants.SING_ACCUM;
+
          //save epoch to the various time scales
          //fill the >1Hz times 
          for(int fill_i = 0; fill_i < 4; fill_i++){
@@ -244,6 +247,8 @@ public class ExtractTiming {
             ((fc * models[model_i].getSlope()) + 
             models[model_i].getIntercept()) * 1000000
          );
+
+         data.epoch_mod4[data_i] -= Constants.QUAD_ACCUM;
       }
 
       //fill mod32 timestamps
@@ -255,6 +260,8 @@ public class ExtractTiming {
             ((fc * models[model_i].getSlope()) + 
             models[model_i].getIntercept()) * 1000000
          );
+
+         data.epoch_mod32[data_i] -= Constants.SSPC_ACCUM;
       }
 
       //fill mod40 timestamps
@@ -266,6 +273,9 @@ public class ExtractTiming {
             ((fc * models[model_i].getSlope()) + 
             models[model_i].getIntercept()) * 1000000
          );
+         
+         //offset the epoch to the accumulation time of the first frame
+         data.epoch_mod40[data_i] -= (((fc % 40) + 1) * Constants.SING_ACCUM);
       }
    }
 
