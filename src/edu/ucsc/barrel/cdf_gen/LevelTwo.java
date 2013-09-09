@@ -528,6 +528,7 @@ public class LevelTwo extends CDFWriter{
          //get the adjusted bin edges
          //chan_edges[lc_rec] = 
          //   SpectrumExtract.createBinEdges(0, /*scint_temp, dpu_temp, */peak);
+         chan_edges[lc_rec] = new double[] {(double)lc_rec, (double)lc_rec+1, (double)lc_rec+2, (double)lc_rec+3, (double)lc_rec+4};
 
          //write the spectrum to the new array
          if(CDF_Gen.data.lc1[lc_rec + first] != Constants.FSPC_RAW_FILL){
@@ -574,15 +575,17 @@ public class LevelTwo extends CDFWriter{
       System.out.println("FSPC1");
       fspc.getCDF().addData("FSPC1", lc_scaled[0]);
       fspc.getCDF().addData("cnt_error1", lc_error[0]);
-      System.out.println("FSPC1");
+      System.out.println("FSPC2");
       fspc.getCDF().addData("FSPC2", lc_scaled[1]);
       fspc.getCDF().addData("cnt_error2", lc_error[1]);
-      System.out.println("FSPC1");
+      System.out.println("FSPC3");
       fspc.getCDF().addData("FSPC3", lc_scaled[2]);
       fspc.getCDF().addData("cnt_error3", lc_error[2]);
-      System.out.println("FSPC1");
+      System.out.println("FSPC4");
       fspc.getCDF().addData("FSPC4", lc_scaled[3]);
       fspc.getCDF().addData("cnt_error4", lc_error[3]);
+      System.out.println("FSPC_Edges");
+      fspc.getCDF().addData("FSPC_Edges", chan_edges);
       System.out.println("FrameGroup");
       fspc.getCDF().addData("FrameGroup", frameGroup);
       System.out.println("Epoch");

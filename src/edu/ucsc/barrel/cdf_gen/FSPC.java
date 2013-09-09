@@ -92,6 +92,36 @@ public class FSPC extends DataProduct{
       addFSPC(2);
       addFSPC(3);
       addFSPC(4);
+
+      //create variable for tracking energy edges
+      CDFVar var;
+      var = new CDFVar(
+            cdf, "FSPC_Edges", CDFConstants.CDF_DOUBLE, 
+            true, new  long[] {5L} 
+         );   
+
+      var.attribute("FIELDNAM", "FPSC_Edges");
+      var.attribute("CATDESC", "Fast Spectrum Channel Boundaries");
+      var.attribute("LABLAXIS", "FSPC_Edges");
+      var.attribute(
+         "VAR_NOTES", 
+         "Each element of the array represents the boundaries that separate " +
+         "each energy channel. That is, FSPC1 lies between elements 0 and 1, " +
+         "FSPC2 between 1 and 2, FSPC3 between 2 and 3, and FSPC4 between 3 " +
+         "and 4." 
+      );
+      var.attribute("VAR_TYPE", "data");
+      var.attribute("DEPEND_0", "Epoch");
+      //var.attribute("DEPEND_1", "energy");
+      var.attribute("FORMAT", "F8.3");
+      var.attribute("UNITS", "keV");
+      var.attribute("SCALETYP", "linear");
+      var.attribute("DISPLAY_TYPE", "spectrogram");
+      var.attribute("VALIDMIN", 0.0);
+      var.attribute("VALIDMAX", 1e30);
+      var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
+      this.cdf.addVar("FSPC_Edges", var);
+
    }
 
    private void addFSPC(final int ch){
