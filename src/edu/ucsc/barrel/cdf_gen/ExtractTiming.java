@@ -178,7 +178,7 @@ public class ExtractTiming {
             );
          }else{
             System.out.println(
-               "Failed to get model using " + (last_rec-first_rec) + "records"
+               "Failed to get model using " + (last_rec-first_rec) + " records."
             );
          }
       }

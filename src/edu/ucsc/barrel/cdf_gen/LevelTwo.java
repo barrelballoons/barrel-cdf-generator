@@ -497,6 +497,8 @@ public class LevelTwo extends CDFWriter{
          frameGroup = new int[numOfRecs],
          q = new int[numOfRecs];
       long[] epoch = new long[numOfRecs];
+      double[] old_edges = new double[5];
+      double[] std_edges = SpectrumExtract.stdEdges(0, 2.4414);
 
       System.out.println("\nSaving FSPC...");
       
@@ -504,60 +506,61 @@ public class LevelTwo extends CDFWriter{
       //figure out the channel width
       double double_fill = CDFVar.getIstpVal("DOUBLE_FILL").doubleValue();
       int int4_fill = CDFVar.getIstpVal("INT4_FILL").intValue();
-      for(int lc_rec = 0, hkpg_rec = 0; lc_rec < numOfRecs; lc_rec++){
+      for(int fspc_rec = 0, sspc_rec = 0; fspc_rec < numOfRecs; fspc_rec++){
 
-         //get temperatures
-         hkpg_rec = (lc_rec + first) / 20 / 40; //convert from 20Hz to mod40
-         if(CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] != int4_fill){
-            scint_temp = 
-               (CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] * 
-               CDF_Gen.data.hkpg_scale[Constants.T0]) + 
-               CDF_Gen.data.hkpg_offset[Constants.T0];
-         }else{
-            scint_temp = 20;
+         //incremint sspc_rec if needed
+         if(
+            (CDF_Gen.data.frame_20Hz[fspc_rec] - 
+            CDF_Gen.data.frame_20Hz[fspc_rec] % 32) != 
+            CDF_Gen.data.frame_mod32[sspc_rec]
+         ){
+            sspc_rec++;
          }
-         if(CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] != int4_fill){
-            dpu_temp = 
-               (CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] * 
-               CDF_Gen.data.hkpg_scale[Constants.T5]) + 
-               CDF_Gen.data.hkpg_offset[Constants.T5];
-         }else{
-            dpu_temp = 20;
-         }
-         
+
          //get the adjusted bin edges
-         //chan_edges[lc_rec] = 
-         //   SpectrumExtract.createBinEdges(0, /*scint_temp, dpu_temp, */peak);
-         chan_edges[lc_rec] = new double[] {(double)lc_rec, (double)lc_rec+1, (double)lc_rec+2, (double)lc_rec+3, (double)lc_rec+4};
+         chan_edges[fspc_rec] = SpectrumExtract.createBinEdges(
+            0, CDF_Gen.data.peak511_bin[sspc_rec]
+         );
+/*
+         //rebin the spectrum
+         fspc_rebin[fspc_rec] = SpectrumExtract.rebin(
+            CDF_Gen.data.mspc[fspc_rec + first], old_edges, std_edges 
+         );
 
+         //get the adjusted bin edges
+         //chan_edges[fspc_rec] = 
+         //   SpectrumExtract.createBinEdges(0, peak);
+
+          = new double[] {(double)fspc_rec, (double)lc_rec+1, (double)lc_rec+2, (double)lc_rec+3, (double)lc_rec+4};
+*/
          //write the spectrum to the new array
-         if(CDF_Gen.data.lc1[lc_rec + first] != Constants.FSPC_RAW_FILL){
-            lc_scaled[0][lc_rec] = CDF_Gen.data.lc1[lc_rec + first];
-            lc_error[0][lc_rec] = Math.sqrt(CDF_Gen.data.lc1[lc_rec + first]);
+         if(CDF_Gen.data.lc1[fspc_rec + first] != Constants.FSPC_RAW_FILL){
+            lc_scaled[0][fspc_rec] = CDF_Gen.data.lc1[fspc_rec + first];
+            lc_error[0][fspc_rec] = Math.sqrt(CDF_Gen.data.lc1[fspc_rec + first]);
          }else{
-            lc_scaled[0][lc_rec] = int4_fill;
-            lc_error[0][lc_rec] = double_fill;
+            lc_scaled[0][fspc_rec] = int4_fill;
+            lc_error[0][fspc_rec] = double_fill;
          }
-         if(CDF_Gen.data.lc2[lc_rec + first] != Constants.FSPC_RAW_FILL){
-            lc_scaled[1][lc_rec] = CDF_Gen.data.lc2[lc_rec + first];
-            lc_error[1][lc_rec] = Math.sqrt(CDF_Gen.data.lc2[lc_rec + first]);
+         if(CDF_Gen.data.lc2[fspc_rec + first] != Constants.FSPC_RAW_FILL){
+            lc_scaled[1][fspc_rec] = CDF_Gen.data.lc2[fspc_rec + first];
+            lc_error[1][fspc_rec] = Math.sqrt(CDF_Gen.data.lc2[fspc_rec + first]);
          }else{
-            lc_scaled[1][lc_rec] = int4_fill;
-            lc_error[1][lc_rec] = double_fill;
+            lc_scaled[1][fspc_rec] = int4_fill;
+            lc_error[1][fspc_rec] = double_fill;
          }
-         if(CDF_Gen.data.lc3[lc_rec + first] != Constants.FSPC_RAW_FILL){
-            lc_scaled[2][lc_rec] = CDF_Gen.data.lc3[lc_rec + first];
-            lc_error[2][lc_rec] = Math.sqrt(CDF_Gen.data.lc3[lc_rec + first]);
+         if(CDF_Gen.data.lc3[fspc_rec + first] != Constants.FSPC_RAW_FILL){
+            lc_scaled[2][fspc_rec] = CDF_Gen.data.lc3[fspc_rec + first];
+            lc_error[2][fspc_rec] = Math.sqrt(CDF_Gen.data.lc3[fspc_rec + first]);
          }else{
-            lc_scaled[2][lc_rec] = int4_fill;
-            lc_error[2][lc_rec] = double_fill;
+            lc_scaled[2][fspc_rec] = int4_fill;
+            lc_error[2][fspc_rec] = double_fill;
          }
-         if(CDF_Gen.data.lc4[lc_rec + first] != Constants.FSPC_RAW_FILL){
-            lc_scaled[3][lc_rec] = CDF_Gen.data.lc4[lc_rec + first];
-            lc_error[3][lc_rec] = Math.sqrt(CDF_Gen.data.lc4[lc_rec + first]);
+         if(CDF_Gen.data.lc4[fspc_rec + first] != Constants.FSPC_RAW_FILL){
+            lc_scaled[3][fspc_rec] = CDF_Gen.data.lc4[fspc_rec + first];
+            lc_error[3][fspc_rec] = Math.sqrt(CDF_Gen.data.lc4[fspc_rec + first]);
          }else{
-            lc_scaled[3][lc_rec] = int4_fill;
-            lc_error[3][lc_rec] = double_fill;
+            lc_scaled[3][fspc_rec] = int4_fill;
+            lc_error[3][fspc_rec] = double_fill;
          }
       }
 
