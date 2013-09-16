@@ -110,13 +110,12 @@ public class FSPC extends DataProduct{
          "FSPC2 between 1 and 2, FSPC3 between 2 and 3, and FSPC4 between 3 " +
          "and 4." 
       );
-      var.attribute("VAR_TYPE", "data");
+      var.attribute("VAR_TYPE", "suppot_data");
       var.attribute("DEPEND_0", "Epoch");
       //var.attribute("DEPEND_1", "energy");
       var.attribute("FORMAT", "F8.3");
       var.attribute("UNITS", "keV");
       var.attribute("SCALETYP", "linear");
-      var.attribute("DISPLAY_TYPE", "spectrogram");
       var.attribute("VALIDMIN", 0.0);
       var.attribute("VALIDMAX", 1e30);
       var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));

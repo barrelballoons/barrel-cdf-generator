@@ -87,7 +87,7 @@ public class Misc extends DataProduct{
       var.attribute("FIELDNAM", "Pulse Per Second");
       var.attribute("CATDESC", "Milliseconds before GPS pulse arrived.");
       var.attribute("LABLAXIS", "PPS");
-      var.attribute("VAR_TYPE", "data");
+      var.attribute("VAR_TYPE", "support_data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "I4");
       var.attribute("UNITS", "ms");
