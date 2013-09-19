@@ -141,6 +141,7 @@ public class MSPC extends DataProduct{
 
       //Create the "energy" variable
       //This variable lists the starting energy for each channel in keV
+      //Depend1 variable for the spectrum
       var = new CDFVar(
          this.cdf, "energy", CDFConstants.CDF_DOUBLE,
          false, new long[] {BIN_CENTERS.length}
@@ -182,14 +183,48 @@ public class MSPC extends DataProduct{
       var.attribute("VAR_NOTES", "Error only valid for large count values.");
       var.attribute("VAR_TYPE", "support_data");
       var.attribute("DEPEND_0", "Epoch");
+      var.attribute("DEPEND_1", "channel");
       var.attribute("FORMAT", "F8.3");
       var.attribute("UNITS", "cnts/sec");
       var.attribute("SCALETYP", "linear");
+      var.attribute("DISPLAY_TYPE", "spectrogram");
       var.attribute("VALIDMIN", 0.0);
       var.attribute("VALIDMAX", 10000.0);
       var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
       this.cdf.addVar("cnt_error", var);
       
+      //Create the "channel" variable
+      //Depend 1 variable for cnt_error.
+      var = new CDFVar(
+         this.cdf, "channel", CDFConstants.CDF_UINT1,
+         false, new long[] {BIN_CENTERS.length}
+      );
+
+      var.attribute("FIELDNAM", "channel");
+      var.attribute("CATDESC", "Channel Number");
+      var.attribute("LABLAXIS", "Channel");
+      var.attribute("VAR_NOTES", "Channel number 0 - 47.");
+      var.attribute("VAR_TYPE", "support_data");
+      var.attribute("DEPEND_0", "Epoch");
+      var.attribute("FORMAT", "I2");
+      var.attribute("UNITS", "channel");
+      var.attribute("SCALETYP", "linear");
+      var.attribute("VALIDMIN", 0);
+      var.attribute("VALIDMAX", 48);
+      var.attribute("FILLVAL", CDFVar.getIstpVal("UINT1_FILL"));
+      this.cdf.addVar("channel", var);
+
+      //Fill the "channel" variable
+      short[][] channel = {{
+         0,1,2,3,4,5,6,7,8,9,
+         10,11,12,13,14,15,16,17,18,19,
+         20,21,22,23,24,25,26,27,28,29,
+         30,31,32,33,34,35,36,37,38,39,
+         40,41,42,43,44,45,46,47
+      }};
+      var.writeData("channel", channel);
+      channel = null;
+
       //Create a variable that will track each energy channel width
       var = new CDFVar(
          this.cdf, "HalfBinWidth", CDFConstants.CDF_DOUBLE,
