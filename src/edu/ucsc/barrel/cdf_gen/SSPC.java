@@ -281,10 +281,10 @@ public class SSPC extends DataProduct{
       var.attribute("CATDESC", "Count error based on Poisson statistics.");
       var.attribute("LABLAXIS", "Error");
       var.attribute("VAR_NOTES", "Error only valid for large count values.");
-      var.attribute("VAR_TYPE", "data");
+      var.attribute("VAR_TYPE", "support_data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "F8.3");
-      var.attribute("UNITS", "keV");
+      var.attribute("UNITS", "cnts/sec");
       var.attribute("SCALETYP", "linear");
       var.attribute("VALIDMIN", 0.0);
       var.attribute("VALIDMAX", 10000.0);

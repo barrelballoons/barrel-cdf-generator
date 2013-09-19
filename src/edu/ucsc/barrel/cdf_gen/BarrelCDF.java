@@ -137,6 +137,7 @@ public class BarrelCDF extends CDFFile{
       var.attribute("FIELDNAM", "Data Quality Flag");
       var.attribute("CATDESC", "Data Quality Flag");
       var.attribute("VAR_NOTES", "32bit flag used to indicate data quality.");
+      var.attribute("UNITS", "0 means no issues");
       var.attribute("LABLAXIS", "Q");
       var.attribute("VAR_TYPE", "data");
       var.attribute("DEPEND_0", "Epoch");

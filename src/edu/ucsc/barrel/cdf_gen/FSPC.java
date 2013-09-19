@@ -154,10 +154,10 @@ public class FSPC extends DataProduct{
       );
       var.attribute("LABLAXIS", "Error");
       var.attribute("VAR_NOTES", "Error only valid for large count values.");
-      var.attribute("VAR_TYPE", "data");
+      var.attribute("VAR_TYPE", "support_data");
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("FORMAT", "F6.3");
-      var.attribute("UNITS", "keV");
+      var.attribute("UNITS", "cnts/50ms");
       var.attribute("SCALETYP", "linear");
       var.attribute("VALIDMIN", 0.0);
       var.attribute("VALIDMAX", 10000.0);

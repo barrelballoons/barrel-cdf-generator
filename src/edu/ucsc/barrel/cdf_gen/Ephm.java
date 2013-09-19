@@ -139,8 +139,8 @@ public class Ephm extends DataProduct{
       var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       this.cdf.addVar("GPS_Alt", var);
 
-      var = new CDFVar(this.cdf, "MLT_Kp2", CDFConstants.CDF_FLOAT);
-      var.attribute("FIELDNAM", "MLT for Kp=2");
+      var = new CDFVar(this.cdf, "MLT_Kp2_T89c", CDFConstants.CDF_FLOAT);
+      var.attribute("FIELDNAM", "MLT for Kp=2 (T89c)");
       var.attribute(
          "CATDESC", "Magnetic local time for Kp=2 in hours (using T89c)."
       );
@@ -160,8 +160,8 @@ public class Ephm extends DataProduct{
       var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       this.cdf.addVar("MLT_Kp2", var);
 
-      var = new CDFVar(this.cdf, "MLT_Kp6", CDFConstants.CDF_FLOAT);
-      var.attribute("FIELDNAM", "MLT for Kp=6");
+      var = new CDFVar(this.cdf, "MLT_Kp6_T89c", CDFConstants.CDF_FLOAT);
+      var.attribute("FIELDNAM", "MLT for Kp=6 (T89c)");
       var.attribute(
          "CATDESC", "Magnetic local time for Kp=6 in hours (using T89c)."
       );
@@ -182,9 +182,9 @@ public class Ephm extends DataProduct{
       this.cdf.addVar("MLT_Kp6", var);
 
       var = new CDFVar(this.cdf, "L_Kp2", CDFConstants.CDF_FLOAT);
-      var.attribute("FIELDNAM", "L for Kp=2");
+      var.attribute("FIELDNAM", "L for Kp=2 (T89c)");
       var.attribute("CATDESC", "L shell for Kp=2 (using T89c).");
-      var.attribute("LABLAXIS", "L_Kp2");
+      var.attribute("LABLAXIS", "L_Kp2_T89c");
       var.attribute(
          "VAR_NOTES", 
          "Calculated using T89c model with the IRBEM FORTRAN library. " +
@@ -201,9 +201,9 @@ public class Ephm extends DataProduct{
       this.cdf.addVar("L_Kp2", var);
 
       var = new CDFVar(this.cdf, "L_Kp6", CDFConstants.CDF_FLOAT);
-      var.attribute("FIELDNAM", "L for Kp=6");
+      var.attribute("FIELDNAM", "L for Kp=6 (T89c)");
       var.attribute("CATDESC", "L shell for Kp=6 (using T89c).");
-      var.attribute("LABLAXIS", "L_Kp6");
+      var.attribute("LABLAXIS", "L_Kp6_T89c");
       var.attribute(
          "VAR_NOTES", 
          "Calculated using T89c model with the IRBEM FORTRAN library. " +
