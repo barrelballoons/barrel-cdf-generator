@@ -56,6 +56,9 @@ public class CDFVar implements CDFComponent{
       map.put("INT1_FILL",-128);
       map.put("INT2_FILL", -32768);
       map.put("INT4_FILL", -2147483648);
+      map.put("UINT1_FILL", 255);
+      map.put("UINT2_FILL", 65535);
+      map.put("UINT4_FILL", 4294967295L);
       ISTP_CONSTANTS = Collections.unmodifiableMap(map);
    }
    static public Number getIstpVal(String key){
