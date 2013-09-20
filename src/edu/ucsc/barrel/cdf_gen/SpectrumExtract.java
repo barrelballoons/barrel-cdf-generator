@@ -25,6 +25,8 @@ Description:
 package edu.ucsc.barrel.cdf_gen;
 
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.ListIterator;
 import java.lang.ArrayIndexOutOfBoundsException;
 import org.apache.commons.math3.fitting.GaussianFitter;
 import org.apache.commons.math3.optim.nonlinear.vector.
@@ -226,6 +228,90 @@ public class SpectrumExtract {
 
       return result;
    }
+
+/*
+   NAME: binvert
+
+   DESC: invert bin(energy) relation to find energy(bin)
+
+   INPUT: start is an initial estimate of bin value(s)
+          f is a temperature/detector dependent constant
+
+   OUTPUT: returns an object of the same type and dimension
+           as start object contains energy value(s)
+
+   METHOD: two iterations of Newton-Raphson to solve a
+          transcendental equation. A tricky part is the
+          argument for Math.log() can be negative, due to
+          electronics offsets (say bin 5 is 0 keV). Since only
+          makeedges() calls, we assume some properties
+          of argument start. If start is a scalar, then
+          we're working on the 511keV line, so we won't have
+          start <= 0. For slo, we can have several early
+          start values negative. Force these to be NaN, and
+          proceed with calculations, then force these to
+          ascending negative values on return.
+
+          An accurate approach is to use complex numbers and
+          discard the imaginary part of the result. This gives
+          correct negative energy results for bin edges, but
+          doubles computational effort. It's not worth it.
+
+   NOTES: binvert() should be used only by makedges().
+          Ported from Michael McCarthy's original IDL code
+*/
+   private double[] binvert(double[] start, double f){
+      int 
+         size = start.length,
+         bad_vals = 0;
+
+      double[] iter1 = new double[size];
+      double[] iter2 = new double[size];
+     
+
+      //first iteration of Newton-Raphson  
+      for(int i = 0; i < size; i++){
+         if(start[i] < 0){
+            iter1[i] = Double.NaN;
+         }else{
+            iter1[i] = 
+               (start[i] + f * start[i]) / 
+               (1 + f * (1 + Math.log(start[i])));
+         }
+      }
+
+      //second iteration of Newton-Raphson  
+      for(int i = 0; i < size; i++){
+         if(Double.isNaN(iter1[i])){
+            bad_vals++;
+         }else{
+            iter2[i] = 
+               (iter1[i] + f * iter1[i]) / 
+               (1.0 + f * (1.0 + Math.log(iter1[i])));
+            if(Double.isInfinite(iter2[i])){
+               bad_vals++;
+            }
+         }
+      }
+      
+      //turn bad values into negatives ascending to zero
+      if(bad_vals > 0){
+         for(int i = 0; i < size; i++){
+            if(Double.isNaN(iter2[i]) || Double.isInfinite(iter2[i])){
+               bad_vals--;
+               iter2[i] = 0 - bad_vals;
+            }
+         }
+      }
+
+      return iter2;
+   }
+   
+
+   public double[] makeedges(){
+      return new double[] {};
+   }
+
 
    public static double[] createBinEdges(
       int spec_i, double peak511// double xtal_temp, double dpu_temp, double peak511
