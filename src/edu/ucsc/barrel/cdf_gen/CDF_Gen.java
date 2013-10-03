@@ -92,7 +92,7 @@ public class CDF_Gen{
 			if(payload_parts[2] != null){stn = payload_parts[2];}
 			if(payload_parts[3] != null){mag = payload_parts[3];}
 			if(payload_parts[3] != null){dpu = payload_parts[4];}
-			
+		   
          //set output paths
          if(getSetting("outDir") != ""){
 			   //check if user specified a place to store the files

@@ -712,7 +712,7 @@ public class LevelTwo extends CDFWriter{
       double[][] 
          sspc_rebin = new double[numOfRecs][256],
          sspc_error = new double[numOfRecs][256];
-      double[] 
+      float[] 
          old_edges, 
          std_edges = SpectrumExtract.stdEdges(2, 2.4414);
       
@@ -726,8 +726,20 @@ public class LevelTwo extends CDFWriter{
 
       //rebin the sspc spectra
       for(int sspc_rec = 0, hkpg_rec = 0; sspc_rec < numOfRecs; sspc_rec++){
-/*         //get temperatures
-         hkpg_rec = (sspc_rec + first) * 32 / 40; //convert from mod32 to mod40
+         
+         //find correct hkpg_rec
+         int target_frame = 
+            CDF_Gen.data.frame_mod32[sspc_rec] - 
+            (CDF_Gen.data.frame_mod32[sspc_rec] % 40);
+
+         while(
+            (CDF_Gen.data.frame_mod40[hkpg_rec] <= target_frame) &&
+            (hkpg_rec <= sspc_rec)
+         ){
+            hkpg_rec++;
+         }
+
+         //get temperatures
          if(CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] != Constants.HKPG_FILL){
             scint_temp = 
                (CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] * 
@@ -744,11 +756,11 @@ public class LevelTwo extends CDFWriter{
          }else{
             dpu_temp = 20;
          }
-*/    
+    
          //get the adjusted bin edges
          old_edges = 
-            SpectrumExtract.createBinEdges(
-               2, CDF_Gen.data.peak511_bin[sspc_rec]
+            SpectrumExtract.makeedges(
+               2, 20f, 20f, CDF_Gen.data.peak511_bin[sspc_rec]
             );
          
          //rebin the spectum
