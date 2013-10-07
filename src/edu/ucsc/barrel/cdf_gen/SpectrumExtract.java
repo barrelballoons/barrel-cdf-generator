@@ -362,9 +362,12 @@ public class SpectrumExtract {
    NOTES: Ported from Michael McCarthy's original IDL code
 */
    public float[] makeedges(
-      int spec_i, final String payload, 
-      float xtal_temp, float dpu_temp, float peak511
+      int spec_i, float xtal_temp, float dpu_temp, float peak511
    ){
+
+      String payload = 
+         CDF_Gen.getSetting(currentPayload).subString(0,2);
+      
       //initialize the uncalibrated bin edges
       int[][] uncal_edges = {
          {0, 75, 230, 350, 620},
@@ -478,9 +481,7 @@ public class SpectrumExtract {
    }
 
 
-   public static double[] createBinEdges(
-      int spec_i, double peak511// double xtal_temp, double dpu_temp, double peak511
-   ){
+   public static double[] createBinEdges(int spec_i, double peak511){
       double factor1, factor2, scale;
       double[] edges_nonlin = new double[RAW_EDGES[spec_i].length];
       double[] edges_cal = new double[RAW_EDGES[spec_i].length];
