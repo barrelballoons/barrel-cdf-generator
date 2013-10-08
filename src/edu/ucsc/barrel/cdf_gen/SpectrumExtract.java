@@ -43,39 +43,39 @@ public class SpectrumExtract {
    private SpectrumExtract(){}
 
    //create uncalibrated bin edges
-   private static final double[][] RAW_EDGES = {
-      {0, 75, 230, 350, 620},
+   private static final float[][] RAW_EDGES = {
+      {0f, 75f, 230f, 350f, 620f},
       {
-         42, 46, 50, 53, 57, 60, 64, 70, 78, 84, 92, 100, 
-         106 , 114, 120, 128, 140, 156, 168, 184, 200, 212, 228, 
-         240, 256, 280, 312, 336, 368, 400, 424, 456, 480, 512, 
-         560, 624, 672, 736, 800, 848, 912, 960, 1024, 1120, 
-         1248, 1344, 1472, 1600, 1696
+         42f, 46f, 50f, 53f, 57f, 60f, 64f, 70f, 78f, 84f, 92f, 100f, 
+         106f, 114f, 120f, 128f, 140f, 156f, 168f, 184f, 200f, 212f, 228f, 
+         240f, 256f, 280f, 312f, 336f, 368f, 400f, 424f, 456f, 480f, 512f, 
+         560f, 624f, 672f, 736f, 800f, 848f, 912f, 960f, 1024f, 1120f, 
+         1248f, 1344f, 1472f, 1600f, 1696f
       },
       {
-         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 
-         16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 
-         30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 
-         44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 
-         58, 59, 60, 61, 62, 63, 64, 66, 68, 70, 72, 74, 76, 78, 
-         80, 82, 84, 86, 88, 90, 92, 94, 96, 98, 100, 102, 104, 106, 
-         108, 110, 112, 114, 116, 118, 120, 122, 124, 126, 128, 132, 
-         136, 140, 144, 148, 152, 156, 160, 164, 168, 172, 176, 
-         180, 184, 188, 192, 196, 200, 204, 208, 212, 216, 220, 
-         224, 228, 232, 236, 240, 244, 248, 252, 256, 264, 272, 
-         280, 288, 296, 304, 312, 320, 328, 336, 344, 352, 360, 
-         368, 376, 384, 392, 400, 408, 416, 424, 432, 440, 448, 
-         456, 464, 472, 480, 488, 496, 504, 512, 528, 544, 560, 
-         576, 592, 608, 624, 640, 656, 672, 688, 704, 720, 736, 
-         752, 768, 784, 800, 816, 832, 848, 864, 880, 896, 912, 
-         928, 944, 960, 976, 992, 1008, 1024, 1056, 1088, 1120, 
-         1152, 1184, 1216, 1248, 1280, 1312, 1344, 1376, 1408, 
-         1440, 1472, 1504, 1536, 1568, 1600, 1632, 1664, 1696, 
-         1728, 1760, 1792, 1824, 1856, 1888, 1920, 1952, 1984, 
-         2016, 2048, 2112, 2176, 2240, 2304, 2368, 2432, 2496, 
-         2560, 2624, 2688, 2752, 2816, 2880, 2944, 3008, 3072, 
-         3136, 3200, 3264, 3328, 3392, 3456, 3520, 3584, 3648, 
-         3712, 3776, 3840, 3904, 3968, 4032, 4096
+         0f, 1f, 2f, 3f, 4f, 5f, 6f, 7f, 8f, 9f, 10f, 11f, 12f, 13f, 14f, 15f, 
+         16f, 17f, 18f, 19f, 20f, 21f, 22f, 23f, 24f, 25f, 26f, 27f, 28f, 29f, 
+         30f, 31f, 32f, 33f, 34f, 35f, 36f, 37f, 38f, 39f, 40f, 41f, 42f, 43f, 
+         44f, 45f, 46f, 47f, 48f, 49f, 50f, 51f, 52f, 53f, 54f, 55f, 56f, 57f, 
+         58f, 59f, 60f, 61f, 62f, 63f, 64f, 66f, 68f, 70f, 72f, 74f, 76f, 78f, 
+         80f, 82f, 84f, 86f, 88f, 90f, 92f, 94f, 96f, 98f, 100f, 102f, 104f, 
+         106f, 108f, 110f, 112f, 114f, 116f, 118f, 120f, 122f, 124f, 126f, 
+         128f, 132f, 136f, 140f, 144f, 148f, 152f, 156f, 160f, 164f, 168f, 
+         172f, 176f, 180f, 184f, 188f, 192f, 196f, 200f, 204f, 208f, 212f, 
+         216f, 220f, 224f, 228f, 232f, 236f, 240f, 244f, 248f, 252f, 256f, 
+         264f, 272f, 280f, 288f, 296f, 304f, 312f, 320f, 328f, 336f, 344f, 
+         352f, 360f, 368f, 376f, 384f, 392f, 400f, 408f, 416f, 424f, 432f, 
+         440f, 448f,  456f, 464f, 472f, 480f, 488f, 496f, 504f, 512f, 528f, 
+         544f, 560f, 576f, 592f, 608f, 624f, 640f, 656f, 672f, 688f, 704f, 
+         720f, 736f, 752f, 768f, 784f, 800f, 816f, 832f, 848f, 864f, 880f, 
+         896f, 912f, 928f, 944f, 960f, 976f, 992f, 1008f, 1024f, 1056f, 
+         1088f, 1120f, 1152f, 1184f, 1216f, 1248f, 1280f, 1312f, 1344f, 
+         1376f, 1408f, 1440f, 1472f, 1504f, 1536f, 1568f, 1600f, 1632f, 
+         1664f, 1696f, 1728f, 1760f, 1792f, 1824f, 1856f, 1888f, 1920f, 
+         1952f, 1984f, 2016f, 2048f, 2112f, 2176f, 2240f, 2304f, 2368f, 
+         2432f, 2496f, 2560f, 2624f, 2688f, 2752f, 2816f, 2880f, 2944f, 
+         3008f, 3072f, 3136f, 3200f, 3264f, 3328f, 3392f, 3456f, 3520f, 
+         3584f, 3648f, 3712f, 3776f, 3840f, 3904f, 3968f, 4032f, 4096f
       }
    };
 
@@ -122,7 +122,8 @@ public class SpectrumExtract {
       if(length < 2){return;}
       
       DescriptiveStatistics stats = new DescriptiveStatistics();
-      double max_bin, min_bin, peak;
+      float peak;
+      double max_bin, min_bin;
       double[]
          search_spec = new double[PEAK_511_WIDTH],
          bin_num = new double[PEAK_511_WIDTH];
@@ -131,7 +132,6 @@ public class SpectrumExtract {
       for(int bin_i = 0; bin_i < PEAK_511_WIDTH; bin_i++){
          bin_num[bin_i] = SSPC_MIDPOINTS[bin_i + PEAK_511_START]; 
       }
-
 
       //sum up all of the spectra from this group
       for(int spec_i = start; spec_i < stop; spec_i++){
@@ -144,7 +144,7 @@ public class SpectrumExtract {
                //check to see if it is likely the 511 line will be washed out
                if(search_spec[chan_i] > max_cnts){
                   for(int peak_i = start; peak_i < stop; peak_i++){
-                     data.peak511_bin[peak_i] = Constants.DOUBLE_FILL; 
+                     data.peak511_bin[peak_i] = Constants.FLOAT_FILL; 
                   }
                   return;
                }
@@ -159,7 +159,7 @@ public class SpectrumExtract {
       }
    }
 
-   private static double find511(double[] x, double[] y){
+   private static float find511(double[] x, double[] y){
       GaussianFitter fitter = 
          new GaussianFitter(new LevenbergMarquardtOptimizer());
       double[] 
@@ -219,12 +219,12 @@ public class SpectrumExtract {
          System.out.println("Gaussian out of bounds: " + apex);
          fit_params[1] = Constants.DOUBLE_FILL;
       }
-      return fit_params[1];
+      return (float)fit_params[1];
    }
 
-   public static double[] stdEdges(int spec_i, double scale){
+   public static float[] stdEdges(int spec_i, float scale){
       int length = RAW_EDGES[spec_i].length;
-      double[] result = new double[length];
+      float[] result = new float[length];
 
       for(int edge_i = 0; edge_i < length; edge_i++){
          result[edge_i] = scale * RAW_EDGES[spec_i][edge_i];
@@ -361,12 +361,12 @@ public class SpectrumExtract {
 
    NOTES: Ported from Michael McCarthy's original IDL code
 */
-   public float[] makeedges(
+   public static float[] makeedges(
       int spec_i, float xtal_temp, float dpu_temp, float peak511
    ){
 
       String payload = 
-         CDF_Gen.getSetting(currentPayload).subString(0,2);
+         CDF_Gen.getSetting("currentPayload").substring(0,2);
       
       //initialize the uncalibrated bin edges
       int[][] uncal_edges = {
@@ -447,6 +447,7 @@ public class SpectrumExtract {
          }
          return edges_out;
       }
+
       //set model parameters 
       float xtal_compensate = 
          1.022f - 1.0574e-4f * (float)Math.pow(xtal_temp - 10.7f, 2);
@@ -459,7 +460,7 @@ public class SpectrumExtract {
       
       //calculate a correction from 511keV location
       float fac511 = 1.0f;
-      if(!Float.isNaN(peak511)){
+      if(peak511 != (Float)CDFVar.getIstpVal("FLOAT_FILL")){
          float start = 
             (peak511 / xtal_compensate - dpu_compensate[0]) / dpu_compensate[1];
          fac511 = 511.0f / binvert(start,factor);
@@ -528,8 +529,8 @@ public class SpectrumExtract {
    }
    
 
-   public static double[] rebin(
-      int[] specin, double[] edges_in, double[] edges_out
+   public static float[] rebin(
+      int[] specin, float[] edges_in, float[] edges_out
    ){
       int a_cnt, b_cnt, c_cnt, d_cnt;
 
@@ -544,14 +545,14 @@ public class SpectrumExtract {
          c = new int[numOfEdges],
          d = new int[numOfEdges];
 
-      double[] 
+      float[] 
          ea1 = Arrays.copyOfRange(edges_in, 0, (numOfEdges - 1)),
          ea2 = Arrays.copyOfRange(edges_in, 1, numOfEdges),
          eb1 = Arrays.copyOfRange(edges_out, 0, (numOfEdges - 1)),
          eb2 = Arrays.copyOfRange(edges_out, 1, numOfEdges),
-         widths_in = new double[numOfBins],
-         widths_out = new double[numOfBins],
-         specout = new double[numOfBins];
+         widths_in = new float[numOfBins],
+         widths_out = new float[numOfBins],
+         specout = new float[numOfBins];
 
       //calculate the widths of each bin
       for(int i = 0; i < numOfBins; i++){
@@ -611,7 +612,7 @@ public class SpectrumExtract {
          if (a_cnt > 0){ 
             for(int k = 0; k < a_cnt; k++){
                if(specin[a[k]] < 0){
-                  specout[i] = Constants.DOUBLE_FILL;
+                  specout[i] = Constants.FLOAT_FILL;
                   continue spec_loop;
                }else{
                   specout[i] += 
@@ -622,7 +623,7 @@ public class SpectrumExtract {
          if (b_cnt > 0){
             for(int k = 0; k < b_cnt; k++){
                if(specin[b[k]] < 0){
-                  specout[i] = Constants.DOUBLE_FILL;
+                  specout[i] = Constants.FLOAT_FILL;
                   continue spec_loop;
                }else{
                   specout[i] += specin[b[k]];
@@ -632,7 +633,7 @@ public class SpectrumExtract {
          if (c_cnt > 0){
             for(int k = 0; k < c_cnt; k++){
                if(specin[c[k]] < 0){
-                  specout[i] = Constants.DOUBLE_FILL;
+                  specout[i] = Constants.FLOAT_FILL;
                   continue spec_loop;
                }else{
                   specout[i] += 
@@ -643,7 +644,7 @@ public class SpectrumExtract {
          if (d_cnt > 0){
             for(int k = 0; k < d_cnt; k++){
                if(specin[d[k]] < 0){
-                  specout[i] = Constants.DOUBLE_FILL;
+                  specout[i] = Constants.FLOAT_FILL;
                   continue spec_loop;
                }else{
                   specout[i] += 

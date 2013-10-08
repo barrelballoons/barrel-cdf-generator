@@ -218,16 +218,17 @@ public class CDF_Gen{
       log.close();
    }
    
-   public static void fillDataGaps(double[] input_data){
+   public static void fillDataGaps(float[] input_data){
       int 
          size = data.getSize("mod32"),
          step_size = 1, 
          start = 0;
       double 
+         delta, std_dev, med;
+      float
          m, b, //values used for interpolating data        
-         delta, std_dev, med,
-         last_value = Constants.DOUBLE_FILL, 
-         new_value = Constants.DOUBLE_FILL;
+         new_value = Constants.FLOAT_FILL,
+         last_value = Constants.FLOAT_FILL;
       DescriptiveStatistics stats = new DescriptiveStatistics();
       
       //generate statistics on the 511 peak jump sizes

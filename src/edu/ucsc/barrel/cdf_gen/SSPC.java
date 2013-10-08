@@ -40,81 +40,81 @@ import java.util.Arrays;
 public class SSPC extends DataProduct{
    private int date, lvl;
    private String payload_id;
-   private double scale = 2.4414; // keV/bin
+   private float scale = 2.4414f; // keV/bin
 
-   public final static double[] 
+   public final static float[] 
       BIN_EDGES = {
-         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 
-         16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 
-         30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 
-         44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 
-         58, 59, 60, 61, 62, 63, 64, 66, 68, 70, 72, 74, 76, 78, 
-         80, 82, 84, 86, 88, 90, 92, 94, 96, 98, 100, 102, 104, 
-         106, 108, 110, 112, 114, 116, 118, 120, 122, 124, 126, 
-         128, 132, 136, 140, 144, 148, 152, 156, 160, 164, 168, 
-         172, 176, 180, 184, 188, 192, 196, 200, 204, 208, 212, 
-         216, 220, 224, 228, 232, 236, 240, 244, 248, 252, 256, 
-         264, 272, 280, 288, 296, 304, 312, 320, 328, 336, 344, 
-         352, 360, 368, 376, 384, 392, 400, 408, 416, 424, 432, 
-         440, 448, 456, 464, 472, 480, 488, 496, 504, 512, 528, 
-         544, 560, 576, 592, 608, 624, 640, 656, 672, 688, 704, 
-         720, 736, 752, 768, 784, 800, 816, 832, 848, 864, 880, 
-         896, 912, 928, 944, 960, 976, 992, 1008, 1024, 1056, 
-         1088, 1120, 1152, 1184, 1216, 1248, 1280, 1312, 1344, 
-         1376, 1408, 1440, 1472, 1504, 1536, 1568, 1600, 1632, 
-         1664, 1696, 1728, 1760, 1792, 1824, 1856, 1888, 1920, 
-         1952, 1984, 2016, 2048, 2112, 2176, 2240, 2304, 2368, 
-         2432, 2496, 2560, 2624, 2688, 2752, 2816, 2880, 2944, 
-         3008, 3072, 3136, 3200, 3264, 3328, 3392, 3456, 3520, 
-         3584, 3648, 3712, 3776, 3840, 3904, 3968, 4032, 4096
+         0f, 1f, 2f, 3f, 4f, 5f, 6f, 7f, 8f, 9f, 10f, 11f, 12f, 13f, 14f, 15f, 
+         16f, 17f, 18f, 19f, 20f, 21f, 22f, 23f, 24f, 25f, 26f, 27f, 28f, 29f, 
+         30f, 31f, 32f, 33f, 34f, 35f, 36f, 37f, 38f, 39f, 40f, 41f, 42f, 43f, 
+         44f, 45f, 46f, 47f, 48f, 49f, 50f, 51f, 52f, 53f, 54f, 55f, 56f, 57f, 
+         58f, 59f, 60f, 61f, 62f, 63f, 64f, 66f, 68f, 70f, 72f, 74f, 76f, 78f, 
+         80f, 82f, 84f, 86f, 88f, 90f, 92f, 94f, 96f, 98f, 100f, 102f, 104f, 
+         106f, 108f, 110f, 112f, 114f, 116f, 118f, 120f, 122f, 124f, 126f, 
+         128f, 132f, 136f, 140f, 144f, 148f, 152f, 156f, 160f, 164f, 168f, 
+         172f, 176f, 180f, 184f, 188f, 192f, 196f, 200f, 204f, 208f, 212f, 
+         216f, 220f, 224f, 228f, 232f, 236f, 240f, 244f, 248f, 252f, 256f, 
+         264f, 272f, 280f, 288f, 296f, 304f, 312f, 320f, 328f, 336f, 344f, 
+         352f, 360f, 368f, 376f, 384f, 392f, 400f, 408f, 416f, 424f, 432f, 
+         440f, 448f, 456f, 464f, 472f, 480f, 488f, 496f, 504f, 512f, 528f, 
+         544f, 560f, 576f, 592f, 608f, 624f, 640f, 656f, 672f, 688f, 704f, 
+         720f, 736f, 752f, 768f, 784f, 800f, 816f, 832f, 848f, 864f, 880f, 
+         896f, 912f, 928f, 944f, 960f, 976f, 992f, 1008f, 1024f, 1056f, 
+         1088f, 1120f, 1152f, 1184f, 1216f, 1248f, 1280f, 1312f, 1344f, 
+         1376f, 1408f, 1440f, 1472f, 1504f, 1536f, 1568f, 1600f, 1632f, 
+         1664f, 1696f, 1728f, 1760f, 1792f, 1824f, 1856f, 1888f, 1920f, 
+         1952f, 1984f, 2016f, 2048f, 2112f, 2176f, 2240f, 2304f, 2368f, 
+         2432f, 2496f, 2560f, 2624f, 2688f, 2752f, 2816f, 2880f, 2944f, 
+         3008f, 3072f, 3136f, 3200f, 3264f, 3328f, 3392f, 3456f, 3520f, 
+         3584f, 3648f, 3712f, 3776f, 3840f, 3904f, 3968f, 4032f, 4096
       },
       BIN_CENTERS = {
-         0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 
-         11.5, 12.5, 13.5, 14.5, 15.5, 16.5, 17.5, 18.5, 19.5, 
-         20.5, 21.5, 22.5, 23.5, 24.5, 25.5, 26.5, 27.5, 28.5, 
-         29.5, 30.5, 31.5, 32.5, 33.5, 34.5, 35.5, 36.5, 37.5, 
-         38.5, 39.5, 40.5, 41.5, 42.5, 43.5, 44.5, 45.5, 46.5, 
-         47.5, 48.5, 49.5, 50.5, 51.5, 52.5, 53.5, 54.5, 55.5, 
-         56.5, 57.5, 58.5, 59.5, 60.5, 61.5, 62.5, 63.5, 65, 
-         67, 69, 71, 73, 75, 77, 79, 81, 83, 85, 87, 89, 91, 
-         93, 95, 97, 99, 101, 103, 105, 107, 109, 111, 113, 
-         115, 117, 119, 121, 123, 125, 127, 130, 134, 138, 
-         142, 146, 150, 154, 158, 162, 166, 170, 174, 178, 
-         182, 186, 190, 194, 198, 202, 206, 210, 214, 218, 
-         222, 226, 230, 234, 238, 242, 246, 250, 254, 260, 
-         268, 276, 284, 292, 300, 308, 316, 324, 332, 340, 
-         348, 356, 364, 372, 380, 388, 396, 404, 412, 420, 
-         428, 436, 444, 452, 460, 468, 476, 484, 492, 500, 
-         508, 520, 536, 552, 568, 584, 600, 616, 632, 648, 
-         664, 680, 696, 712, 728, 744, 760, 776, 792, 808, 
-         824, 840, 856, 872, 888, 904, 920, 936, 952, 968, 
-         984, 1000, 1016, 1040, 1072, 1104, 1136, 1168, 1200, 
-         1232, 1264, 1296, 1328, 1360, 1392, 1424, 1456, 1488, 
-         1520, 1552, 1584, 1616, 1648, 1680, 1712, 1744, 1776, 
-         1808, 1840, 1872, 1904, 1936, 1968, 2000, 2032, 2080, 
-         2144, 2208, 2272, 2336, 2400, 2464, 2528, 2592, 2656,
-         2720, 2784, 2848, 2912, 2976, 3040, 3104, 3168, 3232, 
-         3296, 3360, 3424, 3488, 3552, 3616, 3680, 3744, 3808, 
-         3872, 3936, 4000, 4064
+         0.5f, 1.5f, 2.5f, 3.5f, 4.5f, 5.5f, 6.5f, 7.5f, 8.5f, 9.5f, 10.5f, 
+         11.5f, 12.5f, 13.5f, 14.5f, 15.5f, 16.5f, 17.5f, 18.5f, 19.5f, 
+         20.5f, 21.5f, 22.5f, 23.5f, 24.5f, 25.5f, 26.5f, 27.5f, 28.5f, 
+         29.5f, 30.5f, 31.5f, 32.5f, 33.5f, 34.5f, 35.5f, 36.5f, 37.5f, 
+         38.5f, 39.5f, 40.5f, 41.5f, 42.5f, 43.5f, 44.5f, 45.5f, 46.5f, 
+         47.5f, 48.5f, 49.5f, 50.5f, 51.5f, 52.5f, 53.5f, 54.5f, 55.5f, 
+         56.5f, 57.5f, 58.5f, 59.5f, 60.5f, 61.5f, 62.5f, 63.5f, 65f, 
+         67f, 69f, 71f, 73f, 75f, 77f, 79f, 81f, 83f, 85f, 87f, 89f, 91f, 
+         93f, 95f, 97f, 99f, 101f, 103f, 105f, 107f, 109f, 111f, 113f, 
+         115f, 117f, 119f, 121f, 123f, 125f, 127f, 130f, 134f, 138f, 
+         142f, 146f, 150f, 154f, 158f, 162f, 166f, 170f, 174f, 178f, 
+         182f, 186f, 190f, 194f, 198f, 202f, 206f, 210f, 214f, 218f, 
+         222f, 226f, 230f, 234f, 238f, 242f, 246f, 250f, 254f, 260f, 
+         268f, 276f, 284f, 292f, 300f, 308f, 316f, 324f, 332f, 340f, 
+         348f, 356f, 364f, 372f, 380f, 388f, 396f, 404f, 412f, 420f, 
+         428f, 436f, 444f, 452f, 460f, 468f, 476f, 484f, 492f, 500f, 
+         508f, 520f, 536f, 552f, 568f, 584f, 600f, 616f, 632f, 648f, 
+         664f, 680f, 696f, 712f, 728f, 744f, 760f, 776f, 792f, 808f, 
+         824f, 840f, 856f, 872f, 888f, 904f, 920f, 936f, 952f, 968f, 
+         984f, 1000f, 1016f, 1040f, 1072f, 1104f, 1136f, 1168f, 1200f, 
+         1232f, 1264f, 1296f, 1328f, 1360f, 1392f, 1424f, 1456f, 1488f, 
+         1520f, 1552f, 1584f, 1616f, 1648f, 1680f, 1712f, 1744f, 1776f, 
+         1808f, 1840f, 1872f, 1904f, 1936f, 1968f, 2000f, 2032f, 2080f, 
+         2144f, 2208f, 2272f, 2336f, 2400f, 2464f, 2528f, 2592f, 2656f,
+         2720f, 2784f, 2848f, 2912f, 2976f, 3040f, 3104f, 3168f, 3232f, 
+         3296f, 3360f, 3424f, 3488f, 3552f, 3616f, 3680f, 3744f, 3808f, 
+         3872f, 3936f, 4000f, 4064
       },
       BIN_WIDTHS = {
-         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
-         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
-         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
-         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 
-         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
-         2, 2, 2, 2, 2, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 
-         4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 
-         4, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
-         8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 16, 
-         16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 
-         16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 
-         16, 16, 16, 16, 16, 32, 32, 32, 32, 32, 32, 32, 32, 
-         32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 
-         32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 64, 64, 
-         64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 
-         64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 
-         64, 64, 64, 64
+         1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 
+         1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 
+         1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 
+         1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 2f, 2f, 2f, 2f, 2f, 2f, 2f, 2f, 
+         2f, 2f, 2f, 2f, 2f, 2f, 2f, 2f, 2f, 2f, 2f, 2f, 2f, 2f, 2f, 2f, 2f, 2f, 
+         2f, 2f, 2f, 2f, 2f, 2f, 4f, 4f, 4f, 4f, 4f, 4f, 4f, 4f, 4f, 4f, 4f, 4f, 
+         4f, 4f, 4f, 4f, 4f, 4f, 4f, 4f, 4f, 4f, 4f, 4f, 4f, 4f, 4f, 4f, 4f, 4f, 
+         4f, 4f, 8f, 8f, 8f, 8f, 8f, 8f, 8f, 8f, 8f, 8f, 8f, 8f, 8f, 8f, 8f, 8f, 
+         8f, 8f, 8f, 8f, 8f, 8f, 8f, 8f, 8f, 8f, 8f, 8f, 8f, 8f, 8f, 8f, 16f, 
+         16f, 16f, 16f, 16f, 16f, 16f, 16f, 16f, 16f, 16f, 16f, 16f, 16f, 
+         16f, 16f, 16f, 16f, 16f, 16f, 16f, 16f, 16f, 16f, 16f, 16f, 16f, 
+         16f, 16f, 16f, 16f, 16f, 32f, 32f, 32f, 32f, 32f, 32f, 32f, 32f, 
+         32f, 32f, 32f, 32f, 32f, 32f, 32f, 32f, 32f, 32f, 32f, 32f, 32f, 
+         32f, 32f, 32f, 32f, 32f, 32f, 32f, 32f, 32f, 32f, 32f, 64f, 64f, 
+         64f, 64f, 64f, 64f, 64f, 64f, 64f, 64f, 64f, 64f, 64f, 64f, 64f, 
+         64f, 64f, 64f, 64f, 64f, 64f, 64f, 64f, 64f, 64f, 64f, 64f, 64f, 
+         64f, 64f, 64f, 64
       };
 
    public SSPC(final String path, final String pay, int d, int l){
@@ -166,7 +166,7 @@ public class SSPC extends DataProduct{
       //This variable will contain the slow spectrum that is returned over
       //32 frames.
       var = new CDFVar(
-            cdf, "SSPC", CDFConstants.CDF_DOUBLE, 
+            cdf, "SSPC", CDFConstants.CDF_FLOAT, 
             true, new  long[] {BIN_CENTERS.length} 
          );   
 
@@ -185,9 +185,9 @@ public class SSPC extends DataProduct{
       var.attribute("UNITS", "cnts/keV/sec");
       var.attribute("SCALETYP", "log");
       var.attribute("DISPLAY_TYPE", "spectrogram");
-      var.attribute("VALIDMIN", 0.0);
-      var.attribute("VALIDMAX", 1e30);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
+      var.attribute("VALIDMIN", 0.0f);
+      var.attribute("VALIDMAX", 1e30f);
+      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       var.attribute("DELTA_PLUS_VAR", "cnt_error");
       var.attribute("DELTA_MINUS_VAR", "cnt_error");
       this.cdf.addVar("SSPC", var);
@@ -195,7 +195,7 @@ public class SSPC extends DataProduct{
       //Create the "energy" variable
       //This variable lists the starting energy for each channel in keV
       var = new CDFVar(
-            cdf, "energy", CDFConstants.CDF_DOUBLE, 
+            cdf, "energy", CDFConstants.CDF_FLOAT, 
             false, new  long[] {BIN_CENTERS.length} 
          );   
 
@@ -208,15 +208,15 @@ public class SSPC extends DataProduct{
       var.attribute("FORMAT", "F8.3");
       var.attribute("UNITS", "keV");
       var.attribute("SCALETYP", "log");
-      var.attribute("VALIDMIN", 20.0);
-      var.attribute("VALIDMAX", 10000.0);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
+      var.attribute("VALIDMIN", 20.0f);
+      var.attribute("VALIDMAX", 10000.0f);
+      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       var.attribute("DELTA_PLUS_VAR", "HalfBinWidth");
       var.attribute("DELTA_MINUS_VAR", "HalfBinWidth");
       this.cdf.addVar("energy", var);
 
       //Fill the "energy" variable
-      double[][] energy = new double[1][BIN_CENTERS.length];
+      float[][] energy = new float[1][BIN_CENTERS.length];
       for(int bin_i = 0; bin_i < BIN_CENTERS.length; bin_i++){
          energy[0][bin_i] = BIN_CENTERS[bin_i] * scale;
       }
@@ -279,7 +279,7 @@ public class SSPC extends DataProduct{
 
       //Create a variable that will track each energy channel width
       var = new CDFVar(
-            cdf, "HalfBinWidth", CDFConstants.CDF_DOUBLE, 
+            cdf, "HalfBinWidth", CDFConstants.CDF_FLOAT, 
             false, new  long[] {BIN_CENTERS.length} 
          );   
 
@@ -291,13 +291,13 @@ public class SSPC extends DataProduct{
       var.attribute("FORMAT", "F6.3");
       var.attribute("UNITS", "keV");
       var.attribute("SCALETYP", "linear");
-      var.attribute("VALIDMIN", 0.0);
-      var.attribute("VALIDMAX", 200.0);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
+      var.attribute("VALIDMIN", 0.0f);
+      var.attribute("VALIDMAX", 200.0f);
+      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       this.cdf.addVar("HalfBinWidth", var);
 
       //Fill the "BinWidth" variable
-      double[][] bin_width = new double[1][BIN_WIDTHS.length];
+      float[][] bin_width = new float[1][BIN_WIDTHS.length];
       for(int bin_i = 0; bin_i < BIN_WIDTHS.length; bin_i++){
          bin_width[0][bin_i] = BIN_WIDTHS[bin_i] * scale / 2;
       }
@@ -305,7 +305,7 @@ public class SSPC extends DataProduct{
       bin_width = null;
 
       //Create a variable that will track the 511 line peak
-      var = new CDFVar(cdf, "Peak_511", CDFConstants.CDF_DOUBLE);
+      var = new CDFVar(cdf, "Peak_511", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "Peak_511");
       var.attribute("CATDESC", "Peak location of the 511keV line.");
       var.attribute("VAR_TYPE", "data");
@@ -320,14 +320,14 @@ public class SSPC extends DataProduct{
       var.attribute("UNITS", "channel");
       var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
-      var.attribute("VALIDMIN", 0.0);
-      var.attribute("VALIDMAX", 4096.0);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
+      var.attribute("VALIDMIN", 0.0f);
+      var.attribute("VALIDMAX", 4096.0f);
+      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       this.cdf.addVar("Peak_511", var);
 
       //Create the count error variable
       var = new CDFVar(
-            cdf, "cnt_error", CDFConstants.CDF_DOUBLE, 
+            cdf, "cnt_error", CDFConstants.CDF_FLOAT, 
             true, new  long[] {BIN_CENTERS.length} 
          );   
 
@@ -342,9 +342,9 @@ public class SSPC extends DataProduct{
       var.attribute("UNITS", "cnts/sec");
       var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "spectrogram");
-      var.attribute("VALIDMIN", 0.0);
-      var.attribute("VALIDMAX", 10000.0);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
+      var.attribute("VALIDMIN", 0.0f);
+      var.attribute("VALIDMAX", 10000.0f);
+      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       this.cdf.addVar("cnt_error", var);
    }
 }

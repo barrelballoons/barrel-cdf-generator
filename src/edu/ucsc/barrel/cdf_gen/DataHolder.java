@@ -114,8 +114,8 @@ public class DataHolder{
       lc2 = new int[MAX_FRAMES * 20],
       lc3 = new int[MAX_FRAMES * 20],
       lc4 = new int[MAX_FRAMES * 20];
-   public double[]
-      peak511_bin = new double[MAX_FRAMES / 32];
+   public float[]
+      peak511_bin = new float[MAX_FRAMES / 32];
 
    public int 
       //record numbers are incrimented on the first record so

@@ -498,7 +498,7 @@ public class LevelTwo extends CDFWriter{
          q = new int[numOfRecs];
       long[] epoch = new long[numOfRecs];
       double[] old_edges = new double[5];
-      double[] std_edges = SpectrumExtract.stdEdges(0, 2.4414);
+      float[] std_edges = SpectrumExtract.stdEdges(0, 2.4414f);
 
       System.out.println("\nSaving FSPC...");
       
@@ -614,11 +614,12 @@ public class LevelTwo extends CDFWriter{
          q = new int[numOfRecs];
       long[] epoch = new long[numOfRecs];
 
-      double[][] 
-         mspc_rebin = new double[numOfRecs][48],
-         mspc_error = new double[numOfRecs][48];
-      double[] old_edges = new double[48];
-      double[] std_edges = SpectrumExtract.stdEdges(1, 2.4414);
+      float[][] 
+         mspc_rebin = new float[numOfRecs][48],
+         mspc_error = new float[numOfRecs][48];
+      float[]
+         old_edges = new float[48],
+         std_edges = SpectrumExtract.stdEdges(1, 2.4414f);
 
       
       //rebin the mspc spectra
@@ -654,9 +655,10 @@ public class LevelTwo extends CDFWriter{
          }
 
          //get the adjusted bin edges
-         old_edges = SpectrumExtract.createBinEdges(
-            1, /*scint_temp, dpu_temp, */ CDF_Gen.data.peak511_bin[sspc_rec]
-         );
+         old_edges = 
+            SpectrumExtract.makeedges(
+               2, 20f, 20f, CDF_Gen.data.peak511_bin[sspc_rec]
+            );
 
          //rebin the spectrum
          mspc_rebin[mspc_rec] = SpectrumExtract.rebin(
@@ -668,12 +670,12 @@ public class LevelTwo extends CDFWriter{
             if(mspc_rebin[mspc_rec][bin_i] != fill){
                //get the count error
                mspc_error[mspc_rec][bin_i] = 
-                  Math.sqrt(mspc_rebin[mspc_rec][bin_i])
-                  / MSPC.BIN_WIDTHS[bin_i] / 4;
+                  (float)Math.sqrt(mspc_rebin[mspc_rec][bin_i])
+                  / MSPC.BIN_WIDTHS[bin_i] / 4f;
 
                //divide counts by bin width and adjust the time scale
                mspc_rebin[mspc_rec][bin_i] /= MSPC.BIN_WIDTHS[bin_i];
-               mspc_rebin[mspc_rec][bin_i] /= 4;
+               mspc_rebin[mspc_rec][bin_i] /= 4f;
             }
          }
       }
@@ -709,14 +711,14 @@ public class LevelTwo extends CDFWriter{
       double scint_temp = 0, dpu_temp = 0;
 
       int numOfRecs = last - first;
-      double[][] 
-         sspc_rebin = new double[numOfRecs][256],
-         sspc_error = new double[numOfRecs][256];
+      float[][] 
+         sspc_rebin = new float[numOfRecs][256],
+         sspc_error = new float[numOfRecs][256];
       float[] 
          old_edges, 
-         std_edges = SpectrumExtract.stdEdges(2, 2.4414);
+         std_edges = SpectrumExtract.stdEdges(2, 2.4414f);
       
-      double[] peak = new double[numOfRecs];
+      float[] peak = new float[numOfRecs];
       int[] 
          frameGroup = new int[numOfRecs],
          q = new int[numOfRecs];
@@ -773,12 +775,12 @@ public class LevelTwo extends CDFWriter{
             if(sspc_rebin[sspc_rec][bin_i] != fill){
                //get the count error
                sspc_error[sspc_rec][bin_i] =
-                  Math.sqrt(sspc_rebin[sspc_rec][bin_i])
-                  / SSPC.BIN_WIDTHS[bin_i] / 32;
+                  (float)Math.sqrt(sspc_rebin[sspc_rec][bin_i])
+                  / SSPC.BIN_WIDTHS[bin_i] / 32f;
 
                //divide counts by bin width and adjust the time scale
                sspc_rebin[sspc_rec][bin_i] /= SSPC.BIN_WIDTHS[bin_i];
-               sspc_rebin[sspc_rec][bin_i] /= 32;
+               sspc_rebin[sspc_rec][bin_i] /= 32f;
             }
          }
       }

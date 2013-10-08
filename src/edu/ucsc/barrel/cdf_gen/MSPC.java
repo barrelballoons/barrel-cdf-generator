@@ -41,28 +41,28 @@ public class MSPC extends DataProduct{
    private int date, lvl;
    private String payload_id;
 
-   private double scale = 2.4414; // keV/bin
+   private float scale = 2.4414f; // keV/bin
 
-   public final static double[] 
+   public final static float[]
       BIN_EDGES = {
-         42, 46, 50, 53, 57, 60, 64, 70, 78, 84, 92, 100, 
-         106, 114, 120, 128, 140, 156, 168, 184, 200, 212, 
-         228, 240, 256, 280, 312, 336, 368, 400, 424, 456, 
-         480, 512, 560, 624, 672, 736, 800, 848, 912, 960, 
-         1024, 1120, 1248, 1344, 1472, 1600, 1696
+         42f, 46f, 50f, 53f, 57f, 60f, 64f, 70f, 78f, 84f, 92f, 100f, 
+         106f, 114f, 120f, 128f, 140f, 156f, 168f, 184f, 200f, 212f, 
+         228f, 240f, 256f, 280f, 312f, 336f, 368f, 400f, 424f, 456f, 
+         480f, 512f, 560f, 624f, 672f, 736f, 800f, 848f, 912f, 960f, 
+         1024f, 1120f, 1248f, 1344f, 1472f, 1600f, 1696
       },
       BIN_CENTERS = {
-         44, 48, 51.5, 55, 58.5, 62, 67, 74, 81, 88, 96, 103, 
-         110, 117, 124, 134, 148, 162, 176, 192, 206, 220, 234, 
-         248, 268, 296, 324, 352, 384, 412, 440, 468, 496, 536, 
-         592, 648, 704, 768, 824, 880, 936, 992, 1072, 1184, 1296, 
-         1408, 1536, 1648
+         44f, 48f, 51.5f, 55f, 58.5f, 62f, 67f, 74f, 81f, 88f, 96f, 103f, 
+         110f, 117f, 124f, 134f, 148f, 162f, 176f, 192f, 206f, 220f, 234f, 
+         248f, 268f, 296f, 324f, 352f, 384f, 412f, 440f, 468f, 496f, 536f, 
+         592f, 648f, 704f, 768f, 824f, 880f, 936f, 992f, 1072f, 1184f, 1296f, 
+         1408f, 1536f, 1648
       },
       BIN_WIDTHS = {
-         4, 4, 3, 4, 3, 4, 6, 8, 6, 8, 8, 6, 8, 6, 8, 12, 16, 
-         12, 16, 16, 12, 16, 12, 16, 24, 32, 24, 32, 32, 24, 
-         32, 24, 32, 48, 64, 48, 64, 64, 48, 64, 48, 64, 96, 
-         128, 96, 128, 128, 96
+         4f, 4f, 3f, 4f, 3f, 4f, 6f, 8f, 6f, 8f, 8f, 6f, 8f, 6f, 8f, 12f, 16f, 
+         12f, 16f, 16f, 12f, 16f, 12f, 16f, 24f, 32f, 24f, 32f, 32f, 24f, 
+         32f, 24f, 32f, 48f, 64f, 48f, 64f, 64f, 48f, 64f, 48f, 64f, 96f, 
+         128f, 96f, 128f, 128f, 96f
       };
 
    public MSPC(final String path, final String pay, int d, int l){
@@ -113,7 +113,7 @@ public class MSPC extends DataProduct{
       //This variable will contain the medium spectrum that is returned over
       //4 frames.
       var = new CDFVar(
-         this.cdf, "MSPC", CDFConstants.CDF_DOUBLE,
+         this.cdf, "MSPC", CDFConstants.CDF_FLOAT,
          true, new long[] {BIN_CENTERS.length}
       );
 
@@ -132,18 +132,18 @@ public class MSPC extends DataProduct{
       var.attribute("UNITS", "cnts/keV/sec");
       var.attribute("SCALETYP", "log");
       var.attribute("DISPLAY_TYPE", "spectrogram");
-      var.attribute("VALIDMIN", 0.0);
-      var.attribute("VALIDMAX", 1707.0);
+      var.attribute("VALIDMIN", 0.0f);
+      var.attribute("VALIDMAX", 1707.0f);
       var.attribute("DELTA_PLUS_VAR", "cnt_error");
       var.attribute("DELTA_MINUS_VAR", "cnt_error");
-      var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
+      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       this.cdf.addVar("MSPC", var);
 
       //Create the "energy" variable
       //This variable lists the starting energy for each channel in keV
       //Depend1 variable for the spectrum
       var = new CDFVar(
-         this.cdf, "energy", CDFConstants.CDF_DOUBLE,
+         this.cdf, "energy", CDFConstants.CDF_FLOAT,
          false, new long[] {BIN_CENTERS.length}
       );
 
@@ -156,15 +156,15 @@ public class MSPC extends DataProduct{
       var.attribute("FORMAT", "F7.3");
       var.attribute("UNITS", "keV");
       var.attribute("SCALETYP", "log");
-      var.attribute("VALIDMIN", 100.0);
-      var.attribute("VALIDMAX", 4100.0);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
+      var.attribute("VALIDMIN", 100.0f);
+      var.attribute("VALIDMAX", 4100.0f);
+      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       var.attribute("DELTA_PLUS_VAR", "HalfBinWidth");
       var.attribute("DELTA_MINUS_VAR", "HalfBinWidth");
       this.cdf.addVar("energy", var);
 
       //Fill the "energy" variable
-      double[][] energy = new double[1][BIN_CENTERS.length];
+      float[][] energy = new float[1][BIN_CENTERS.length];
       for(int bin_i = 0; bin_i < BIN_CENTERS.length; bin_i++){
          energy[0][bin_i] = BIN_CENTERS[bin_i] * scale;
       }
@@ -173,7 +173,7 @@ public class MSPC extends DataProduct{
 
       //Create the count error variable
       var = new CDFVar(
-            cdf, "cnt_error", CDFConstants.CDF_DOUBLE, 
+            cdf, "cnt_error", CDFConstants.CDF_FLOAT, 
             true, new  long[] {BIN_CENTERS.length} 
          );   
 
@@ -188,9 +188,9 @@ public class MSPC extends DataProduct{
       var.attribute("UNITS", "cnts/sec");
       var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "spectrogram");
-      var.attribute("VALIDMIN", 0.0);
-      var.attribute("VALIDMAX", 10000.0);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
+      var.attribute("VALIDMIN", 0.0f);
+      var.attribute("VALIDMAX", 10000.0f);
+      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       this.cdf.addVar("cnt_error", var);
       
       //Create the "channel" variable
@@ -227,7 +227,7 @@ public class MSPC extends DataProduct{
 
       //Create a variable that will track each energy channel width
       var = new CDFVar(
-         this.cdf, "HalfBinWidth", CDFConstants.CDF_DOUBLE,
+         this.cdf, "HalfBinWidth", CDFConstants.CDF_FLOAT,
          false, new long[] {BIN_WIDTHS.length}
       );
 
@@ -239,13 +239,13 @@ public class MSPC extends DataProduct{
       var.attribute("FORMAT", "F6.3");
       var.attribute("UNITS", "keV");
       var.attribute("SCALETYP", "linear");
-      var.attribute("VALIDMIN", 3.0);
-      var.attribute("VALIDMAX", 157.0);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
+      var.attribute("VALIDMIN", 3.0f);
+      var.attribute("VALIDMAX", 157.0f);
+      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       this.cdf.addVar("HalfBinWidth", var);
 
       //Fill the "BinWidth" variable
-      double[][] bin_width = new double[1][BIN_WIDTHS.length];
+      float[][] bin_width = new float[1][BIN_WIDTHS.length];
       for(int bin_i = 0; bin_i < BIN_WIDTHS.length; bin_i++){
          bin_width[0][bin_i] = BIN_WIDTHS[bin_i] * scale / 2;
       }
