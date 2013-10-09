@@ -196,7 +196,7 @@ public class CDF_Gen{
                      start_i = stop_i;
                   }
 
-                  fillDataGaps(data.peak511_bin);
+                  fill511Gaps();
 
                   //create Level Two
                   LevelTwo L2 =
@@ -218,7 +218,7 @@ public class CDF_Gen{
       log.close();
    }
    
-   public static void fillDataGaps(float[] input_data){
+   public static void fill511Gaps(){
       int 
          size = data.getSize("mod32"),
          step_size = 1, 
@@ -227,14 +227,15 @@ public class CDF_Gen{
          delta, std_dev, med;
       float
          m, b, //values used for interpolating data        
-         new_value = Constants.FLOAT_FILL,
-         last_value = Constants.FLOAT_FILL;
+         fill = (Float)CDFVar.getIstpVal("FLOAT_FILL"),
+         new_value = fill,
+         last_value = fill;
       DescriptiveStatistics stats = new DescriptiveStatistics();
       
       //generate statistics on the 511 peak jump sizes
       for(int peak_i = 0; peak_i < (size - 1); peak_i++){
-         if(data.peak511_bin[peak_i] == Constants.DOUBLE_FILL){continue;}
-         if(data.peak511_bin[peak_i + 1] == Constants.DOUBLE_FILL){continue;}
+         if(data.peak511_bin[peak_i] == fill){continue;}
+         if(data.peak511_bin[peak_i + 1] == fill){continue;}
 
          delta = data.peak511_bin[peak_i + 1] - data.peak511_bin[peak_i];
          if(delta != 0){stats.addValue(delta);}
@@ -244,7 +245,7 @@ public class CDF_Gen{
 
       //find first good value
       for(start = 0; start < size; start++){
-         if(data.peak511_bin[start] != Constants.DOUBLE_FILL){
+         if(data.peak511_bin[start] != fill){
             new_value = data.peak511_bin[start];
             last_value = data.peak511_bin[start];
             break;
@@ -255,7 +256,7 @@ public class CDF_Gen{
       Arrays.fill(data.peak511_bin, 0, start, new_value);
 
       for(int filler_i = start + 1; filler_i < size; filler_i++){
-        if(data.peak511_bin[filler_i] == Constants.DOUBLE_FILL){
+        if(data.peak511_bin[filler_i] == fill){
             //temporarily fill the gap with the last good value 
             //this is done in case there is not another good value
             //to use for interpolation
