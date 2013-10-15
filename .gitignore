@@ -2,3 +2,4 @@ build
 bin
 .metadata
 .nfs*
+.ant-targets-build.xml
