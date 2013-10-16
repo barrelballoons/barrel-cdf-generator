@@ -172,7 +172,7 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
       }
       if(first_i != -1 && (last_i - first_i) > 0){
          doGpsCdf(first_i, last_i, date);
-         doMspcCdf(first_i, last_i, date);
+        // doMspcCdf(first_i, last_i, date);
          doRcntCdf(first_i, last_i, date);  
       }
 

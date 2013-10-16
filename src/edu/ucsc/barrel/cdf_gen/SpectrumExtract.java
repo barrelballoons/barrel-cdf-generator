@@ -361,6 +361,9 @@ public class SpectrumExtract {
 
    NOTES: Ported from Michael McCarthy's original IDL code
 */
+   public static float[] makeedges(int spec_i, float peak511){
+      return makeedges(spec_i, 0f, 0f, peak511);
+   }
    public static float[] makeedges(
       int spec_i, float xtal_temp, float dpu_temp, float peak511
    ){
@@ -391,7 +394,7 @@ public class SpectrumExtract {
                line_parts[0] = line_parts[0].trim();
                if(!payload.equals(line_parts[0])){continue;}
 
-               //we have the right payload, check for the right number of values 
+               //we have the right payload, check for the right number of values
                line_parts[1] = line_parts[1].trim();
                line_parts = line_parts[1].split(",");
                if(line_parts.length != 6){continue;}
@@ -437,7 +440,9 @@ public class SpectrumExtract {
       float[] start = new float[RAW_EDGES[spec_i].length];
       float offset = (dpu_compensate[0] / dpu_compensate[1]);
       for(int i = 0; i < start.length; i++){
-         start[i] = (RAW_EDGES[spec_i][i] / xtal_compensate) - offset;
+         start[i] = 
+            (RAW_EDGES[spec_i][i] / xtal_compensate - dpu_compensate[0]) / 
+            dpu_compensate[1];
       }
 
       edges_out = binvert(start, factor);
@@ -449,10 +454,10 @@ public class SpectrumExtract {
    }
 
 
-   public static double[] createBinEdges(int spec_i, double peak511){
+   public static float[] createBinEdges(int spec_i, double peak511){
       double factor1, factor2, scale;
       double[] edges_nonlin = new double[RAW_EDGES[spec_i].length];
-      double[] edges_cal = new double[RAW_EDGES[spec_i].length];
+      float[] edges_cal = new float[RAW_EDGES[spec_i].length];
 
       //a rational function approximates energy non-linearity
       for(int edge_i = 0; edge_i < edges_nonlin.length; edge_i++){
@@ -489,7 +494,7 @@ public class SpectrumExtract {
       //apply corrections to energy bin edges
       //scale *= factor1 / factor2;
       for(int edge_i = 0; edge_i < edges_cal.length; edge_i++){
-         edges_cal[edge_i] = scale * (edges_nonlin[edge_i]);
+         edges_cal[edge_i] = (float)(scale * (edges_nonlin[edge_i]));
       }
 
       return edges_cal;

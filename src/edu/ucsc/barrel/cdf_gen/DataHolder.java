@@ -264,7 +264,7 @@ public class DataHolder{
       Arrays.fill(weeks, Constants.WEEKS_FILL);
       Arrays.fill(cmdCnt, Constants.CMD_CNT_FILL);
       for(int var_i = 0; var_i < 40; var_i++){
-         Arrays.fill(hkpg[var_i], Constants.INT8_FILL);
+         Arrays.fill(hkpg[var_i], Constants.HKPG_FILL);
       }
       for(int[] rec: mspc){
          Arrays.fill(rec, Constants.MSPC_RAW_FILL);

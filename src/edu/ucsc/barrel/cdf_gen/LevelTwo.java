@@ -486,8 +486,9 @@ public class LevelTwo extends CDFWriter{
    public void doFspcCdf(int first, int last, int date) throws CDFException{
       int numOfRecs = last - first;
 
-      double[][] 
-         chan_edges = new double[numOfRecs][5],
+      float[][] 
+         chan_edges = new float[numOfRecs][5];
+      double[][]
          lc_error = new double[4][numOfRecs];
       int[][] 
          lc_scaled = new int[4][numOfRecs];
@@ -604,7 +605,7 @@ public class LevelTwo extends CDFWriter{
    }
 
    public void doMspcCdf(int first, int last, int date) throws CDFException{
-      double peak = -1, scint_temp = 0, dpu_temp = 0;
+      float peak = -1, scint_temp = 0, dpu_temp = 0;
       
       int offset = 90;
 
@@ -623,41 +624,54 @@ public class LevelTwo extends CDFWriter{
 
       
       //rebin the mspc spectra
-      for(int mspc_rec = 0, sspc_rec = 0; mspc_rec < numOfRecs; mspc_rec++){
+      for(
+         int mspc_rec = 0, sspc_rec = 0, hkpg_rec = 0; 
+         mspc_rec < numOfRecs; 
+         mspc_rec++
+      ){
         
-         /*
+         //find correct hkpg_rec
+         int target_frame = 
+            CDF_Gen.data.frame_mod4[mspc_rec] - 
+            (CDF_Gen.data.frame_mod4[mspc_rec] % 40);
+         while(
+            (CDF_Gen.data.frame_mod40[hkpg_rec] <= target_frame) &&
+            (hkpg_rec <= mspc_rec) &&
+            (hkpg_rec < CDF_Gen.data.frame_mod40.length)
+         ){
+            hkpg_rec++;
+         }
+
+         //find correct sspc_rec
+         target_frame = 
+            CDF_Gen.data.frame_mod4[mspc_rec] - 
+            (CDF_Gen.data.frame_mod4[mspc_rec] % 32);
+         while(
+            (CDF_Gen.data.frame_mod32[sspc_rec] <= target_frame) &&
+            (sspc_rec <= mspc_rec) &&
+            (sspc_rec < CDF_Gen.data.frame_mod32.length)
+         ){
+            sspc_rec++;
+         }
+
          //get temperatures
-         hkpg_rec = (mspc_rec + first) * 4 / 40; //convert from mod4 to mod40
          if(CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] != Constants.HKPG_FILL){
             scint_temp = 
                (CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] * 
                CDF_Gen.data.hkpg_scale[Constants.T0]) + 
                CDF_Gen.data.hkpg_offset[Constants.T0];
-         }else{
-            scint_temp = 20;
          }
          if(CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] != Constants.HKPG_FILL){
             dpu_temp = 
                (CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] * 
                CDF_Gen.data.hkpg_scale[Constants.T5]) + 
                CDF_Gen.data.hkpg_offset[Constants.T5];
-         }else{
-            dpu_temp = 20;
-         }*/
-         
-         //incremint sspc_rec if needed
-         if(
-            (CDF_Gen.data.frame_mod4[mspc_rec] - 
-            CDF_Gen.data.frame_mod4[mspc_rec] % 32) != 
-            CDF_Gen.data.frame_mod32[sspc_rec]
-         ){
-            sspc_rec++;
-         }
+         }    
 
          //get the adjusted bin edges
          old_edges = 
             SpectrumExtract.makeedges(
-               2, 20f, 20f, CDF_Gen.data.peak511_bin[sspc_rec]
+               2, /*scint_temp, dpu_temp, CDF_Gen.data.peak511_bin[sspc_rec]
             );
 
          //rebin the spectrum
@@ -708,7 +722,7 @@ public class LevelTwo extends CDFWriter{
    }
 
    public void doSspcCdf(int first, int last, int date) throws CDFException{
-      double scint_temp = 0, dpu_temp = 0;
+      float scint_temp = 0, dpu_temp = 0;
 
       int numOfRecs = last - first;
       float[][] 
@@ -736,7 +750,8 @@ public class LevelTwo extends CDFWriter{
 
          while(
             (CDF_Gen.data.frame_mod40[hkpg_rec] <= target_frame) &&
-            (hkpg_rec <= sspc_rec)
+            (hkpg_rec <= sspc_rec) &&
+            (hkpg_rec < CDF_Gen.data.frame_mod40.length)
          ){
             hkpg_rec++;
          }
@@ -747,24 +762,20 @@ public class LevelTwo extends CDFWriter{
                (CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] * 
                CDF_Gen.data.hkpg_scale[Constants.T0]) + 
                CDF_Gen.data.hkpg_offset[Constants.T0];
-         }else{
-            scint_temp = 20;
          }
          if(CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] != Constants.HKPG_FILL){
             dpu_temp = 
                (CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] * 
                CDF_Gen.data.hkpg_scale[Constants.T5]) + 
                CDF_Gen.data.hkpg_offset[Constants.T5];
-         }else{
-            dpu_temp = 20;
-         }
-    
+         }    
+
          //get the adjusted bin edges
          old_edges = 
             SpectrumExtract.makeedges(
-               2, 20f, 20f, CDF_Gen.data.peak511_bin[sspc_rec]
+               2, scint_temp, dpu_temp, CDF_Gen.data.peak511_bin[sspc_rec]
             );
-         
+
          //rebin the spectum
          sspc_rebin[sspc_rec] = SpectrumExtract.rebin(
             CDF_Gen.data.sspc[sspc_rec + first], old_edges, std_edges
