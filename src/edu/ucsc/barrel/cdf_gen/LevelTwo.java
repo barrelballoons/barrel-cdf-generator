@@ -671,7 +671,7 @@ public class LevelTwo extends CDFWriter{
          //get the adjusted bin edges
          old_edges = 
             SpectrumExtract.makeedges(
-               2, scint_temp, dpu_temp, CDF_Gen.data.peak511_bin[sspc_rec]
+               1, scint_temp, dpu_temp, CDF_Gen.data.peak511_bin[sspc_rec]
             );
 
          //rebin the spectrum
