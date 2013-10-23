@@ -282,6 +282,7 @@ public class SpectrumExtract {
             iter1[i] = 
                (start[i] + f * start[i]) / 
                (1.0f + f * (1.0f + (float)Math.log(start[i])));
+            if(iter1[i] < 0){iter1[i] = Float.NaN;}
          }
       }
 
@@ -293,8 +294,9 @@ public class SpectrumExtract {
             iter2[i] = 
                (iter1[i] + f * iter1[i]) / 
                (1.0f + f * (1.0f + (float)Math.log(iter1[i])));
-            if(Float.isInfinite(iter2[i])){
+            if(Float.isInfinite(iter2[i]) || iter2[i] < 0){
                bad_vals++;
+               iter2[i] = Float.NaN;
             }
          }
       }
@@ -302,7 +304,7 @@ public class SpectrumExtract {
       //turn bad values into negatives ascending to zero
       if(bad_vals > 0){
          for(int i = 0; i < size; i++){
-            if(Float.isNaN(iter2[i]) || Float.isInfinite(iter2[i])){
+            if(Float.isNaN(iter2[i])){
                bad_vals--;
                iter2[i] = 0 - bad_vals;
             }
@@ -367,7 +369,9 @@ public class SpectrumExtract {
    public static float[] makeedges(
       int spec_i, float xtal_temp, float dpu_temp, float peak511
    ){
-
+      peak511 = (Float)CDFVar.getIstpVal("FLOAT_FILL");
+      dpu_temp = 0f;
+      xtal_temp = 0f;
       String payload = 
          CDF_Gen.getSetting("currentPayload").substring(0,2);
 
@@ -409,13 +413,8 @@ public class SpectrumExtract {
             }
          }
       }catch(IOException ex){
-         System.out.println("Can not find energy calibration file:");
-         System.out.println(ex.getMessage());
-
-         for(int i = 0; i < RAW_EDGES[spec_i].length; i++){
-            edges_out[i] = RAW_EDGES[spec_i][i];
-         }
-         return edges_out;
+         System.out.println("Can not find energy calibration file.");
+         System.out.println("Using default values.");
       }
 
       //set model parameters 
@@ -438,7 +437,6 @@ public class SpectrumExtract {
 
       //calculate energies for the desired spectral product
       float[] start = new float[RAW_EDGES[spec_i].length];
-      float offset = (dpu_compensate[0] / dpu_compensate[1]);
       for(int i = 0; i < start.length; i++){
          start[i] = 
             (RAW_EDGES[spec_i][i] / xtal_compensate - dpu_compensate[0]) / 
