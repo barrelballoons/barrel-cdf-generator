@@ -292,7 +292,7 @@ public class SpectrumExtract {
             bad_vals++;
          }else{
             iter2[i] = 
-               (iter1[i] + f * iter1[i]) / 
+               (start[i] + f * iter1[i]) / 
                (1.0f + f * (1.0f + (float)Math.log(iter1[i])));
             if(Float.isInfinite(iter2[i]) || iter2[i] < 0){
                bad_vals++;
@@ -426,7 +426,7 @@ public class SpectrumExtract {
          ((dpu_coeffs[2][0]) + (dpu_temp * dpu_coeffs[2][1]))
       };
       float factor = dpu_compensate[2] / dpu_compensate[1];
-      
+
       //calculate a correction from 511keV location
       float fac511 = 1.0f;
       if(peak511 != (Float)CDFVar.getIstpVal("FLOAT_FILL")){
