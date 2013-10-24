@@ -369,9 +369,6 @@ public class SpectrumExtract {
    public static float[] makeedges(
       int spec_i, float xtal_temp, float dpu_temp, float peak511
    ){
-      peak511 = (Float)CDFVar.getIstpVal("FLOAT_FILL");
-      dpu_temp = 0f;
-      xtal_temp = 0f;
       String payload = 
          CDF_Gen.getSetting("currentPayload").substring(0,2);
 
