@@ -781,7 +781,7 @@ public class LevelTwo extends CDFWriter{
             CDF_Gen.data.sspc[sspc_rec + first], old_edges, std_edges
          );
 
-         double fill = CDFVar.getIstpVal("DOUBLE_FILL").doubleValue();
+         float fill = CDFVar.getIstpVal("FLOAT_FILL").floatValue();
          for(int bin_i = 0; bin_i < sspc_rebin[sspc_rec].length; bin_i++){
             if(sspc_rebin[sspc_rec][bin_i] != fill){
                //get the count error
