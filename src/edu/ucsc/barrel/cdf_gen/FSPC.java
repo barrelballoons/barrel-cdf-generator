@@ -40,12 +40,12 @@ import java.util.Arrays;
 public class FSPC extends DataProduct{
    private int date, lvl;
    private String payload_id;
-   private double scale = 2.4414; // keV/bin
+   private float scale = 2.4414f; // keV/bin
 
-   public final static double[] 
-      BIN_EDGES = {0, 75, 230, 350, 620},
-      BIN_CENTERS = {37.5, 77.5, 410, 485},
-      BIN_WIDTHS = {75, 155, 120, 250};
+   public final static float[] 
+      BIN_EDGES = {0f, 75f, 230f, 350f, 620f},
+      BIN_CENTERS = {37.5f, 77.5f, 410f, 485f},
+      BIN_WIDTHS = {75f, 155f, 120f, 250f};
 
    public FSPC(final String path, final String pay, int d, int l){
       this.date = d;
@@ -96,7 +96,7 @@ public class FSPC extends DataProduct{
       //create variable for tracking energy edges
       CDFVar var;
       var = new CDFVar(
-            cdf, "FSPC_Edges", CDFConstants.CDF_DOUBLE, 
+            cdf, "FSPC_Edges", CDFConstants.CDF_FLOAT, 
             true, new  long[] {5L} 
          );   
 
@@ -116,9 +116,9 @@ public class FSPC extends DataProduct{
       var.attribute("FORMAT", "F8.3");
       var.attribute("UNITS", "keV");
       var.attribute("SCALETYP", "linear");
-      var.attribute("VALIDMIN", 0.0);
-      var.attribute("VALIDMAX", 1e30);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
+      var.attribute("VALIDMIN", 0.0f);
+      var.attribute("VALIDMAX", 1e30f);
+      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       this.cdf.addVar("FSPC_Edges", var);
 
    }
@@ -146,7 +146,7 @@ public class FSPC extends DataProduct{
       this.cdf.addVar("FSPC" + ch, var);
 
       //Create the count error variable
-      var = new CDFVar(cdf, "cnt_error" + ch, CDFConstants.CDF_DOUBLE);
+      var = new CDFVar(cdf, "cnt_error" + ch, CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "Count Error " + ch);
       var.attribute(
          "CATDESC", 
@@ -159,9 +159,9 @@ public class FSPC extends DataProduct{
       var.attribute("FORMAT", "F6.3");
       var.attribute("UNITS", "cnts/50ms");
       var.attribute("SCALETYP", "linear");
-      var.attribute("VALIDMIN", 0.0);
-      var.attribute("VALIDMAX", 10000.0);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
+      var.attribute("VALIDMIN", 0.0f);
+      var.attribute("VALIDMAX", 10000.0f);
+      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       this.cdf.addVar("cnt_error" + ch, var);
    }
 }
