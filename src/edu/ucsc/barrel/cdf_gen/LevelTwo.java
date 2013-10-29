@@ -671,14 +671,15 @@ public class LevelTwo extends CDFWriter{
          double fill = CDFVar.getIstpVal("DOUBLE_FILL").doubleValue();
          for(int bin_i = 0; bin_i < mspc_rebin[mspc_rec].length; bin_i++){
             if(mspc_rebin[mspc_rec][bin_i] != fill){
+               float width = std_edges[bin_i + 1] - std_edges[bin_i];
+
                //get the count error
                mspc_error[mspc_rec][bin_i] = 
                   (float)Math.sqrt(mspc_rebin[mspc_rec][bin_i])
-                  / MSPC.BIN_WIDTHS[bin_i] / 4f;
+                  / (width * 4f);
 
                //divide counts by bin width and adjust the time scale
-               mspc_rebin[mspc_rec][bin_i] /= MSPC.BIN_WIDTHS[bin_i];
-               mspc_rebin[mspc_rec][bin_i] /= 4f;
+               mspc_rebin[mspc_rec][bin_i] /= (width * 4f);
             }
          }
       }
@@ -773,14 +774,14 @@ public class LevelTwo extends CDFWriter{
          float fill = CDFVar.getIstpVal("FLOAT_FILL").floatValue();
          for(int bin_i = 0; bin_i < sspc_rebin[sspc_rec].length; bin_i++){
             if(sspc_rebin[sspc_rec][bin_i] != fill){
+               float width = std_edges[bin_i + 1] - std_edges[bin_i];
                //get the count error
                sspc_error[sspc_rec][bin_i] =
                   (float)Math.sqrt(sspc_rebin[sspc_rec][bin_i])
-                  / SSPC.BIN_WIDTHS[bin_i] / 32f;
+                  / (width * 32f);
 
                //divide counts by bin width and adjust the time scale
-               sspc_rebin[sspc_rec][bin_i] /= SSPC.BIN_WIDTHS[bin_i];
-               sspc_rebin[sspc_rec][bin_i] /= 32f;
+               sspc_rebin[sspc_rec][bin_i] /= (width * 32f);
             }
          }
       }
