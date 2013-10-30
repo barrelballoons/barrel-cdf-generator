@@ -339,7 +339,7 @@ public class SSPC extends DataProduct{
       var.attribute("DEPEND_0", "Epoch");
       var.attribute("DEPEND_1", "channel");
       var.attribute("FORMAT", "F8.3");
-      var.attribute("UNITS", "cnts/sec");
+      var.attribute("UNITS", "cnts/sec/keV");
       var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "spectrogram");
       var.attribute("VALIDMIN", 0.0f);
