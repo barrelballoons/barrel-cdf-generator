@@ -64,8 +64,8 @@ public class Ephm extends DataProduct{
          "Geographic and magnetic corrdinates. Geographic coordinates are " +
          "obtained from onboard GPS unit, magnegic coordinates are derived " +
          "using the IRBEM FORTRAN library. Ephemeris data products " +
-         "(Lat, Long, Alt, and Time) are each returned once every 4s."
-         
+         "(Lat, Long, Alt, and Time) are each returned from the payload " + 
+         "once every 4s."
       );
       cdf.attribute("Instrument_type", "Ephemeris");
       cdf.attribute("Descriptor", "ephm>EPHeMeris");
@@ -90,7 +90,7 @@ public class Ephm extends DataProduct{
       var.attribute("LABLAXIS", "Lat");
       var.attribute(
          "VAR_NOTES", 
-         "Converted from raw int value by multiplying by scaling factor " +
+         "Converted from raw int value by multiplying by a scaling factor: " +
          "8.38190317154 * 10^-8" 
       );
       var.attribute("VAR_TYPE", "data");
@@ -99,8 +99,8 @@ public class Ephm extends DataProduct{
       var.attribute("UNITS", "degrees North");
       var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
-      var.attribute("VALIDMIN", -180f);
-      var.attribute("VALIDMAX", 180f);
+      var.attribute("VALIDMIN", -90f);
+      var.attribute("VALIDMAX", 90f);
       var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       this.cdf.addVar("GPS_Lat", var);
 
@@ -110,7 +110,7 @@ public class Ephm extends DataProduct{
       var.attribute("LABLAXIS", "Lon");
       var.attribute(
          "VAR_NOTES", 
-         "Converted from raw int value by multiplying by scaling factor " +
+         "Converted from raw int value by multiplying by a scaling factor: " +
          "8.38190317154 * 10^-8"
       );
       var.attribute("VAR_TYPE", "data");
