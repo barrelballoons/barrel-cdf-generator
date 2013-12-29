@@ -412,11 +412,12 @@ public class DataHolder{
          frame.shiftRight(1632).and(BigInteger.valueOf(4294967295L)).intValue();
 
       //check to make sure we have a frame from the correct payload
-      if(dpu_id != tmpPayID){return;}
-     
-      //figure out the frame version
-      if(tmpVer > 3){new_fspc = true;}
-
+      if(dpu_id != tmpPayID){
+         System.out.println("Bad payload ID in frame: " + tmpFC);
+         System.out.println("Found: " + tmpPayID + " Should be: " + dpu_id);
+         return;
+      }
+      
       //validate frame number
       if(tmpFC <= Constants.FC_MIN || tmpFC > Constants.FC_MAX){return;}
 
