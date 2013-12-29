@@ -510,7 +510,7 @@ public class LevelTwo extends CDFWriter{
       int numOfRecs = last - first;
 
       float[][] 
-         chan_edges = new float[numOfRecs][5],
+         chan_edges = new float[numOfRecs][7],
          lc_error = new float[6][numOfRecs];
       int[][] 
          lc_scaled = new int[6][numOfRecs];

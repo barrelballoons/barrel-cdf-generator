@@ -44,7 +44,7 @@ public class SpectrumExtract {
 
    //create uncalibrated bin edges
    private static final float[][] RAW_EDGES = {
-      {0f, 75f, 230f, 350f, 620f},
+      {0f, 20f, 40, 75f, 230f, 350f, 619f},
       {
          42f, 46f, 50f, 53f, 57f, 60f, 64f, 70f, 78f, 84f, 92f, 100f, 
          106f, 114f, 120f, 128f, 140f, 156f, 168f, 184f, 200f, 212f, 228f, 

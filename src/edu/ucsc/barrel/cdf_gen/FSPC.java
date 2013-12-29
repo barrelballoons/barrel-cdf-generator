@@ -99,7 +99,7 @@ public class FSPC extends DataProduct{
       CDFVar var;
       var = new CDFVar(
             cdf, "FSPC_Edges", CDFConstants.CDF_FLOAT, 
-            true, new  long[] {5L} 
+            true, new  long[] {7L} 
          );   
 
       var.attribute("FIELDNAM", "FPSC_Edges");
