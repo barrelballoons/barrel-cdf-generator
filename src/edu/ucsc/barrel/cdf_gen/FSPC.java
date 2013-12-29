@@ -92,6 +92,8 @@ public class FSPC extends DataProduct{
       addFSPC(2);
       addFSPC(3);
       addFSPC(4);
+      addFSPC(5);
+      addFSPC(6);
 
       //create variable for tracking energy edges
       CDFVar var;

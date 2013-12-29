@@ -579,6 +579,22 @@ public class LevelTwo extends CDFWriter{
             lc_scaled[3][fspc_rec] = int4_fill;
             lc_error[3][fspc_rec] = float_fill;
          }
+         if(CDF_Gen.data.lc5[fspc_rec + first] != Constants.FSPC_RAW_FILL){
+            lc_scaled[4][fspc_rec] = CDF_Gen.data.lc5[fspc_rec + first];
+            lc_error[4][fspc_rec] = 
+               (float)Math.sqrt(CDF_Gen.data.lc5[fspc_rec + first]);
+         }else{
+            lc_scaled[4][fspc_rec] = int4_fill;
+            lc_error[4][fspc_rec] = float_fill;
+         }
+         if(CDF_Gen.data.lc6[fspc_rec + first] != Constants.FSPC_RAW_FILL){
+            lc_scaled[5][fspc_rec] = CDF_Gen.data.lc6[fspc_rec + first];
+            lc_error[5][fspc_rec] = 
+               (float)Math.sqrt(CDF_Gen.data.lc6[fspc_rec + first]);
+         }else{
+            lc_scaled[5][fspc_rec] = int4_fill;
+            lc_error[5][fspc_rec] = float_fill;
+         }
       }
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
@@ -604,6 +620,12 @@ public class LevelTwo extends CDFWriter{
       System.out.println("FSPC4");
       fspc.getCDF().addData("FSPC4", lc_scaled[3]);
       fspc.getCDF().addData("cnt_error4", lc_error[3]);
+      System.out.println("FSPC5");
+      fspc.getCDF().addData("FSPC5", lc_scaled[4]);
+      fspc.getCDF().addData("cnt_error5", lc_error[4]);
+      System.out.println("FSPC6");
+      fspc.getCDF().addData("FSPC6", lc_scaled[5]);
+      fspc.getCDF().addData("cnt_error6", lc_error[5]);
       System.out.println("FSPC_Edges");
       fspc.getCDF().addData("FSPC_Edges", chan_edges);
       System.out.println("FrameGroup");
