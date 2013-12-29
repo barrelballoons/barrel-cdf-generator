@@ -88,12 +88,12 @@ public class FSPC extends DataProduct{
 
    @Override
    protected void addVars(){
-      addFSPC(1);
-      addFSPC(2);
-      addFSPC(3);
-      addFSPC(4);
-      addFSPC(5);
-      addFSPC(6);
+      addFSPC("1a");
+      addFSPC("1b");
+      addFSPC("1c");
+      addFSPC("2");
+      addFSPC("3");
+      addFSPC("4");
 
       //create variable for tracking energy edges
       CDFVar var;
@@ -112,7 +112,7 @@ public class FSPC extends DataProduct{
          "FSPC2 between 1 and 2, FSPC3 between 2 and 3, and FSPC4 between 3 " +
          "and 4." 
       );
-      var.attribute("VAR_TYPE", "suppot_data");
+      var.attribute("VAR_TYPE", "support_data");
       var.attribute("DEPEND_0", "Epoch");
       //var.attribute("DEPEND_1", "energy");
       var.attribute("FORMAT", "F8.3");
@@ -125,7 +125,7 @@ public class FSPC extends DataProduct{
 
    }
 
-   private void addFSPC(final int ch){
+   private void addFSPC(final String ch){
       CDFVar var;
 
       //create FSPC variable
