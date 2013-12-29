@@ -426,26 +426,49 @@ public class LevelTwo extends CDFWriter{
 
       HKPG hkpg = new HKPG(destName, "bar_" + id, date, 2);
       float fill = CDFVar.getIstpVal("FLOAT_FILL").floatValue();
-
+      
       for(int var_i = 0; var_i < 36; var_i++){
-         //scale all the records for this variable
          float[] hkpg_scaled = new float[numOfRecs];
-         for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-            if(CDF_Gen.data.hkpg[var_i][data_i] != Constants.HKPG_FILL){
-               hkpg_scaled[rec_i] = 
-                  (
-                     CDF_Gen.data.hkpg[var_i][data_i] * 
-                     CDF_Gen.data.hkpg_scale[var_i]
-                  ) + CDF_Gen.data.hkpg_offset[var_i];
-            }else{
-               hkpg_scaled[rec_i] = fill;
+
+         //get the appropriate values for the ADC data if needed
+         if(var_i == 19 && CDF_Gen.data.new_fspc){
+            for(int rec_i= 0, data_i= first; data_i < last; rec_i++, data_i++){
+               if(CDF_Gen.data.hkpg[var_i][data_i] != Constants.HKPG_FILL){
+                  hkpg_scaled[rec_i] = 
+                     ((CDF_Gen.data.hkpg[var_i][data_i] - 0x8000) * 0.09094) - 
+                     273.15;
+               }else{
+                  hkpg_scaled[rec_i] = fill;
+               }
+            }
+         }else if(var_i == 23 && CDF_Gen.data.new_fspc){
+            for(int rec_i= 0, data_i= first; data_i < last; rec_i++, data_i++){
+               if(CDF_Gen.data.hkpg[var_i][data_i] != Constants.HKPG_FILL){
+                  hkpg_scaled[rec_i] = 
+                     (CDF_Gen.data.hkpg[var_i][data_i] * 0.0003576); 
+               }else{
+                  hkpg_scaled[rec_i] = fill;
+               }
+            }
+         }else{
+            for(int rec_i= 0, data_i= first; data_i < last; rec_i++, data_i++){
+               if(CDF_Gen.data.hkpg[var_i][data_i] != Constants.HKPG_FILL){
+                  hkpg_scaled[rec_i] = 
+                     (
+                        CDF_Gen.data.hkpg[var_i][data_i] * 
+                        CDF_Gen.data.hkpg_scale[var_i]
+                     ) + CDF_Gen.data.hkpg_offset[var_i];
+               }else{
+                  hkpg_scaled[rec_i] = fill;
+               }
             }
          }
+         
 
          System.out.println(CDF_Gen.data.hkpg_label[var_i] + "...");
          hkpg.getCDF().addData(CDF_Gen.data.hkpg_label[var_i], hkpg_scaled);
       }
-      
+
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          sats[rec_i] = CDF_Gen.data.sats[data_i];
          offset[rec_i] = CDF_Gen.data.offset[data_i];

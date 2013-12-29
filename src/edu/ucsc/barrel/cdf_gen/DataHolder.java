@@ -57,6 +57,8 @@ public class DataHolder{
       sspc_frames = 0,
       mspc_frames = 0;
 
+   public boolean new_fspc = false;
+
    public short[]  
       pps = new short[MAX_FRAMES],
       payID = new short[MAX_FRAMES], 
@@ -114,6 +116,8 @@ public class DataHolder{
       lc2 = new int[MAX_FRAMES * 20],
       lc3 = new int[MAX_FRAMES * 20],
       lc4 = new int[MAX_FRAMES * 20];
+      lc5 = new int[MAX_FRAMES * 20];
+      lc6 = new int[MAX_FRAMES * 20];
    public float[]
       peak511_bin = new float[MAX_FRAMES / 32];
 
@@ -252,6 +256,8 @@ public class DataHolder{
       Arrays.fill(lc2, Constants.FSPC_RAW_FILL);
       Arrays.fill(lc3, Constants.FSPC_RAW_FILL);
       Arrays.fill(lc4, Constants.FSPC_RAW_FILL);
+      Arrays.fill(lc5, Constants.FSPC_RAW_FILL);
+      Arrays.fill(lc6, Constants.FSPC_RAW_FILL);
       Arrays.fill(rcnt[0], Constants.RCNT_FILL);
       Arrays.fill(rcnt[1], Constants.RCNT_FILL);
       Arrays.fill(rcnt[2], Constants.RCNT_FILL);
@@ -407,7 +413,10 @@ public class DataHolder{
 
       //check to make sure we have a frame from the correct payload
       if(dpu_id != tmpPayID){return;}
-      
+     
+      //figure out the frame version
+      if(tmpVer > 3){new_fspc = true;}
+
       //validate frame number
       if(tmpFC <= Constants.FC_MIN || tmpFC > Constants.FC_MAX){return;}
 
@@ -795,47 +804,113 @@ public class DataHolder{
          
       //fast spectra: 20 sets of 4 channel data. 
       //ch1 and ch2 are 16 bits, ch3 and ch4 are 8bits 
-      for(int lc_i = 0; lc_i < 20; lc_i++){
-         lc1[rec_num_20Hz + lc_i] =
-            frame.shiftRight(1296 - (48 * lc_i))
-               .and(BigInteger.valueOf(65535)).intValue();
-         lc2[rec_num_20Hz + lc_i] =
-            frame.shiftRight(1280 - (48 * lc_i))
-               .and(BigInteger.valueOf(65535)).intValue();
-         lc3[rec_num_20Hz + lc_i] =
-            frame.shiftRight(1272 - (48 * lc_i))
-               .and(BigInteger.valueOf(255)).intValue();
-         lc4[rec_num_20Hz + lc_i] =
-            frame.shiftRight(1264 - (48 * lc_i))
-               .and(BigInteger.valueOf(255)).intValue();
+      if(new_fspc){
+         for(int lc_i = 0; lc_i < 20; lc_i++){
+            lc1[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1303 - (48 * lc_i))
+                  .and(BigInteger.valueOf(511)).intValue();
+            lc2[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1294 - (48 * lc_i))
+                  .and(BigInteger.valueOf(511)).intValue();
+            lc3[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1286 - (48 * lc_i))
+                  .and(BigInteger.valueOf(255)).intValue();
+            lc4[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1277 - (48 * lc_i))
+                  .and(BigInteger.valueOf(511)).intValue();
+            lc5[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1270 - (48 * lc_i))
+                  .and(BigInteger.valueOf(127)).intValue();
+            lc6[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1264 - (48 * lc_i))
+                  .and(BigInteger.valueOf(63)).intValue();
 
-         if(
-            (lc1[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
-            (lc1[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
-         ){
-            lc1[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
-            fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            if(
+               (lc1[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+               (lc1[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            ){
+               lc1[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+               fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            }
+            if(
+               (lc2[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+               (lc2[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            ){
+               lc2[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+               fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            }
+            if(
+               (lc3[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+               (lc3[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            ){
+               lc3[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+               fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            }
+            if(
+               (lc4[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+               (lc4[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            ){
+               lc4[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+               fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            }
+            if(
+               (lc5[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+               (lc5[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            ){
+               lc5[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+               fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            }
+            if(
+               (lc6[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+               (lc6[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            ){
+               lc6[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+               fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            }
          }
-         if(
-            (lc2[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
-            (lc2[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
-         ){
-            lc2[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
-            fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
-         }
-         if(
-            (lc3[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
-            (lc3[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
-         ){
-            lc3[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
-            fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
-         }
-         if(
-            (lc4[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
-            (lc4[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
-         ){
-            lc4[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
-            fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+      }else{
+         for(int lc_i = 0; lc_i < 20; lc_i++){
+            lc1[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1296 - (48 * lc_i))
+                  .and(BigInteger.valueOf(65535)).intValue();
+            lc2[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1280 - (48 * lc_i))
+                  .and(BigInteger.valueOf(65535)).intValue();
+            lc3[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1272 - (48 * lc_i))
+                  .and(BigInteger.valueOf(255)).intValue();
+            lc4[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1264 - (48 * lc_i))
+                  .and(BigInteger.valueOf(255)).intValue();
+
+            if(
+               (lc1[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+               (lc1[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            ){
+               lc1[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+               fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            }
+            if(
+               (lc2[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+               (lc2[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            ){
+               lc2[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+               fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            }
+            if(
+               (lc3[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+               (lc3[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            ){
+               lc3[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+               fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            }
+            if(
+               (lc4[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+               (lc4[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            ){
+               lc4[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+               fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            }
          }
       }
        

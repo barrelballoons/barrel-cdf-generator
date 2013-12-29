@@ -297,6 +297,14 @@ public class HKPG extends DataProduct{
          "weeks", "Weeks Since 6 Jan 1980", "weeks", 
          0, 0, 65535, CDFConstants.CDF_INT4
       ));
+      vars.add(new HkpgVar(
+         "Mag_ADC_Offset", "Magnetometer A-D Board Offset",
+         "", 19, 0, 273, CDFConstants.CDF_FLOAT
+      ));
+      vars.add(new HkpgVar(
+         "Mag_ADC_Temp", "Magnetometer A-D Board Temp",
+         "", 23, -273, 273, CDFConstants.CDF_FLOAT
+      ));
    }
 
    private void createVar(final HkpgVar v){
