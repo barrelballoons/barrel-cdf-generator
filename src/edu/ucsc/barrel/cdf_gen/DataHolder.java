@@ -115,8 +115,8 @@ public class DataHolder{
       lc1 = new int[MAX_FRAMES * 20],
       lc2 = new int[MAX_FRAMES * 20],
       lc3 = new int[MAX_FRAMES * 20],
-      lc4 = new int[MAX_FRAMES * 20];
-      lc5 = new int[MAX_FRAMES * 20];
+      lc4 = new int[MAX_FRAMES * 20],
+      lc5 = new int[MAX_FRAMES * 20],
       lc6 = new int[MAX_FRAMES * 20];
    public float[]
       peak511_bin = new float[MAX_FRAMES / 32];

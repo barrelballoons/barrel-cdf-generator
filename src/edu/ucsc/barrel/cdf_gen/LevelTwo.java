@@ -435,8 +435,8 @@ public class LevelTwo extends CDFWriter{
             for(int rec_i= 0, data_i= first; data_i < last; rec_i++, data_i++){
                if(CDF_Gen.data.hkpg[var_i][data_i] != Constants.HKPG_FILL){
                   hkpg_scaled[rec_i] = 
-                     ((CDF_Gen.data.hkpg[var_i][data_i] - 0x8000) * 0.09094) - 
-                     273.15;
+                     ((CDF_Gen.data.hkpg[var_i][data_i] - 0x8000) * 0.09094f) - 
+                     273.15f;
                }else{
                   hkpg_scaled[rec_i] = fill;
                }
@@ -445,7 +445,7 @@ public class LevelTwo extends CDFWriter{
             for(int rec_i= 0, data_i= first; data_i < last; rec_i++, data_i++){
                if(CDF_Gen.data.hkpg[var_i][data_i] != Constants.HKPG_FILL){
                   hkpg_scaled[rec_i] = 
-                     (CDF_Gen.data.hkpg[var_i][data_i] * 0.0003576); 
+                     (CDF_Gen.data.hkpg[var_i][data_i] * 0.0003576f); 
                }else{
                   hkpg_scaled[rec_i] = fill;
                }
