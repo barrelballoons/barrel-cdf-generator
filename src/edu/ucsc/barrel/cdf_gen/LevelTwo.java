@@ -511,9 +511,9 @@ public class LevelTwo extends CDFWriter{
 
       float[][] 
          chan_edges = new float[numOfRecs][5],
-         lc_error = new float[4][numOfRecs];
+         lc_error = new float[6][numOfRecs];
       int[][] 
-         lc_scaled = new int[4][numOfRecs];
+         lc_scaled = new int[6][numOfRecs];
       float scint_temp = 20f, dpu_temp = 20f, peak = -1f;
       
       int[] 

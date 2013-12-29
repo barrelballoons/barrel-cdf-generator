@@ -410,6 +410,9 @@ public class DataHolder{
          frame.shiftRight(1664).and(BigInteger.valueOf(2097151)).intValue();
       int tmpGPS = 
          frame.shiftRight(1632).and(BigInteger.valueOf(4294967295L)).intValue();
+      
+      //check if this is a new enough version to have a different FSPC layout
+      if(tmpVer > 3){new_fspc = true;}
 
       //check to make sure we have a frame from the correct payload
       if(dpu_id != tmpPayID){
