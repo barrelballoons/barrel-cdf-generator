@@ -302,7 +302,6 @@ public class ExtractTiming {
          //the value given by the gps might jump around a bit, so make sure 
          //the roll back is significant (>1min)
          if((data.ms_of_week[ms_i] - initial_ms) < -60000){
-         System.out.println((data.ms_of_week[ms_i] - initial_ms));
             //check if the week variable was updated
             if(data.weeks[ms_i/10] != 0 && data.weeks[ms_i/10] == initial_week){
                //the week variable has not yet updated,
