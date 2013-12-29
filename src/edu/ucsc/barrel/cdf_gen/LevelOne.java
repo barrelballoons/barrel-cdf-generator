@@ -556,7 +556,7 @@ public class LevelOne extends CDFWriter{
          q = new int[numOfRecs];
       long[] epoch = new long[numOfRecs];
       int[][]
-         lc = new int[4][numOfRecs];
+         lc = new int[6][numOfRecs];
 
       System.out.println("\nSaving FSPC...");
 
@@ -577,6 +577,8 @@ public class LevelOne extends CDFWriter{
          lc[1][rec_i] = CDF_Gen.data.lc2[data_i];
          lc[2][rec_i] = CDF_Gen.data.lc3[data_i];
          lc[3][rec_i] = CDF_Gen.data.lc4[data_i];
+         lc[4][rec_i] = CDF_Gen.data.lc5[data_i];
+         lc[5][rec_i] = CDF_Gen.data.lc6[data_i];
       }
 
       var = cdf.getVariable("LC1");
@@ -617,6 +619,26 @@ public class LevelOne extends CDFWriter{
          new long[] {1}, 
          new long[] {1}, 
          lc[3]
+      );
+
+      var = cdf.getVariable("LC5");
+      System.out.println("LC5...");
+      var.putHyperData(
+         var.getNumWrittenRecords(), numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         lc[4]
+      );
+
+      var = cdf.getVariable("LC6");
+      System.out.println("LC6...");
+      var.putHyperData(
+         var.getNumWrittenRecords(), numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         lc[5]
       );
 
       var = cdf.getVariable("FrameGroup");
