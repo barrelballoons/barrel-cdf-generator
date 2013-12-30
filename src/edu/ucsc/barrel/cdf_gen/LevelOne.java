@@ -581,8 +581,8 @@ public class LevelOne extends CDFWriter{
          lc[5][rec_i] = CDF_Gen.data.lc6[data_i];
       }
 
-      var = cdf.getVariable("LC1");
-      System.out.println("LC1...");
+      var = cdf.getVariable("FSPC1a");
+      System.out.println("FSPC1a...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -591,8 +591,8 @@ public class LevelOne extends CDFWriter{
          lc[0]
       );
       
-      var = cdf.getVariable("LC2");
-      System.out.println("LC2...");
+      var = cdf.getVariable("FSPC1b");
+      System.out.println("FSPC1b...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -601,8 +601,8 @@ public class LevelOne extends CDFWriter{
          lc[1]
       );
 
-      var = cdf.getVariable("LC3");
-      System.out.println("LC3...");
+      var = cdf.getVariable("FSPC1c");
+      System.out.println("FSPC1c...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -611,8 +611,8 @@ public class LevelOne extends CDFWriter{
          lc[2]
       );
 
-      var = cdf.getVariable("LC4");
-      System.out.println("LC4...");
+      var = cdf.getVariable("FSPC2");
+      System.out.println("FSPC2...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -621,8 +621,8 @@ public class LevelOne extends CDFWriter{
          lc[3]
       );
 
-      var = cdf.getVariable("LC5");
-      System.out.println("LC5...");
+      var = cdf.getVariable("FSPC3");
+      System.out.println("FSPC3...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -631,8 +631,8 @@ public class LevelOne extends CDFWriter{
          lc[4]
       );
 
-      var = cdf.getVariable("LC6");
-      System.out.println("LC6...");
+      var = cdf.getVariable("FSPC4");
+      System.out.println("FSPC4...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
