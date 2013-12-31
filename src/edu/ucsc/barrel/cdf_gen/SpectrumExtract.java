@@ -377,7 +377,7 @@ public class SpectrumExtract {
 
       //get dpu coefficients from calibration file
       float[][] dpu_coeffs = {{-5f, -0.1f}, {-0.5f, -0.001f}, {-0.1f, 0.0001f}};
-      boolean paylaod_found = false;
+      boolean payload_found = false;
       try{
          File energy_cal = new File("energy.cal");
          if(energy_cal.exists()){
