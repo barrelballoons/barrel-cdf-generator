@@ -38,19 +38,23 @@ import java.util.Vector;
 import java.util.Arrays;
 
 public class FSPC extends DataProduct{
-   private int date, lvl;
+   private int date, lvl, version;
    private String payload_id;
    private float scale = 2.4414f; // keV/bin
 
    public final static float[] 
-      BIN_EDGES = {0f, 75f, 230f, 350f, 620f},
-      BIN_CENTERS = {37.5f, 77.5f, 410f, 485f},
-      BIN_WIDTHS = {75f, 155f, 120f, 250f};
+      BIN_EDGES = {0f, 20f, 40f, 75f, 230f, 350f, 620f}, 
+      BIN_CENTERS = {10f, 30f, 57.5f, 152.5f, 290f, 485f}, 
+      BIN_WIDTHS = {20f, 20f, 35f, 155f, 120f, 250f},
+      OLD_BIN_EDGES = {0f, 75f, 230f, 350f, 620f}, 
+      OLD_BIN_CENTERS = {37.5f, 152.5f, 290f, 485f}, 
+      OLD_BIN_WIDTHS = {75f, 155f, 120f, 250f};
 
-   public FSPC(final String path, final String pay, int d, int l){
+   public FSPC(final String path, final String pay, int d, int l, int v){
       this.date = d;
       this.lvl = l;
       this.payload_id = pay;
+      this.version = v;
 
       setCDF(new BarrelCDF(path, this.payload_id, this.lvl));
 
@@ -88,9 +92,13 @@ public class FSPC extends DataProduct{
 
    @Override
    protected void addVars(){
-      addFSPC("1a");
-      addFSPC("1b");
-      addFSPC("1c");
+      if(this.version <= 3){
+         addFSPC("1");
+      }else{
+         addFSPC("1a");
+         addFSPC("1b");
+         addFSPC("1c");
+      }
       addFSPC("2");
       addFSPC("3");
       addFSPC("4");

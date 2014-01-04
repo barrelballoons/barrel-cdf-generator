@@ -57,7 +57,7 @@ public class DataHolder{
       sspc_frames = 0,
       mspc_frames = 0;
 
-   public boolean new_fspc = false;
+   private short version = 0;
 
    public short[]  
       pps = new short[MAX_FRAMES],
@@ -294,6 +294,10 @@ public class DataHolder{
       }
    }
 
+   public int getVersion(){
+      return this.version;
+   }
+
    public int getSize(String cadence){
       if(cadence.equals("1Hz")){
          return rec_num_1Hz + 1;
@@ -402,7 +406,7 @@ public class DataHolder{
       //save the frame counter parts as temp variables,
       //they will be written to the main structure once rec_num is calculated.
       //First 5 bits are version, next 6 are id, last 21 are FC
-      short tmpVer = 
+      this.version =
          frame.shiftRight(1691).and(BigInteger.valueOf(31)).shortValue();
       short tmpPayID = 
          frame.shiftRight(1685).and(BigInteger.valueOf(63)).shortValue();
@@ -411,9 +415,6 @@ public class DataHolder{
       int tmpGPS = 
          frame.shiftRight(1632).and(BigInteger.valueOf(4294967295L)).intValue();
       
-      //check if this is a new enough version to have a different FSPC layout
-      if(tmpVer > 3){new_fspc = true;}
-
       //check to make sure we have a frame from the correct payload
       if(dpu_id != tmpPayID){
          System.out.println("Bad payload ID in frame: " + tmpFC);
@@ -496,7 +497,7 @@ public class DataHolder{
       }
 
       //save the info from the frame counter word
-      ver[rec_num_1Hz] = tmpVer;
+      ver[rec_num_1Hz] = this.version;
       payID[rec_num_1Hz] = tmpPayID;
       frame_1Hz[rec_num_1Hz] = (int)tmpFC;
 
@@ -806,9 +807,7 @@ public class DataHolder{
             break;
       }
          
-      //fast spectra: 20 sets of 4 channel data. 
-      //ch1 and ch2 are 16 bits, ch3 and ch4 are 8bits 
-      if(new_fspc){
+      if(this.version > 3){
          for(int lc_i = 0; lc_i < 20; lc_i++){
             lc1[rec_num_20Hz + lc_i] =
                frame.shiftRight(1303 - (48 * lc_i))
@@ -873,6 +872,8 @@ public class DataHolder{
             }
          }
       }else{
+         //old fast spectra: 20 sets of 4 channel data. 
+         //ch1 and ch2 are 16 bits, ch3 and ch4 are 8bits 
          for(int lc_i = 0; lc_i < 20; lc_i++){
             lc1[rec_num_20Hz + lc_i] =
                frame.shiftRight(1296 - (48 * lc_i))

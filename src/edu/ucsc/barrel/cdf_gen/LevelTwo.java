@@ -431,7 +431,7 @@ public class LevelTwo extends CDFWriter{
          float[] hkpg_scaled = new float[numOfRecs];
 
          //get the appropriate values for the ADC data if needed
-         if(var_i == 19 && CDF_Gen.data.new_fspc){
+         if(var_i == 19 && (CDF_Gen.data.getVersion() > 3)){
             for(int rec_i= 0, data_i= first; data_i < last; rec_i++, data_i++){
                if(CDF_Gen.data.hkpg[var_i][data_i] != Constants.HKPG_FILL){
                   hkpg_scaled[rec_i] = 
@@ -441,7 +441,7 @@ public class LevelTwo extends CDFWriter{
                   hkpg_scaled[rec_i] = fill;
                }
             }
-         }else if(var_i == 23 && CDF_Gen.data.new_fspc){
+         }else if(var_i == 23 && (CDF_Gen.data.getVersion() > 3)){
             for(int rec_i= 0, data_i= first; data_i < last; rec_i++, data_i++){
                if(CDF_Gen.data.hkpg[var_i][data_i] != Constants.HKPG_FILL){
                   hkpg_scaled[rec_i] = 
@@ -607,25 +607,41 @@ public class LevelTwo extends CDFWriter{
          outputPath + "/" + date + "/" + "bar_" + id + 
          "_l2_" + "fspc" + "_20" + date +  "_v" + revNum + ".cdf";
 
-      FSPC fspc = new FSPC(destName, "bar_" + id, date, 2);
-      System.out.println("FSPC1a");
-      fspc.getCDF().addData("FSPC1a", lc_scaled[0]);
-      fspc.getCDF().addData("cnt_error1a", lc_error[0]);
-      System.out.println("FSPC1b");
-      fspc.getCDF().addData("FSPC1b", lc_scaled[1]);
-      fspc.getCDF().addData("cnt_error1b", lc_error[1]);
-      System.out.println("FSPC1c");
-      fspc.getCDF().addData("FSPC1c", lc_scaled[2]);
-      fspc.getCDF().addData("cnt_error1c", lc_error[2]);
-      System.out.println("FSPC2");
-      fspc.getCDF().addData("FSPC2", lc_scaled[3]);
-      fspc.getCDF().addData("cnt_error2", lc_error[3]);
-      System.out.println("FSPC3");
-      fspc.getCDF().addData("FSPC3", lc_scaled[4]);
-      fspc.getCDF().addData("cnt_error3", lc_error[4]);
-      System.out.println("FSPC4");
-      fspc.getCDF().addData("FSPC4", lc_scaled[5]);
-      fspc.getCDF().addData("cnt_error4", lc_error[5]);
+      FSPC fspc = 
+         new FSPC(destName, "bar_" + id, date, 2, CDF_Gen.data.getVersion());
+      if(CDF_Gen.data.getVersion() > 3){
+         System.out.println("FSPC1a");
+         fspc.getCDF().addData("FSPC1a", lc_scaled[0]);
+         fspc.getCDF().addData("cnt_error1a", lc_error[0]);
+         System.out.println("FSPC1b");
+         fspc.getCDF().addData("FSPC1b", lc_scaled[1]);
+         fspc.getCDF().addData("cnt_error1b", lc_error[1]);
+         System.out.println("FSPC1c");
+         fspc.getCDF().addData("FSPC1c", lc_scaled[2]);
+         fspc.getCDF().addData("cnt_error1c", lc_error[2]);
+         System.out.println("FSPC2");
+         fspc.getCDF().addData("FSPC2", lc_scaled[3]);
+         fspc.getCDF().addData("cnt_error2", lc_error[3]);
+         System.out.println("FSPC3");
+         fspc.getCDF().addData("FSPC3", lc_scaled[4]);
+         fspc.getCDF().addData("cnt_error3", lc_error[4]);
+         System.out.println("FSPC4");
+         fspc.getCDF().addData("FSPC4", lc_scaled[5]);
+         fspc.getCDF().addData("cnt_error4", lc_error[5]);
+      }else{
+         System.out.println("FSPC1");
+         fspc.getCDF().addData("FSPC1", lc_scaled[0]);
+         fspc.getCDF().addData("cnt_error1", lc_error[0]);
+         System.out.println("FSPC2");
+         fspc.getCDF().addData("FSPC2", lc_scaled[1]);
+         fspc.getCDF().addData("cnt_error2", lc_error[1]);
+         System.out.println("FSPC3");
+         fspc.getCDF().addData("FSPC3", lc_scaled[2]);
+         fspc.getCDF().addData("cnt_error3", lc_error[2]);
+         System.out.println("FSPC4");
+         fspc.getCDF().addData("FSPC4", lc_scaled[3]);
+         fspc.getCDF().addData("cnt_error4", lc_error[3]);
+      }
       System.out.println("FSPC_Edges");
       fspc.getCDF().addData("FSPC_Edges", chan_edges);
       System.out.println("FrameGroup");
