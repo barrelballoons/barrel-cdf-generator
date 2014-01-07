@@ -223,7 +223,7 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
       //...for the 4Hz file
       first_i = -1;
       size = data.getSize("4Hz");
-      for(last_i = 0; last_i < size; last_i++){
+      for(last_i = 0; last_i < size; last_i += 4){
          tt2000_parts = CDFTT2000.breakdown(data.epoch_4Hz[last_i]);
          rec_date = 
             tt2000_parts[2] + //day
@@ -249,7 +249,7 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
       //...for the 20Hz file
       first_i = -1;
       size = data.getSize("20Hz");
-      for(last_i = 0; last_i < size; last_i++){
+      for(last_i = 0; last_i < size; last_i += 20){
          tt2000_parts = CDFTT2000.breakdown(data.epoch_20Hz[last_i]);
          rec_date = 
             tt2000_parts[2] + //day
