@@ -128,7 +128,7 @@ public class SSPC extends DataProduct{
       CDFVar var = 
          new CDFVar(
             cdf, "HalfAccumTime", CDFConstants.CDF_TIME_TT2000, 
-            false, new  long[] {1} 
+            false, new  long[] {0} 
          ); 
 
       var.attribute("FIELDNAM", "Half accumulation time.");
@@ -137,13 +137,13 @@ public class SSPC extends DataProduct{
       var.attribute("VAR_TYPE", "support_data");
       var.attribute("UNITS", "ns");
       var.attribute("SCALETYP", "linear");
-      var.attribute("VALIDMIN", 16000000000L);
-      var.attribute("VALIDMAX", 16000000000L);
+      var.attribute("VALIDMIN", 15999999999L);
+      var.attribute("VALIDMAX", 16000000001L);
       var.attribute("FILLVAL", Long.MIN_VALUE);
       this.cdf.addVar("HalfAccumTime", var);
 
       //Fill the "HalfAccumTime" variable
-      var.writeData("HalfAccumTime", new Long[] {16000000000L});
+      var.writeData("HalfAccumTime", new long[] {16000000000L});
 
       //add the DELTA_PLUS/MINUS_VAR to Epoch so it will track HalfAccumTime
       var = this.cdf.getVar("Epoch");

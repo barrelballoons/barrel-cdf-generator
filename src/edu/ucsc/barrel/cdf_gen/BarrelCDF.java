@@ -126,7 +126,7 @@ public class BarrelCDF extends CDFFile{
       var.attribute("LABLAXIS", "Frame");
       var.attribute("VAR_TYPE", "support_data");
       var.attribute("DEPEND_0", "Epoch");
-      var.attribute("FORMAT", "I7");
+      var.attribute("FORMAT", "I10");
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0);
       var.attribute("VALIDMAX", 2147483647);
