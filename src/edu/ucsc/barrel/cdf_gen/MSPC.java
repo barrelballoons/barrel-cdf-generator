@@ -74,6 +74,27 @@ public class MSPC extends DataProduct{
 
       //if this is a new cdf file, fill it with the default attributes
       if(getCDF().newFile == true){
+         //set accumulaton time
+         CDFVar var = 
+            new CDFVar(
+               cdf, "HalfAccumTime", CDFConstants.CDF_TIME_TT2000, 
+               false, new  long[] {0} 
+            ); 
+
+         var.attribute("FIELDNAM", "Half accumulation time.");
+         var.attribute("CATDESC", "Period of time used to accumulate spectra.");
+         var.attribute("LABLAXIS", "AccumTime");
+         var.attribute("VAR_TYPE", "support_data");
+         var.attribute("UNITS", "ns");
+         var.attribute("SCALETYP", "linear");
+         var.attribute("VALIDMIN", 3999999999L);
+         var.attribute("VALIDMAX", 4000000001L);
+         var.attribute("FILLVAL", Long.MIN_VALUE);
+         this.cdf.addVar("HalfAccumTime", var);
+
+         //Fill the "HalfAccumTime" variable
+         var.writeData("HalfAccumTime", new long[] {4000000000L});
+
          addGAttributes();
       }
       addVars();

@@ -124,35 +124,36 @@ public class SSPC extends DataProduct{
 
       setCDF(new BarrelCDF(path, this.payload_id, this.lvl));
 
-      //set accumulaton time
-      CDFVar var = 
-         new CDFVar(
-            cdf, "HalfAccumTime", CDFConstants.CDF_TIME_TT2000, 
-            false, new  long[] {0} 
-         ); 
-
-      var.attribute("FIELDNAM", "Half accumulation time.");
-      var.attribute("CATDESC", "Period of time used to accumulate spectra.");
-      var.attribute("LABLAXIS", "AccumTime");
-      var.attribute("VAR_TYPE", "support_data");
-      var.attribute("UNITS", "ns");
-      var.attribute("SCALETYP", "linear");
-      var.attribute("VALIDMIN", 15999999999L);
-      var.attribute("VALIDMAX", 16000000001L);
-      var.attribute("FILLVAL", Long.MIN_VALUE);
-      this.cdf.addVar("HalfAccumTime", var);
-
-      //Fill the "HalfAccumTime" variable
-      var.writeData("HalfAccumTime", new long[] {16000000000L});
-
-      //add the DELTA_PLUS/MINUS_VAR to Epoch so it will track HalfAccumTime
-      var = this.cdf.getVar("Epoch");
-      var.attribute("DELTA_MINUS_VAR", "HalfAccumTime");
-      var.attribute("DELTA_PLUS_VAR", "HalfAccumTime");
-      this.cdf.addVar("Epoch", var);
-
       //if this is a new cdf file, fill it with the default attributes
       if(getCDF().newFile == true){
+         //set accumulaton time
+         CDFVar var = 
+            new CDFVar(
+               cdf, "HalfAccumTime", CDFConstants.CDF_TIME_TT2000, 
+               false, new  long[] {0} 
+            ); 
+
+         var.attribute("FIELDNAM", "Half accumulation time.");
+         var.attribute("CATDESC", "Period of time used to accumulate spectra.");
+         var.attribute("LABLAXIS", "AccumTime");
+         var.attribute("VAR_TYPE", "support_data");
+         var.attribute("UNITS", "ns");
+         var.attribute("SCALETYP", "linear");
+         var.attribute("VALIDMIN", 15999999999L);
+         var.attribute("VALIDMAX", 16000000001L);
+         var.attribute("FILLVAL", Long.MIN_VALUE);
+         this.cdf.addVar("HalfAccumTime", var);
+
+         //Fill the "HalfAccumTime" variable
+         var.writeData("HalfAccumTime", new long[] {16000000000L});
+
+         /*
+         //add the DELTA_PLUS/MINUS_VAR to Epoch so it will track HalfAccumTime
+         var = this.cdf.getVar("Epoch");
+         var.attribute("DELTA_MINUS_VAR", "HalfAccumTime");
+         var.attribute("DELTA_PLUS_VAR", "HalfAccumTime");
+         this.cdf.addVar("Epoch", var);
+         */
          addGAttributes();
       }
       addVars();
