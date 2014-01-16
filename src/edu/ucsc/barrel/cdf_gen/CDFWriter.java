@@ -152,11 +152,11 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
          doMiscCdf(first_i, last_i, date);
       }
 
-      //...for the mod4 file
+      //...for the mod40 file
       first_i = -1;
-      size = data.getSize("mod4");
+      size = data.getSize("mod40");
       for(last_i = 0; last_i < size; last_i++){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_mod4[last_i]);
+         tt2000_parts = CDFTT2000.breakdown(data.epoch_mod40[last_i]);
          rec_date = 
             tt2000_parts[2] + //day
             (100 * tt2000_parts[1]) + //month
@@ -171,9 +171,7 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
          }
       }
       if(first_i != -1 && (last_i - first_i) > 0){
-         doGpsCdf(first_i, last_i, date);
-         doMspcCdf(first_i, last_i, date);
-         doRcntCdf(first_i, last_i, date);  
+         doHkpgCdf(first_i, last_i, date);  
       }
 
       //...for the mod32 file
@@ -198,11 +196,11 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
          doSspcCdf(first_i, last_i, date);  
       }
 
-      //...for the mod40 file
+      //...for the mod4 file
       first_i = -1;
-      size = data.getSize("mod40");
+      size = data.getSize("mod4");
       for(last_i = 0; last_i < size; last_i++){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_mod40[last_i]);
+         tt2000_parts = CDFTT2000.breakdown(data.epoch_mod4[last_i]);
          rec_date = 
             tt2000_parts[2] + //day
             (100 * tt2000_parts[1]) + //month
@@ -217,7 +215,9 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
          }
       }
       if(first_i != -1 && (last_i - first_i) > 0){
-         doHkpgCdf(first_i, last_i, date);  
+         doMspcCdf(first_i, last_i, date);
+         doRcntCdf(first_i, last_i, date);  
+         doGpsCdf(first_i, last_i, date);
       }
 
       //...for the 4Hz file

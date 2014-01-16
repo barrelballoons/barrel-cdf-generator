@@ -827,7 +827,7 @@ public class LevelTwo extends CDFWriter{
                2, scint_temp, dpu_temp, CDF_Gen.data.peak511_bin[sspc_rec]
             );
 
-         //rebin the spectum
+         //rebin the spectrum
          sspc_rebin[sspc_rec] = SpectrumExtract.rebin(
             CDF_Gen.data.sspc[sspc_rec + first], old_edges, std_edges
          );

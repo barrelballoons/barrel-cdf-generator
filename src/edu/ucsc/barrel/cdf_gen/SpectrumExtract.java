@@ -422,40 +422,42 @@ public class SpectrumExtract {
       //get dpu coefficients from calibration file
       float[][] dpu_coeffs = {{-5f, -0.1f}, {-0.5f, -0.001f}, {-0.1f, 0.0001f}};
       boolean payload_found = false;
+      File energy_cal = new File("energy.cal");
+      if(!energy_cal.exists()){}
       try{
-         File energy_cal = new File("energy.cal");
-         if(energy_cal.exists()){
-            FileReader fr = new FileReader(energy_cal);
-            BufferedReader br = new BufferedReader(fr);
-            
-            String line;
-            String[] line_parts;
+         FileReader fr = new FileReader(energy_cal);
+         BufferedReader br = new BufferedReader(fr);
+         
+         String line;
+         String[] line_parts;
 
-            while((line = br.readLine()) != null){
-               //split off comments
-               line_parts = line.split(";");
+         while((line = br.readLine()) != null){
+            //split off comments
+            line_parts = line.split(";");
 
-               //split the payload ID from the rest
-               line_parts = line_parts[0].split(":");
-               line_parts[0] = line_parts[0].trim();
-               if(!payload.equals(line_parts[0])){continue;}
+            //split the payload ID from the rest
+            line_parts = line_parts[0].split(":");
+            line_parts[0] = line_parts[0].trim();
+            if(!payload.equals(line_parts[0])){continue;}
 
-               //we have the right payload, check for the right number of values
-               payload_found = true;
-               line_parts[1] = line_parts[1].trim();
-               line_parts = line_parts[1].split(",");
-               if(line_parts.length != 6){continue;}
+            //we have the right payload, check for the right number of values
+            payload_found = true;
+            line_parts[1] = line_parts[1].trim();
+            line_parts = line_parts[1].split(",");
+            if(line_parts.length != 6){continue;}
 
-               //the correct number of values were in the file
-               //overwrite defaults
-               dpu_coeffs = new float[][] {
-                  {Float.valueOf(line_parts[0]), Float.valueOf(line_parts[1])},
-                  {Float.valueOf(line_parts[2]), Float.valueOf(line_parts[3])},
-                  {Float.valueOf(line_parts[4]), Float.valueOf(line_parts[5])}
-               };
-               break;
-            }
+            //the correct number of values were in the file
+            //overwrite defaults
+            dpu_coeffs = new float[][] {
+               {Float.valueOf(line_parts[0]), Float.valueOf(line_parts[1])},
+               {Float.valueOf(line_parts[2]), Float.valueOf(line_parts[3])},
+               {Float.valueOf(line_parts[4]), Float.valueOf(line_parts[5])}
+            };
+            br.close();
+            break;
          }
+
+         br.close();
       }catch(IOException ex){
          System.out.println("Can not find energy calibration file.");
          System.out.println("Using default values.");
