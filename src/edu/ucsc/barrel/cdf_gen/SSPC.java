@@ -147,13 +147,12 @@ public class SSPC extends DataProduct{
          //Fill the "HalfAccumTime" variable
          var.writeData("HalfAccumTime", new long[] {16000000000L});
 
-         /*
          //add the DELTA_PLUS/MINUS_VAR to Epoch so it will track HalfAccumTime
          var = this.cdf.getVar("Epoch");
          var.attribute("DELTA_MINUS_VAR", "HalfAccumTime");
          var.attribute("DELTA_PLUS_VAR", "HalfAccumTime");
          this.cdf.addVar("Epoch", var);
-         */
+         
          addGAttributes();
       }
       addVars();

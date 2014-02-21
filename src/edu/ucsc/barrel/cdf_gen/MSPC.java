@@ -87,13 +87,20 @@ public class MSPC extends DataProduct{
          var.attribute("VAR_TYPE", "support_data");
          var.attribute("UNITS", "ns");
          var.attribute("SCALETYP", "linear");
-         var.attribute("VALIDMIN", 3999999999L);
-         var.attribute("VALIDMAX", 4000000001L);
+         var.attribute("VALIDMIN", 15999999999L);
+         var.attribute("VALIDMAX", 16000000001L);
          var.attribute("FILLVAL", Long.MIN_VALUE);
          this.cdf.addVar("HalfAccumTime", var);
 
          //Fill the "HalfAccumTime" variable
          var.writeData("HalfAccumTime", new long[] {4000000000L});
+
+         //add the DELTA_PLUS/MINUS_VAR to Epoch so it will track HalfAccumTime
+         var = this.cdf.getVar("Epoch");
+         var.attribute("DELTA_MINUS_VAR", "HalfAccumTime");
+         var.attribute("DELTA_PLUS_VAR", "HalfAccumTime");
+         this.cdf.addVar("Epoch", var);
+         
 
          addGAttributes();
       }
