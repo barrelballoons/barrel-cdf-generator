@@ -129,7 +129,7 @@ public class SSPC extends DataProduct{
          //set accumulaton time
          CDFVar var = 
             new CDFVar(
-               cdf, "HalfAccumTime", CDFConstants.CDF_TIME_TT2000, 
+               cdf, "HalfAccumTime", CDFConstants.CDF_INT8, 
                false, new  long[] {0} 
             ); 
 
