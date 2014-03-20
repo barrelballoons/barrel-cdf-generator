@@ -266,125 +266,125 @@ if [ "$es" != "0" ]; then
    exit $es;
 fi
 
-#java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140203
-#es=$?
-#if [ "$es" != "0" ]; then
-#   echo "oh no!"
-#   exit $es;
-#fi
-#
-#java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140204
-#es=$?
-#if [ "$es" != "0" ]; then
-#   echo "oh no!"
-#   exit $es;
-#fi
-#
-#java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140205
-#es=$?
-#if [ "$es" != "0" ]; then
-#   echo "oh no!"
-#   exit $es;
-#fi
-#
-#java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140206
-#es=$?
-#if [ "$es" != "0" ]; then
-#   echo "oh no!"
-#   exit $es;
-#fi
-#
-#java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140207
-#es=$?
-#if [ "$es" != "0" ]; then
-#   echo "oh no!"
-#   exit $es;
-#fi
-#
-#java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140208
-#es=$?
-#if [ "$es" != "0" ]; then
-#   echo "oh no!"
-#   exit $es;
-#fi
-#
-#java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140209
-#es=$?
-#if [ "$es" != "0" ]; then
-#   echo "oh no!"
-#   exit $es;
-#fi
-#
-#java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140210
-#es=$?
-#if [ "$es" != "0" ]; then
-#   echo "oh no!"
-#   exit $es;
-#fi
-#
-#java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140211
-#es=$?
-#if [ "$es" != "0" ]; then
-#   echo "oh no!"
-#   exit $es;
-#fi
-#
-#java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140212
-#es=$?
-#if [ "$es" != "0" ]; then
-#   echo "oh no!"
-#   exit $es;
-#fi
-#
-#java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140213
-#es=$?
-#if [ "$es" != "0" ]; then
-#   echo "oh no!"
-#   exit $es;
-#fi
-#
-#java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140214
-#es=$?
-#if [ "$es" != "0" ]; then
-#   echo "oh no!"
-#   exit $es;
-#fi
-#
-#java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140215
-#es=$?
-#if [ "$es" != "0" ]; then
-#   echo "oh no!"
-#   exit $es;
-#fi
-#
-#java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140216
-#es=$?
-#if [ "$es" != "0" ]; then
-#   echo "oh no!"
-#   exit $es;
-#fi
-#
-#java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140217
-#es=$?
-#if [ "$es" != "0" ]; then
-#   echo "oh no!"
-#   exit $es;
-#fi
-#
-#java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140218
-#es=$?
-#if [ "$es" != "0" ]; then
-#   echo "oh no!"
-#   exit $es;
-#fi
-#
-#java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140219
-#es=$?
-#if [ "$es" != "0" ]; then
-#   echo "oh no!"
-#   exit $es;
-#fi
-#
+java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140203
+es=$?
+if [ "$es" != "0" ]; then
+   echo "oh no!"
+   exit $es;
+fi
+
+java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140204
+es=$?
+if [ "$es" != "0" ]; then
+   echo "oh no!"
+   exit $es;
+fi
+
+java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140205
+es=$?
+if [ "$es" != "0" ]; then
+   echo "oh no!"
+   exit $es;
+fi
+
+java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140206
+es=$?
+if [ "$es" != "0" ]; then
+   echo "oh no!"
+   exit $es;
+fi
+
+java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140207
+es=$?
+if [ "$es" != "0" ]; then
+   echo "oh no!"
+   exit $es;
+fi
+
+java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140208
+es=$?
+if [ "$es" != "0" ]; then
+   echo "oh no!"
+   exit $es;
+fi
+
+java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140209
+es=$?
+if [ "$es" != "0" ]; then
+   echo "oh no!"
+   exit $es;
+fi
+
+java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140210
+es=$?
+if [ "$es" != "0" ]; then
+   echo "oh no!"
+   exit $es;
+fi
+
+java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140211
+es=$?
+if [ "$es" != "0" ]; then
+   echo "oh no!"
+   exit $es;
+fi
+
+java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140212
+es=$?
+if [ "$es" != "0" ]; then
+   echo "oh no!"
+   exit $es;
+fi
+
+java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140213
+es=$?
+if [ "$es" != "0" ]; then
+   echo "oh no!"
+   exit $es;
+fi
+
+java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140214
+es=$?
+if [ "$es" != "0" ]; then
+   echo "oh no!"
+   exit $es;
+fi
+
+java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140215
+es=$?
+if [ "$es" != "0" ]; then
+   echo "oh no!"
+   exit $es;
+fi
+
+java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140216
+es=$?
+if [ "$es" != "0" ]; then
+   echo "oh no!"
+   exit $es;
+fi
+
+java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140217
+es=$?
+if [ "$es" != "0" ]; then
+   echo "oh no!"
+   exit $es;
+fi
+
+java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140218
+es=$?
+if [ "$es" != "0" ]; then
+   echo "oh no!"
+   exit $es;
+fi
+
+java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140219
+es=$?
+if [ "$es" != "0" ]; then
+   echo "oh no!"
+   exit $es;
+fi
+
 #java -jar cdf_gen.jar ini=2013-2014.ini L=1,2 date=140220
 #es=$?
 #if [ "$es" != "0" ]; then
