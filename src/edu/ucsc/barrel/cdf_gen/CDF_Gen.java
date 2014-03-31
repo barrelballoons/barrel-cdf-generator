@@ -197,7 +197,6 @@ public class CDF_Gen{
                         stop_i = start_i + max_recs;
                      }
 
-                     System.out.println(stop_i + " -  " + start_i + " = " + (stop_i - start_i));
                      SpectrumExtract.do511Fits(start_i, stop_i);
                      start_i = stop_i;
                   }
