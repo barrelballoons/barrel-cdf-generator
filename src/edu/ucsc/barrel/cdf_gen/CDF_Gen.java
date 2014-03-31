@@ -191,11 +191,16 @@ public class CDF_Gen{
                   System.out.println("Locating 511 line...");
 
                   while(start_i < total_specs){
-                     stop_i = Math.min(total_specs, start_i + max_recs); 
+                     if((start_i + (2 * max_recs)) > total_specs){
+                        stop_i = total_specs;
+                     }else{
+                        stop_i = start_i + max_recs;
+                     }
+
+                     System.out.println(stop_i + " -  " + start_i + " = " + (stop_i - start_i));
                      SpectrumExtract.do511Fits(start_i, stop_i);
                      start_i = stop_i;
                   }
-
                   fill511Gaps();
 
                   //create Level Two
