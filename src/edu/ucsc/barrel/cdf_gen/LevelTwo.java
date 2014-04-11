@@ -694,11 +694,11 @@ public class LevelTwo extends CDFWriter{
 
          //find correct sspc_rec
          target_frame = 
-            CDF_Gen.data.frame_mod4[mspc_rec] - 
-            (CDF_Gen.data.frame_mod4[mspc_rec] % 32);
+            CDF_Gen.data.frame_mod4[mspc_rec + first] - 
+            (CDF_Gen.data.frame_mod4[mspc_rec + first] % 32);
          while(
             (CDF_Gen.data.frame_mod32[sspc_rec] < target_frame) &&
-            (sspc_rec < mspc_rec) &&
+            (sspc_rec < mspc_rec + first) &&
             (sspc_rec < CDF_Gen.data.frame_mod32.length)
          ){
             sspc_rec++;
@@ -824,7 +824,7 @@ public class LevelTwo extends CDFWriter{
          //get the adjusted bin edges
          old_edges = 
             SpectrumExtract.makeedges(
-               2, scint_temp, dpu_temp, CDF_Gen.data.peak511_bin[sspc_rec]
+               2, scint_temp, dpu_temp, CDF_Gen.data.peak511_bin[sspc_rec + first]
             );
 
          //rebin the spectrum
