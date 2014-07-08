@@ -153,7 +153,7 @@ public class SpectrumExtract {
       DataHolder data = CDF_Gen.data;
 
       int length = stop - start;
-      int max_cnts = 250 * length;
+      int max_cnts = 1000 * length;
 
       if(length < 2){return;}
       
@@ -182,6 +182,7 @@ public class SpectrumExtract {
                   for(int peak_i = start; peak_i < stop; peak_i++){
                      data.peak511_bin[peak_i] = Constants.FLOAT_FILL; 
                   }
+                  System.out.println("too many: " + length + " " + max_cnts + " " + search_spec[chan_i]);
                   return;
                }
             }
@@ -215,7 +216,7 @@ public class SpectrumExtract {
       // guess at a linear background
       m = (y[PEAK_511_WIDTH - 1] - y[0]) / (x[PEAK_511_WIDTH - 1] - x[0]);
       b = y[0] - m * x[0];
-      
+
       //convert y to cnts/bin_width
       for(int bin_i = 0; bin_i < x.length; bin_i++){
          y[bin_i] /= (
