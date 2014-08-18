@@ -44,6 +44,12 @@ public class ExtractTiming {
    //ms from Jan 6, 1980 to J2000
    private static final long GPS_EPOCH = -630763148816L;
 
+   //offsets for spectral data. These offsets will move the epoch variable so
+   //it points to the middle of the accumulation time
+   private static final int SSPC_EPOCH_OFFSET = 16000000000L; //31968000000L;
+   private static final int MSPC_EPOCH_OFFSET = 2000000000L; //3996000000L;
+
+
    private class TimeRec{
       private long ms;//frame timestamp
       private long frame;//frame counter
@@ -223,8 +229,10 @@ public class ExtractTiming {
             data.time_model_intercept[data_i]) * 1000000
          );
 
+         /*
          //offset epoch to the begining of the accumulation period
          data.epoch_1Hz[data_i] -= Constants.SING_ACCUM;
+         */
 
          //save epoch to the various time scales
          //fill the >1Hz times 
@@ -248,7 +256,7 @@ public class ExtractTiming {
             models[model_i].getIntercept()) * 1000000
          );
 
-         data.epoch_mod4[data_i] -= Constants.QUAD_ACCUM;
+         data.epoch_mod4[data_i] -= MSPC_EPOCH_OFFSET;
       }
 
       //fill mod32 timestamps
@@ -261,7 +269,7 @@ public class ExtractTiming {
             models[model_i].getIntercept()) * 1000000
          );
 
-         data.epoch_mod32[data_i] -= Constants.SSPC_ACCUM;
+         data.epoch_mod32[data_i] -= SSPC_EPOCH_OFFSET;
       }
 
       //fill mod40 timestamps
@@ -273,9 +281,11 @@ public class ExtractTiming {
             ((fc * models[model_i].getSlope()) + 
             models[model_i].getIntercept()) * 1000000
          );
-         
+        
+         /*
          //offset the epoch to the accumulation time of the first frame
          data.epoch_mod40[data_i] -= (((fc % 40) + 1) * Constants.SING_ACCUM);
+         */
       }
    }
 

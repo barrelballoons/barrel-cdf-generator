@@ -104,10 +104,4 @@ public class Constants{
 
    //minimum altitude at which we can expect good science (in mm)
    public static final int MIN_SCI_ALT = 20000000;
-
-   //various accumulation time offsets based on nominal ms/frame
-   public static final long 
-      SSPC_ACCUM = 16000000000L,//31968000000L,
-      QUAD_ACCUM = 2000000000L, //3996000000L,
-      SING_ACCUM = 1000000000L; //999000000L;
 }
