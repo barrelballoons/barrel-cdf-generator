@@ -571,7 +571,7 @@ public class LevelOne extends CDFWriter{
       
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          frameGroup[rec_i] = CDF_Gen.data.frame_20Hz[data_i];
-         epoch[rec_i] = CDF_Gen.data.epoch_20Hz[data_i] - Constants.SING_ACCUM;
+         epoch[rec_i] = CDF_Gen.data.epoch_20Hz[data_i];
          q[rec_i] = CDF_Gen.data.fspc_q[data_i];
          lc[0][rec_i] = CDF_Gen.data.lc1[data_i];
          lc[1][rec_i] = CDF_Gen.data.lc2[data_i];
