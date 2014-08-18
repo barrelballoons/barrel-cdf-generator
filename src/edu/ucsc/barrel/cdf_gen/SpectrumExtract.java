@@ -113,7 +113,7 @@ public class SpectrumExtract {
          3008f, 3072f, 3136f, 3200f, 3264f, 3328f, 3392f, 3456f, 3520f, 
          3584f, 3648f, 3712f, 3776f, 3840f, 3904f, 3968f, 4032f, 4096f
       }
-      };
+   };
 
    private static final double[] SSPC_MIDPOINTS = {
       0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5,  
@@ -144,16 +144,35 @@ public class SpectrumExtract {
       3680, 3744, 3808, 3872, 3936, 4000, 4064
    };
 
+   //nominal scaling factor for converting raw bins to energy levels
+   private static final float
+      SCALE_FACTOR = 2.4414f;
+
    //defines the search window for the 511 line
    private static final int
       PEAK_511_START = 90,
-      PEAK_511_WIDTH = 50;
+      PEAK_511_WIDTH = 50,
+      PEAK_511_END = PEAK_511_START + PEAK_511_WIDTH;
+
+   /*
+      determine the max counts per spectrum to accept before assuming the 511 
+      line is washed out
+      511 line has no more than 2cnts/sec/kev
+      In order to see if we are in a saturated area, we will limit the 
+      counts for this spectrum to 2*32*[End Energy Level - Start Enrgy level]
+   */
+   public static final int
+      MAX_CNT_FACTOR = 
+         (int) (32 * 2 * 
+         (OLD_RAW_EDGES[2][PEAK_511_END]-OLD_RAW_EDGES[2][PEAK_511_START]) * 
+         SCALE_FACTOR);
 
    public static void do511Fits(int start, int stop){ 
       DataHolder data = CDF_Gen.data;
 
       int length = stop - start;
-      int max_cnts = 1000 * length;
+
+      int max_cnts = MAX_CNT_FACTOR * length; 
 
       if(length < 2){return;}
       
@@ -466,7 +485,7 @@ public class SpectrumExtract {
       
       //just return standard edges if there are no dpu coefficients
       if(!payload_found){
-         return stdEdges(spec_i, 2.4414f);
+         return stdEdges(spec_i, SCALE_FACTOR);
       }
 
       //set model parameters 
@@ -538,7 +557,7 @@ public class SpectrumExtract {
       //set an overall scale factor to position 511keV line
       //this also helps compensate incorrect temperature values
 
-      scale = 2.4414; //nominal keV/bin
+      scale = SCALE_FACTOR; //nominal keV/bin
       if(peak511 != Constants.DOUBLE_FILL){
          scale = 
             511.  /* * factor2 / factor1*/ / peak511 / 
