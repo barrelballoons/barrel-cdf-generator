@@ -46,8 +46,8 @@ public class ExtractTiming {
 
    //offsets for spectral data. These offsets will move the epoch variable so
    //it points to the middle of the accumulation time
-   private static final int SSPC_EPOCH_OFFSET = 16000000000L; //31968000000L;
-   private static final int MSPC_EPOCH_OFFSET = 2000000000L; //3996000000L;
+   private static final long SSPC_EPOCH_OFFSET = 16000000000L; //31968000000L;
+   private static final long MSPC_EPOCH_OFFSET = 2000000000L; //3996000000L;
 
 
    private class TimeRec{
