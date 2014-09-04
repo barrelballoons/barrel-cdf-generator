@@ -411,6 +411,7 @@ td:not(.linenos) .linenodiv { padding: 0 !important; }
 <li><a href="#49-variable-definitions">4.9 Variable Definitions</a></li>
 </ul>
 </li>
+<li><a href="#5-timestamp-generation">5 Timestamp generation</a></li>
 </ul>
 </div>
 <hr />
@@ -429,6 +430,7 @@ td:not(.linenos) .linenodiv { padding: 0 !important; }
 <h4 id="311-level-zero"><a name="user-content-311-level-zero" href="#311-level-zero" class="headeranchor-link"  aria-hidden="true"><span class="headeranchor"></span></a>3.1.1 Level Zero</h4>
 <p>Level Zero products are daily files containing a all raw telemetry streams. A single file will contain all data from each satellite modem call that <em>start</em> in a 24hr period. That is, it includes any call originated between 00:00 and 23:59UTC. It is important to understand that the calls are not ended at midnight. A call that is started on January, 1 at 23:00 and last for three hours will be contained (in its entirety) in the January, 1 file. </p>
 <p>Level Zero products are mostly useful as an archival format and as a &ldquo;pure&rdquo; source of data for checking the validity of the higher level products.</p>
+<p>The format of the raw data is detailed in a document called &ldquo;BARREL Telemetry Interface Control Document&rdquo; located at <a href="http://www.dartmouth.edu/~barrel/documents.html"><a href="http://www.dartmouth.edu/~barrel/documents.html"><a href="http://www.dartmouth.edu/~barrel/documents.html">http://www.dartmouth.edu/~barrel/documents.html</a></a></a>.</p>
 <h4 id="312-level-one"><a name="user-content-312-level-one" href="#312-level-one" class="headeranchor-link"  aria-hidden="true"><span class="headeranchor"></span></a>3.1.2 Level One</h4>
 <p>Level One data are stored in CDF files which are grouped by date. Unlike Level Zero files, the dates here are midnight-to-midnight. </p>
 <p>The data contained in these files are essentially the raw values extracted from Level Zero and placed into CDF files. The one bit of processing that was done for these files is time stamp correction. The GPS time that is collected with the BARREL ephemeris data is sent once every four seconds and can be up to one second off. An attempt is made to give each data point a time stamp that is accurate to 1ms. </p>
@@ -496,18 +498,23 @@ bar_PP_S_LL_TTTT_YYYYMMDD_VVV.cdf</p>
 </thead>
 <tbody>
 <tr>
-<td>FSPC1a</td>
+<td></td>
 <td>FSPC1</td>
+<td>0.0 - 177.6</td>
+</tr>
+<tr>
+<td>FSPC1a</td>
+<td></td>
 <td>0.0 - 45.6</td>
 </tr>
 <tr>
 <td>FSPC1b</td>
-<td>FSPC1</td>
+<td></td>
 <td>48.0 - 93.6</td>
 </tr>
 <tr>
 <td>FSPC1c</td>
-<td>FSPC1</td>
+<td></td>
 <td>96.0 - 177.6</td>
 </tr>
 <tr>
@@ -647,7 +654,7 @@ bar_PP_S_LL_TTTT_YYYYMMDD_VVV.cdf</p>
 </tbody>
 </table>
 <h3 id="42-mspc-medium-spectra"><a name="user-content-42-mspc-medium-spectra" href="#42-mspc-medium-spectra" class="headeranchor-link"  aria-hidden="true"><span class="headeranchor"></span></a>4.2 MSPC - Medium Spectra</h3>
-<p>Medium spectra are the result of accumulating counts in 48 channels for 4 seconds. </p>
+<p>Medium spectra are the result of accumulating counts in 48 channels for 4 seconds.  Each record contains all 48 channels and is comprised of 4 frames. Unlike the FSPC spectra, all of the channels in the record are stored in an array who&rsquo;s indices are the channel number. A description of the nominal energy binning scheme can be found  in the &lsquo;BARREL Telemetry Interface Control Document&rsquo; located at <a href="http://www.dartmouth.edu/~barrel/documents.html"><a href="http://www.dartmouth.edu/~barrel/documents.html"><a href="http://www.dartmouth.edu/~barrel/documents.html">http://www.dartmouth.edu/~barrel/documents.html</a></a></a>.</p>
 <p><em>Table 4.2.1</em> - Level One MSPC Contents</p>
 <table>
 <thead>
@@ -743,6 +750,8 @@ bar_PP_S_LL_TTTT_YYYYMMDD_VVV.cdf</p>
 </tbody>
 </table>
 <h3 id="43-sspc-slow-spectra"><a name="user-content-43-sspc-slow-spectra" href="#43-sspc-slow-spectra" class="headeranchor-link"  aria-hidden="true"><span class="headeranchor"></span></a>4.3 SSPC - Slow Spectra</h3>
+<p>SSPC is very similar to MSPC with the main difference that counts are accumulated over 32 seconds and split into 256 channels. Again, a description of the nominal energy binning scheme can be found  in the &lsquo;BARREL Telemetry Interface Control Document&rsquo; located at <a href="http://www.dartmouth.edu/~barrel/documents.html"><a href="http://www.dartmouth.edu/~barrel/documents.html"><a href="http://www.dartmouth.edu/~barrel/documents.html">http://www.dartmouth.edu/~barrel/documents.html</a></a></a>.</p>
+<p>The differences between L1 and L2 SSPC files are outlined in Tables 7 and 8.</p>
 <p><em>Table 4.3.1</em> - Level One SSPC Contents</p>
 <table>
 <thead>
@@ -838,13 +847,17 @@ bar_PP_S_LL_TTTT_YYYYMMDD_VVV.cdf</p>
 </tbody>
 </table>
 <h3 id="44-rcnt-rate-counters"><a name="user-content-44-rcnt-rate-counters" href="#44-rcnt-rate-counters" class="headeranchor-link"  aria-hidden="true"><span class="headeranchor"></span></a>4.4 RCNT - Rate Counters</h3>
-<p><em>Table 4.4.1</em> - Level One RCNT Contents</p>
+<p>High Level, Low Level, and Peak Detector are counted on the analog board. Low Level and Peak Detector are for circuit diagnostics. Low Level counts excursions above a baseline and includes rejected events. Peak Detector counts peaks detected on the ADC board. For low count rate, low-noise environment, and at room temperature: Low Level = Peak Detect + High Level and Peak Detector = Interrupt.<br />
+Interrupt counts analyzed (ADC) x-rays as accepted by the DPU board.<br />
+The only difference between L1 and L2 data is that in L1 the units are counts/4seconds and in L2 the units are counts/second.</p>
+<p><em>Table 4.4.1</em> - Level One and Two RCNT Contents</p>
 <table>
 <thead>
 <tr>
 <th>Variable</th>
 <th>Datatype</th>
-<th>Units</th>
+<th>L1 Units</th>
+<th>L2 Units</th>
 </tr>
 </thead>
 <tbody>
@@ -852,87 +865,49 @@ bar_PP_S_LL_TTTT_YYYYMMDD_VVV.cdf</p>
 <td>FrameGroup</td>
 <td>INT4</td>
 <td></td>
-</tr>
-<tr>
-<td>Epoch</td>
-<td>TT2000</td>
-<td>ns</td>
-</tr>
-<tr>
-<td>Quality</td>
-<td>INT4</td>
-<td></td>
-</tr>
-<tr>
-<td>PeakDet</td>
-<td>INT8</td>
-<td>cnts/4sec</td>
-</tr>
-<tr>
-<td>LowLevel</td>
-<td>INT8</td>
-<td>cnts/4sec</td>
-</tr>
-<tr>
-<td>Interrupt</td>
-<td>INT8</td>
-<td>cnts/4sec</td>
-</tr>
-<tr>
-<td>HighLevel</td>
-<td>INT8</td>
-<td>cnts/4sec</td>
-</tr>
-</tbody>
-</table>
-<p><em>Table 4.4.2</em> - Level Two RCNT Contents</p>
-<table>
-<thead>
-<tr>
-<th>Variable</th>
-<th>Datatype</th>
-<th>Units</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>FrameGroup</td>
-<td>INT4</td>
 <td></td>
 </tr>
 <tr>
 <td>Epoch</td>
 <td>TT2000</td>
 <td>ns</td>
+<td>ns</td>
 </tr>
 <tr>
 <td>Quality</td>
-<td>FLOAT</td>
+<td>INT4</td>
+<td></td>
 <td></td>
 </tr>
 <tr>
 <td>PeakDet</td>
-<td>FLOAT</td>
+<td>INT8</td>
+<td>cnts/4sec</td>
 <td>cnts/sec</td>
 </tr>
 <tr>
 <td>LowLevel</td>
-<td>FLOAT</td>
+<td>INT8</td>
+<td>cnts/4sec</td>
 <td>cnts/sec</td>
 </tr>
 <tr>
 <td>Interrupt</td>
-<td>FLOAT</td>
+<td>INT8</td>
+<td>cnts/4sec</td>
 <td>cnts/sec</td>
 </tr>
 <tr>
 <td>HighLevel</td>
-<td>FLOAT</td>
+<td>INT8</td>
+<td>cnts/4sec</td>
 <td>cnts/sec</td>
 </tr>
 </tbody>
 </table>
 <h3 id="45-magn-magnetometer"><a name="user-content-45-magn-magnetometer" href="#45-magn-magnetometer" class="headeranchor-link"  aria-hidden="true"><span class="headeranchor"></span></a>4.5 MAGN - Magnetometer</h3>
+<p>The analog magnetometer data is encoded by a standalone ADC. The data are collected from the X, Y, and Z axes at 4Hz and are transmitted in each frame. Each frame is split into 4 records. The digital word transmitted by the payload can be decoded with the following formula: $B_{analog} = \frac{B_{digital} - 8388608.0}{83886.070}$.</p>
+<p>The magnetometor data has not been &ldquo;unspun&rdquo;, so there are fluctuations due to payload motion. Furthermore, the 3 axes have not been gain calibrated, so the fuctuations due to motion will present themselves in the |B| variable as well.</p>
 <p><em>Table 4.5.1</em> - Level One MAGN Contents</p>
 <table>
 <thead>
@@ -1133,6 +1108,7 @@ bar_PP_S_LL_TTTT_YYYYMMDD_VVV.cdf</p>
 </tbody>
 </table>
 <h3 id="47-hkpg-housekeeping"><a name="user-content-47-hkpg-housekeeping" href="#47-hkpg-housekeeping" class="headeranchor-link"  aria-hidden="true"><span class="headeranchor"></span></a>4.7 HKPG - Housekeeping</h3>
+<p>Housekeeping data are transmitted as digital words calculated by an ADC and multiplexed as mod40. These values are saved to the L1 files while the scaled (physical units) values are saved to the L2 files. The &lsquo;BARREL Housekeeping Assignments&rsquo; document gives the conversion factors for scaling the digital data and the &lsquo;BARREL Telemetry Interface Control Document&rsquo; lists the order in which the housekeeping data are transmitted.</p>
 <p><em>Table 4.7.1</em> - Level One and Two HKPG Contents</p>
 <table>
 <thead>
@@ -1376,6 +1352,7 @@ bar_PP_S_LL_TTTT_YYYYMMDD_VVV.cdf</p>
 </tbody>
 </table>
 <h3 id="48-misc-miscellaneous"><a name="user-content-48-misc-miscellaneous" href="#48-misc-miscellaneous" class="headeranchor-link"  aria-hidden="true"><span class="headeranchor"></span></a>4.8 MISC - Miscellaneous</h3>
+<p>The MISC file contains 1Hz data. It holds both the PPS variable and the DPU version number that is transmitted in each frame. In both L1 and L2 the PPS variable is an INT4 that represents the number of milliseconds in to the frame that the GPS PPS signal was received. The DPU Version variable is INT2 in both L1 and L2 and has a valid range from 0-31.</p>
 <p><em>Table 4.8.1</em> - Level One and Two MISC Contents</p>
 <table>
 <thead>
@@ -1402,6 +1379,11 @@ bar_PP_S_LL_TTTT_YYYYMMDD_VVV.cdf</p>
 <td>ms</td>
 </tr>
 <tr>
+<td>Version</td>
+<td>INT2</td>
+<td></td>
+</tr>
+<tr>
 <td>Payload_ID</td>
 <td>INT4</td>
 <td></td>
@@ -1418,4 +1400,5 @@ bar_PP_S_LL_TTTT_YYYYMMDD_VVV.cdf</p>
 </tr>
 </tbody>
 </table>
-<h3 id="49-variable-definitions"><a name="user-content-49-variable-definitions" href="#49-variable-definitions" class="headeranchor-link"  aria-hidden="true"><span class="headeranchor"></span></a>4.9 Variable Definitions</h3></body></html>
+<h3 id="49-variable-definitions"><a name="user-content-49-variable-definitions" href="#49-variable-definitions" class="headeranchor-link"  aria-hidden="true"><span class="headeranchor"></span></a>4.9 Variable Definitions</h3>
+<h1 id="5-timestamp-generation"><a name="user-content-5-timestamp-generation" href="#5-timestamp-generation" class="headeranchor-link"  aria-hidden="true"><span class="headeranchor"></span></a>5 Timestamp generation</h1></body></html>
