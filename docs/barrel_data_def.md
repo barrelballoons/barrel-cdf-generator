@@ -36,6 +36,8 @@ Level Zero products are daily files containing a all raw telemetry streams. A si
 
 Level Zero products are mostly useful as an archival format and as a "pure" source of data for checking the validity of the higher level products.
 
+The format of the raw data is detailed in a document called "BARREL Telemetry Interface Control Document" located at [http://www.dartmouth.edu/~barrel/documents.html](http://www.dartmouth.edu/~barrel/documents.html).
+
 #### 3.1.2 Level One
 Level One data are stored in CDF files which are grouped by date. Unlike Level Zero files, the dates here are midnight-to-midnight. 
 
@@ -112,9 +114,10 @@ Note: FSPC channels may also be referred to as *light curves*. In the CDF files 
 
 | 2012-2013 | 2013-2014| Energy Range (keV) |  
 | ----------| ---------| -------------------|  
-|    FSPC1a |    FSPC1 |         0.0 - 45.6 |
-|    FSPC1b |    FSPC1 |        48.0 - 93.6 |
-|    FSPC1c |    FSPC1 |       96.0 - 177.6 |
+|           |    FSPC1 |        0.0 - 177.6 |
+|    FSPC1a |          |         0.0 - 45.6 |
+|    FSPC1b |          |        48.0 - 93.6 |
+|    FSPC1c |          |       96.0 - 177.6 |
 |    FSPC2  |    FSPC2 |      180.0 - 549.6 |
 |    FSPC3  |    FSPC3 |      552.0 - 837.6 |
 |    FSPC4  |    FSPC4 |     840.0 - 1485.6 |
@@ -149,7 +152,9 @@ Note: FSPC channels may also be referred to as *light curves*. In the CDF files 
 |        FSPC1_Edges | FLOAT[7] |       keV |  
 
 ### 4.2 MSPC - Medium Spectra
-Medium spectra are the result of accumulating counts in 48 channels for 4 seconds. 
+
+Medium spectra are the result of accumulating counts in 48 channels for 4 seconds.  Each record contains all 48 channels and is comprised of 4 frames. Unlike the FSPC spectra, all of the channels in the record are stored in an array who's indices are the channel number. A description of the nominal energy binning scheme can be found  in the 'BARREL Telemetry Interface Control Document' located at [http://www.dartmouth.edu/~barrel/documents.html](http://www.dartmouth.edu/~barrel/documents.html).
+
 
 *Table 4.2.1* - Level One MSPC Contents
 
@@ -177,6 +182,11 @@ Medium spectra are the result of accumulating counts in 48 channels for 4 second
 
 ### 4.3 SSPC - Slow Spectra
 
+SSPC is very similar to MSPC with the main difference that counts are accumulated over 32 seconds and split into 256 channels. Again, a description of the nominal energy binning scheme can be found  in the 'BARREL Telemetry Interface Control Document' located at [http://www.dartmouth.edu/~barrel/documents.html](http://www.dartmouth.edu/~barrel/documents.html).
+
+
+The differences between L1 and L2 SSPC files are outlined in Tables 7 and 8.
+
 *Table 4.3.1* - Level One SSPC Contents
 
 |    Variable | Datatype |     Units |  
@@ -201,33 +211,33 @@ Medium spectra are the result of accumulating counts in 48 channels for 4 second
 |        channel* | UINT1[256] |              |  
 |   HalfBinWidth* | FLOAT[256] |          kev |  
 
+
 ### 4.4 RCNT - Rate Counters
 
-*Table 4.4.1* - Level One RCNT Contents
+High Level, Low Level, and Peak Detector are counted on the analog board. Low Level and Peak Detector are for circuit diagnostics. Low Level counts excursions above a baseline and includes rejected events. Peak Detector counts peaks detected on the ADC board. For low count rate, low-noise environment, and at room temperature: Low Level = Peak Detect + High Level and Peak Detector = Interrupt.
+Interrupt counts analyzed (ADC) x-rays as accepted by the DPU board.
+The only difference between L1 and L2 data is that in L1 the units are counts/4seconds and in L2 the units are counts/second.
 
-|    Variable | Datatype |     Units |  
-| ----------- | -------- | --------- |  
-|  FrameGroup |     INT4 |           |  
-|       Epoch |   TT2000 |        ns |  
-|     Quality |     INT4 |           |
-|     PeakDet |     INT8 | cnts/4sec |  
-|    LowLevel |     INT8 | cnts/4sec |  
-|   Interrupt |     INT8 | cnts/4sec |  
-|   HighLevel |     INT8 | cnts/4sec |  
 
-*Table 4.4.2* - Level Two RCNT Contents
+*Table 4.4.1* - Level One and Two RCNT Contents
 
-|    Variable | Datatype |     Units |  
-| ----------- | -------- | --------- |  
-|  FrameGroup |     INT4 |           |  
-|       Epoch |   TT2000 |        ns |  
-|     Quality |    FLOAT |           |
-|     PeakDet |    FLOAT |  cnts/sec |  
-|    LowLevel |    FLOAT |  cnts/sec |  
-|   Interrupt |    FLOAT |  cnts/sec |  
-|   HighLevel |    FLOAT |  cnts/sec |  
+|    Variable | Datatype |  L1 Units |  L2 Units |  
+| ----------- | -------- | --------- | --------- |  
+|  FrameGroup |     INT4 |           |           |  
+|       Epoch |   TT2000 |        ns |        ns |  
+|     Quality |     INT4 |           |           |
+|     PeakDet |     INT8 | cnts/4sec |  cnts/sec |  
+|    LowLevel |     INT8 | cnts/4sec |  cnts/sec |  
+|   Interrupt |     INT8 | cnts/4sec |  cnts/sec |  
+|   HighLevel |     INT8 | cnts/4sec |  cnts/sec |  
+
 
 ### 4.5 MAGN - Magnetometer
+
+The analog magnetometer data is encoded by a standalone ADC. The data are collected from the X, Y, and Z axes at 4Hz and are transmitted in each frame. Each frame is split into 4 records. The digital word transmitted by the payload can be decoded with the following formula: $B_{analog} = \frac{B_{digital} - 8388608.0}{83886.070}$.
+
+The magnetometor data has not been "unspun", so there are fluctuations due to payload motion. Furthermore, the 3 axes have not been gain calibrated, so the fuctuations due to motion will present themselves in the |B| variable as well.
+
 
 *Table 4.5.1* - Level One MAGN Contents
 
@@ -283,6 +293,10 @@ Medium spectra are the result of accumulating counts in 48 channels for 4 second
 
 ### 4.7 HKPG - Housekeeping
 
+Housekeeping data are transmitted as digital words calculated by an ADC and multiplexed as mod40. These values are saved to the L1 files while the scaled (physical units) values are saved to the L2 files. The 'BARREL Housekeeping Assignments' document gives the conversion factors for scaling the digital data and the 'BARREL Telemetry Interface Control Document' lists the order in which the housekeeping data are transmitted.
+
+
+
 *Table 4.7.1* - Level One and Two HKPG Contents
 
 |         Variable | Dattaype |                   Units |  
@@ -336,15 +350,22 @@ Medium spectra are the result of accumulating counts in 48 channels for 4 second
      
 ### 4.8 MISC - Miscellaneous
 
+The MISC file contains 1Hz data. It holds both the PPS variable and the DPU version number that is transmitted in each frame. In both L1 and L2 the PPS variable is an INT4 that represents the number of milliseconds in to the frame that the GPS PPS signal was received. The DPU Version variable is INT2 in both L1 and L2 and has a valid range from 0-31.
+
+
 *Table 4.8.1* - Level One and Two MISC Contents
 
 |               Variable | Datatype |     Units |  
 | ---------------------- | -------- | --------- |  
 |             FrameGroup |     INT4 |           |  
 |                  Epoch |   TT2000 |        ns |  
-|                GPS_PPS |     INT4 |        ms |
+|                GPS_PPS |     INT4 |        ms |  
+|                Version |     INT2 |           |
 |             Payload_ID |     INT4 |           |
 | Time\_Model\_Intercept |   DOUBLE |           |  
 |     Time\_Model\_Slope |   DOUBLE |           |  
 
 ### 4.9 Variable Definitions
+
+5 Timestamp generation
+======================
