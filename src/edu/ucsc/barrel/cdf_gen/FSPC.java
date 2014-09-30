@@ -174,4 +174,34 @@ public class FSPC extends DataProduct{
       var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
       this.cdf.addVar("cnt_error" + ch, var);
    }
+
+   public static Channel[] getChannels(int version){
+      if(version < 3){
+         return {
+            new Channel(32, 65535),
+            new Channel(16, 65535),
+            new Channel(8, 255),
+            new Channel(0, 255)
+         }
+      } else {
+         return {
+            new Channel(39, 511),
+            new Channel(30, 511),
+            new Channel(22, 255),
+            new Channel(13, 511),
+            new Channel(6, 127),
+            new Channel(0, 63)
+         }
+      }
+   }
+}
+
+class Channel{
+   public int start = 0;
+   public int width = 0;
+
+   public Channel(int s, int w){
+      start = s;
+      width = w;
+   }
 }
