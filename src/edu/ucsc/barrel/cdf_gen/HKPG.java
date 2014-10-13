@@ -34,6 +34,8 @@ import java.nio.channels.FileChannel;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Vector;
 import java.util.Arrays;
 import java.util.List;
@@ -45,7 +47,114 @@ public class HKPG extends DataProduct{
    private int date, lvl;
    private String payload_id;
    List<HkpgVar> vars;   
+
    
+   private static final Map<String, Float> SCALE_FACTORS;
+   static {
+      Map<String, Float> scale = new HashMap<String, Float>;
+      );
+      scales.put("V0" ,  0.0003052f);
+      scales.put("V1" ,  0.0003052f);
+      scales.put("V2" ,  0.0006104f);
+      scales.put("V3" ,  0.0001526f);
+      scales.put("V4" ,  0.0001526f);
+      scales.put("V5" ,  0.0003052f);
+      scales.put("V6" , -0.0001526f);
+      scales.put("V7" , -0.0001526f);
+      scales.put("V8" ,  0.0001526f);
+      scales.put("V9" ,  0.0006104f);
+      scales.put("V10",  0.0006104f);
+      scales.put("V11",  0.0006104f);
+      scales.put("I0" ,  0.05086f  );
+      scales.put("I1" ,  0.06104f  );
+      scales.put("I2" ,  0.06104f  );
+      scales.put("I3" ,  0.01017f  );
+      scales.put("I4" ,  0.001017f );
+      scales.put("I5" ,  0.05086f  );
+      scales.put("I6" , -0.0001261f);
+      scales.put("I7" , -0.001017f );
+      scales.put("T0" ,  0.007629f );
+      scales.put("T1" ,  0.007629f );
+      scales.put("T2" ,  0.007629f );
+      scales.put("T3" ,  0.007629f );
+      scales.put("T4" ,  0.007629f );
+      scales.put("T5" ,  0.007629f );
+      scales.put("T6" ,  0.007629f );
+      scales.put("T7" ,  0.007629f );
+      scales.put("T8" ,  0.007629f );
+      scales.put("T9" ,  0.007629f );
+      scales.put("T10",  0.007629f );
+      scales.put("T11",  0.007629f );
+      scales.put("T12",  0.007629f );
+      scales.put("T13",  0.0003052f);
+      scales.put("T14",  0.0003052f);
+      scales.put("T15",  0.0001526f);
+      SCALE_FACTORS = Collections.unmodifiableMap(scale);
+   }
+   private static final Map<String, Float> OFFSETS;
+   static {
+      Map<String, Float> offsets = new HashMap<String, Float>;
+      );
+      offsets.put("T1" ,  -273.15f);
+      offsets.put("T2" ,  -273.15f);
+      offsets.put("T3" ,  -273.15f);
+      offsets.put("T4" ,  -273.15f);
+      offsets.put("T5" ,  -273.15f);
+      offsets.put("T6" ,  -273.15f);
+      offsets.put("T7" ,  -273.15f);
+      offsets.put("T8" ,  -273.15f);
+      offsets.put("T9" ,  -273.15f);
+      offsets.put("T10",  -273.15f);
+      offsets.put("T11",  -273.15f);
+      offsets.put("T12",  -273.15f);
+      offsets.put("T13",  -273.15f);
+      offsets.put("T14",  -273.15f);
+      offsets.put("T15",  -273.15f);
+      OFFSETS = Collections.unmodifiableMap(offsets);
+   }
+   private static final Map<String, String> LABELS;
+   static {
+      Map<String, String> labels = new HashMap<String, String>;
+      );
+      labels.put("V0" , "V0_VoltAtLoad");
+      labels.put("V1" , "V1_Battery");
+      labels.put("V2" , "V2_Solar1");
+      labels.put("V3" , "V3_POS_DPU");
+      labels.put("V4" , "V4_POS_XRayDet");
+      labels.put("V5" , "V5_Modem");
+      labels.put("V6" , "V6_NEG_XRayDet");
+      labels.put("V7" , "V7_NEG_DPU");
+      labels.put("V8" , "V8_Mag");
+      labels.put("V9" , "V9_Solar2");
+      labels.put("V10", "V10_Solar3");
+      labels.put("V11", "V11_Solar4");
+      labels.put("I0" , "I0_TotalLoad");
+      labels.put("I1" , "I1_TotalSolar");
+      labels.put("I2" , "I2_Solar1");
+      labels.put("I3" , "I3_POS_DPU");
+      labels.put("I4" , "I4_POS_XRayDet");
+      labels.put("I5" , "I5_Modem");
+      labels.put("I6" , "I6_NEG_XRayDet");
+      labels.put("I7" , "I7_NEG_DPU");
+      labels.put("T0" , "T0_Scint");
+      labels.put("T1" , "T1_Mag");
+      labels.put("T2" , "T2_ChargeCont");
+      labels.put("T3" , "T3_Battery");
+      labels.put("T4" , "T4_PowerConv");
+      labels.put("T5" , "T5_DPU");
+      labels.put("T6" , "T6_Modem");
+      labels.put("T7" , "T7_Structure");
+      labels.put("T8" , "T8_Solar1");
+      labels.put("T9" , "T9_Solar2");
+      labels.put("T10", "T10_Solar3");
+      labels.put("T11", "T11_Solar4");
+      labels.put("T12", "T12_TermTemp");
+      labels.put("T13", "T13_TermBatt");
+      labels.put("T14", "T14_TermCap");
+      labels.put("T15", "T15_CCStat");
+      LABELS = Collections.unmodifiableMap(labels);
+   }
+
    //define a data object to hold housekeeping variable attirbutes
    private class HkpgVar{
       private String name, desc, units;
@@ -73,8 +182,9 @@ public class HKPG extends DataProduct{
       private float getMax(){return max;}
       private long getType(){return type;}
    }
-
+   
    public HKPG(final String path,final String pay, int d, int l){
+
       this.date = d;
       this.lvl = l;
       this.payload_id = pay;
