@@ -38,6 +38,9 @@ import java.util.Vector;
 import java.util.Arrays;
 
 public class Ephm extends DataProduct{
+   static public final int 
+      ALT_I = 0, TIME_I = 1, LAT_I = 2, LON_I = 3;
+
    private int date, lvl;
    private String payload_id;
 

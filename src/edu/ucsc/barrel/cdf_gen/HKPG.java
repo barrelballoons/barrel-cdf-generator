@@ -46,10 +46,26 @@ import java.util.ListIterator;
 public class HKPG extends DataProduct{
    private int date, lvl;
    private String payload_id;
-   List<HkpgVar> vars;   
+   List<HkpgVar> vars;
 
+   public static final int
+      V0 = 0, I0 = 1, V1 = 2, I1 = 3, V2 = 4, I2 = 5, V3 = 6, I3 = 7, V4 = 8, 
+      I4 = 9, V5 = 10, I5 = 11, V6 = 12, I6 = 13, V7 = 14, I7 = 15, T0 = 16, 
+      T8 = 17, T1 = 18, T9 = 19, T2 = 20, T10 = 21, T3 = 22, T11 = 23, T4 = 24, 
+      T12 = 25, T5 = 26, T13 = 27, T6 = 28, T14 = 29, T7 = 30, T15 = 31, 
+      V8 = 32, V9 = 33, V10 = 34, V11 = 35, 
+      SATSOFF = 36, WEEK = 37, CMDCNT = 38, MDMCNT = 39;
    
-   private static final Map<String, Float> SCALE_FACTORS;
+   //array showing indexes of mod40 data
+   public static final String[] HKPG_I = {
+      "V0",  "I0", "V1",  "I1",  "V2",  "I2",  "V3", "I3",  "V4", 
+      "I4",  "V5", "I5",  "V6",  "I6",  "V7",  "I7", "T0",  "T8",
+      "T1",  "T9", "T2",  "T10", "T3",  "T11", "T4", "T12", "T5",
+      "T13", "T6", "T14", "T7 ", "T15", "V8",  "V9", "V10", "V11", 
+      "SATSOFF", "WEEK", "CMDCNT", "MDMCNT";
+   };
+
+   public static final Map<String, Float> SCALE_FACTORS;
    static {
       Map<String, Float> scale = new HashMap<String, Float>;
       );
@@ -91,7 +107,7 @@ public class HKPG extends DataProduct{
       scales.put("T15",  0.0001526f);
       SCALE_FACTORS = Collections.unmodifiableMap(scale);
    }
-   private static final Map<String, Float> OFFSETS;
+   public static final Map<String, Float> OFFSETS;
    static {
       Map<String, Float> offsets = new HashMap<String, Float>;
       );
@@ -112,7 +128,7 @@ public class HKPG extends DataProduct{
       offsets.put("T15",  -273.15f);
       OFFSETS = Collections.unmodifiableMap(offsets);
    }
-   private static final Map<String, String> LABELS;
+   public static final Map<String, String> LABELS;
    static {
       Map<String, String> labels = new HashMap<String, String>;
       );

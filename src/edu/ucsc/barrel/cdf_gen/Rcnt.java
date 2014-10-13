@@ -38,6 +38,9 @@ import java.util.Vector;
 import java.util.Arrays;
 
 public class Rcnt extends DataProduct{
+   static public final int
+      INTER = 0, LL = 1, PD = 2, HL = 3;
+
    private int date, lvl;
    private String payload_id;
 
