@@ -219,7 +219,7 @@ public class BarrelFrame {
 
       //slow spectra: 8 channels per frame, 16 bits/channels
       for(int chan_i = 0; chan_i < this.sspc.length; chan_i++){
-         chan_i = (mod32 * 8) + sspc_i;
+         chan_i = (this.mod32 * 8) + sspc_i;
          this.valid = this.setSspc(
             chan_i,
             frame.shiftRight(144 - (16 * sspc_i))
@@ -451,13 +451,9 @@ public class BarrelFrame {
 
    public boolean setHousekeeping(final long hkpg){
       boolean valid = true;
-      if(
-         (hkpg < Constants.HKPG_MIN) ||
-         (hkpg > Constants.HKPG_MAX)
-      ){
+      if((hkpg < Constants.HKPG_MIN) || (hkpg > Constants.HKPG_MAX)){
          this.hkpg = Constants.HKPG_FILL;
          //this.hkpg_q |= Constants.OUT_OF_RANGE;
-
          return false;
       } else {
          this.hkpg = hkpg;
@@ -465,11 +461,10 @@ public class BarrelFrame {
 
       switch(this.mod40){
          case 36:
-            this.sats = (short)(this.hkpg >> 8);
+            this.sats   = (short)(this.hkpg >> 8);
             this.offset = (short)(this.hkpg & 255);
 
-            if(
-               (this.sats < Constants.SATS_MIN) ||
+            if((this.sats < Constants.SATS_MIN) ||
                (this.sats > Constants.SATS_MAX)
             ){
                this.sats = Constants.SATS_FILL;
@@ -593,14 +588,14 @@ public class BarrelFrame {
       switch(this.mod4){
          case Constants.ALT_I:
             if(
-               (gps[mod4][rec_num_mod4] < Constants.ALT_RAW_MIN) ||
-               (gps[mod4][rec_num_mod4] > Constants.ALT_RAW_MAX)
+               (gps[this.mod4] < Constants.ALT_RAW_MIN) ||
+               (gps[this.mod4] > Constants.ALT_RAW_MAX)
             ){
-               gps[mod4][rec_num_mod4] = Constants.ALT_RAW_FILL;
+               gps[this.mod4] = Constants.ALT_RAW_FILL;
                //gps_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;  
                valid = false;
             }
-            else if(gps[mod4][rec_num_mod4] < Constants.MIN_SCI_ALT){
+            else if(gps[this.mod4] < Constants.MIN_SCI_ALT){
                /*gps_q[rec_num_mod4] |= Constants.LOW_ALT;
                pps_q[rec_num_1Hz] |= Constants.LOW_ALT;
                hkpg_q[rec_num_mod40] |= Constants.LOW_ALT;
@@ -618,10 +613,10 @@ public class BarrelFrame {
             break;
          case Constants.TIME_I:
             if(
-               (gps[mod4][rec_num_mod4] < Constants.MS_WEEK_MIN) ||
-               (gps[mod4][rec_num_mod4] > Constants.MS_WEEK_MAX)
+               (gps[this.mod4] < Constants.MS_WEEK_MIN) ||
+               (gps[this.mod4] > Constants.MS_WEEK_MAX)
             ){
-               gps[mod4][rec_num_mod4] = Constants.MS_WEEK_FILL;
+               gps[this.mod4] = Constants.MS_WEEK_FILL;
                //gps_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;  
                valid = false;
             }
@@ -636,7 +631,9 @@ public class BarrelFrame {
       return valid;
    }
 
-   public boolean setMagnetometer(final int axis, final int sample, final int mag){
+   public boolean setMagnetometer(
+      final int axis, final int sample, final int mag
+   ){
       if((mag < Constants.MAG_MIN) || (mag > Constants.MAG_MAX)){
          this.mag[sample][axis] = Constants.MAG_FILL;
          //magn_q[rec_num_4Hz] |= Constants.OUT_OF_RANGE;

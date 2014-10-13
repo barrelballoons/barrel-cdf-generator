@@ -456,14 +456,13 @@ public class LevelTwo extends CDFWriter{
                   hkpg_scaled[rec_i] = 
                      (
                         CDF_Gen.data.hkpg[var_i][data_i] * 
-                        CDF_Gen.data.hkpg_scale[var_i]
-                     ) + CDF_Gen.data.hkpg_offset[var_i];
+                        HKPG.SCALE_FACTORS.get(var_i)
+                     ) + HKPG.OFFSETS.get(var_i);
                }else{
                   hkpg_scaled[rec_i] = fill;
                }
             }
          }
-         
 
          System.out.println(CDF_Gen.data.hkpg_label[var_i] + "...");
          hkpg.getCDF().addData(CDF_Gen.data.hkpg_label[var_i], hkpg_scaled);
@@ -708,14 +707,14 @@ public class LevelTwo extends CDFWriter{
          if(CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] != Constants.HKPG_FILL){
             scint_temp = 
                (CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] * 
-               CDF_Gen.data.hkpg_scale[Constants.T0]) + 
-               CDF_Gen.data.hkpg_offset[Constants.T0];
+               HKPG.SCALE_FACTORS.get("T0") + 
+               HKPG.OFFSETS.get("T0");
          }
          if(CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] != Constants.HKPG_FILL){
             dpu_temp = 
                (CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] * 
-               CDF_Gen.data.hkpg_scale[Constants.T5]) + 
-               CDF_Gen.data.hkpg_offset[Constants.T5];
+               HKPG.SCALE_FACTORS.get("T5") +
+               HKPG.OFFSETS.get("T5");
          }    
 
          //get the adjusted bin edges
@@ -811,14 +810,14 @@ public class LevelTwo extends CDFWriter{
          if(CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] != Constants.HKPG_FILL){
             scint_temp = 
                (CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] * 
-               CDF_Gen.data.hkpg_scale[Constants.T0]) + 
-               CDF_Gen.data.hkpg_offset[Constants.T0];
+               HKPG.SCALE_FACTORS.get("T0") + 
+               HKPG.OFFSETS.get("T0");
          }
          if(CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] != Constants.HKPG_FILL){
             dpu_temp = 
                (CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] * 
-               CDF_Gen.data.hkpg_scale[Constants.T5]) + 
-               CDF_Gen.data.hkpg_offset[Constants.T5];
+               HKPG.SCALE_FACTORS.get("T5")) + 
+               HKPG.OFFSETS.get("T5");
          }    
 
          //get the adjusted bin edges
