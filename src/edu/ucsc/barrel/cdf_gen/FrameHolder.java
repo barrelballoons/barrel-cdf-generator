@@ -30,6 +30,8 @@ import java.util.Arrays;
 
 public class FrameHolder{
    private String payload;
+   private int dpuId;
+   private Map<Integer, BarrelFrame> frames;
    
    //variables to keep track of valid altitude range
    private float min_alt;
@@ -37,9 +39,12 @@ public class FrameHolder{
    
    //variables to  signal frame counter rollover
    private boolean fc_rollover = false;
+   private Integer last_fc = 0;
 
-   public FrameHolder(final String p){
-      payload = (p.split(","))[0];
+   public FrameHolder(final String p, final int id){
+      this.frame = new HashMap<String, BarrelFrame>();
+      this.payload = (p.split(","))[0];
+      this.dpuId = id;
       
       //set minimum altitude based on either command line argument or
       //default setting in the Constants class
@@ -52,7 +57,7 @@ public class FrameHolder{
       
       //Figure out if the previous CDF file had a frame counter rollover
       if(new File("fc_rollovers/" + payload).exists()){
-        fc_rollover = true; 
+        this.fc_rollover = true; 
       }
    }
 
@@ -61,7 +66,34 @@ public class FrameHolder{
    }
 
    public void addFrame(BigInteger rawFrame){
+      BarrelFrame frame = new BarrelFrame(rawFrame, dpuId);
+      int fc = frame.getFrameCounter();
 
+      //check for fc rollover
+      if(this.fc_rollover){
+         frame.setFrameCounter(fc + Constants.FC_OFFSET);
+      }else{
+         if((this.last_fc - fc) > Constants.LAST_DAY_FC){
+            //rollover detected
+            this.fc_rollover = true;
+           
+         CDF_Gen.log.writeln(
+               "Payload " + payload + " rolled over after fc = " + last_fc 
+            );
+
+            //offset fc
+            frame.setFrameCounter(fc + Constants.FC_OFFSET);
+
+            //create an empty file to indicate rollover
+            (new Logger("fc_rollovers/" + payload)).close();
+         }else{
+            last_fc = tmpFC;
+         }
+      }
+
+      //add the frame to the map
+      this.frames.put(fc, frame);
    }
-
+   
+   public 
 }

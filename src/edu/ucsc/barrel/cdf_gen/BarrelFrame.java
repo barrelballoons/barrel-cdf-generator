@@ -90,7 +90,7 @@ public class BarrelFrame {
       rawFrame = null;
    boolean valid = true;
  
-   public BarrelFrame(final BigInteger frame, final int dpuId){
+   public BarrelFrame(final BigInteger frame, final short dpuId){
       //Breakdown frame counter words: 
       //save the frame counter parts as temp variables,
       //they will be written to the main structure once rec_num is calculated.
@@ -100,7 +100,7 @@ public class BarrelFrame {
       );
 
       //make sure this frame belongs to this payload
-      this.valid = this.setPayID(
+      this.valid = this.setPayloadId(
          frame.shiftRight(1685).and(BigInteger.valueOf(63)).shortValue(), dpuId
       );
       if(!this.valid){
@@ -239,28 +239,8 @@ public class BarrelFrame {
       this.fc = fc;
 
       //validate frame number
-      if(tmpFC <= Constants.FC_MIN || tmpFC > Constants.FC_MAX){return;}
-
-      //check for fc rollover
-      if(fc_rollover){
-         tmpFC += Constants.FC_OFFSET;
-      }else{
-         if((last_fc - tmpFC) > Constants.LAST_DAY_FC){
-            //rollover detected
-            fc_rollover = true;
-           
-         CDF_Gen.log.writeln(
-               "Payload " + payload + " rolled over after fc = " + last_fc 
-            );
-
-            //offset fc
-            tmpFC += Constants.FC_OFFSET;
-
-            //create an empty file to indicate rollover
-            (new Logger("fc_rollovers/" + payload)).close();
-         }else{
-            last_fc = tmpFC;
-         }
+      if(tmpFC <= Constants.FC_MIN || tmpFC > Constants.FC_MAX){
+         return false;
       }
 
       //if there was a rollover, flag the data
@@ -289,8 +269,11 @@ public class BarrelFrame {
       return true;
    }
 
-   public boolean setPayloadId(final short payID){
-      this.payId = payId;
+   public boolean setPayloadId(final short payID, final short dpuID){
+      this.payID = payID;
+      if(this.payID != dpuID){
+         return false;
+      }
       return true;
    }
 
