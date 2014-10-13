@@ -47,7 +47,7 @@ public class RCNT extends DataProduct{
    private int date, lvl;
    private String payload_id;
 
-   public Rcnt(final String path, final String pay, int d, int l){
+   public RCNT(final String path, final String pay, int d, int l){
       this.payload_id = pay;
       this.date = d;
       this.lvl = l;
