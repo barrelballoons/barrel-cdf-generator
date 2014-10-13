@@ -1,3 +1,5 @@
+//BarrelFrame.java
+
 /*
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    This file is part of The BARREL CDF Generator.
@@ -23,7 +25,7 @@ import java.io.File;
 import java.math.BigInteger;
 import java.util.Arrays;
 
-public class DataFrame{
+public class BarrelFrame {
 
    //ISTP defined fill values
    static public final int 
@@ -88,7 +90,7 @@ public class DataFrame{
       rawFrame = null;
    boolean valid = true;
  
-   public DataFrame(final BigInteger frame, final int dpuId){
+   public BarrelFrame(final BigInteger frame, final int dpuId){
       //Breakdown frame counter words: 
       //save the frame counter parts as temp variables,
       //they will be written to the main structure once rec_num is calculated.
