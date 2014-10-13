@@ -27,22 +27,22 @@ public class DataFrame{
 
    //ISTP defined fill values
    static public final int 
-      UINT1_FILL = 255,
-      UINT2_FILL = 65535,
-      INT1_FILL = -128,
-      INT2_FILL = -32768,
-      INT4_FILL = -2147483648;
+      UINT1_FILL  = 255,
+      UINT2_FILL  = 65535,
+      INT1_FILL   = -128,
+      INT2_FILL   = -32768,
+      INT4_FILL   = -2147483648;
    static public final long
-      INT8_FILL = -9223372036854775808L,
-      UINT4_FILL = 4294967295L;
+      INT8_FILL   = -9223372036854775808L,
+      UINT4_FILL  = 4294967295L;
    static public final float 
-      FLOAT_FILL = -1.0e+31f;
+      FLOAT_FILL  = -1.0e+31f;
    static public final double 
       DOUBLE_FILL = -1.0e+31;
    
    static public final int 
       LAST_DAY_FC = 2010752,
-      FC_OFFSET = 2097152;
+      FC_OFFSET   = 2097152;
 
    private short  
       pps         = INT2_FILL,
@@ -153,10 +153,9 @@ public class DataFrame{
       frame_mod32[rec_num_mod32] = frame_1Hz[rec_num_1Hz] - mod32;
       frame_mod40[rec_num_mod40] = frame_1Hz[rec_num_1Hz] - mod40;
 */    
-            
-
+    
       //GPS PPS
-      this.valid = setPulsePerSecond([rec_num_1Hz] = 
+      this.valid = this.setPulsePerSecond([rec_num_1Hz] = 
          frame.shiftRight(1616).and(BigInteger.valueOf(65535)).shortValue());
 
       //mag data 4 sets of xyz vectors. 24 bits/component
@@ -176,17 +175,16 @@ public class DataFrame{
             frame.shiftRight(1544 - (72 * i)).
             and(BigInteger.valueOf(16777215)).intValue();
          );
-         
       }
       
       //mod40 housekeeping data: 16bits
-      this.setHousekeeping(
+      this.valid = this.setHousekeeping(
          frame.shiftRight(1312).and(BigInteger.valueOf(65535)).longValue()
       );
       
       //fast spectra: 20Hz data
       for(int sample = 0; sample < 20; sample++){
-         this.setFSPC(
+         this.valid = this.setFSPC(
             sample, 
             frame.shiftRight(1264 - sample * 48).
             and(BigInteger.valueOf(281474976710656));
@@ -205,7 +203,7 @@ public class DataFrame{
       //slow spectra: 8 channels per frame, 16 bits/channels
       for(int chan_i = 0; chan_i < 8; chan_i++){
          chan_i = (mod32 * 8) + sspc_i;
-         this.setSspc(
+         this.valid = this.setSspc(
             chan_i,
             frame.shiftRight(144 - (16 * sspc_i))
                .and(BigInteger.valueOf(65535)).intValue()
@@ -215,15 +213,9 @@ public class DataFrame{
       sspc_frames++;
       
       //rate counter: mod4 data, 16bits
-      rcnt[mod4][rec_num_mod4] = 
+      this.valid = this.setRateCounter(
          frame.shiftRight(16).and(BigInteger.valueOf(65535)).longValue();
-      if(
-         (rcnt[mod4][rec_num_mod4] < Constants.RCNT_MIN) ||
-         (rcnt[mod4][rec_num_mod4] > Constants.RCNT_MAX)
-      ){
-         rcnt[mod4][rec_num_mod4] = Constants.RCNT_FILL;
-         rcnt_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;
-      }
+      );
    }
    public boolean setFrameCounter(final int fc){
    
@@ -256,11 +248,11 @@ public class DataFrame{
 
       //if there was a rollover, flag the data
       if(fc_rollover){
-         gps_q[rec_num_mod4] |= Constants.FC_ROLL;
-         pps_q[rec_num_1Hz] |= Constants.FC_ROLL;
+         gps_q[rec_num_mod4]   |= Constants.FC_ROLL;
+         pps_q[rec_num_1Hz]    |= Constants.FC_ROLL;
          hkpg_q[rec_num_mod40] |= Constants.FC_ROLL;
-         rcnt_q[rec_num_mod4] |= Constants.FC_ROLL;
-         mspc_q[rec_num_mod4] |= Constants.FC_ROLL;
+         rcnt_q[rec_num_mod4]  |= Constants.FC_ROLL;
+         mspc_q[rec_num_mod4]  |= Constants.FC_ROLL;
          sspc_q[rec_num_mod32] |= Constants.FC_ROLL;
          for(int lc_i = 0; lc_i < 20; lc_i++){
             fspc_q[rec_num_1Hz + lc_i] |= Constants.FC_ROLL;
@@ -273,7 +265,6 @@ public class DataFrame{
       this.mod4 = (int)fc % 4;
       this.mod32 = (int)fc % 32;
       this.mod40 = (int)fc % 40;
-
    }
 
    public void setPayloadId(final short payID){
@@ -337,7 +328,7 @@ public class DataFrame{
       this.cmdCnt = cmdCnt;
    }
 
-   public void setFSPC(final int sample, final BigIntege raw){
+   public void setFSPC(final int sample, final BigInteger raw){
       int channels = FSPC.getChannels(this.version);
       int[] fspc = new int[channels.length]
       int value;
@@ -509,11 +500,18 @@ public class DataFrame{
       return this.hkpg == 0 ? true : false;
    }
 
-   public void setRateCounter(final long rcnt){
-      this.rcnt = rcnt;
+   public boolean setRateCounter(final long r){
+      if((this.rcnt < Constants.RCNT_MIN) || (this.rcnt > Constants.RCNT_MAX)){
+         this.rcnt = Constants.RCNT_FILL;
+         this.rcnt_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;
+         return false;
+      } else {
+         this.rcnt = r;
+         return true;
+      }
    }
 
-   public void setGPS(final int gps){
+   public boolean setGPS(final int gps){
       this.gps = gps;
       
 /*
