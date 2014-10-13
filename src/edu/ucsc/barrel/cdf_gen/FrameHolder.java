@@ -1,5 +1,5 @@
 /*
-DataStore.java
+FrameHolder.java
 
 Description:
    Stores the data frames that are being processed
@@ -28,7 +28,7 @@ import java.io.File;
 import java.math.BigInteger;
 import java.util.Arrays;
 
-public class DataStore{
+public class FrameHolder{
    
    static public float[] hkpg_scale = new float[36];
    static public float[] hkpg_offset = new float[36];
@@ -47,7 +47,7 @@ public class DataStore{
    //variables to  signal frame counter rollover
    private boolean fc_rollover = false;
 
-   public DataHolder(final String p){
+   public FrameHolder(final String p){
       payload = (p.split(","))[0];
       
       //fill the housekeeping reference arrays
