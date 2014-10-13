@@ -57,9 +57,10 @@ public class DataFrame{
       fc          = INT4_FILL,
       week        = INT4_FILL,
       cmdCnt      = INT4_FILL,
-      mspc        = INT4_FILL,
-      sspc        = INT4_FILL,
-      gps         = INT4_FILL;
+      gps         = INT4_FILL,
+      mod4        = INT4_FILL,
+      mod32       = INT4_FILL,
+      mod40       = INT4_FILL;
    private long
       epoch       = INT4_FILL,
       hkpg        = INT4_FILL,
@@ -67,7 +68,16 @@ public class DataFrame{
    public float 
       peak511_bin = null;
    public int[]
-      mag         = null;
+      mspc        = {
+                     INT4_FILL, INT4_FILL, INT4_FILL, INT4_FILL, 
+                     INT4_FILL, INT4_FILL, INT4_FILL, INT4_FILL,
+                     INT4_FILL, INT4_FILL, INT4_FILL, INT4_FILL
+                  },
+      sspc        = {
+                     INT4_FILL, INT4_FILL, INT4_FILL, INT4_FILL, 
+                     INT4_FILL, INT4_FILL, INT4_FILL, INT4_FILL
+                  },
+      mag         = {INT4_FILL, INT4_FILL, INT4_FILL, INT4_FILL};
    public int[][]
       fspc        = null;
    private BigInteger
@@ -247,45 +257,51 @@ public class DataFrame{
       }
 
       //if there was a rollover, flag the data
+      /*
       if(fc_rollover){
-         gps_q[rec_num_mod4]   |= Constants.FC_ROLL;
-         pps_q[rec_num_1Hz]    |= Constants.FC_ROLL;
-         hkpg_q[rec_num_mod40] |= Constants.FC_ROLL;
-         rcnt_q[rec_num_mod4]  |= Constants.FC_ROLL;
-         mspc_q[rec_num_mod4]  |= Constants.FC_ROLL;
-         sspc_q[rec_num_mod32] |= Constants.FC_ROLL;
+         this.gps_q[rec_num_mod4]   |= Constants.FC_ROLL;
+         this.pps_q[rec_num_1Hz]    |= Constants.FC_ROLL;
+         this.hkpg_q[rec_num_mod40] |= Constants.FC_ROLL;
+         this.rcnt_q[rec_num_mod4]  |= Constants.FC_ROLL;
+         this.mspc_q[rec_num_mod4]  |= Constants.FC_ROLL;
+         this.sspc_q[rec_num_mod32] |= Constants.FC_ROLL;
          for(int lc_i = 0; lc_i < 20; lc_i++){
-            fspc_q[rec_num_1Hz + lc_i] |= Constants.FC_ROLL;
+            this.fspc_q[rec_num_1Hz + lc_i] |= Constants.FC_ROLL;
          }
          for(int mag_i = 0; mag_i < 4; mag_i++){
-            magn_q[rec_num_1Hz + mag_i] |= Constants.FC_ROLL;
+            this.magn_q[rec_num_1Hz + mag_i] |= Constants.FC_ROLL;
          }
       }
+      */
+
       //get multiplex info
       this.mod4 = (int)fc % 4;
       this.mod32 = (int)fc % 32;
       this.mod40 = (int)fc % 40;
+
+      return true;
    }
 
-   public void setPayloadId(final short payID){
+   public boolean setPayloadId(final short payID){
       this.payId = payId;
+      return true;
    }
 
-   public void setPulsePerSecond(final short pps){
+   public boolean setPulsePerSecond(final short pps){
       this.pps = pps;
-      if(
-         (pps[rec_num_1Hz] < Constants.PPS_MIN) ||
-         (pps[rec_num_1Hz] > Constants.PPS_MAX)
-      ){
+      if((this.pps < Constants.PPS_MIN) || (this.pps > Constants.PPS_MAX)){
          //make sure the value is not out of range because of an early pps
-         if(pps[rec_num_1Hz] != 65535){
-            pps[rec_num_1Hz] = Constants.PPS_FILL;
-            pps_q[rec_num_1Hz] |= Constants.OUT_OF_RANGE;
+         if(this.pps != 65535){
+            this.pps = Constants.PPS_FILL;
+            //pps_q[rec_num_1Hz] |= Constants.OUT_OF_RANGE;
+            return false;
          }
       }
 
-      //flag potentially bad gps and pps records
+      return true;
 
+      /*
+      //flag potentially bad gps and pps records
       if(
          mod4 > 0 && // make sure there is a previous record to compare to
          pps[rec_num_1Hz] == 65535 && //possible bad pps
@@ -294,44 +310,54 @@ public class DataFrame{
          pps_q[rec_num_1Hz] |= Constants.NO_GPS;
          gps_q[rec_num_mod4] |= Constants.NO_GPS;
       }
+      */
    }
 
-   public void setDPUVersion(final short ver){
+   public boolean setDPUVersion(final short ver){
       this.ver = ver;
+      return true;
    }
 
-   public void setNumSats(final short sats){
+   public boolean setNumSats(final short sats){
       this.sats = sats;
+      return true;
    }
 
-   public void setUTCOffset(final short offset){
+   public boolean setUTCOffset(final short offset){
       this.offset = offset;
+      return true;
    }
 
-   public void setTermStatus(final short termStat){
+   public boolean setTermStatus(final short termStat){
       this.termStat = termStat;
+      return true;
    }
 
-   public void setModemCount(final short modemCnt){
+   public boolean setModemCount(final short modemCnt){
       this.modemCnt = modemCnt;
+      return true;
    }
 
-   public void setDcdCount(final short dcdCnt){
+   public boolean setDcdCount(final short dcdCnt){
       this.dcdCnt = dcdCnt;
+      return true;
    }
 
-   public void setWeek(final int week){
+   public boolean setWeek(final int week){
       this.week = week;
+      return true;
    }
 
-   public void setCommandCounter(final int cmdCnt){
+   public boolean setCommandCounter(final int cmdCnt){
       this.cmdCnt = cmdCnt;
+      return true;
    }
 
-   public void setFSPC(final int sample, final BigInteger raw){
+   public boolean setFSPC(final int sample, final BigInteger raw){
       int channels = FSPC.getChannels(this.version);
       int[] fspc = new int[channels.length]
       int value;
+      boolean valid = true;
 
       for(int ch_i = 0; ch_i < channels.length; ch_i++){
           value = 
@@ -342,11 +368,14 @@ public class DataFrame{
             (value > Constants.FSPC_RAW_MAX)
          ){
             fspc[ch_i] = Constants.FSPC_RAW_FILL;
-            fspc_q[ch_i] |= Constants.OUT_OF_RANGE;
+            //fspc_q[ch_i] |= Constants.OUT_OF_RANGE;
+            valid = false;
          } else {
             fspc[ch_i] = value;
          }
       }
+
+      return valid;
 /*
       lc1[rec_num_20Hz + lc_i] =
          frame.shiftRight(1296 - (48 * lc_i))
@@ -382,41 +411,47 @@ public class DataFrame{
 */
    }
 
-   public void setMSPC(final int chan_i, final int mspc){
+   public boolean setMSPC(final int chan_i, final int mspc){
       this.mspc[chan_i] = mspc;
       if(
          (this.mspc[chan_i] < Constants.MSPC_RAW_MIN) ||
          (this.mspc[chan_i] > Constants.MSPC_RAW_MAX)
       ){
          this.mspc[chan_i] = Constants.MSPC_RAW_FILL;
-         this.mspc_q |= Constants.OUT_OF_RANGE;
+         //this.mspc_q |= Constants.OUT_OF_RANGE;
+         return false;
       }
+      return true;
    }
 
-   public void setSSPC(final int chan_i, final int sspc){
+   public boolean setSSPC(final int chan_i, final int sspc){
       this.sspc[chan_i] = sspc;
-         if(
-            (sspc[chan_i] < Constants.SSPC_RAW_MIN) ||
-            (sspc[chan_i] > Constants.SSPC_RAW_MAX)
-         ){
-            sspc[chan_i] = Constants.SSPC_RAW_FILL;
-            sspc_q |= Constants.OUT_OF_RANGE;
-         }
-   }
-
-   public void setEpoch(final long epoch){
-      this.epoch = epoch;
-   }
-
-   public void setHousekeeping(final long hkpg){
       if(
-         (this.hkpg < Constants.HKPG_MIN) ||
-         (this.hkpg > Constants.HKPG_MAX)
+         (sspc[chan_i] < Constants.SSPC_RAW_MIN) ||
+         (sspc[chan_i] > Constants.SSPC_RAW_MAX)
+      ){
+         sspc[chan_i] = Constants.SSPC_RAW_FILL;
+         //sspc_q |= Constants.OUT_OF_RANGE;
+         return false;
+      }
+      return true;
+   }
+
+   public boolean setEpoch(final long epoch){
+      this.epoch = epoch;
+      return true;
+   }
+
+   public boolean setHousekeeping(final long hkpg){
+      boolean valid = true;
+      if(
+         (hkpg < Constants.HKPG_MIN) ||
+         (hkpg > Constants.HKPG_MAX)
       ){
          this.hkpg = Constants.HKPG_FILL;
-         this.hkpg_q |= Constants.OUT_OF_RANGE;
+         //this.hkpg_q |= Constants.OUT_OF_RANGE;
 
-         return;
+         return false;
       } else {
          this.hkpg = hkpg;
       }
@@ -431,7 +466,8 @@ public class DataFrame{
                (this.sats > Constants.SATS_MAX)
             ){
                this.sats = Constants.SATS_FILL;
-               this.hkpg_q |= Constants.OUT_OF_RANGE;
+               //this.hkpg_q |= Constants.OUT_OF_RANGE;
+               valid = false;
             }
 
             if(
@@ -439,7 +475,8 @@ public class DataFrame{
                (this.offset > Constants.LEAP_SEC_MAX)
             ){
                this.offset = Constants.LEAP_SEC_FILL;
-               this.hkpg_q |= Constants.OUT_OF_RANGE;
+               //this.hkpg_q |= Constants.OUT_OF_RANGE;
+               valid = false;
             }
 
             break;
@@ -451,7 +488,8 @@ public class DataFrame{
                (this.weeks > Constants.WEEKS_MAX)
             ){
                this.weeks = Constants.WEEKS_FILL;
-               this.hkpg_q |= Constants.OUT_OF_RANGE;
+               //this.hkpg_q |= Constants.OUT_OF_RANGE;
+               valid = false;
             }
 
             break;
@@ -465,14 +503,16 @@ public class DataFrame{
                (this.termStat > Constants.TERM_STAT_MAX)
             ){
                this.termStat = Constants.TERM_STAT_FILL;
-               this.hkpg_q |= Constants.OUT_OF_RANGE;
+               //this.hkpg_q |= Constants.OUT_OF_RANGE;
+               valid = false;
             }
             if(
                (this.cmdCnt < Constants.CMD_CNT_MIN) ||
                (this.cmdCnt > Constants.CMD_CNT_MAX)
             ){
                this.cmdCnt = Constants.CMD_CNT_FILL;
-               this.hkpg_q |= Constants.OUT_OF_RANGE;
+               //this.hkpg_q |= Constants.OUT_OF_RANGE;
+               valid = false;
             }
             break;
          case 39:
@@ -483,39 +523,41 @@ public class DataFrame{
                (this.dcdCnt > Constants.DCD_CNT_MAX)
             ){
                this.dcdCnt = Constants.DCD_CNT_FILL;
-               this.hkpg_q |= Constants.OUT_OF_RANGE;
+               //this.hkpg_q |= Constants.OUT_OF_RANGE;
+               valid = false;
             }
             if(
                (this.modemCnt < Constants.MODEM_CNT_MIN) ||
                (this.modemCnt > Constants.MODEM_CNT_MAX)
             ){
                this.modemCnt = Constants.MODEM_CNT_FILL;
-               this.hkpg_q |= Constants.OUT_OF_RANGE;
+               //this.hkpg_q |= Constants.OUT_OF_RANGE;
+               valid = false;
             }
             break;
          default:
             break;
       }
 
-      return this.hkpg == 0 ? true : false;
+      return valid;
    }
 
    public boolean setRateCounter(final long r){
       if((this.rcnt < Constants.RCNT_MIN) || (this.rcnt > Constants.RCNT_MAX)){
          this.rcnt = Constants.RCNT_FILL;
-         this.rcnt_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;
+         //this.rcnt_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;
          return false;
-      } else {
-         this.rcnt = r;
-         return true;
-      }
+      } 
+
+      this.rcnt = r;
+      return true;
    }
 
    public boolean setGPS(final int gps){
+      boolean valid = true;
       this.gps = gps;
       
-/*
-
+      /*
       //check the payload is above the minimum altitude
       if(low_alt){
          if((mod4 == Constants.ALT_I) && ((tmpGPS / 1000000) >= min_alt)){
@@ -537,22 +579,22 @@ public class DataFrame{
             low_alt = true;
             return;
          }
-     }
-
+      }
+      */
 
       //get gps info: 32 bits of mod4 gps data followed by 16 bits of pps data
-
-      switch(mod4){
-         case Constants.ALT_I: 
+      switch(this.mod4){
+         case Constants.ALT_I:
             if(
                (gps[mod4][rec_num_mod4] < Constants.ALT_RAW_MIN) ||
                (gps[mod4][rec_num_mod4] > Constants.ALT_RAW_MAX)
             ){
                gps[mod4][rec_num_mod4] = Constants.ALT_RAW_FILL;
-               gps_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;  
+               //gps_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;  
+               valid = false;
             }
             else if(gps[mod4][rec_num_mod4] < Constants.MIN_SCI_ALT){
-               gps_q[rec_num_mod4] |= Constants.LOW_ALT;
+               /*gps_q[rec_num_mod4] |= Constants.LOW_ALT;
                pps_q[rec_num_1Hz] |= Constants.LOW_ALT;
                hkpg_q[rec_num_mod40] |= Constants.LOW_ALT;
                rcnt_q[rec_num_mod4] |= Constants.LOW_ALT;
@@ -563,32 +605,44 @@ public class DataFrame{
                }
                for(int mag_i = 0; mag_i < 4; mag_i++){
                   magn_q[rec_num_1Hz + mag_i] |= Constants.LOW_ALT;
-               }
+               }*/
+               valid = false;
             }
             break;
-         case Constants.TIME_I: 
+         case Constants.TIME_I:
             if(
                (gps[mod4][rec_num_mod4] < Constants.MS_WEEK_MIN) ||
                (gps[mod4][rec_num_mod4] > Constants.MS_WEEK_MAX)
             ){
                gps[mod4][rec_num_mod4] = Constants.MS_WEEK_FILL;
-               gps_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;  
+               //gps_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;  
+               valid = false;
             }
-*/
+            break;
+         case Constants.LAT_I:
+         case Constants.LON_I:
+            break;
+         default:
+            valid = false;
+            break;
+
+      return valid;
    }
 
-   public void setMagnetometer(final int axis, final int sample, final int mag){
+   public boolean setMagnetometer(final int axis, final int sample, final int mag){
       if((mag < Constants.MAG_MIN) || (mag > Constants.MAG_MAX)){
          this.mag[axis][sample] = Constants.MAG_FILL;
-         magn_q[rec_num_4Hz] |= Constants.OUT_OF_RANGE;
-         return;
+         //magn_q[rec_num_4Hz] |= Constants.OUT_OF_RANGE;
+         return false;
       }
 
       this.mag[axis][sample] = mag;
+      return true;
    }
 
-   public void setPeak511Line(final float peak511_bin){
+   public boolean setPeak511Line(final float peak511_bin){
       this.peak511_bin;
+      return true;
    }
 
    public int getFrameCounter(){
