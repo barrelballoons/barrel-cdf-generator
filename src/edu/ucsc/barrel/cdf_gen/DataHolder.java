@@ -432,9 +432,9 @@ public class DataHolder{
          if((last_fc - tmpFC) > Constants.LAST_DAY_FC){
             //rollover detected
             fc_rollover = true;
-           
+            
             System.out.println(
-               "Payload " + payload + " rolled over after fc = " + last_fc 
+               "Payload " + payload + " rolled over after fc = " + last_fc
             );
 
             //offset fc

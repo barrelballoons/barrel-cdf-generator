@@ -95,5 +95,84 @@ public class FrameHolder{
       this.frames.put(fc, frame);
    }
    
-   public 
+   public int[] getFrameRange(int date){
+      int[] range = new int[];
+      return range;
+   }
+   
+   public BarrelFrame getFrane(fc){
+      return frames.get(fc);
+   }
+
+   public Map<Integer, Short> getPPS(int start, int stop){
+
+   }
+
+   public Map<Integer, Short> getPayID(int start, int stop){
+      
+   }
+
+   public Map<Integer, Short> getVersion(int start, int stop){
+      
+   }
+
+   public Map<Integer, Short> getNumSats(int start, int stop){
+      
+   }
+
+   public Map<Integer, Short> getOffset(int start, int stop){
+      
+   }
+
+   public Map<Integer, Short> getTermStatus(int start, int stop){
+      
+   }
+
+   public Map<Integer, Short> getModemCounter(int start, int stop){
+      
+   }
+
+   public Map<Integer, Short> getDcdCounter(int start, int stop){
+      
+   }
+
+   public Map<Integer, Integer> getWeek(int start, int stop){
+      
+   }
+
+   public Map<Integer, Integer> getCmdCounter(int start, int stop){
+      
+   }
+
+   public Map<Integer, Integer[]> getGPS(int start, int stop){
+      
+   }
+   
+   public Map<Integer, Integer[]> getMAG(int start, int stop){
+      
+   }
+
+   public Map<Integer, Integer[]> getMSPC(int start, int stop){
+      
+   }
+
+   public Map<Integer, Integer[]> getSSPC(int start, int stop){
+      
+   }
+   
+   public Map<Integer, Map<Integer, Integer[]>> getFSPC(int start, int stop){
+      
+   }
+   
+   public Map<Integer, Long> getEpoch(int start, int stop){
+      
+   }
+
+   public Map<Integer, Long[]> getHousekeeping(int start, int stop){
+      
+   }
+
+   public Map<Integer, Long[]> getRateCounters(int start, int stop){
+      
+   }   
 }
