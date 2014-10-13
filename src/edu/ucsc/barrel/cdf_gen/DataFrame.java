@@ -77,7 +77,11 @@ public class DataFrame{
                      INT4_FILL, INT4_FILL, INT4_FILL, INT4_FILL, 
                      INT4_FILL, INT4_FILL, INT4_FILL, INT4_FILL
                   },
-      mag         = {INT4_FILL, INT4_FILL, INT4_FILL, INT4_FILL};
+      mag         = {
+                     {INT4_FILL, INT4_FILL, INT4_FILL},
+                     {INT4_FILL, INT4_FILL, INT4_FILL},
+                     {INT4_FILL, INT4_FILL, INT4_FILL}
+                  };
    public int[][]
       fspc        = null;
    private BigInteger
@@ -165,11 +169,12 @@ public class DataFrame{
 */    
     
       //GPS PPS
-      this.valid = this.setPulsePerSecond([rec_num_1Hz] = 
-         frame.shiftRight(1616).and(BigInteger.valueOf(65535)).shortValue());
+      this.valid = this.setPulsePerSecond(
+         frame.shiftRight(1616).and(BigInteger.valueOf(65535)).shortValue()
+      );
 
       //mag data 4 sets of xyz vectors. 24 bits/component
-      for(int i = 0; i < 4; i++){
+      for(int i = 0; i < this.mag.length; i++){
          this.valid = this.setMagnetometer(
             Magnetometer.X_AXIS,
             frame.shiftRight(1592 - (72 * i)).
@@ -197,12 +202,12 @@ public class DataFrame{
          this.valid = this.setFSPC(
             sample, 
             frame.shiftRight(1264 - sample * 48).
-            and(BigInteger.valueOf(281474976710656));
+            and(BigInteger.valueOf(281474976710656)).intValue();
          );
       }
        
       //medium spectra: 12 channels per frame, 16 bits/channels
-      for(int chan_i = 0; chan_i < 12; chan_i++){
+      for(int chan_i = 0; chan_i < this.mspc.length; chan_i++){
          this.setMspc(
             chan_i,
             frame.shiftRight(336 - (16 * chan_i)).
@@ -211,7 +216,7 @@ public class DataFrame{
       }
 
       //slow spectra: 8 channels per frame, 16 bits/channels
-      for(int chan_i = 0; chan_i < 8; chan_i++){
+      for(int chan_i = 0; chan_i < this.sspc.length; chan_i++){
          chan_i = (mod32 * 8) + sspc_i;
          this.valid = this.setSspc(
             chan_i,
@@ -631,12 +636,12 @@ public class DataFrame{
 
    public boolean setMagnetometer(final int axis, final int sample, final int mag){
       if((mag < Constants.MAG_MIN) || (mag > Constants.MAG_MAX)){
-         this.mag[axis][sample] = Constants.MAG_FILL;
+         this.mag[sample][axis] = Constants.MAG_FILL;
          //magn_q[rec_num_4Hz] |= Constants.OUT_OF_RANGE;
          return false;
       }
 
-      this.mag[axis][sample] = mag;
+      this.mag[sample][axis] = mag;
       return true;
    }
 
