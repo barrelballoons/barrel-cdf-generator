@@ -29,11 +29,6 @@ import java.math.BigInteger;
 import java.util.Arrays;
 
 public class FrameHolder{
-   
-   static public final String[] rc_label = {
-	   "Interrupt", "LowLevel", "PeakDet", "HighLevel"
-   };
-   
    private String payload;
    
    //variables to keep track of valid altitude range

@@ -1,5 +1,5 @@
 /*
-Rcnt.java
+RCNT.java
 
 Description:
    Creates RCNT CDF files.
@@ -37,9 +37,12 @@ import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
 
-public class Rcnt extends DataProduct{
+public class RCNT extends DataProduct{
    static public final int
       INTER = 0, LL = 1, PD = 2, HL = 3;
+   static public final String[] LABELS = {
+      "Interrupt", "LowLevel", "PeakDet", "HighLevel"
+   };
 
    private int date, lvl;
    private String payload_id;

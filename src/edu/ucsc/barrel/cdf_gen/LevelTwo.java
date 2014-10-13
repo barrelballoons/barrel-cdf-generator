@@ -907,7 +907,7 @@ public class LevelTwo extends CDFWriter{
       String destName = 
          outputPath + "/" + date + "/"  + "bar_" + id +
          "_l2_" + "rcnt" + "_20" + date +  "_v" + revNum + ".cdf";
-       DataProduct rcnt = new Rcnt(destName, "bar_" + id, date, 2);
+       DataProduct rcnt = new RCNT(destName, "bar_" + id, date, 2);
 
       System.out.println("Interrupt");
       rcnt.getCDF().addData("Interrupt", rc_timeScaled[0]);
