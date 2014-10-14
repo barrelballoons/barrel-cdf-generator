@@ -41,8 +41,7 @@ public class FrameHolder{
    private boolean fc_rollover = false;
    private Integer last_fc = 0;
 
-   public FrameHolder(final String p, final short
-    id){
+   public FrameHolder(final String p, final short id){
       this.frame = new HashMap<String, BarrelFrame>();
       this.payload = (p.split(","))[0];
       this.dpuId = id;
