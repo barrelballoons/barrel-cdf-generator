@@ -30,7 +30,7 @@ import java.util.Arrays;
 
 public class FrameHolder{
    private String payload;
-   private int dpuId;
+   private short dpuId;
    private Map<Integer, BarrelFrame> frames;
    
    //variables to keep track of valid altitude range
@@ -41,7 +41,8 @@ public class FrameHolder{
    private boolean fc_rollover = false;
    private Integer last_fc = 0;
 
-   public FrameHolder(final String p, final int id){
+   public FrameHolder(final String p, final short
+    id){
       this.frame = new HashMap<String, BarrelFrame>();
       this.payload = (p.split(","))[0];
       this.dpuId = id;
@@ -61,12 +62,8 @@ public class FrameHolder{
       }
    }
 
-   public int getVersion(){
-      return this.version;
-   }
-
    public void addFrame(BigInteger rawFrame){
-      BarrelFrame frame = new BarrelFrame(rawFrame, dpuId);
+      BarrelFrame frame = new BarrelFrame(rawFrame, this.dpuId);
       int fc = frame.getFrameCounter();
 
       //check for fc rollover
@@ -95,25 +92,116 @@ public class FrameHolder{
       this.frames.put(fc, frame);
    }
    
-   public int[] getFrameRange(int date){
+   public int[] getDateFrames(int date){
       int[] range = new int[];
       return range;
    }
    
-   public BarrelFrame getFrane(fc){
+   public BarrelFrame[] getFrames(int start, int stop){
+      BarrelFrame[] 
+         results,
+         frames = BarrelFrame[stop - start];
+      BarrelFrame 
+         frame = null;
+      int 
+         fc,
+         frame_i = 0;
+      
+      for (fc = start; fc <= stop; fc++) {
+         if(this.frames.containsKey(fc)){
+            frame = this.frames.get(fc);
+         }
+      }
+
       return frames.get(fc);
    }
+   public BarrelFrame[] getFrames(int[] range){
+      if(range.length != 2){
+         CDF_Gen.out.log(2, "Invalid frame range: " + range.join(", "));
+      }
+      return this.getFrames.get(range[0], range[1]);
+   }
+/*
+   public Map<String, Number> getData(String type, int start, int stop){
+      Map<Integer, Short> data = new Map<Integer, Short>();
+      BarrelFrame frame;
 
+      //copy the frame data into an array that is sized for no data gaps
+      for (int fc = start; fc <= stop; fc++) {
+         if ((frame = this.getFrame(fc)) != null) {
+            //only touch the array if there is a valid frame
+            data.put(fc, frame.getPPS());
+            frame_i++;
+         }
+      }
+
+      //trim excess elements left by data gaps
+      System.arraycopy(data, 0, result, 0, frame_i);
+
+      return data;
+   }
+   
    public Map<Integer, Short> getPPS(int start, int stop){
+      Map<Integer, Short> data = new Map<Integer, Short>();
+      BarrelFrame frame;
 
+      //copy the frame data into an array that is sized for no data gaps
+      for(int fc = start; fc <= stop; fc++){
+         if ((frame = this.getFrame(fc)) != null) {
+            //only touch the array if there is a valid frame
+            data.put(fc, frame.getPPS());
+            frame_i++;
+         }
+      }
+
+      //trim excess elements left by data gaps
+      System.arraycopy(data, 0, result, 0, frame_i);
+
+      return data;
    }
 
    public Map<Integer, Short> getPayID(int start, int stop){
-      
+      Short[] data = new Short[start - stop], result;
+      BarrelFrame frame;
+      int fc, frame_i;
+
+      //copy the frame data into an array that is sized for no data gaps
+      for(fc = start; fc <= stop; fc++){
+         if ((frame = this.getFrame(fc)) != null) {
+            //only touch the array if there is a valid datum
+            data[frame_i] = frame.getPayloadID();
+            frame_i++;
+         }
+      }
+
+      //trim excess elements left by data gaps
+      System.arraycopy(data, 0, result, 0, frame_i);
+
+      return result;
    }
 
-   public Map<Integer, Short> getVersion(int start, int stop){
-      
+   public short getDPUVersion(){
+      return this.version;
+   }
+
+   public Map<Integer, Short> getDPUVersion(int start, int stop){
+      Short[] data = new Short[start - stop], result;
+      BarrelFrame frame;
+      int fc, frame_i;
+
+      //copy the frame data into an array that is sized for no data gaps
+      for(fc = start; fc <= stop; fc++){
+         if ((frame = this.getFrame(fc)) != null) {
+            //only touch the array if there is a valid datum
+            data[frame_i] = frame.getPayloadID();
+            frame_i++;
+         }
+      }
+
+      //trim excess elements left by data gaps
+      System.arraycopy(data, 0, result, 0, frame_i);
+
+      return result;
    }
 
    public Map<Integer, Short> getNumSats(int start, int stop){
@@ -175,4 +263,5 @@ public class FrameHolder{
    public Map<Integer, Long[]> getRateCounters(int start, int stop){
       
    }   
+   */
 }
