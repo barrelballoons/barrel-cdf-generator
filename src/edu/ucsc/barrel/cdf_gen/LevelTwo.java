@@ -706,15 +706,13 @@ public class LevelTwo extends CDFWriter{
          //get temperatures
          if(CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] != Constants.HKPG_FILL){
             scint_temp = 
-               (CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] * 
-               HKPG.SCALE_FACTORS.get("T0") + 
-               HKPG.OFFSETS.get("T0");
+               CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] * 
+               HKPG.SCALE_FACTORS.get("T0") + HKPG.OFFSETS.get("T0");
          }
          if(CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] != Constants.HKPG_FILL){
             dpu_temp = 
-               (CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] * 
-               HKPG.SCALE_FACTORS.get("T5") +
-               HKPG.OFFSETS.get("T5");
+               CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] * 
+               HKPG.SCALE_FACTORS.get("T5") + HKPG.OFFSETS.get("T5");
          }    
 
          //get the adjusted bin edges
@@ -809,15 +807,13 @@ public class LevelTwo extends CDFWriter{
          //get temperatures
          if(CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] != Constants.HKPG_FILL){
             scint_temp = 
-               (CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] * 
-               HKPG.SCALE_FACTORS.get("T0") + 
-               HKPG.OFFSETS.get("T0");
+               CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] * 
+               HKPG.SCALE_FACTORS.get("T0") + HKPG.OFFSETS.get("T0");
          }
          if(CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] != Constants.HKPG_FILL){
             dpu_temp = 
-               (CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] * 
-               HKPG.SCALE_FACTORS.get("T5")) + 
-               HKPG.OFFSETS.get("T5");
+               CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] * 
+               HKPG.SCALE_FACTORS.get("T5") + HKPG.OFFSETS.get("T5");
          }    
 
          //get the adjusted bin edges

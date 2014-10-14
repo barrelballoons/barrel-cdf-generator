@@ -93,7 +93,7 @@ public class FrameHolder{
    }
    
    public int[] getDateFrames(int date){
-      int[] range = new int[];
+      int[] range = new int[2];
       return range;
    }
    
@@ -101,19 +101,20 @@ public class FrameHolder{
       BarrelFrame[] 
          results,
          frames = BarrelFrame[stop - start];
-      BarrelFrame 
-         frame = null;
       int 
          fc,
          frame_i = 0;
       
       for (fc = start; fc <= stop; fc++) {
          if(this.frames.containsKey(fc)){
-            frame = this.frames.get(fc);
+            frames[frame_i] = this.frames.get(fc);
+            frame_i++;
          }
       }
 
-      return frames.get(fc);
+      System.arraycopy(frames, 0, results, 0, frame_i);
+
+      return results;
    }
    public BarrelFrame[] getFrames(int[] range){
       if(range.length != 2){

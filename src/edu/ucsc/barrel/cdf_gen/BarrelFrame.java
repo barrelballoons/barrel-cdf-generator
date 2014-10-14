@@ -180,17 +180,17 @@ public class BarrelFrame {
          this.valid = this.setMagnetometer(
             Magnetometer.X_AXIS,
             frame.shiftRight(1592 - (72 * i)).
-            and(BigInteger.valueOf(16777215)).intValue(),
+            and(BigInteger.valueOf(16777215)).intValue()
          );
          this.valid = this.setMag(
             Magnetometer.Y_AXIS,
             frame.shiftRight(1568 - (72 * i)).
-            and(BigInteger.valueOf(16777215)).intValue();
+            and(BigInteger.valueOf(16777215)).intValue()
          );
          this.valid = this.setMag(
             Magnetometer.Z_AXIS,
             frame.shiftRight(1544 - (72 * i)).
-            and(BigInteger.valueOf(16777215)).intValue();
+            and(BigInteger.valueOf(16777215)).intValue()
          );
       }
       
@@ -203,8 +203,9 @@ public class BarrelFrame {
       for(int sample = 0; sample < 20; sample++){
          this.valid = this.setFSPC(
             sample, 
-            frame.shiftRight(1264 - sample * 48).
-            and(BigInteger.valueOf(281474976710656)).intValue();
+            frame.shiftRight(1264 - sample * 48).and(
+               BigInteger.valueOf(281474976710656L)
+            ).intValue()
          );
       }
        
@@ -231,7 +232,7 @@ public class BarrelFrame {
       
       //rate counter: mod4 data, 16bits
       this.valid = this.setRateCounter(
-         frame.shiftRight(16).and(BigInteger.valueOf(65535)).longValue();
+         frame.shiftRight(16).and(BigInteger.valueOf(65535)).longValue()
       );
    }
    public boolean setFrameCounter(final int fc){
@@ -345,7 +346,7 @@ public class BarrelFrame {
 
    public boolean setFSPC(final int sample, final BigInteger raw){
       int channels = FSPC.getChannels(this.version);
-      int[] fspc = new int[channels.length]
+      int[] fspc = new int[channels.length];
       int value;
       boolean valid = true;
 
@@ -610,7 +611,7 @@ public class BarrelFrame {
          default:
             valid = false;
             break;
-
+      }
       return valid;
    }
 
@@ -628,7 +629,7 @@ public class BarrelFrame {
    }
 
    public boolean setPeak511Line(final float peak511_bin){
-      this.peak511_bin;
+      this.peak511_bin = peak511_bin;
       return true;
    }
 
@@ -711,3 +712,4 @@ public class BarrelFrame {
    public float getPeak511Line(){
       return this.peak511_bin;
    }
+}

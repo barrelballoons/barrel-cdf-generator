@@ -62,13 +62,12 @@ public class HKPG extends DataProduct{
       "I4",  "V5", "I5",  "V6",  "I6",  "V7",  "I7", "T0",  "T8",
       "T1",  "T9", "T2",  "T10", "T3",  "T11", "T4", "T12", "T5",
       "T13", "T6", "T14", "T7 ", "T15", "V8",  "V9", "V10", "V11", 
-      "SATSOFF", "WEEK", "CMDCNT", "MDMCNT";
+      "SATSOFF", "WEEK", "CMDCNT", "MDMCNT"
    };
 
    public static final Map<String, Float> SCALE_FACTORS;
    static {
-      Map<String, Float> scale = new HashMap<String, Float>;
-      );
+      Map<String, Float> scale = new HashMap<String, Float>();
       scales.put("V0" ,  0.0003052f);
       scales.put("V1" ,  0.0003052f);
       scales.put("V2" ,  0.0006104f);
@@ -109,8 +108,7 @@ public class HKPG extends DataProduct{
    }
    public static final Map<String, Float> OFFSETS;
    static {
-      Map<String, Float> offsets = new HashMap<String, Float>;
-      );
+      Map<String, Float> offsets = new HashMap<String, Float>();
       offsets.put("T1" ,  -273.15f);
       offsets.put("T2" ,  -273.15f);
       offsets.put("T3" ,  -273.15f);
@@ -130,8 +128,7 @@ public class HKPG extends DataProduct{
    }
    public static final Map<String, String> LABELS;
    static {
-      Map<String, String> labels = new HashMap<String, String>;
-      );
+      Map<String, String> labels = new HashMap<String, String>();
       labels.put("V0" , "V0_VoltAtLoad");
       labels.put("V1" , "V1_Battery");
       labels.put("V2" , "V2_Solar1");
