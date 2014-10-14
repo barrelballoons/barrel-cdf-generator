@@ -27,6 +27,8 @@ package edu.ucsc.barrel.cdf_gen;
 import java.io.File;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 public class FrameHolder{
    private String payload;
@@ -35,6 +37,7 @@ public class FrameHolder{
       first_fc = 0,
       last_fc = 0;
    private Map<Integer, BarrelFrame> frames;
+   private List<Integer> ordered_fc;
    
    //variables to keep track of valid altitude range
    private float min_alt;
@@ -45,7 +48,9 @@ public class FrameHolder{
    private Integer last_fc = 0;
 
    public FrameHolder(final String p, final short id){
-      this.frame = new HashMap<String, BarrelFrame>();
+      this.frames = new HashMap<Integer, BarrelFrame>();
+      this.ordered_fc = new LinkedList<Integer>();
+
       this.payload = (p.split(","))[0];
       this.dpuId = id;
       
@@ -97,6 +102,7 @@ public class FrameHolder{
 
       //add the frame to the map
       this.frames.put(fc, frame);
+      this.ordered_fc.add(fc);
    }
    
    public int[] getDateFrames(int date){
@@ -137,6 +143,11 @@ public class FrameHolder{
    public int size(){
       return this.frames.size();
    }
+
+   public BarrelFrame fcIterator(){
+      return this.ordered_fc.iterator();
+   }
+
 /*
    public Map<String, Number> getData(String type, int start, int stop){
       Map<Integer, Short> data = new Map<Integer, Short>();
