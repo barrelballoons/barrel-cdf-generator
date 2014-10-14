@@ -100,7 +100,7 @@ public class BarrelFrame {
       );
 
       //make sure this frame belongs to this payload
-      this.valid = this.setPayloadId(
+      this.valid = this.setPayloadID(
          frame.shiftRight(1685).and(BigInteger.valueOf(63)).shortValue(), dpuId
       );
       if(!this.valid){
@@ -171,7 +171,7 @@ public class BarrelFrame {
 */    
     
       //GPS PPS
-      this.valid = this.setPulsePerSecond(
+      this.valid = this.setPPS(
          frame.shiftRight(1616).and(BigInteger.valueOf(65535)).shortValue()
       );
 
@@ -269,7 +269,7 @@ public class BarrelFrame {
       return true;
    }
 
-   public boolean setPayloadId(final short payID, final short dpuID){
+   public boolean setPayloadID(final short payID, final short dpuID){
       this.payID = payID;
       if(this.payID != dpuID){
          return false;
@@ -277,7 +277,7 @@ public class BarrelFrame {
       return true;
    }
 
-   public boolean setPulsePerSecond(final short pps){
+   public boolean setPPS(final short pps){
       this.pps = pps;
       if((this.pps < Constants.PPS_MIN) || (this.pps > Constants.PPS_MAX)){
          //make sure the value is not out of range because of an early pps
@@ -636,11 +636,11 @@ public class BarrelFrame {
       return this.fc;
    }
 
-   public short getPayloadId(){
+   public short getPayloadID(){
       return this.payId;
    }
 
-   public short getPulsePerSecond(){
+   public short getPPS(){
       return this.pps;
    }
 
