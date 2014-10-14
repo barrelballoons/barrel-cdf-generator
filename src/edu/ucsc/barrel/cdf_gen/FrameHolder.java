@@ -31,6 +31,9 @@ import java.util.Arrays;
 public class FrameHolder{
    private String payload;
    private short dpuId;
+   private int 
+      first_fc = 0,
+      last_fc = 0;
    private Map<Integer, BarrelFrame> frames;
    
    //variables to keep track of valid altitude range
@@ -67,25 +70,30 @@ public class FrameHolder{
 
       //check for fc rollover
       if(this.fc_rollover){
-         frame.setFrameCounter(fc + Constants.FC_OFFSET);
-      }else{
-         if((this.last_fc - fc) > Constants.LAST_DAY_FC){
+         fc += Constants.FC_OFFSET;
+         frame.setFrameCounter(fc);
+      } else {
+         if ((this.last_fc - fc) > Constants.LAST_DAY_FC) {
             //rollover detected
             this.fc_rollover = true;
-           
-         CDF_Gen.log.writeln(
-               "Payload " + payload + " rolled over after fc = " + last_fc 
+            
+            fc += Constants.FC_OFFSET;
+
+            CDF_Gen.log.writeln(
+               "Payload " + payload + " rolled over after fc = " + this.last_fc 
             );
 
             //offset fc
-            frame.setFrameCounter(fc + Constants.FC_OFFSET);
+            frame.setFrameCounter(fc);
 
             //create an empty file to indicate rollover
             (new Logger("fc_rollovers/" + payload)).close();
-         }else{
-            last_fc = tmpFC;
          }
       }
+      
+      //update the first and last frame numbers
+      this.first_fc = Math.min(this.first_fc, fc);
+      this.last_fc = Math.max(this.last_fc, fc);
 
       //add the frame to the map
       this.frames.put(fc, frame);
@@ -96,6 +104,10 @@ public class FrameHolder{
       return range;
    }
    
+   public int[] getFcRange(){
+      return new int[](this.first_fc, this.last_fc);
+   }
+
    public BarrelFrame[] getFrames(int start, int stop){
       BarrelFrame[] 
          results,
@@ -120,6 +132,10 @@ public class FrameHolder{
          CDF_Gen.out.log(2, "Invalid frame range: " + range.join(", "));
       }
       return this.getFrames.get(range[0], range[1]);
+   }
+
+   public int size(){
+      return this.frames.size();
    }
 /*
    public Map<String, Number> getData(String type, int start, int stop){
