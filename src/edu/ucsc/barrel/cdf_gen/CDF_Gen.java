@@ -38,7 +38,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 public class CDF_Gen{
    
-   public static DataHolder data;
+   public static FrameHolder frames;
    private static DataCollector dataPull;
    private static LevelZero L0;
    
@@ -59,6 +59,9 @@ public class CDF_Gen{
       //array to hold payload id, lauch order, and launch site
 		String[] payload = new String[3];
 		
+      //holds a full day of frames
+      BarrelFrame[] frames;
+
       //create a log file
       log = new Logger("log.txt");
 
@@ -111,7 +114,7 @@ public class CDF_Gen{
          settings.put("currentPayload", payload_i);
          
          //create a new storage object
-         data = new DataHolder(payload_i);
+         frames = new FrameHolder(payload_i, Short.parseShort(dpu));
          
          //Figure out where the input files are coming from
          if(getSetting("local") == ""){
@@ -133,7 +136,6 @@ public class CDF_Gen{
          try{
             System.out.println("Creating Level Zero...");
             L0 = new LevelZero(
-               data,
                Integer.parseInt(settings.get("frameLength")), 
                settings.get("syncWord"),
                tlm_Dir, 
@@ -141,7 +143,6 @@ public class CDF_Gen{
                id,
 					flt,
 					stn,
-               dpu,
                getSetting("date")
             );
             L0.processRawFiles();
@@ -151,14 +152,14 @@ public class CDF_Gen{
             );
          
             //If we didn't get any data, move on to the next payload.
-            if(data.getSize("1Hz") > 0){
-            
+            if(frames.size() > 0){
+               int[] fc_range = frame.getFcRange();
+
                //calculate throughput value
                System.out.println(
-                     "Payload " + getSetting("currentPayload") + 
-                     " Throughput: " + (100 * data.getSize("1Hz") - 1) /
-   			      (data.frame_1Hz[data.getSize("1Hz") - 1] - 
-   			      (data.frame_1Hz[0]))
+                  "Payload " + getSetting("currentPayload") + 
+                  " Throughput: " + 
+                  ((100 * frames.size() - 1) / (fc_range[1] - fc_range[0]))
    			      + " %"
    			   );
             
