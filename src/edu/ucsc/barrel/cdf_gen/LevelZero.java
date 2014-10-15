@@ -47,7 +47,6 @@ public class LevelZero{
    private int dpu_id;
    
    public LevelZero(
-      DataHolder data,
       final int length, 
       final String sync, 
       final String inputDir, 
@@ -55,7 +54,6 @@ public class LevelZero{
       final String p,
 		final String f,
 		final String s,
-      final String dpu,
 		final String d
    ){
 	   //set object properties
@@ -208,8 +206,8 @@ public class LevelZero{
          //write to level zero file
          outFile.write(hexToByte(frame));
          
-         //add frame to data object
-         CDF_Gen.data.addFrame(binFrame, dpu_id);
+         //add frame to the FrameHolder
+         CDF_Gen.frames.addFrame(binFrame, dpu_id);
       }else{
          System.out.println("Checksum Failed for frame in  " + fileName + "!");
       }

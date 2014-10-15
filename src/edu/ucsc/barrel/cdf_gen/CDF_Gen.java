@@ -38,7 +38,10 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 public class CDF_Gen{
    
-   public static DataHolder data;
+   public static FrameHolder frames;
+   public static SpectrumExtract spectra;
+   public static ExtractTiming epochs;
+
    private static DataCollector dataPull;
    private static LevelZero L0;
    
@@ -59,6 +62,9 @@ public class CDF_Gen{
       //array to hold payload id, lauch order, and launch site
 		String[] payload = new String[3];
 		
+      //holds a full day of frames
+      BarrelFrame[] frames;
+
       //create a log file
       log = new Logger("log.txt");
 
@@ -111,7 +117,7 @@ public class CDF_Gen{
          settings.put("currentPayload", payload_i);
          
          //create a new storage object
-         data = new DataHolder(payload_i);
+         frames = new FrameHolder(payload_i, Short.parseShort(dpu));
          
          //Figure out where the input files are coming from
          if(getSetting("local") == ""){
@@ -133,7 +139,6 @@ public class CDF_Gen{
          try{
             System.out.println("Creating Level Zero...");
             L0 = new LevelZero(
-               data,
                Integer.parseInt(settings.get("frameLength")), 
                settings.get("syncWord"),
                tlm_Dir, 
@@ -141,7 +146,6 @@ public class CDF_Gen{
                id,
 					flt,
 					stn,
-               dpu,
                getSetting("date")
             );
             L0.processRawFiles();
@@ -151,14 +155,14 @@ public class CDF_Gen{
             );
          
             //If we didn't get any data, move on to the next payload.
-            if(data.getSize("1Hz") > 0){
-            
+            if(frames.size() > 0){
+               int[] fc_range = frame.getFcRange();
+
                //calculate throughput value
                System.out.println(
-                     "Payload " + getSetting("currentPayload") + 
-                     " Throughput: " + (100 * data.getSize("1Hz") - 1) /
-   			      (data.frame_1Hz[data.getSize("1Hz") - 1] - 
-   			      (data.frame_1Hz[0]))
+                  "Payload " + getSetting("currentPayload") + 
+                  " Throughput: " + 
+                  ((100 * frames.size() - 1) / (fc_range[1] - fc_range[0]))
    			      + " %"
    			   );
             
@@ -182,7 +186,7 @@ public class CDF_Gen{
                   //create a set of linear models that track the location of
                   //the 511 line and store them in the DataHolder object
                   int 
-                     total_specs = data.getSize("mod32"),
+                     total_specs = parseInt(frames.size() / 32),
                      start_i = 0,
                      stop_i = 0,
                      max_recs = 20;
@@ -190,15 +194,10 @@ public class CDF_Gen{
                   System.out.println("Starting Level Two...");
                   System.out.println("Locating 511 line...");
 
-                  while(start_i < total_specs){
-                     if((start_i + (2 * max_recs)) > total_specs){
-                        stop_i = total_specs;
-                     }else{
-                        stop_i = start_i + max_recs;
-                     }
-
-                     SpectrumExtract.do511Fits(start_i, stop_i);
-                     start_i = stop_i;
+                  for(int spec_i = 0; spec_i < total_specs, spec_i += max_recs){
+                     SpectrumExtract.do511Fits(
+                        spec_i, Math.min(total_specs, start_i + max_recs)
+                     );
                   }
                   fill511Gaps();
 
@@ -224,7 +223,7 @@ public class CDF_Gen{
    
    public static void fill511Gaps(){
       int 
-         size = data.getSize("mod32"),
+         size = parseInt(frames.size() / 32),
          step_size = 1, 
          start = 0;
       double 
@@ -234,6 +233,7 @@ public class CDF_Gen{
          fill = (Float)CDFVar.getIstpVal("FLOAT_FILL"),
          new_value = fill,
          last_value = fill;
+      Iterator<Integer> fc_i = frames.fcIterator();
       DescriptiveStatistics stats = new DescriptiveStatistics();
       
       //generate statistics on the 511 peak jump sizes
