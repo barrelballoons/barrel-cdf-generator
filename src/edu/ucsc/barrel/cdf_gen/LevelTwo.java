@@ -44,75 +44,95 @@ import java.util.Map;
 import java.util.HashMap;
 
 public class LevelTwo extends CDFWriter{
-
+   private BarrelFrame[] frames;
+   private int date;
    public LevelTwo(
+      final BarrelFrame[] frames, final int date,
       final String d, final String p, 
       final String f, final String s, final String dir 
    ) throws IOException
    {
       super(d, p, f, s, dir, "Level Two");
+      this.frames = frames;
+      this.date = date;
    }
    
    //Convert the EPHM data and save it to CDF files
-   public void doGpsCdf(int first, int last, int date) throws CDFException{
-      Calendar d = Calendar.getInstance();
-      Logger geo_coord_file = new Logger("pay" + id + "_" + date + "_gps.txt");
+   public void doGpsCdf() throws CDFException{
+      Calendar cal;
+      Logger geo_coord_file = 
+         new Logger("pay" + this.id + "_" + this.date + "_gps.txt");
       int 
          year, month, day, day_of_year, hour, min, sec,
-         numOfRecs = last - first;
+         fc = 0;
       double
          sec_of_day = 0;
       float
          east_lon = 0;
       String[] mag_coords;
       float[] 
-         lat = new float[numOfRecs], 
-         lon = new float[numOfRecs], 
-         alt = new float[numOfRecs],
-         mlt2 = new float[numOfRecs],
-         mlt6 = new float[numOfRecs],
-         l2 = new float[numOfRecs],
-         l6 = new float[numOfRecs];
+         lat = new float[this.frames.length], 
+         lon = new float[this.frames.length], 
+         alt = new float[this.frames.length],
+         mlt2 = new float[this.frames.length],
+         mlt6 = new float[this.frames.length],
+         l2 = new float[this.frames.length],
+         l6 = new float[this.frames.length];
       int[] 
-         frameGroup = new int[numOfRecs],
-         q = new int[numOfRecs]; 
+         frameGroup = new int[this.frames.length],
+         q = new int[this.frames.length]; 
       long[] 
          epoch_parts = new long[9],
-         epoch = new long[numOfRecs],
-         gps_time = new long[numOfRecs];
+         epoch = new long[this.frames.length],
+         gps_time = new long[this.frames.length];
       Map<Integer, Boolean> complete_gps = 
-         new HashMap<Integer, Boolean>(numOfRecs);
+         new HashMap<Integer, Boolean>(this.frames.length);
 
       System.out.println("\nSaving EPHM Level Two CDF...");
 
       //calculate the day of year
-      year = date / 10000;
-      month = (date - (year * 10000)) / 100;
-      day = date - (year * 10000) - (month * 100);
-      d.set(Calendar.YEAR, year + 2000);
-      d.set(Calendar.MONTH, month - 1);
-      d.set(Calendar.DAY_OF_MONTH, day);
-      day_of_year = d.get(Calendar.DAY_OF_YEAR);
+      year = this.date / 10000;
+      month = (this.date - (year * 10000)) / 100;
+      day = this.date - (year * 10000) - (month * 100);
+      cal = Calendar.getInstance();
+      cal.set(Calendar.YEAR, year + 2000);
+      cal.set(Calendar.MONTH, month - 1);
+      cal.set(Calendar.DAY_OF_MONTH, day);
+      day_of_year = cal.get(Calendar.DAY_OF_YEAR);
+      cal = null;
 
       //convert lat, lon, and alt values and select values for this date
-      for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
+      for(int frame_i = 0, rec_i; frame_i < this.frames.length; frame_i++){
+         switch(this.frames[frame_i].mod4){
+            case Ephm.TIME_I:
+               fc = this.frames[frame_i].getFrameCounter();
+               frameGroup[rec_i] = fc;
+            break;
+            case Ephm.LAT_I:
+            break;
+            case Ephm.LON_I:
+            break;
+            case Ephm.ALT_I:
+               alt[]
+            break;
+         }
          //convert mm to km
-         alt[rec_i] = CDF_Gen.data.gps[Constants.ALT_I][data_i];
-         alt[rec_i] = (alt[rec_i] != Constants.ALT_RAW_FILL) ?
-            alt[rec_i] / 1000000 :  Constants.ALT_FILL;
+         alt[frame_i] = gps[Constants.ALT_I][data_i];
+         alt[frame_i] = (alt[frame_i] != Constants.ALT_RAW_FILL) ?
+            alt[frame_i] / 1000000 :  Constants.ALT_FILL;
 
          //convert lat and lon to physical units
-         lat[rec_i] = CDF_Gen.data.gps[Constants.LAT_I][data_i];
-         lat[rec_i] = (lat[rec_i] != Constants.LAT_RAW_FILL) ? 
-            (lat[rec_i] * 
+         lat[frame_i] = CDF_Gen.data.gps[Constants.LAT_I][data_i];
+         lat[frame_i] = (lat[frame_i] != Constants.LAT_RAW_FILL) ? 
+            (lat[frame_i] * 
             Float.intBitsToFloat(Integer.valueOf("33B40000", 16).intValue())) :
             Constants.LAT_FILL;
 
-         lon[rec_i] = CDF_Gen.data.gps[Constants.LON_I][data_i];
-         lon[rec_i] = (lon[rec_i] != Constants.LON_RAW_FILL) ?
-            (lon[rec_i] *= 
+         lon[frame_i] = CDF_Gen.data.gps[Constants.LON_I][data_i];
+         lon[frame_i] = (lon[frame_i] != Constants.LON_RAW_FILL) ?
+            (lon[frame_i] *= 
             Float.intBitsToFloat(Integer.valueOf("33B40000", 16).intValue())) :
-            Constants.LON_FILL;
+             Constants.LON_FILL;
 
          //calculate the GPS time
          if(CDF_Gen.data.ms_of_week[data_i] != Constants.MS_WEEK_FILL){
@@ -285,7 +305,7 @@ public class LevelTwo extends CDFWriter{
    }
    
    //write the misc file, no processing needed
-   public void doMiscCdf(int first, int last, int date) throws CDFException{
+   public void doMiscCdf() throws CDFException{
       int numOfRecs = last - first;
       short[] 
          version = new short[numOfRecs],
@@ -329,7 +349,7 @@ public class LevelTwo extends CDFWriter{
       misc.close();
    }
    
-   public void doMagCdf(int first, int last, int date) throws CDFException{
+   public void doMagCdf() throws CDFException{
       int numOfRecs = last - first;
       int[] 
          frameGroup = new int[numOfRecs],
@@ -403,7 +423,7 @@ public class LevelTwo extends CDFWriter{
       magn.close();
    }
    
-   public void doHkpgCdf(int first, int last, int date) throws CDFException{
+   public void doHkpgCdf() throws CDFException{
       int numOfRecs = last - first;
       short []
          sats = new short[numOfRecs],
@@ -505,7 +525,7 @@ public class LevelTwo extends CDFWriter{
       hkpg.close();
    }
 
-   public void doFspcCdf(int first, int last, int date) throws CDFException{
+   public void doFspcCdf() throws CDFException{
       int numOfRecs = last - first;
 
       float[][] 
@@ -653,7 +673,7 @@ public class LevelTwo extends CDFWriter{
       fspc.close();
    }
 
-   public void doMspcCdf(int first, int last, int date) throws CDFException{
+   public void doMspcCdf() throws CDFException{
       float peak = -1, scint_temp = 0, dpu_temp = 0;
       
       int offset = 90;
@@ -771,7 +791,7 @@ public class LevelTwo extends CDFWriter{
       mspc.close();
    }
 
-   public void doSspcCdf(int first, int last, int date) throws CDFException{
+   public void doSspcCdf() throws CDFException{
       float scint_temp = 0, dpu_temp = 0;
 
       int numOfRecs = last - first;
@@ -875,7 +895,7 @@ public class LevelTwo extends CDFWriter{
       sspc.close();
    }
 
-   public void doRcntCdf(int first, int last, int date) throws CDFException{
+   public void doRcntCdf() throws CDFException{
       int numOfRecs = last - first;
       float[][] rc_timeScaled = new float[4][numOfRecs];
       int[] 
@@ -907,7 +927,7 @@ public class LevelTwo extends CDFWriter{
       String destName = 
          outputPath + "/" + date + "/"  + "bar_" + id +
          "_l2_" + "rcnt" + "_20" + date +  "_v" + revNum + ".cdf";
-       DataProduct rcnt = new RCNT(destName, "bar_" + id, date, 2);
+      DataProduct rcnt = new RCNT(destName, "bar_" + id, date, 2);
 
       System.out.println("Interrupt");
       rcnt.getCDF().addData("Interrupt", rc_timeScaled[0]);
