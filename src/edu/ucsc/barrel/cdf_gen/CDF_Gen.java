@@ -39,6 +39,9 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 public class CDF_Gen{
    
    public static FrameHolder frames;
+   public static SpectrumExtract spectra;
+   public static ExtractTiming epochs;
+
    private static DataCollector dataPull;
    private static LevelZero L0;
    
