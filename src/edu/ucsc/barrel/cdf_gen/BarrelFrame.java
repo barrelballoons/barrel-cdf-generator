@@ -709,7 +709,7 @@ public class BarrelFrame {
       return this.gps;
    }
 
-   public int[] getMag(){
+   public int[][] getMag(){
       return this.mag;
    }
 
