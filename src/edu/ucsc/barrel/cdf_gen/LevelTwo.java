@@ -54,7 +54,7 @@ public class LevelTwo extends CDFWriter{
    {
       super(d, p, f, s, dir, "Level Two");
       this.frames = frames;
-      this.numRecords = this.frames.length;
+      this.numFrames = this.frames.length;
       this.date = date;
    }
    
@@ -64,9 +64,8 @@ public class LevelTwo extends CDFWriter{
       Logger geo_coord_file =
          new Logger("pay" + this.id + "_" + this.date + "_gps.txt");
       int
-         year, month, day, day_of_year, hour, min, sec, intVal,
-         fc          = 0, 
-         numRecords  = (int)Math.ceil(this.numFrames / 4);
+         year, month, day, day_of_year, hour, min, sec, intVal, mod4, fc, fg,
+         numRecords  = (int)Math.ceil(this.numFrames / 4.0);
       double
          sec_of_day  = 0;
       float
@@ -118,8 +117,27 @@ public class LevelTwo extends CDFWriter{
       cal = null;
 
       //convert lat, lon, and alt values and select values for this date
-      for(int frame_i = 0, rec_i; frame_i < numFrames; frame_i++){
-         rec_i = (int)(frame_i / 4);
+      for(int frame_i = 0, rec_i = -1; frame_i < this.numFrames; frame_i++){
+
+         //make sure we have a valid frame counter
+         fc = this.frames[frame_i].getFrameCounter();
+         if(fc == null || fc == BarrelFrame.INT4_FILL){
+            continue;
+         }
+
+         //calculate the subcom and frameGroup
+         mod4 = fc % 4;
+         fg = fc - mod4;
+
+         //figure out if we are still in the same record
+         if (frameGroup[rec_i] != fg) {
+            rec_i++;
+            frameGroup[rec_i] = fg;
+         }
+         
+         //get the epoch the the frameGroup frame
+         epoch[rec_i] = CDF_Gen.timeModel.getEpoch(frameGroup[rec_i]);
+
          switch(this.frames[frame_i].mod4) {
             //convert mm to km
             case Ephm.ALT_I:
@@ -169,14 +187,6 @@ public class LevelTwo extends CDFWriter{
                }
             break;
          }
-
-         //make sure the frameGroup has been set. 
-         //Its value should be a mod4 = 0 frame counter
-         frameGroup[rec_i] = this.frames[frame_i].getFrameCounter();
-         frameGroup[rec_i] -= frameGroup[rec_i] % 4;
-         
-         //get the epoch the the frameGroup frame
-         epoch[rec_i] = CDF_Gen.timeModel.getEpoch(frameGroup[rec_i]);
 
          //keep track of which frames have complete GPS values
          complete_gps.put(
@@ -341,7 +351,7 @@ public class LevelTwo extends CDFWriter{
 
       System.out.println("\nSaving MISC Level Two CDF...");
 
-      for(int frame_i = 0; frame_i < numFrames; frame_i++){
+      for(int frame_i = 0; frame_i < this.numFrames; frame_i++){
         pps_vals[frame_i]   = this.frames.getPPS();
         version[frame_i]    = this.frames.getDPUVersion();
         payID[frame_i]      = this.frames.getPayloadID();
@@ -467,19 +477,35 @@ public class LevelTwo extends CDFWriter{
    }
    
    public void doHkpgCdf() throws CDFException{
-      int numOfRecs = last - first;
+      int
+         numRecords  = (int) Math.ceil(this.numFrames / 40.0);
       short []
-         sats = new short[numOfRecs],
-         offset = new short[numOfRecs],
-         termStat = new short[numOfRecs],
-         modemCnt = new short[numOfRecs],
-         dcdCnt = new short[numOfRecs];
+         sats        = new short[numRecords],
+         offset      = new short[numRecords],
+         termStat    = new short[numRecords],
+         modemCnt    = new short[numRecords],
+         dcdCnt      = new short[numRecords];
       int[] 
-         frameGroup = new int[numOfRecs],
-         q = new int[numOfRecs],
-         cmdCnt = new int[numOfRecs],
-         weeks = new int[numOfRecs];
-      long[] epoch = new long[numOfRecs];
+         frameGroup  = new int[numRecords],
+         q           = new int[numRecords],
+         cmdCnt      = new int[numRecords],
+         weeks       = new int[numRecords];
+      long[]
+         epoch       = new long[numRecords];
+      float[]
+         hkpg_scaled = new float[numRecords];
+
+      Arrays.fill(frameGroup, BarrelFrame.INT4_FILL);
+      Arrays.fill(epoch,      BarrelFrame.INT8_FILL);
+      Arrays.fill(q,          BarrelFrame.INT4_FILL);
+      Arrays.fill(weeks,      BarrelFrame.INT4_FILL);
+      Arrays.fill(cmdCnt,     BarrelFrame.INT2_FILL);
+      Arrays.fill(dcdCnt,     BarrelFrame.INT2_FILL);
+      Arrays.fill(sats,       BarrelFrame.INT2_FILL);
+      Arrays.fill(offset,     BarrelFrame.INT2_FILL);
+      Arrays.fill(termStat,   BarrelFrame.INT2_FILL);
+      Arrays.fill(modemCnt,   BarrelFrame.INT2_FILL);
+      
 
       System.out.println("\nSaving HKPG...");
 
@@ -488,50 +514,49 @@ public class LevelTwo extends CDFWriter{
          "_l2_" + "hkpg" + "_20" + date +  "_v" + revNum + ".cdf";
 
       HKPG hkpg = new HKPG(destName, "bar_" + id, date, 2);
-      float fill = CDFVar.getIstpVal("FLOAT_FILL").floatValue();
-      
-      for(int var_i = 0; var_i < 36; var_i++){
-         float[] hkpg_scaled = new float[numOfRecs];
 
-         //get the appropriate values for the ADC data if needed
-         if(var_i == 19 && (CDF_Gen.data.getVersion() > 3)){
-            for(int rec_i= 0, data_i= first; data_i < last; rec_i++, data_i++){
-               if(CDF_Gen.data.hkpg[var_i][data_i] != Constants.HKPG_FILL){
-                  hkpg_scaled[rec_i] = 
-                     ((CDF_Gen.data.hkpg[var_i][data_i] - 0x8000) * 0.09094f) - 
-                     273.15f;
-               }else{
-                  hkpg_scaled[rec_i] = fill;
+      for(int frame_i = 0; frame_i < this.numFrames; frame_i++){
+         for(int var_i = 0; var_i < 36; var_i++){
+            Arrays.fill(hkpg_scaled, BarrelFrame.FLOAT_FILL);
+
+            //get the appropriate values for the ADC data if needed
+            if(var_i == 19 && (this.frames[frame_i].getVersion() > 3)){
+               for(int rec_i= 0, data_i= first; data_i < last; rec_i++, data_i++){
+                  if(CDF_Gen.data.hkpg[var_i][data_i] != Constants.HKPG_FILL){
+                     hkpg_scaled[rec_i] = 
+                        ((CDF_Gen.data.hkpg[var_i][data_i] - 0x8000) * 0.09094f) - 
+                        273.15f;
+                  }else{
+                     hkpg_scaled[rec_i] = fill;
+                  }
+               }
+            }else if(var_i == 23 && (CDF_Gen.data.getVersion() > 3)){
+               for(int rec_i= 0, data_i= first; data_i < last; rec_i++, data_i++){
+                  if(CDF_Gen.data.hkpg[var_i][data_i] != Constants.HKPG_FILL){
+                     hkpg_scaled[rec_i] = 
+                        (CDF_Gen.data.hkpg[var_i][data_i] * 0.0003576f); 
+                  }else{
+                     hkpg_scaled[rec_i] = fill;
+                  }
+               }
+            }else{
+               for(int rec_i= 0, data_i= first; data_i < last; rec_i++, data_i++){
+                  if(CDF_Gen.data.hkpg[var_i][data_i] != Constants.HKPG_FILL){
+                     hkpg_scaled[rec_i] = 
+                        (
+                           CDF_Gen.data.hkpg[var_i][data_i] * 
+                           HKPG.SCALE_FACTORS.get(var_i)
+                        ) + HKPG.OFFSETS.get(var_i);
+                  }else{
+                     hkpg_scaled[rec_i] = fill;
+                  }
                }
             }
-         }else if(var_i == 23 && (CDF_Gen.data.getVersion() > 3)){
-            for(int rec_i= 0, data_i= first; data_i < last; rec_i++, data_i++){
-               if(CDF_Gen.data.hkpg[var_i][data_i] != Constants.HKPG_FILL){
-                  hkpg_scaled[rec_i] = 
-                     (CDF_Gen.data.hkpg[var_i][data_i] * 0.0003576f); 
-               }else{
-                  hkpg_scaled[rec_i] = fill;
-               }
-            }
-         }else{
-            for(int rec_i= 0, data_i= first; data_i < last; rec_i++, data_i++){
-               if(CDF_Gen.data.hkpg[var_i][data_i] != Constants.HKPG_FILL){
-                  hkpg_scaled[rec_i] = 
-                     (
-                        CDF_Gen.data.hkpg[var_i][data_i] * 
-                        HKPG.SCALE_FACTORS.get(var_i)
-                     ) + HKPG.OFFSETS.get(var_i);
-               }else{
-                  hkpg_scaled[rec_i] = fill;
-               }
-            }
+
+            System.out.println(CDF_Gen.data.hkpg_label[var_i] + "...");
+            hkpg.getCDF().addData(CDF_Gen.data.hkpg_label[var_i], hkpg_scaled);
          }
 
-         System.out.println(CDF_Gen.data.hkpg_label[var_i] + "...");
-         hkpg.getCDF().addData(CDF_Gen.data.hkpg_label[var_i], hkpg_scaled);
-      }
-
-      for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          sats[rec_i] = CDF_Gen.data.sats[data_i];
          offset[rec_i] = CDF_Gen.data.offset[data_i];
          termStat[rec_i] = CDF_Gen.data.termStat[data_i];
