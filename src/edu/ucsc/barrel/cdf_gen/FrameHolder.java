@@ -104,6 +104,10 @@ public class FrameHolder{
       this.frames.put(fc, frame);
       this.ordered_fc.add(fc);
    }
+
+   public BarrelFrame getFrane(int fc) {
+      return this.frames.get(fc);
+   }
    
    public int[] getDateFrames(int date){
       int[] range = new int[2];
