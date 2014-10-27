@@ -82,6 +82,7 @@ public class BarrelFrame {
       mag         = {
                      {INT4_FILL, INT4_FILL, INT4_FILL},
                      {INT4_FILL, INT4_FILL, INT4_FILL},
+                     {INT4_FILL, INT4_FILL, INT4_FILL},
                      {INT4_FILL, INT4_FILL, INT4_FILL}
                   };
    public int[][]
@@ -176,21 +177,24 @@ public class BarrelFrame {
       );
 
       //mag data 4 sets of xyz vectors. 24 bits/component
-      for(int i = 0; i < this.mag.length; i++){
-         this.valid = this.setMagnetometer(
+      for(int sample_i = 0; sample_i < this.mag.length; sample_i++){
+         this.valid = this.setMag(
             Magnetometer.X_AXIS,
+            sample_i,
             frame.shiftRight(1592 - (72 * i)).
-            and(BigInteger.valueOf(16777215)).intValue()
+               and(BigInteger.valueOf(16777215)).intValue()
          );
          this.valid = this.setMag(
             Magnetometer.Y_AXIS,
+            sample_i,
             frame.shiftRight(1568 - (72 * i)).
-            and(BigInteger.valueOf(16777215)).intValue()
+               and(BigInteger.valueOf(16777215)).intValue()
          );
          this.valid = this.setMag(
             Magnetometer.Z_AXIS,
+            sample_i,
             frame.shiftRight(1544 - (72 * i)).
-            and(BigInteger.valueOf(16777215)).intValue()
+               and(BigInteger.valueOf(16777215)).intValue()
          );
       }
       
@@ -615,7 +619,7 @@ public class BarrelFrame {
       return valid;
    }
 
-   public boolean setMagnetometer(
+   public boolean setMag(
       final int axis, final int sample, final int mag
    ){
       if((mag < Constants.MAG_MIN) || (mag > Constants.MAG_MAX)){
@@ -705,7 +709,7 @@ public class BarrelFrame {
       return this.gps;
    }
 
-   public int[] getMagnetometer(){
+   public int[] getMag(){
       return this.mag;
    }
 
