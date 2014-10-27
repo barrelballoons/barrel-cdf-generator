@@ -86,7 +86,7 @@ public class LevelTwo extends CDFWriter{
       long[]
          epoch_parts = new long[9],
          gps_time    = new long[numRecords],
-         epoch       = new long[numRecords]
+         epoch       = new long[numRecords];
       Map<Integer, Boolean> 
          complete_gps= new HashMap<Integer, Boolean>(numRecords);
 
@@ -126,7 +126,7 @@ public class LevelTwo extends CDFWriter{
          }
 
          //calculate the subcom and frameGroup
-         mod4 = fc % 4;
+         mod4 = this.frames[frame_i].mod4;
          fg = fc - mod4;
 
          //figure out if we are still in the same record
@@ -478,6 +478,7 @@ public class LevelTwo extends CDFWriter{
    
    public void doHkpgCdf() throws CDFException{
       int
+         fc, fg, hkpg_raw,
          numRecords  = (int) Math.ceil(this.numFrames / 40.0);
       short []
          sats        = new short[numRecords],
@@ -492,8 +493,8 @@ public class LevelTwo extends CDFWriter{
          weeks       = new int[numRecords];
       long[]
          epoch       = new long[numRecords];
-      float[]
-         hkpg_scaled = new float[numRecords];
+      float [][]
+         hkpg_scaled = new float[40][numRecords];
 
       Arrays.fill(frameGroup, BarrelFrame.INT4_FILL);
       Arrays.fill(epoch,      BarrelFrame.INT8_FILL);
@@ -505,8 +506,10 @@ public class LevelTwo extends CDFWriter{
       Arrays.fill(offset,     BarrelFrame.INT2_FILL);
       Arrays.fill(termStat,   BarrelFrame.INT2_FILL);
       Arrays.fill(modemCnt,   BarrelFrame.INT2_FILL);
+      for(int var_i = 0; var_i < 36; var_i++){
+         Arrays.fill(hkpg_scaled[var_i],   BarrelFrame.FLOAT_FILL);
+      }
       
-
       System.out.println("\nSaving HKPG...");
 
       String destName = 
@@ -515,60 +518,64 @@ public class LevelTwo extends CDFWriter{
 
       HKPG hkpg = new HKPG(destName, "bar_" + id, date, 2);
 
-      for(int frame_i = 0; frame_i < this.numFrames; frame_i++){
-         for(int var_i = 0; var_i < 36; var_i++){
-            Arrays.fill(hkpg_scaled, BarrelFrame.FLOAT_FILL);
+      for(int frame_i = 0, rec_i = -1; frame_i < this.numFrames; frame_i++){
 
-            //get the appropriate values for the ADC data if needed
-            if(var_i == 19 && (this.frames[frame_i].getVersion() > 3)){
-               for(int rec_i= 0, data_i= first; data_i < last; rec_i++, data_i++){
-                  if(CDF_Gen.data.hkpg[var_i][data_i] != Constants.HKPG_FILL){
-                     hkpg_scaled[rec_i] = 
-                        ((CDF_Gen.data.hkpg[var_i][data_i] - 0x8000) * 0.09094f) - 
-                        273.15f;
-                  }else{
-                     hkpg_scaled[rec_i] = fill;
-                  }
-               }
-            }else if(var_i == 23 && (CDF_Gen.data.getVersion() > 3)){
-               for(int rec_i= 0, data_i= first; data_i < last; rec_i++, data_i++){
-                  if(CDF_Gen.data.hkpg[var_i][data_i] != Constants.HKPG_FILL){
-                     hkpg_scaled[rec_i] = 
-                        (CDF_Gen.data.hkpg[var_i][data_i] * 0.0003576f); 
-                  }else{
-                     hkpg_scaled[rec_i] = fill;
-                  }
-               }
-            }else{
-               for(int rec_i= 0, data_i= first; data_i < last; rec_i++, data_i++){
-                  if(CDF_Gen.data.hkpg[var_i][data_i] != Constants.HKPG_FILL){
-                     hkpg_scaled[rec_i] = 
-                        (
-                           CDF_Gen.data.hkpg[var_i][data_i] * 
-                           HKPG.SCALE_FACTORS.get(var_i)
-                        ) + HKPG.OFFSETS.get(var_i);
-                  }else{
-                     hkpg_scaled[rec_i] = fill;
-                  }
-               }
-            }
-
-            System.out.println(CDF_Gen.data.hkpg_label[var_i] + "...");
-            hkpg.getCDF().addData(CDF_Gen.data.hkpg_label[var_i], hkpg_scaled);
+         fc = this.frames[frame_i].getFrameCounter();
+         if(fc == null || fc == BarrelFrame.INT4_FILL){
+            continue;
          }
 
-         sats[rec_i] = CDF_Gen.data.sats[data_i];
-         offset[rec_i] = CDF_Gen.data.offset[data_i];
-         termStat[rec_i] = CDF_Gen.data.termStat[data_i];
-         modemCnt[rec_i] = CDF_Gen.data.modemCnt[data_i];
-         dcdCnt[rec_i] = CDF_Gen.data.dcdCnt[data_i];
-         cmdCnt[rec_i] = CDF_Gen.data.cmdCnt[data_i];
-         frameGroup[rec_i] = CDF_Gen.data.frame_mod40[data_i];
-         weeks[rec_i] = CDF_Gen.data.weeks[data_i];
-         epoch[rec_i] = CDF_Gen.data.epoch_mod40[data_i];
-         q[rec_i] = CDF_Gen.data.hkpg_q[data_i];
+         mod40 = this.frames[frame_i].mod40;
+         
+         if (frameGroup[rec_i] != fg) {
+            rec_i++;
+            frameGroup[rec_i] = fg;
+         }
+
+         //make sure there is a valid housekeeping value to process
+         hkpg_raw = this.frames[frame_i].getHousekeeping();
+         if(hkpg_raw == BarrelFrame.INT4_FILL){continue;}
+
+         //convert the housekeeping data to physical units
+         if(this.frames[frame_i].getDPUVersion() > 3) {
+            //for versions 3 and up the T9 and T11 sensors were used for
+            //mag statistics rather than solar panel temps
+            switch (mod40) {
+               case HKPG.T9:
+                  hkpg_scaled[mod40][frame_i] = 
+                     ((hkpg_raw - 0x8000) * 0.09094f) - 273.15f;
+               break;
+               case HPKG.T11:
+                  hkpg_scaled[mod40][frame_i] =  hkpg_raw * 0.0003576f;
+               break;
+               default:
+                  hkpg_scaled[mod40][frame_i] = 
+                     (hkpk_raw * HKPG.SCALE_FACTORS.get(mod40)) +
+                     HKPG.OFFSETS.get(mod40);
+               break;
+            }
+         } else {
+            hkpg_scaled[mod40][frame_i] = 
+               (hkpk_raw * HKPG.SCALE_FACTORS.get(mod40)) +
+               HKPG.OFFSETS.get(mod40);
+         }
+
+         sats[rec_i]       = this.frames[frame_i].getsats();
+         offset[rec_i]     = this.frames[frame_i].getoffset();
+         termStat[rec_i]   = this.frames[frame_i].gettermStat();
+         modemCnt[rec_i]   = this.frames[frame_i].getmodemCnt();
+         dcdCnt[rec_i]     = this.frames[frame_i].getdcdCnt();
+         cmdCnt[rec_i]     = this.frames[frame_i].getcmdCnt();
+         frameGroup[rec_i] = this.frames[frame_i].getframe_mod40();
+         weeks[rec_i]      = this.frames[frame_i].getweeks();
+         epoch[rec_i]      = this.frames[frame_i].getepoch_mod40();
       }
 
+      for(int var_i = 0; var_i < 36; var_i++){
+         String label = HKPG.LABELS.get(var_i);
+         System.out.println(label + "...");
+         hkpg.getCDF().addData(label, hkpg_scaled[var_i]);
+      }
       System.out.println("numOfSats...");
       hkpg.getCDF().addData("numOfSats", sats);
       System.out.println("timeOffset...");
