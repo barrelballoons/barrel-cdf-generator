@@ -65,12 +65,14 @@ public class LevelTwo extends CDFWriter{
          new Logger("pay" + this.id + "_" + this.date + "_gps.txt");
       int
          year, month, day, day_of_year, hour, min, sec, intVal,
-         fc = 0, numRecords = (int)Math.ceil(this.numFrames / 4);
+         fc          = 0, 
+         numRecords  = (int)Math.ceil(this.numFrames / 4);
       double
-         sec_of_day = 0;
+         sec_of_day  = 0;
       float
-         east_lon = 0;
-      String[] mag_coords;
+         east_lon    = 0;
+      String[] 
+         mag_coords;
       float[]
          lat         = new float[numRecords],
          lon         = new float[numRecords],
@@ -87,19 +89,20 @@ public class LevelTwo extends CDFWriter{
          gps_time    = new long[numRecords],
          epoch       = new long[numRecords]
       Map<Integer, Boolean> 
-         complete_gps = new HashMap<Integer, Boolean>(numRecords);
+         complete_gps= new HashMap<Integer, Boolean>(numRecords);
 
       //initialize the data arrays with fill value
       Arrays.fill(frameGroup, BarrelFrame.INT4_FILL);
-      Arrays.fill(epoch, BarrelFrame.INT8_FILL);
-      Arrays.fill(gps_time, BarrelFrame.INT8_FILL);
-      Arrays.fill(lat, BarrelFrame.FLOAT_FILL);
-      Arrays.fill(lon, BarrelFrame.FLOAT_FILL);
-      Arrays.fill(alt, BarrelFrame.FLOAT_FILL);
-      Arrays.fill(mlt2, BarrelFrame.FLOAT_FILL);
-      Arrays.fill(mlt6, BarrelFrame.FLOAT_FILL);
-      Arrays.fill(l2, BarrelFrame.FLOAT_FILL);
-      Arrays.fill(l6, BarrelFrame.FLOAT_FILL);
+      Arrays.fill(epoch,      BarrelFrame.INT8_FILL);
+      Arrays.fill(q,          BarrelFrame.INT4_FILL);
+      Arrays.fill(gps_time,   BarrelFrame.INT8_FILL);
+      Arrays.fill(lat,        BarrelFrame.FLOAT_FILL);
+      Arrays.fill(lon,        BarrelFrame.FLOAT_FILL);
+      Arrays.fill(alt,        BarrelFrame.FLOAT_FILL);
+      Arrays.fill(mlt2,       BarrelFrame.FLOAT_FILL);
+      Arrays.fill(mlt6,       BarrelFrame.FLOAT_FILL);
+      Arrays.fill(l2,         BarrelFrame.FLOAT_FILL);
+      Arrays.fill(l6,         BarrelFrame.FLOAT_FILL);
 
       System.out.println("\nSaving EPHM Level Two CDF...");
 
@@ -215,7 +218,7 @@ public class LevelTwo extends CDFWriter{
             "pay" + id + "_" + date + "_gps.txt";
 
          Process p = Runtime.getRuntime().exec(command);
-         BufferedReader input =                                           
+         BufferedReader input =
             new BufferedReader(new InputStreamReader(p.getInputStream()));
          System.out.println(input.readLine()); 
       }catch(IOException ex){
@@ -320,23 +323,30 @@ public class LevelTwo extends CDFWriter{
    //write the misc file, no processing needed
    public void doMiscCdf() throws CDFException{
       short[] 
-         version = new short[numOfRecs],
-         payID = new short[numOfRecs],
-         pps_vals = new short[numOfRecs];
+         version    = new short[this.numFrames],
+         payID      = new short[this.numFrames],
+         pps_vals   = new short[this.numFrames];
       int[] 
-         frameGroup = new int[numOfRecs],
-         q = new int[numOfRecs];
-      long[] epoch = new long[numOfRecs];
+         frameGroup = new int[this.numFrames],
+         q          = new int[this.numFrames];
+      long[] 
+         epoch      = new long[this.numFrames];
+
+      Arrays.fill(frameGroup, BarrelFrame.INT4_FILL);
+      Arrays.fill(epoch,      BarrelFrame.INT8_FILL);
+      Arrays.fill(q,          BarrelFrame.INT4_FILL);
+      Arrays.fill(version,    BarrelFrame.INT2_FILL);
+      Arrays.fill(payID,      BarrelFrame.INT2_FILL);
+      Arrays.fill(pps_vals,   BarrelFrame.INT2_FILL);
 
       System.out.println("\nSaving MISC Level Two CDF...");
 
-      for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-        pps_vals[rec_i] = CDF_Gen.data.pps[data_i];
-        version[rec_i] = CDF_Gen.data.ver[data_i];
-        payID[rec_i] = CDF_Gen.data.payID[data_i];
-        frameGroup[rec_i] = CDF_Gen.data.frame_1Hz[data_i];
-        epoch[rec_i] = CDF_Gen.data.epoch_1Hz[data_i];
-        q[rec_i] = CDF_Gen.data.pps_q[data_i];
+      for(int frame_i = 0; frame_i < numFrames; frame_i++){
+        pps_vals[frame_i]   = this.frames.getPPS();
+        version[frame_i]    = this.frames.getDPUVersion();
+        payID[frame_i]      = this.frames.getPayloadID();
+        frameGroup[frame_i] = this.frames.getFrameCounter();
+        epoch[frame_i] = CDF_Gen.timeModel.getEpoch(frameGroup[frame_i]);
       }
 
       String destName = 
@@ -362,53 +372,74 @@ public class LevelTwo extends CDFWriter{
    }
    
    public void doMagCdf() throws CDFException{
-      int numOfRecs = last - first;
-      int[] 
-         frameGroup = new int[numOfRecs],
-         q = new int[numOfRecs]; 
-      long[] epoch = new long[numOfRecs];
-
+      boolean 
+         found_fill = false;
+      int
+         sample;
+      int[]
+         frameGroup = new int[this.numFrames],
+         q          = new int[this.numFrames];
+      int[][]
+         raw_mag;
+      long[] 
+         epoch      = new long[this.numFrames];
       float[] 
-         magx = new float[numOfRecs],
-         magy = new float[numOfRecs],
-         magz = new float[numOfRecs],
-         magTot = new float[numOfRecs];
+         magx       = new float[this.numFrames],
+         magy       = new float[this.numFrames],
+         magz       = new float[this.numFrames],
+         magTot     = new float[this.numFrames];
+
+      Arrays.fill(frameGroup, BarrelFrame.INT4_FILL);
+      Arrays.fill(epoch,      BarrelFrame.INT8_FILL);
+      Arrays.fill(q,          BarrelFrame.INT4_FILL);
+      Arrays.fill(magx,       BarrelFrame.FLOAT_FILL);
+      Arrays.fill(magy,       BarrelFrame.FLOAT_FILL);
+      Arrays.fill(magz,       BarrelFrame.FLOAT_FILL);
+      Arrays.fill(magTot,     BarrelFrame.FLOAT_FILL);
 
       System.out.println("\nSaving Magnetometer Level Two CDF...");
 
-      //extract the nominal magnetometer value and calculate |B|
-      float fill = CDFVar.getIstpVal("FLOAT_FILL").floatValue();
-      for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-         if(CDF_Gen.data.magx[data_i] != fill){
-            magx[rec_i] = (CDF_Gen.data.magx[data_i] - 8388608.0f) / 83886.070f;
-         }else{
-            magx[rec_i] = fill;
-         }
-         if(CDF_Gen.data.magy[data_i] != fill){
-            magy[rec_i] = (CDF_Gen.data.magy[data_i] - 8388608.0f) / 83886.070f;
-         }else{
-            magx[rec_i] = fill;
-         }
-         if(CDF_Gen.data.magz[data_i] != fill){
-            magz[rec_i] = (CDF_Gen.data.magz[data_i] - 8388608.0f) / 83886.070f;
-         }else{
-            magx[rec_i] = fill;
+      //extract the nominal magnetometer value and calculate |B| for each frame
+      for (int frame_i = 0; frame_i < numFrames; frame_i++) {
+         raw_mag = this.frames[frame_i].getMag();
+
+         //each frame has 4 samples
+         for (int sample_i = 0; sample_i < 4; sample_i++) {
+            sample = raw_mag[sample_i][Magnetometer.X_AXIS];
+            if(sample != BarrelFrame.INT4_FILL){
+               magx[frame_i] = (sample - 8388608.0f) / 83886.070f;
+            } else {
+               found_fill = true;
+            }
+
+            sample = raw_mag[sample_i][Magnetometer.Y_AXIS];
+            if(sample != BarrelFrame.INT4_FILL){
+               magy[frame_i] = (sample - 8388608.0f) / 83886.070f;
+            } else {
+               found_fill = true;
+            }
+            
+            sample = raw_mag[sample_i][Magnetometer.Z_AXIS];
+            if(sample != BarrelFrame.INT4_FILL){
+               magz[frame_i] = (sample - 8388608.0f) / 83886.070f;
+            } else {
+               found_fill = true;
+            }
+            
+            if(!found_fill){
+               magTot[frame_i] = 
+                  (float)Math.sqrt(
+                     (magx[frame_i] * magx[frame_i]) + 
+                     (magy[frame_i] * magy[frame_i]) +
+                     (magz[frame_i] * magz[frame_i]) 
+                  );
+                  found_fill = false;
+            }
          }
          
-         if(magx[rec_i] != fill && magy[rec_i] != fill && magz[rec_i] != fill){
-            magTot[rec_i] = 
-               (float)Math.sqrt(
-                  (magx[rec_i] * magx[rec_i]) + 
-                  (magy[rec_i] * magy[rec_i]) +
-                  (magz[rec_i] * magz[rec_i]) 
-               );
-         }else{
-            magTot[rec_i] = fill;
-         }
-
-         frameGroup[rec_i] = CDF_Gen.data.frame_4Hz[data_i];
-         epoch[rec_i] = CDF_Gen.data.epoch_4Hz[data_i];
-         q[rec_i] = CDF_Gen.data.magn_q[data_i];
+         frameGroup[frame_i] = this.frames[frane_i].getFrameCounter();
+         epoch[frame_i] = CDF_Gen.timeModel.getEpoch(frameGroup[frame_i]);
+         q[frame_i] = this.frames[frane_i].get();
       }
 
       //store the nominal mag values
