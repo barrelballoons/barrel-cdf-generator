@@ -657,7 +657,7 @@ public class BarrelFrame {
       return this.sats;
    }
 
-   public short getUTCOffget(){
+   public short getUTCOffset(){
       return this.offset;
    }
 
@@ -673,7 +673,7 @@ public class BarrelFrame {
       return this.dcdCnt;
    }
 
-   public int getWeek(){
+   public int getWeeks(){
       return this.week;
    }
 

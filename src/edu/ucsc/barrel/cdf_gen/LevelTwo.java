@@ -385,7 +385,7 @@ public class LevelTwo extends CDFWriter{
       boolean 
          found_fill = false;
       int
-         sample;
+         rec_i, sample, offset;
       int[]
          frameGroup = new int[this.numFrames],
          q          = new int[this.numFrames];
@@ -415,40 +415,43 @@ public class LevelTwo extends CDFWriter{
 
          //each frame has 4 samples
          for (int sample_i = 0; sample_i < 4; sample_i++) {
+            rec_i = sample_i + frame_i;
+            offset = sample_i * 250000000;
             sample = raw_mag[sample_i][Magnetometer.X_AXIS];
             if(sample != BarrelFrame.INT4_FILL){
-               magx[frame_i] = (sample - 8388608.0f) / 83886.070f;
+               magx[rec_i] = (sample - 8388608.0f) / 83886.070f;
             } else {
                found_fill = true;
             }
 
             sample = raw_mag[sample_i][Magnetometer.Y_AXIS];
             if(sample != BarrelFrame.INT4_FILL){
-               magy[frame_i] = (sample - 8388608.0f) / 83886.070f;
+               magy[rec_i] = (sample - 8388608.0f) / 83886.070f;
             } else {
                found_fill = true;
             }
             
             sample = raw_mag[sample_i][Magnetometer.Z_AXIS];
             if(sample != BarrelFrame.INT4_FILL){
-               magz[frame_i] = (sample - 8388608.0f) / 83886.070f;
+               magz[rec_i] = (sample - 8388608.0f) / 83886.070f;
             } else {
                found_fill = true;
             }
             
             if(!found_fill){
-               magTot[frame_i] = 
+               magTot[rec_i] = 
                   (float)Math.sqrt(
-                     (magx[frame_i] * magx[frame_i]) + 
-                     (magy[frame_i] * magy[frame_i]) +
-                     (magz[frame_i] * magz[frame_i]) 
+                     (magx[rec_i] * magx[rec_i]) + 
+                     (magy[rec_i] * magy[rec_i]) +
+                     (magz[rec_i] * magz[rec_i]) 
                   );
                   found_fill = false;
             }
+	    frameGroup[rec_i] = this.frames[frame_i].getFrameCounter();
+	    epoch[rec_i] =
+               CDF_Gen.timeModel.getEpoch(frameGroup[rec_i]) + offset ;
          }
          
-         frameGroup[frame_i] = this.frames[frane_i].getFrameCounter();
-         epoch[frame_i] = CDF_Gen.timeModel.getEpoch(frameGroup[frame_i]);
          q[frame_i] = this.frames[frane_i].get();
       }
 
@@ -560,15 +563,14 @@ public class LevelTwo extends CDFWriter{
                HKPG.OFFSETS.get(mod40);
          }
 
-         sats[rec_i]       = this.frames[frame_i].getsats();
-         offset[rec_i]     = this.frames[frame_i].getoffset();
-         termStat[rec_i]   = this.frames[frame_i].gettermStat();
-         modemCnt[rec_i]   = this.frames[frame_i].getmodemCnt();
-         dcdCnt[rec_i]     = this.frames[frame_i].getdcdCnt();
-         cmdCnt[rec_i]     = this.frames[frame_i].getcmdCnt();
-         frameGroup[rec_i] = this.frames[frame_i].getframe_mod40();
-         weeks[rec_i]      = this.frames[frame_i].getweeks();
-         epoch[rec_i]      = this.frames[frame_i].getepoch_mod40();
+         sats[rec_i]       = this.frames[frame_i].getNumSats();
+         offset[rec_i]     = this.frames[frame_i].getUTCOffset();
+         termStat[rec_i]   = this.frames[frame_i].getTermStat();
+         modemCnt[rec_i]   = this.frames[frame_i].getModemCount();
+         dcdCnt[rec_i]     = this.frames[frame_i].getDcdCount();
+         cmdCnt[rec_i]     = this.frames[frame_i].getCommandCounter();
+         weeks[rec_i]      = this.frames[frame_i].getWeeks();
+         epoch[frame_i]    = CDF_Gen.timeModel.getEpoch(frameGroup[frame_i]);
       }
 
       for(int var_i = 0; var_i < 36; var_i++){
@@ -576,6 +578,7 @@ public class LevelTwo extends CDFWriter{
          System.out.println(label + "...");
          hkpg.getCDF().addData(label, hkpg_scaled[var_i]);
       }
+
       System.out.println("numOfSats...");
       hkpg.getCDF().addData("numOfSats", sats);
       System.out.println("timeOffset...");
