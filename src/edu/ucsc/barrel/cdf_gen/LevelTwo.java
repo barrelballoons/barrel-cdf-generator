@@ -385,19 +385,20 @@ public class LevelTwo extends CDFWriter{
       boolean 
          found_fill = false;
       int
-         rec_i, sample, offset;
+         rec_i, sample, offset,
+         numRecords = this.numFrames * 4;
       int[]
-         frameGroup = new int[this.numFrames],
-         q          = new int[this.numFrames];
+         frameGroup = new int[numRecords],
+         q          = new int[numRecords];
       int[][]
          raw_mag;
       long[] 
-         epoch      = new long[this.numFrames];
+         epoch      = new long[numRecords];
       float[] 
-         magx       = new float[this.numFrames],
-         magy       = new float[this.numFrames],
-         magz       = new float[this.numFrames],
-         magTot     = new float[this.numFrames];
+         magx       = new float[numRecords],
+         magy       = new float[numRecords],
+         magz       = new float[numRecords],
+         magTot     = new float[numRecords];
 
       Arrays.fill(frameGroup, BarrelFrame.INT4_FILL);
       Arrays.fill(epoch,      BarrelFrame.INT8_FILL);
@@ -415,7 +416,7 @@ public class LevelTwo extends CDFWriter{
 
          //each frame has 4 samples
          for (int sample_i = 0; sample_i < 4; sample_i++) {
-            rec_i = sample_i + frame_i;
+            rec_i = sample_i + (frame_i * 4);
             offset = sample_i * 250000000;
             sample = raw_mag[sample_i][Magnetometer.X_AXIS];
             if(sample != BarrelFrame.INT4_FILL){
@@ -604,8 +605,6 @@ public class LevelTwo extends CDFWriter{
    }
 
    public void doFspcCdf() throws CDFException{
-      int numOfRecs = last - first;
-
       float[][] 
          chan_edges = new float[numOfRecs][7],
          lc_error = new float[6][numOfRecs];
