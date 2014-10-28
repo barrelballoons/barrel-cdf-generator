@@ -564,14 +564,14 @@ public class LevelTwo extends CDFWriter{
                HKPG.OFFSETS.get(mod40);
          }
 
-         sats[rec_i]       = this.frames[frame_i].getNumSats();
-         offset[rec_i]     = this.frames[frame_i].getUTCOffset();
-         termStat[rec_i]   = this.frames[frame_i].getTermStat();
-         modemCnt[rec_i]   = this.frames[frame_i].getModemCount();
-         dcdCnt[rec_i]     = this.frames[frame_i].getDcdCount();
-         cmdCnt[rec_i]     = this.frames[frame_i].getCommandCounter();
-         weeks[rec_i]      = this.frames[frame_i].getWeeks();
-         epoch[frame_i]    = CDF_Gen.timeModel.getEpoch(frameGroup[frame_i]);
+         sats[rec_i]     = this.frames[frame_i].getNumSats();
+         offset[rec_i]   = this.frames[frame_i].getUTCOffset();
+         termStat[rec_i] = this.frames[frame_i].getTermStat();
+         modemCnt[rec_i] = this.frames[frame_i].getModemCount();
+         dcdCnt[rec_i]   = this.frames[frame_i].getDcdCount();
+         cmdCnt[rec_i]   = this.frames[frame_i].getCommandCounter();
+         weeks[rec_i]    = this.frames[frame_i].getWeeks();
+         epoch[frame_i]  = CDF_Gen.timeModel.getEpoch(frameGroup[frame_i]);
       }
 
       for(int var_i = 0; var_i < 36; var_i++){
@@ -604,45 +604,70 @@ public class LevelTwo extends CDFWriter{
       hkpg.close();
    }
 
-   public void doFspcCdf() throws CDFException{
-      float[][] 
-         chan_edges = new float[numOfRecs][7],
-         lc_error = new float[6][numOfRecs];
-      int[][] 
-         lc_scaled = new int[6][numOfRecs];
-      float scint_temp = 20f, dpu_temp = 20f, peak = -1f;
-      
+   public void doFspcCdf(dpuVer) throws CDFException{
+      int
+         rec_i, offset,
+         numRecords = this.frames * 20,
+         numCh = FSPC.getChannels(dpuVer);
       int[] 
-         frameGroup = new int[numOfRecs],
-         q = new int[numOfRecs];
-      long[] epoch = new long[numOfRecs];
+         lc_raw     = new int[numRecords];
+         frameGroup = new int[numRecords],
+         q          = new int[numRecords];
+      int[][] 
+         lc_scaled  = new int[numCh][numRecords];
+      long[]
+         epoch      = new long[numRecords];
+      float 
+         scint_temp = 20f,
+         dpu_temp   = 20f,
+         peak       = -1f;
       float[] 
          old_edges, 
-         std_edges = SpectrumExtract.stdEdges(0, 2.4414f);
+         std_edges  = SpectrumExtract.stdEdges(0, 2.4414f);
+      float[][] 
+         chan_edges = new float[numRecords][numCh + 1],
+         lc_error   = new float[numCh][numRecords];
+
+      Arrays.fill(frameGroup, BarrelFrame.INT4_FILL);
+      Arrays.fill(epoch,      BarrelFrame.INT8_FILL);
+      Arrays.fill(q,          BarrelFrame.INT4_FILL);
+      for (int ch_i = 0; ch_i < numCh; ch_i++) {
+         Arrays.fill(lc_scaled[chi_i], BarrelFrame.INT4_FILL);
+         Arrays.fill(lc_error[chi_i], BarrelFrame.FLOAT_FILL);
+      }
 
       System.out.println("\nSaving FSPC...");
       
       //convert the light curves counts to cnts/sec and 
-      //figure out the channel width
-      float float_fill = CDFVar.getIstpVal("FLOAT_FILL").floatValue();
-      int int4_fill = CDFVar.getIstpVal("INT4_FILL").intValue();
-      for(int fspc_rec = 0, sspc_rec = 0; fspc_rec < numOfRecs; fspc_rec++){
-
-         //incremint sspc_rec if needed
-         if(
-            (CDF_Gen.data.frame_20Hz[fspc_rec] - 
-            CDF_Gen.data.frame_20Hz[fspc_rec] % 32) != 
-            CDF_Gen.data.frame_mod32[sspc_rec]
-         ){
-            sspc_rec++;
-         }
+      //figure out the channel width :)
+      for(int frame_i = 0; frame_i < this.numFrames; frame_i++){
 
          //get the adjusted bin edges
          chan_edges[fspc_rec] = SpectrumExtract.createBinEdges(
-            0, CDF_Gen.data.peak511_bin[sspc_rec]
+            0, this.frames[frame_i].getPeak511()
          );
 
-         //write the spectrum to the new array
+         lc_raw = this.frames[frame_i].getFSPC();
+
+         //each frame has 20 samples per channel
+         for (int ch_i = 0; ch_i < numCh; ch_i++) {
+            for (int sample_i = 0; sample_i < 20; sample_i++) {
+               rec_i  = sample_i + (frame_i * 20);
+               offset = sample_i * 50000000;
+               sample = raw_mag[sample_i][Magnetometer.X_AXIS];
+               if(sample != BarrelFrame.INT4_FILL){
+                  magx[rec_i] = (sample - 8388608.0f) / 83886.070f;
+               } else {
+                  found_fill = true;
+               }
+
+               frameGroup[rec_i] = this.frames[frame_i].getFrameCounter();
+               epoch[rec_i] =
+                  CDF_Gen.timeModel.getEpoch(frameGroup[rec_i]) + offset ;
+            }
+         }
+
+
          if(CDF_Gen.data.lc1[fspc_rec + first] != Constants.FSPC_RAW_FILL){
             lc_scaled[0][fspc_rec] = CDF_Gen.data.lc1[fspc_rec + first];
             lc_error[0][fspc_rec] = 
