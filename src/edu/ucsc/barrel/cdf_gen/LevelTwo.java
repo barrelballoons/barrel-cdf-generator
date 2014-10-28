@@ -608,7 +608,7 @@ public class LevelTwo extends CDFWriter{
       int
          rec_i, offset,
          numRecords = this.frames * 20,
-         numCh = FSPC.getChannels(dpuVer);
+         numCh = FSPC.getChannels(dpuVer).length;
       int[] 
          lc_raw     = new int[numRecords];
          frameGroup = new int[numRecords],
@@ -627,6 +627,10 @@ public class LevelTwo extends CDFWriter{
       float[][] 
          chan_edges = new float[numRecords][numCh + 1],
          lc_error   = new float[numCh][numRecords];
+      String[]
+         chan_names = numCh == 6 ? 
+            {'FSPC1a', 'FSPC1b', 'FSPC1c', 'FSPC2', 'FSPC3', 'FSPC4'} :
+            {'FSPC1', 'FSPC2', 'FSPC3', 'FSPC4'};
 
       Arrays.fill(frameGroup, BarrelFrame.INT4_FILL);
       Arrays.fill(epoch,      BarrelFrame.INT8_FILL);
@@ -675,9 +679,10 @@ public class LevelTwo extends CDFWriter{
          new FSPC(destName, "bar_" + id, date, 2, CDF_Gen.data.getVersion());
 
       for (int ch_i = 0; ch_i < numCh; ch_i++) {
-         System.out.println("FSPC " + ch_i);
-         fspc.getCDF().addData("FSPC1a", lc_scaled[ch_i]);
-         fspc.getCDF().addData("cnt_error1a", lc_error[ch_i]);
+
+         System.out.println("FSPC" + chan_names[ch_i]);
+         fspc.getCDF().addData("FSPC" + chan_names[ch_i], lc_scaled[ch_i]);
+         fspc.getCDF().addData("cnt_error" + chan_names[ch_i], lc_error[ch_i]);
       }
       System.out.println("FSPC_Edges");
       fspc.getCDF().addData("FSPC_Edges", chan_edges);
