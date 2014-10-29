@@ -685,11 +685,11 @@ public class BarrelFrame {
       return this.fspc;
    }
 
-   public int getMSPC(){
+   public int[] getMSPC(){
       return this.mspc;
    }
 
-   public int getSSPC(){
+   public int[] getSSPC(){
       return this.sspc;
    }
 
