@@ -703,9 +703,8 @@ public class LevelTwo extends CDFWriter{
          dpu_temp   = 0;
       
       int 
-         hkpg_frame, hkpg_raw, start, stop,
-         mod40, mod4, fg,
-         frame_i    = 0,
+         hkpg_frame, start, stop,
+         mod40, mod4, fg, frame_i,
          fc         = null,
          offset     = 90,
          numRecords = (int)Math.ceil(this.numFrames / 4);
@@ -736,6 +735,7 @@ public class LevelTwo extends CDFWriter{
       Arrays.fill(mspc_error, mspc_raw);
 
       //get the first valid frame counter
+      frame_i = 0;
       while (frame_i < this.frames.length) {
          fc = this.frames[frame_i].getFrameCounter();
          if(fc != null && fc != BarrelFrame.INT4_FILL){
@@ -804,14 +804,14 @@ public class LevelTwo extends CDFWriter{
 
          //fill part of the raw spectrum
          start = mod4 * 4;
-         stop = mod4 + 4;
+         stop = start + 4;
          mspc_part = this.frames[frame_i].getMspc();
          for(
-            int sample_i = start, part_i = 0; 
-            sample_i < stop; 
+            int spec_i = start, sample_i = 0;
+            sample_i < stop;
             sample_i++, part_i++
          ) {
-            mspc_raw[sample_i] = mspc_part[part_i];
+            mspc_raw[spec_i] = mspc_part[sample_i];
          }
       }
 
