@@ -701,17 +701,14 @@ public class LevelTwo extends CDFWriter{
          peak       = -1, 
          scint_temp = 0, 
          dpu_temp   = 0;
-      
       int 
-         hkpg_frame, start, stop,
-         mod40, mod4, fg, frame_i,
+         hkpg_frame, start, stop, mod4, fg, frame_i,
          fc         = null,
          offset     = 90,
          numRecords = (int)Math.ceil(this.numFrames / 4);
-
       int[]
-         mspc_part,
-         mspc_raw   = new int[48],
+         part_spec,
+         raw_spec   = new int[48],
          frameGroup = new int[numRecords],
          q          = new int[numRecords];
       long[]
@@ -720,19 +717,19 @@ public class LevelTwo extends CDFWriter{
       float
          width;
       float[]
-         old_edges  = new float[48],
+         old_edges,
          std_edges  = SpectrumExtract.stdEdges(1, 2.4414f);
       float[][]
-         mspc_rebin = new float[numRecords][48],
-         mspc_error = new float[numRecords][48];
+         rebin = new float[numRecords][48],
+         error = new float[numRecords][48];
 
       //initialize the data arrays with fill value
       Arrays.fill(frameGroup, BarrelFrame.INT4_FILL);
       Arrays.fill(epoch,      BarrelFrame.INT8_FILL);
       Arrays.fill(q,          BarrelFrame.INT4_FILL);
-      Arrays.fill(mspc_raw,   BarrelFrame.FLOAT_FILL);
-      Arrays.fill(mspc_rebin, mspc_raw);
-      Arrays.fill(mspc_error, mspc_raw);
+      Arrays.fill(raw_spec,   BarrelFrame.FLOAT_FILL);
+      Arrays.fill(rebin, raw_spec);
+      Arrays.fill(error, raw_spec);
 
       //get the first valid frame counter
       frame_i = 0;
@@ -749,14 +746,13 @@ public class LevelTwo extends CDFWriter{
       frameGroup[0] = fc - mod4; 
 
       //rebin the mspc spectra
-      for(frame_i = 0, rec_i = -1; frame_i < this.numFrames; frame_i++){
+      for(frame_i = 0, rec_i = 0; frame_i < this.numFrames; frame_i++){
           
          fc = this.frames[frame_i].getFrameCounter();
          if(fc == null || fc == BarrelFrame.INT4_FILL){
             continue;
          }
 
-         mod40 = this.frames[frame_i].mod40;
          mod4 = this.frames[frame_i].mod4;
          fg = fc - mod4;
 
@@ -774,20 +770,19 @@ public class LevelTwo extends CDFWriter{
                );
 
             //rebin the spectrum
-            mspc_rebin[rec_i] = SpectrumExtract.rebin(
-               mspc_raw, old_edges, std_edges 
-            );
+            rebin[rec_i] = 
+               SpectrumExtract.rebin(raw_spec, old_edges, std_edges);
 
             //scale the counts and calculate error
-            for(int bin_i = 0; bin_i < mspc_rebin[rec_i].length; bin_i++){
-               if(mspc_rebin[rec_i][bin_i] != BarrelFrame.DOUBLE_FILL){
+            for(int bin_i = 0; bin_i < 48; bin_i++){
+               if(rebin[rec_i][bin_i] != BarrelFrame.DOUBLE_FILL){
                   width = std_edges[bin_i + 1] - std_edges[bin_i];
 
                   //divide counts by bin width and adjust the time scale
-                  mspc_rebin[rec_i][bin_i] /= (width * 4f);
+                  rebin[rec_i][bin_i] /= (width * 4f);
                   //get the count error
-                  mspc_error[rec_i][bin_i] = 
-                     (float)Math.sqrt(mspc_rebin[rec_i][bin_i]) / (width * 4f);
+                  error[rec_i][bin_i] = 
+                     (float)Math.sqrt(rebin[rec_i][bin_i]) / (width * 4f);
                }
             }
 
@@ -795,7 +790,7 @@ public class LevelTwo extends CDFWriter{
             epoch[rec_i] = CDF_Gen.timeModel.getEpoch(frameGroup[rec_i]);
 
             //clear the raw spectrum
-            Arrays.fill(mspc_raw, BarrelFrame.FLOAT_FILL);
+            Arrays.fill(raw_spec, BarrelFrame.FLOAT_FILL);
 
             //update the record number and frameGroup
             rec_i++;
@@ -805,13 +800,13 @@ public class LevelTwo extends CDFWriter{
          //fill part of the raw spectrum
          start = mod4 * 4;
          stop = start + 4;
-         mspc_part = this.frames[frame_i].getMspc();
+         part_spec = this.frames[frame_i].getMspc();
          for(
             int spec_i = start, sample_i = 0;
             sample_i < stop;
             sample_i++, part_i++
          ) {
-            mspc_raw[spec_i] = mspc_part[sample_i];
+            raw_spec[spec_i] = part_spec[sample_i];
          }
       }
 
@@ -837,8 +832,6 @@ public class LevelTwo extends CDFWriter{
    }
 
    public void doSspcCdf() throws CDFException{
-      float scint_temp = 0, dpu_temp = 0;
-
       int numOfRecs = last - first;
       float[][] 
          sspc_rebin = new float[numOfRecs][256],
