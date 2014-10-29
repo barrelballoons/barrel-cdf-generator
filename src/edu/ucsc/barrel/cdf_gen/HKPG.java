@@ -57,7 +57,7 @@ public class HKPG extends DataProduct{
       SATSOFF = 36, WEEK = 37, CMDCNT = 38, MDMCNT = 39;
    
    //array showing indexes of mod40 data
-   public static final String[] HKPG_I = {
+   public static final String[] IDS = {
       "V0",  "I0", "V1",  "I1",  "V2",  "I2",  "V3", "I3",  "V4", 
       "I4",  "V5", "I5",  "V6",  "I6",  "V7",  "I7", "T0",  "T8",
       "T1",  "T9", "T2",  "T10", "T3",  "T11", "T4", "T12", "T5",

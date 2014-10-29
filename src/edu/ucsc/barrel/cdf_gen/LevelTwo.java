@@ -749,31 +749,8 @@ public class LevelTwo extends CDFWriter{
          //(meaning the same spectrum)
          if (frameGroup[rec_i] != fg) {
             //get the most recent scintillator temperature value
-            hkpg_frame = fc - mod40 + HKPG.T0;
-            while(hkpg_frame > 0){
-               hkpg_raw = this.frames[hkpg_frame].getHousekeeping();
-               if(hkpg_raw != null && hkpg_raw != BarrelFrame.INT4_FILL){
-                  scint_temp = 
-                     hkpg_raw * 
-                     HKPG.SCALE_FACTORS.get("T0") + HKPG.OFFSETS.get("T0");
-                  break;
-               }
-               
-               hkpg_frame--;
-            }
-            //dpu temp value
-            hkpg_frame = fc - mod40 + HKPG.T5;
-            while(hkpg_frame > 0 ){
-               hkpg_raw = this.frames[hkpg_frame].getHousekeeping();
-               if(hkpg_raw != null && hkpg_raw != BarrelFrame.INT4_FILL){
-                  scint_temp = 
-                     hkpg_raw * 
-                     HKPG.SCALE_FACTORS.get("T5") + HKPG.OFFSETS.get("T5");
-                  break;
-               }
-               
-               hkpg_frame--;
-            }
+            scint_temp = getTemp(frame_i, HKPG.T0);
+            dpu_temp = getTemp(frame_i, HKPG.T5);
 
             //get the adjusted bin edges
             old_edges = 
@@ -825,7 +802,7 @@ public class LevelTwo extends CDFWriter{
       }
 
       System.out.println("\nSaving MSPC...");
-      
+
       String destName = 
          outputPath + "/" + date + "/" + "bar_" + id +
          "_l2_" + "mspc" + "_20" + date +  "_v" + revNum + ".cdf";
@@ -997,5 +974,30 @@ public class LevelTwo extends CDFWriter{
       rcnt.getCDF().addData("Q", q);
 
       rcnt.close();
+   }
+
+   private float getTemp(int start, int id_number) {
+      int
+         raw_temp  = null,
+         frame_i   = start,
+         mod40     = this.frames[startFrame].mod40,
+         fc        = this.frames[startFrame].getFrameCounter();
+      String
+         id = HKPG.IDS[id_number];
+
+      frame_i = fc - mod40 + tempID;
+      while(frame_i > 0){
+         raw_temp = this.frames[frame_i].getHousekeeping();
+
+         if(raw_temp != null && raw_temp != BarrelFrame.INT4_FILL){
+            return
+               (float) raw_temp * 
+               HKPG.SCALE_FACTORS.get(id) + HKPG.OFFSETS.get(id);
+         }
+         
+         frame_i--;
+      }
+
+      return 0.0f;
    }
  }
