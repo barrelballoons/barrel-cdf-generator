@@ -931,6 +931,19 @@ public class LevelTwo extends CDFWriter{
             rec_i++;            
          }
 
+         //fill part of the raw spectrum
+         start = mod32 * 32;
+         stop = start + 32;
+         part_spec = this.frames[frame_i].getMspc();
+         for(
+            int spec_i = start, sample_i = 0;
+            sample_i < stop;
+            sample_i++, part_i++
+         ) {
+            raw_spec[spec_i] = part_spec[sample_i];
+         }
+      }
+
       String destName =
          outputPath + "/" + date + "/" + "bar_" + id + 
          "_l2_" + "sspc" + "_20" + date +  "_v" + revNum + ".cdf";
