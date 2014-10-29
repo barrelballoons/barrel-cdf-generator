@@ -775,7 +775,7 @@ public class LevelTwo extends CDFWriter{
 
             //scale the counts and calculate error
             for(int bin_i = 0; bin_i < 48; bin_i++){
-               if(rebin[rec_i][bin_i] != BarrelFrame.DOUBLE_FILL){
+               if(rebin[rec_i][bin_i] != BarrelFrame.FLOAT_FILL){
                   width = std_edges[bin_i + 1] - std_edges[bin_i];
 
                   //divide counts by bin width and adjust the time scale
@@ -832,84 +832,106 @@ public class LevelTwo extends CDFWriter{
    }
 
    public void doSspcCdf() throws CDFException{
-      int numOfRecs = last - first;
-      float[][] 
-         sspc_rebin = new float[numOfRecs][256],
-         sspc_error = new float[numOfRecs][256];
-      float[] 
-         old_edges, 
-         std_edges = SpectrumExtract.stdEdges(2, 2.4414f);
-      
-      float[] peak = new float[numOfRecs];
-      int[] 
-         frameGroup = new int[numOfRecs],
-         q = new int[numOfRecs];
-      long[] epoch = new long[numOfRecs];
+      float
+         scint_temp = 0, 
+         dpu_temp   = 0;
+      int 
+         hkpg_frame, start, stop, mod32, fg, frame_i,
+         fc         = null,
+         offset     = 90,
+         numRecords = (int)Math.ceil(this.numFrames / 32);
+      int[]
+         part_spec,
+         raw_spec   = new int[256],
+         frameGroup = new int[numRecords],
+         q          = new int[numRecords];
+      long[]
+         epoch      = new long[numRecords];
+      float
+         width;
+      float[]
+         old_edges,
+         std_edges  = SpectrumExtract.stdEdges(2, 2.4414f);
+         peak       = new float[numRecords];
+      float[][]
+         rebin = new float[numRecords][256],
+         error = new float[numRecords][256];
+
+      //initialize the data arrays with fill value
+      Arrays.fill(frameGroup, BarrelFrame.INT4_FILL);
+      Arrays.fill(epoch,      BarrelFrame.INT8_FILL);
+      Arrays.fill(q,          BarrelFrame.INT4_FILL);
+      Arrays.fill(peak,       BarrelFrame.FLOAT_FILL);
+      Arrays.fill(raw_spec,   BarrelFrame.FLOAT_FILL);
+      Arrays.fill(rebin, raw_spec);
+      Arrays.fill(error, raw_spec);
+
+      //get the first valid frame counter
+      frame_i = 0;
+      while (frame_i < this.frames.length) {
+         fc = this.frames[frame_i].getFrameCounter();
+         if(fc != null && fc != BarrelFrame.INT4_FILL){
+            break;
+         }
+         frame_i++;
+      }
+
+      //caluclate the first frame group
+      mod32 = this.frames[frame_i].mod32;
+      frameGroup[0] = fc - mod32; 
 
       System.out.println("\nSaving SSPC...");
 
       //rebin the sspc spectra
-      for(int sspc_rec = 0, hkpg_rec = 0; sspc_rec < numOfRecs; sspc_rec++){
-         
-         //find correct hkpg_rec
-         int target_frame = 
-            CDF_Gen.data.frame_mod32[sspc_rec] - 
-            (CDF_Gen.data.frame_mod32[sspc_rec] % 40);
-
-         while(
-            (CDF_Gen.data.frame_mod40[hkpg_rec] <= target_frame) &&
-            (hkpg_rec <= sspc_rec) &&
-            (hkpg_rec < CDF_Gen.data.frame_mod40.length)
-         ){
-            hkpg_rec++;
+      for (frame_i = 0, rec_i = 0; frame_i < this.numFrames; frame_i++) {
+         fc = this.frames[frame_i].getFrameCounter();
+         if(fc == null || fc == BarrelFrame.INT4_FILL){
+            continue;
          }
 
-         //get temperatures
-         if(CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] != Constants.HKPG_FILL){
-            scint_temp = 
-               CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] * 
-               HKPG.SCALE_FACTORS.get("T0") + HKPG.OFFSETS.get("T0");
-         }
-         if(CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] != Constants.HKPG_FILL){
-            dpu_temp = 
-               CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] * 
-               HKPG.SCALE_FACTORS.get("T5") + HKPG.OFFSETS.get("T5");
-         }    
+         mod4 = this.frames[frame_i].mod4;
+         fg = fc - mod4;
 
-         //get the adjusted bin edges
-         old_edges = 
-            SpectrumExtract.makeedges(
-               2, scint_temp, dpu_temp, CDF_Gen.data.peak511_bin[sspc_rec + first]
-            );
+         //check if we are still in the same frame group 
+         //(meaning the same spectrum)
+         if (frameGroup[rec_i] != fg) {
+            epoch[rec_i] = CDF_Gen.timeModel.getEpoch(frameGroup[rec_i]);
+            peak[rec_i] = this.frames[frame_i].getPeak511();
+            frameGroup[rec_i] = fg;
 
-         //rebin the spectrum
-         sspc_rebin[sspc_rec] = SpectrumExtract.rebin(
-            CDF_Gen.data.sspc[sspc_rec + first], old_edges, std_edges
-         );
+            //get the most recent scintillator temperature value
+            scint_temp = getTemp(frame_i, HKPG.T0);
+            dpu_temp = getTemp(frame_i, HKPG.T5);
 
-         float fill = CDFVar.getIstpVal("FLOAT_FILL").floatValue();
-         for(int bin_i = 0; bin_i < sspc_rebin[sspc_rec].length; bin_i++){
-            if(sspc_rebin[sspc_rec][bin_i] != fill){
-               float width = std_edges[bin_i + 1] - std_edges[bin_i];
-               //get the count error
-               sspc_error[sspc_rec][bin_i] =
-                  (float)Math.sqrt(sspc_rebin[sspc_rec][bin_i])
-                  / (width * 32f);
+            //get the adjusted bin edges
+            old_edges = 
+               SpectrumExtract.makeedges(2, scint_temp, dpu_temp, peak[rec_i]);
 
-               //divide counts by bin width and adjust the time scale
-               sspc_rebin[sspc_rec][bin_i] /= (width * 32f);
+            //rebin the spectrum
+            rebin[rec_i] = 
+               SpectrumExtract.rebin(raw_spec, old_edges, std_edges);
+
+            //scale the counts and calculate error
+            for(int bin_i = 0; bin_i < 256; bin_i++){
+               if(rebin[rec_i][bin_i] != BarrelFrame.FLOAT_FILL){
+                  width = std_edges[bin_i + 1] - std_edges[bin_i];
+
+                  //divide counts by bin width and adjust the time scale
+                  rebin[rec_i][bin_i] /= (width * 32f);
+                  //get the count error
+                  error[rec_i][bin_i] = 
+                     (float)Math.sqrt(rebin[rec_i][bin_i]) / (width * 32f);
+               }
             }
+
+            //clear the raw spectrum
+            Arrays.fill(raw_spec, BarrelFrame.FLOAT_FILL);
+
+            //update the record number and frameGroup
+            rec_i++;            
          }
-      }
 
-      for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-         peak[rec_i] = CDF_Gen.data.peak511_bin[data_i];
-         frameGroup[rec_i] = CDF_Gen.data.frame_mod32[data_i];
-         epoch[rec_i] = CDF_Gen.data.epoch_mod32[data_i];
-         q[rec_i] = CDF_Gen.data.sspc_q[data_i];
-      }
-
-      String destName = 
+      String destName =
          outputPath + "/" + date + "/" + "bar_" + id + 
          "_l2_" + "sspc" + "_20" + date +  "_v" + revNum + ".cdf";
 
