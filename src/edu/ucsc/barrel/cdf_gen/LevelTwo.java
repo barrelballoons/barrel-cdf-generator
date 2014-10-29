@@ -703,7 +703,10 @@ public class LevelTwo extends CDFWriter{
          dpu_temp   = 0;
       
       int 
-         fc, fg, mod40, mod4, hkpg_frame, hkpg_raw, start, stop,
+         hkpg_frame, hkpg_raw, start, stop,
+         mod40, mod4, fg,
+         frame_i    = 0,
+         fc         = null,
          offset     = 90,
          numRecords = (int)Math.ceil(this.numFrames / 4);
 
@@ -732,9 +735,21 @@ public class LevelTwo extends CDFWriter{
       Arrays.fill(mspc_rebin, mspc_raw);
       Arrays.fill(mspc_error, mspc_raw);
 
-      
+      //get the first valid frame counter
+      while (frame_i < this.frames.length) {
+         fc = this.frames[frame_i].getFrameCounter();
+         if(fc != null && fc != BarrelFrame.INT4_FILL){
+            break;
+         }
+         frame_i++;
+      }
+
+      //caluclate the first frame group
+      mod4 = this.frames[frame_i].mod4;
+      frameGroup[0] = fc - mod4; 
+
       //rebin the mspc spectra
-      for(int frame_i = 0, rec_i = -1; frame_i < this.numFrames; frame_i++){
+      for(frame_i = 0, rec_i = -1; frame_i < this.numFrames; frame_i++){
           
          fc = this.frames[frame_i].getFrameCounter();
          if(fc == null || fc == BarrelFrame.INT4_FILL){
@@ -778,7 +793,6 @@ public class LevelTwo extends CDFWriter{
 
             //get the epoch of this spectrum
             epoch[rec_i] = CDF_Gen.timeModel.getEpoch(frameGroup[rec_i]);
-
 
             //clear the raw spectrum
             Arrays.fill(mspc_raw, BarrelFrame.FLOAT_FILL);
