@@ -731,6 +731,8 @@ public class LevelTwo extends CDFWriter{
       Arrays.fill(rebin, raw_spec);
       Arrays.fill(error, raw_spec);
 
+      System.out.println("\nSaving MSPC...");
+
       //get the first valid frame counter
       frame_i = 0;
       while (frame_i < this.frames.length) {
@@ -809,8 +811,6 @@ public class LevelTwo extends CDFWriter{
             raw_spec[spec_i] = part_spec[sample_i];
          }
       }
-
-      System.out.println("\nSaving MSPC...");
 
       String destName = 
          outputPath + "/" + date + "/" + "bar_" + id +
