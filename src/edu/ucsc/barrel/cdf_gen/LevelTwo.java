@@ -967,30 +967,50 @@ public class LevelTwo extends CDFWriter{
    }
 
    public void doRcntCdf() throws CDFException{
-      int numOfRecs = last - first;
-      float[][] rc_timeScaled = new float[4][numOfRecs];
-      int[] 
-         frameGroup = new int[numOfRecs],
-         q = new int[numOfRecs];
-      long[] epoch = new long[numOfRecs];
-
+      int
+         numRecords = (int)Math.ceil(this.numFrames / 4),
+         raw;
+      int[]
+         frameGroup = new int[numRecords],
+         q = new int[numRecords];
+      float[][] rc = new float[4][numRecords];
+      
+      long[] epoch = new long[numRecords];
+      
+      //initialize the data arrays with fill value
+      Arrays.fill(frameGroup,       BarrelFrame.INT4_FILL);
+      Arrays.fill(epoch,            BarrelFrame.INT8_FILL);
+      Arrays.fill(q,                BarrelFrame.INT4_FILL);
+      Arrays.fill(rc[0], BarrelFrame.FLOAT_FILL);
+      Arrays.fill(rc[1], BarrelFrame.FLOAT_FILL);
+      Arrays.fill(rc[2], BarrelFrame.FLOAT_FILL);
+      Arrays.fill(rc[3], BarrelFrame.FLOAT_FILL);
+      
       //change all the units from cnts/4sec to cnts/sec
-      float fill = CDFVar.getIstpVal("FLOAT_FILL").floatValue();
-      for(int var_i = 0; var_i < 4; var_i++){
-         for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
-            if(CDF_Gen.data.rcnt[var_i][rec_i + first] != Constants.FLOAT_FILL){
-               rc_timeScaled[var_i][rec_i] = 
-                  CDF_Gen.data.rcnt[var_i][rec_i + first] / 4;
-            }else{
-               rc_timeScaled[var_i][rec_i] = fill;
-            }
-         }
-      }
+      for(int frame_i = 0, rec_i = -1; frame_i < this.numFrames; frame_i++){
 
-      for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-         frameGroup[rec_i] = CDF_Gen.data.frame_mod4[data_i];
-         epoch[rec_i] = CDF_Gen.data.epoch_mod4[data_i];
-         q[rec_i] = CDF_Gen.data.rcnt_q[data_i];
+         //make sure we have a valid frame counter
+         fc = this.frames[frame_i].getFrameCounter();
+         if(fc == null || fc == BarrelFrame.INT4_FILL){
+            continue;
+         }
+
+         //calculate the subcom and frameGroup
+         mod4 = this.frames[frame_i].mod4;
+         fg = fc - mod4;
+
+         //figure out if we are still in the same record
+         if (frameGroup[rec_i] != fg) {
+            rec_i++;
+            frameGroup[rec_i] = fg;
+         }
+         
+         //get the epoch the the frameGroup frame
+         epoch[rec_i] = CDF_Gen.timeModel.getEpoch(frameGroup[rec_i]);
+
+         raw = this.frames[frame_i].getRateCounter();
+         rc[rec_i] = raw != BarrelFrame.INT4_FILL ?
+            raw / 4f : BarrelFrame.FLOAT_FILL;
       }
          
       System.out.println("\nSaving RCNT...");
@@ -1001,13 +1021,13 @@ public class LevelTwo extends CDFWriter{
       DataProduct rcnt = new RCNT(destName, "bar_" + id, date, 2);
 
       System.out.println("Interrupt");
-      rcnt.getCDF().addData("Interrupt", rc_timeScaled[0]);
+      rcnt.getCDF().addData("Interrupt", rc[0]);
       System.out.println("LowLevel");
-      rcnt.getCDF().addData("LowLevel", rc_timeScaled[1]);
+      rcnt.getCDF().addData("LowLevel",  rc[1]);
       System.out.println("HighLevel");
-      rcnt.getCDF().addData("HighLevel", rc_timeScaled[3]);
+      rcnt.getCDF().addData("HighLevel", rc[3]);
       System.out.println("PeakDet");
-      rcnt.getCDF().addData("PeakDet", rc_timeScaled[2]);
+      rcnt.getCDF().addData("PeakDet",   rc[2]);
       System.out.println("FrameGroup");
       rcnt.getCDF().addData("FrameGroup", frameGroup);
       System.out.println("Epoch");

@@ -60,13 +60,13 @@ public class BarrelFrame {
       week        = INT4_FILL,
       cmdCnt      = INT4_FILL,
       gps         = INT4_FILL,
+      rcnt        = INT4_FILL,
       mod4        = INT4_FILL,
       mod32       = INT4_FILL,
       mod40       = INT4_FILL;
    private long
       epoch       = INT4_FILL,
-      hkpg        = INT4_FILL,
-      rcnt        = INT4_FILL;
+      hkpg        = INT4_FILL;
    public float 
       peak511_bin = null;
    public int[]
@@ -701,7 +701,7 @@ public class BarrelFrame {
       return this.hkpg;
    }
 
-   public long getRateCounter(){
+   public int getRateCounter(){
       return this.rcnt;
    }
 
