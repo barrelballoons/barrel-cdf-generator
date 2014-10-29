@@ -759,6 +759,10 @@ public class LevelTwo extends CDFWriter{
          //check if we are still in the same frame group 
          //(meaning the same spectrum)
          if (frameGroup[rec_i] != fg) {
+            //save the epoch and frameGroup of this spectrum
+            epoch[rec_i] = CDF_Gen.timeModel.getEpoch(frameGroup[rec_i]);
+            frameGroup[rec_i] = fg;
+
             //get the most recent scintillator temperature value
             scint_temp = getTemp(frame_i, HKPG.T0);
             dpu_temp = getTemp(frame_i, HKPG.T5);
@@ -786,15 +790,11 @@ public class LevelTwo extends CDFWriter{
                }
             }
 
-            //get the epoch of this spectrum
-            epoch[rec_i] = CDF_Gen.timeModel.getEpoch(frameGroup[rec_i]);
-
             //clear the raw spectrum
             Arrays.fill(raw_spec, BarrelFrame.FLOAT_FILL);
 
             //update the record number and frameGroup
             rec_i++;
-            frameGroup[rec_i] = fg;
          }
 
          //fill part of the raw spectrum
