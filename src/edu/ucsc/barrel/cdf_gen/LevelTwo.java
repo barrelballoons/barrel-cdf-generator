@@ -136,7 +136,7 @@ public class LevelTwo extends CDFWriter{
          }
          
          //get the epoch the the frameGroup frame
-         epoch[rec_i] = CDF_Gen.timeModel.getEpoch(frameGroup[rec_i]);
+         epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
 
          switch(this.frames[frame_i].mod4) {
             //convert mm to km
@@ -356,7 +356,7 @@ public class LevelTwo extends CDFWriter{
         version[frame_i]    = this.frames.getDPUVersion();
         payID[frame_i]      = this.frames.getPayloadID();
         frameGroup[frame_i] = this.frames.getFrameCounter();
-        epoch[frame_i] = CDF_Gen.timeModel.getEpoch(frameGroup[frame_i]);
+        epoch[frame_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[frame_i]);
       }
 
       String destName = 
@@ -450,7 +450,7 @@ public class LevelTwo extends CDFWriter{
             }
 	    frameGroup[rec_i] = this.frames[frame_i].getFrameCounter();
 	    epoch[rec_i] =
-               CDF_Gen.timeModel.getEpoch(frameGroup[rec_i]) + offset ;
+               CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]) + offset ;
          }
          
          q[frame_i] = this.frames[frane_i].get();
@@ -571,7 +571,7 @@ public class LevelTwo extends CDFWriter{
          dcdCnt[rec_i]   = this.frames[frame_i].getDcdCount();
          cmdCnt[rec_i]   = this.frames[frame_i].getCommandCounter();
          weeks[rec_i]    = this.frames[frame_i].getWeeks();
-         epoch[frame_i]  = CDF_Gen.timeModel.getEpoch(frameGroup[frame_i]);
+         epoch[frame_i]  = CDF_Gen.barrel_time.getEpoch(frameGroup[frame_i]);
       }
 
       for(int var_i = 0; var_i < 36; var_i++){
@@ -666,7 +666,7 @@ public class LevelTwo extends CDFWriter{
 
                frameGroup[rec_i] = this.frames[frame_i].getFrameCounter();
                epoch[rec_i] =
-                  CDF_Gen.timeModel.getEpoch(frameGroup[rec_i]) + offset ;
+                  CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]) + offset ;
             }
          }
       }
@@ -762,7 +762,7 @@ public class LevelTwo extends CDFWriter{
          //(meaning the same spectrum)
          if (frameGroup[rec_i] != fg) {
             //save the epoch and frameGroup of this spectrum
-            epoch[rec_i] = CDF_Gen.timeModel.getEpoch(frameGroup[rec_i]);
+            epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
             frameGroup[rec_i] = fg;
 
             //get the most recent scintillator temperature value
@@ -895,7 +895,7 @@ public class LevelTwo extends CDFWriter{
          //check if we are still in the same frame group 
          //(meaning the same spectrum)
          if (frameGroup[rec_i] != fg) {
-            epoch[rec_i] = CDF_Gen.timeModel.getEpoch(frameGroup[rec_i]);
+            epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
             peak[rec_i] = this.frames[frame_i].getPeak511();
             frameGroup[rec_i] = fg;
 
@@ -1006,7 +1006,7 @@ public class LevelTwo extends CDFWriter{
          }
          
          //get the epoch the the frameGroup frame
-         epoch[rec_i] = CDF_Gen.timeModel.getEpoch(frameGroup[rec_i]);
+         epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
 
          raw = this.frames[frame_i].getRateCounter();
          rc[rec_i] = raw != BarrelFrame.INT4_FILL ?

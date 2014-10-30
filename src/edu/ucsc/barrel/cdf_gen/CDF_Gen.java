@@ -40,7 +40,7 @@ public class CDF_Gen{
    
    public static FrameHolder frames;
    public static SpectrumExtract spectra;
-   public static ExtractTiming epochs;
+   public static ExtractTiming barrel_time;
 
    private static DataCollector dataPull;
    private static LevelZero L0;
@@ -168,8 +168,7 @@ public class CDF_Gen{
    			   );
             
                //Fill the time variable
-               ExtractTiming barrel_time = 
-                  new ExtractTiming(getSetting("date"));
+               barrel_time = new ExtractTiming(getSetting("date"));
                barrel_time.fixWeekOffset();
                barrel_time.getTimeRecs();
                barrel_time.fillModels();
