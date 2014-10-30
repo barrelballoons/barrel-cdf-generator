@@ -99,11 +99,15 @@ public class ExtractTiming {
    private int model_cnt = 0;
 
    public ExtractTiming(BarrelFrame[] frames){
-      this.frames   = frames;
-      numFrames     = this.frames.length;
-      
-      this.time_recs= new TimeRec[Math.ceil((float)this.numFrames / 40)];
-      this.models   = new LinModel[Math.ceil((float)this.numFrames / MAX_RECS)];
+      int numModels, numRecords;
+
+      this.frames    = frames;
+      numFrames      = this.frames.length;
+      numRecords     = (int)Math.ceil((float)this.numFrames / 40);
+      numModels      = (int)Math.ceil((float)this.numFrames / MAX_RECS);
+
+      this.time_recs = new TimeRec[numRecords];
+      this.models    = new LinModel[numModels];
    }
 
    public void getTimeRecs(){
@@ -127,7 +131,9 @@ public class ExtractTiming {
          }
 
          ms = data.ms_of_week[rec_i];
-         if((ms < MINMS) || (ms > MAXMS)){continue;}
+         if((ms < MINMS) || (ms > MAXMS)){
+            continue;
+         }
 
          pps = (short)data.pps[rec_1Hz_i];
          if((pps < MINPPS) || (pps > MAXPPS)){
@@ -137,7 +143,9 @@ public class ExtractTiming {
             else{continue;}
          }
          week = (short)data.weeks[rec_mod40_i];
-         if((week < MINWK) || (week > MAXWK)){continue;}
+         if((week < MINWK) || (week > MAXWK)){
+            continue;
+         }
 
          //create a new time record 
          this.time_recs[rec_i] = new TimeRec(fc, ms, week, pps);
@@ -294,26 +302,32 @@ public class ExtractTiming {
       rolls over.
       */
       
-      int initial_week = 0, initial_ms = 0;
+      int
+         initial_week = 0, 
+         initial_ms   = 0,
+         numRecords   = (int)Math.ceil((float)this.numFrames / 4);
       
       //start looking for rollover
-      for(int ms_i = 0; ms_i < data.getSize("mod4"); ms_i++){
+      for(int frame_i = 0; frame_i < this.numFrames; frame_i++){
+
          //try to find and initial set of 
          //timestamps and week variables if needed.
-         if(initial_week == 0){initial_week = data.weeks[ms_i / 10];}
-         if(initial_ms == 0){initial_ms = data.ms_of_week[ms_i];}
+         if(initial_week == 0){initial_week = data.weeks[rec_i / 10];}
+         if(initial_ms == 0){initial_ms = data.ms_of_week[rec_i];}
 
          //check to see if the ms_of_week rolled over
          //the value given by the gps might jump around a bit, so make sure 
          //the roll back is significant (>1min)
-         if((data.ms_of_week[ms_i] - initial_ms) < -60000){
+         if((data.ms_of_week[rec_i] - initial_ms) < -60000){
             //check if the week variable was updated
-            if(data.weeks[ms_i/10] != 0 && data.weeks[ms_i/10] == initial_week){
+            if(data.weeks[rec_i/10] != 0 && data.weeks[rec_i/10] == initial_week){
                //the week variable has not yet updated,
                // add 1 week of ms to the ms_of_week variable
-               data.ms_of_week[ms_i] += 604800000;
+               data.ms_of_week[rec_i] += 604800000;
             }
          }
+
+         rec_i++;
       }
       
    }
