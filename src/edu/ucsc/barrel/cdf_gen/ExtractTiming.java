@@ -322,7 +322,12 @@ public class ExtractTiming {
       }
       
    }
-   
+
+   public long getEpoch(int fc){
+      long epoch = 0;
+      return epoch;
+   }
+
    private int selectModel(final long fc, final int i){
       int model_i = i;
       //select a model for this frame
