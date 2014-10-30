@@ -52,22 +52,22 @@ public class LevelZero{
       final String inputDir, 
       final String outputDir,
       final String p,
-		final String f,
-		final String s,
-		final String d
+      final String f,
+      final String s,
+      final String d
    ){
-	   //set object properties
+      //set object properties
       syncWord = sync;
       frameLength = length;
       inputPath = inputDir;
       outputPath = outputDir;
       dpu_id = Integer.parseInt(dpu);
 
-		//get file revision number
+      //get file revision number
       if(CDF_Gen.getSetting("rev") != null){
          revNum = CDF_Gen.getSetting("rev");
       }
-		
+      
       //set get a list of input files
       File tempDir = new File(inputPath);
       fileList = tempDir.list();
@@ -76,11 +76,11 @@ public class LevelZero{
       //make sure the output directory exists
       tempDir = new File(outputDir + "/");
       if(!tempDir.exists()){tempDir.mkdirs();}
-      
+       
       //set output file name
-		outName =
-			"bar1" + f + "_" + p + "_" + s +
-			"_l0_20" + d +  "_v" + revNum + ".tlm";
+      outName =
+         "bar1" + f + "_" + p + "_" + s +
+         "_l0_20" + d +  "_v" + revNum + ".tlm";
    }
    
    public void processRawFiles() throws IOException{
