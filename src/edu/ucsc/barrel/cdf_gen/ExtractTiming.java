@@ -135,8 +135,8 @@ public class ExtractTiming {
       //cycle through the entire data set and create an array of time records
       for(int frame_i = 0, rec_i = 0; frame_i < this.numFrmaes; frame_i++){
 
-         //check if this is a frame which contains the GPS weeks data 
-         if(this.frames[frame_i].mod40 != HKPG.WEEK){continue;}
+         //check if this is a frame which contains the GPS time data 
+         if(this.frames[frame_i].mod4 != GPS.TIME_I){continue;}
 
          //make sure all the time components are valid
          fc = this.frames[frame_i].getFrameCounter();
@@ -144,19 +144,25 @@ public class ExtractTiming {
             continue;
          }
 
-         ms = data.ms_of_week[rec_i];
+         ms = this.frames[frame_i].getGps();
          if((ms < MINMS) || (ms > MAXMS)){
             continue;
          }
 
-         pps = (short)data.pps[rec_1Hz_i];
+         pps = this.frames[frame_i].getPulsePerSecond();
          if((pps < MINPPS) || (pps > MAXPPS)){
             //check if pps is high because it came super early so the
             //dpu didnt have a chance to write "0"
             if(pps == 65535 || pps == 32768){pps = 0;} 
             else{continue;}
          }
-         week = (short)data.weeks[rec_mod40_i];
+
+         //get week data if this frame has it.
+         //If not, use the current_week variable
+         week = this.frames[frame_i].mod40 == HKPG.WEEK ?
+            this.frames[frame_i].getWeeks() :
+            this.current_week;
+            
          if((week < MINWK) || (week > MAXWK)){
             continue;
          }
