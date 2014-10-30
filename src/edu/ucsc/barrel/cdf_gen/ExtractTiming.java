@@ -51,7 +51,9 @@ public class ExtractTiming {
 
 
    private BarrelFrame[] frames;
-   int numFrames = 0;
+   private int
+      current_week, 
+      numFrames    = 0;
 
    private class TimeRec{
       private long ms;//frame timestamp
@@ -108,6 +110,18 @@ public class ExtractTiming {
 
       this.time_recs = new TimeRec[numRecords];
       this.models    = new LinModel[numModels];
+
+      //find the first week
+      for(int frame_i = 0; frame_i < this.numFrames; frame_i++) {
+         this.current_week = this.frames[frame_i].getWeeks();
+         if(this.current_week != BarrelFrame.INT4_FILL){break;}
+      }
+
+      //make sure a week was found
+      if(this.current_week == BarrelFrame.INT4_FILL){
+        System.out.println('No week values found in frame set.');
+        return null;
+      }
    }
 
    public void getTimeRecs(){
