@@ -50,6 +50,9 @@ public class ExtractTiming {
    private static final long MSPC_EPOCH_OFFSET = 2000000000L; //3996000000L;
 
 
+   private BarrelFrame[] frames;
+   int numFrames = 0;
+
    private class TimeRec{
       private long ms;//frame timestamp
       private long frame;//frame counter
@@ -76,13 +79,13 @@ public class ExtractTiming {
       private long first_frame, last_frame;
       private double slope, intercept;
 
-      public void setFirst(long fc){first_frame = fc;}
-      public void setLast(long fc){last_frame = fc;}
-      public void setSlope(double s){slope = s;}
-      public void setIntercept(double i){intercept = i;}
+      public void   setFirst(long fc){first_frame = fc;}
+      public void   setLast(long fc){last_frame = fc;}
+      public void   setSlope(double s){slope = s;}
+      public void   setIntercept(double i){intercept = i;}
 
-      public long getFirst(){return first_frame;}
-      public long getLast(){return last_frame;}
+      public long   getFirst(){return first_frame;}
+      public long   getLast(){return last_frame;}
       public double getSlope(){return slope;}
       public double getIntercept(){return intercept;}
    }
@@ -95,45 +98,37 @@ public class ExtractTiming {
    private LinModel[] models;
    private int model_cnt = 0;
 
-   //holder for external data set
-   private DataHolder data;
-   
-   public ExtractTiming(String d){
-      //get DataHolder storage object
-      data = CDF_Gen.data;
+   public ExtractTiming(BarrelFrame[] frames){
+      this.frames   = frames;
+      numFrames     = this.frames.length;
       
-      int temp, day, fc, week, ms, pps, cnt, mod40;
-      int rec_i = 0, frame_i = 0;
-      
-      time_recs = new TimeRec[data.getSize("mod4")];
-      models = new LinModel[(data.getSize("1Hz") / MAX_RECS) + 1];
+      this.time_recs= new TimeRec[Math.ceil((float)this.numFrames / 40)];
+      this.models   = new LinModel[Math.ceil((float)this.numFrames / MAX_RECS)];
    }
 
    public void getTimeRecs(){
-      int fc_offset, rec_mod40_i, rec_1Hz_i;
-      short week, pps;
-      long ms, fc;
+      short
+         week, pps;
+      int
+         fc_offset;
+      long
+         ms, fc, mod4;
 
       //cycle through the entire data set and create an array of time records
-      for(int rec_mod4_i = 0; rec_mod4_i < time_recs.length; rec_mod4_i++){
-         //make sure we have a valid ms
-         ms = data.ms_of_week[rec_mod4_i];
+      for(int frame_i = 0, rec_i = 0; frame_i < this.numFrmaes; frame_i++){
+
+         //check if this is a frame which contains the GPS weeks data 
+         if(this.frames[frame_i].mod40 != HKPG.WEEK){continue;}
+
+         //make sure all the time components are valid
+         fc = this.frames[frame_i].getFrameCounter();
+         if(fc == null || fc == BarrelFrame.INT4_FILL){
+            continue;
+         }
+
+         ms = data.ms_of_week[rec_i];
          if((ms < MINMS) || (ms > MAXMS)){continue;}
 
-         //get initial fc from the mod4 framegroup
-         fc = data.frame_mod4[rec_mod4_i]; //last good fc from this mod4 group
-         
-         //check if fc is a fill value
-         if(fc == Constants.FC_FILL){continue;}
-
-         //Offset the frame number to be that of the GPS_Time frame
-         fc = fc - (fc % 4) + Constants.TIME_I; 
-
-         //get the indices of other cadence data
-         rec_1Hz_i = data.convertIndex(rec_mod4_i, fc, "mod4", "1Hz");
-         rec_mod40_i = data.convertIndex(rec_mod4_i, fc, "mod4", "mod40");
-
-         //figure out if pps is valid 
          pps = (short)data.pps[rec_1Hz_i];
          if((pps < MINPPS) || (pps > MAXPPS)){
             //check if pps is high because it came super early so the
@@ -141,12 +136,12 @@ public class ExtractTiming {
             if(pps == 65535 || pps == 32768){pps = 0;} 
             else{continue;}
          }
-
-         //get number of weeks since GPS_START_TIME
          week = (short)data.weeks[rec_mod40_i];
          if((week < MINWK) || (week > MAXWK)){continue;}
-         time_recs[time_rec_cnt] = new TimeRec(fc, ms, week, pps);
-         time_rec_cnt++;
+
+         //create a new time record 
+         this.time_recs[rec_i] = new TimeRec(fc, ms, week, pps);
+         rec_i++;
       }
    }
    
