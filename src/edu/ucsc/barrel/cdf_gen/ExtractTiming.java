@@ -52,7 +52,6 @@ public class ExtractTiming {
 
    private BarrelFrame[] frames;
    private int
-      current_week, 
       numFrames    = 0;
 
    private class TimeRec{
@@ -110,30 +109,27 @@ public class ExtractTiming {
 
       this.time_recs = new TimeRec[numRecords];
       this.models    = new LinModel[numModels];
-
-      //find the first week
-      for(int frame_i = 0; frame_i < this.numFrames; frame_i++) {
-         this.current_week = this.frames[frame_i].getWeeks();
-         if(this.current_week != BarrelFrame.INT4_FILL){break;}
-      }
-
-      //make sure a week was found
-      if(this.current_week == BarrelFrame.INT4_FILL){
-        System.out.println('No week values found in frame set.');
-        return null;
-      }
    }
 
    public void getTimeRecs(){
       short
          week, pps;
       int
-         fc_offset;
+         current_week, fc_offset, frame_i;
       long
          ms, fc, mod4;
 
+      //get the initial values for current_week
+      for(frame_i = 0; frame_i < this.numFrames; frame_i++) {
+         current_week = this.frames[frame_i].getWeeks();
+
+         if(current_week != BarrelFrame.INT4_FILL){
+            break;
+         }
+      }
+
       //cycle through the entire data set and create an array of time records
-      for(int frame_i = 0, rec_i = 0; frame_i < this.numFrmaes; frame_i++){
+      for(frame_i = 0, rec_i = 0; frame_i < this.numFrmaes; frame_i++){
 
          //check if this is a frame which contains the GPS time data 
          if(this.frames[frame_i].mod4 != GPS.TIME_I){continue;}
@@ -161,8 +157,8 @@ public class ExtractTiming {
          //If not, use the current_week variable
          week = this.frames[frame_i].mod40 == HKPG.WEEK ?
             this.frames[frame_i].getWeeks() :
-            this.current_week;
-            
+            current_week;
+
          if((week < MINWK) || (week > MAXWK)){
             continue;
          }
