@@ -146,7 +146,8 @@ public class CDF_Gen{
                id,
 					flt,
 					stn,
-               getSetting("date")
+               getSetting("date"),
+               dpu
             );
             L0.processRawFiles();
             L0.finish();

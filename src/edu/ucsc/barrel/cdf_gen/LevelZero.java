@@ -54,7 +54,8 @@ public class LevelZero{
       final String p,
       final String f,
       final String s,
-      final String d
+      final String d,
+      final String dpu
    ){
       //set object properties
       syncWord = sync;
