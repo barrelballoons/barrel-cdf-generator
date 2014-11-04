@@ -55,25 +55,55 @@ public class ExtractTiming {
       numFrames    = 0;
 
    private class TimeRec{
-      private long ms;//frame timestamp
-      private long frame;//frame counter
+      private long 
+         ms,//frame timestamp
+         frame,//frame counter
+         ms_of_week,
+         weeks_in_ms;
+      private short 
+         week, pps;
 
-      public TimeRec(long fc, long msw, short weeks, short pps){
+      public TimeRec(long fc, long msw, short w, short p){
+         this.week        = w,
+         this.pps         = p;
+         this.frame       = fc,
+         this.ms_of_week  = msw,
+         this.weeks_in_ms = week * MSPERWEEK;
+
          //figure out if we need to add an extra second based on the PPS
          int extra_ms = (pps < 241) ? 0 : 1000;
 
-         //get the number of ms between GPS_START_TIME and start of this week
-         long weeks_in_ms = weeks * MSPERWEEK;
-
-         //save the frame number
-         frame = fc;
-
          //calculate the number of milliseconds since J2000 
-         ms = weeks_in_ms + msw + extra_ms - pps + GPS_EPOCH;
+         this.ms = calcEpoch();
       }
       
-      public long getMS(){return ms;}
-      public long getFrame(){return frame;}
+      public long  getMS()   {return ms;}
+      public long  getFrame(){return frame;}
+      public long  getMSW()  {return ms_of_week;}
+      public short getWeek() {return week;}
+      public short getPPS()  {return pps;}
+
+      public long setFrame(long fc){
+         this.frame = fc;
+      }
+      public long setMSW(long msw){
+         this.ms_of_week = msw;
+         this.ms = calcEpoch();
+      }
+      public short setPPS(long p){
+         this.pps = p;
+         this.ms = calcEpoch();
+      }
+      public short setWeek(long w)  {
+         this.week = w;
+         this.weeks_in_ms = week * MSPERWEEK;
+         this.ms = calcEpoch();
+      }
+      
+      private long calcEpoch() {
+         return
+            this.weeks_in_ms +this.ms_of_week +extra_ms -this.pps +GPS_EPOCH;
+      }
    }
    
    private class LinModel{
@@ -159,8 +189,9 @@ public class ExtractTiming {
             this.frames[frame_i].getWeeks() :
             current_week;
 
+         //if the week variable is out of range, use current_week instead
          if((week < MINWK) || (week > MAXWK)){
-            continue;
+            week = current_week;
          }
 
          //create a new time record 
@@ -318,28 +349,28 @@ public class ExtractTiming {
       rolls over.
       */
       
-      int
-         initial_week = 0, 
-         initial_ms   = 0,
-         numRecords   = (int)Math.ceil((float)this.numFrames / 4);
+      short
+         initial_week = this.time_recs[0].getWeek(),
+         week;
+      long
+         initial_ms = this.time_recs[0].getMSW(),
+         msw;
       
       //start looking for rollover
-      for(int frame_i = 0; frame_i < this.numFrames; frame_i++){
-
-         //try to find and initial set of 
-         //timestamps and week variables if needed.
-         if(initial_week == 0){initial_week = data.weeks[rec_i / 10];}
-         if(initial_ms == 0){initial_ms = data.ms_of_week[rec_i];}
+      for(int rec_i = 0; rec_i < this.numRecords; rec_i++){
+         //get the msw and week for this record
+         msw  = this.time_recs[rec_i].getMSW();
+         week = this.time_recs[rec_i].getWeek();
 
          //check to see if the ms_of_week rolled over
          //the value given by the gps might jump around a bit, so make sure 
          //the roll back is significant (>1min)
-         if((data.ms_of_week[rec_i] - initial_ms) < -60000){
+         if((msw - initial_ms) < -60000){
             //check if the week variable was updated
-            if(data.weeks[rec_i/10] != 0 && data.weeks[rec_i/10] == initial_week){
+            if(week == initial_week){
                //the week variable has not yet updated,
                // add 1 week of ms to the ms_of_week variable
-               data.ms_of_week[rec_i] += 604800000;
+               this.time_recs[rec_i].setMSW(msw + 604800000);
             }
          }
 
