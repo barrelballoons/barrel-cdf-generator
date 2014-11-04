@@ -104,7 +104,7 @@ public class ExtractTiming {
 
       this.frames    = frames;
       numFrames      = this.frames.length;
-      numRecords     = (int)Math.ceil((float)this.numFrames / 40);
+      numRecords     = (int)Math.ceil((float)this.numFrames / 4);
       numModels      = (int)Math.ceil((float)this.numFrames / MAX_RECS);
 
       this.time_recs = new TimeRec[numRecords];
