@@ -59,7 +59,7 @@ public class ExtractTiming {
       MSPC_EPOCH_OFFSET = 2000000000L; //3996000000L;
 
    private BarrelFrame[] frames;
-   private int numFrames, numRecords, numModels;
+   private int numFrames, numRecords;
 
    private class TimeRec{
       private long 
@@ -256,36 +256,38 @@ public class ExtractTiming {
             linModel.setIntercept(fit.getIntercept()); 
             linModel.setFirst(time_recs[first_rec].getFrame()); 
             linModel.setLast(time_recs[last_rec - 1].getFrame()); 
-            this.models.add(model_i++, lineModel);
+            this.models.add(model_i, lineModel);
 
             //associate each frame number between the two time records 
             //with this linear model
             last_fc = last_rec.getFrame();
-            while (fc <= last_fc && frame_i) {
+            while (fc <= last_fc) {
                fc = this.frames[frame_i++];
                this.modelRef.put(fc, model_i);
             }
+
+            model_i++;
          }
+      }
+
+      if(this.models.size() == 0){
+         //no timing models were ever created. 
+         //Use slope=1000 and intercept=0 to use frame number epoch.
+         //this will clearly not give a good result for time, but will
+         //allow the data to be plotted as a time series.
+         //This will be a place to add a quality flag
+         linModel = new LinModel();
+         linModel.setSlope(1000);
+         linModel.setIntercept(0);
+         linModel.setFirst(0);
+         linModel.setLast(this.numRecords); 
+         this.models.add(lineModel);
       }
 
       //Associate any remaining frames with the last model
       while (frame_i < this.numFrames) {
          fc = this.frames[frame_i++];
          this.modelRef.put(fc, model_i);
-      }
-
-      if(fit == null){
-         //no timing model was ever created. 
-         //Use slope=1000 and intercept=0 to use frame number epoch.
-         //this will clearly not give a good result for time, but will
-         //allow the data to be plotted as a time series.
-         //This will be a place to add a quality flag
-         this.models[model_cnt] = new LinModel();
-         this.models[model_cnt].setSlope(1000); 
-         this.models[model_cnt].setIntercept(0); 
-         this.models[model_cnt].setFirst(0); 
-         this.models[model_cnt].setLast(this.numRecords); 
-         model_cnt = 1;
       }
    }
 
