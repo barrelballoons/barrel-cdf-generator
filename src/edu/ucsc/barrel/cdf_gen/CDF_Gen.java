@@ -169,8 +169,8 @@ public class CDF_Gen{
             
                //Fill the time variable
                barrel_time = new ExtractTiming(getSetting("date"));
-               barrel_time.fixWeekOffset();
                barrel_time.getTimeRecs();
+               barrel_time.fixWeekOffset();
                barrel_time.fillModels();
                barrel_time.fillEpoch();
                barrel_time = null;
