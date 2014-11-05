@@ -202,13 +202,18 @@ public class ExtractTiming {
    }
    
    public void fillModels(){
-      int last_rec = 0, frame_i = 0, size_1Hz;
-      long last_frame;
-      SimpleRegression fit = null, new_fit = null;
+      int
+         last_rec = 0,
+         frame_i = 0;
+      long
+         last_frame;
+      SimpleRegression
+         fit = null,
+         new_fit = null;
       
-      size_1Hz = data.getSize("1Hz");
+      
       //create a model for each batch of time records
-      for(int first_rec = 0; first_rec < time_rec_cnt; first_rec = last_rec){
+      for(int first_rec = 0; first_rec < this.numRecords; first_rec = last_rec){
          //incriment the last_rec by the max, or however many recs are left
          last_rec += Math.min(MAX_RECS, (time_rec_cnt - first_rec));
          
@@ -219,16 +224,16 @@ public class ExtractTiming {
          if(new_fit != null){
             fit = new_fit;
 
-            models[model_cnt] = new LinModel();
-            models[model_cnt].setSlope(fit.getSlope()); 
-            models[model_cnt].setIntercept(fit.getIntercept()); 
-            models[model_cnt].setFirst(time_recs[first_rec].getFrame()); 
-            models[model_cnt].setLast(time_recs[last_rec - 1].getFrame()); 
+            this.models[model_cnt] = new LinModel();
+            this.models[model_cnt].setSlope(fit.getSlope()); 
+            this.models[model_cnt].setIntercept(fit.getIntercept()); 
+            this.models[model_cnt].setFirst(time_recs[first_rec].getFrame()); 
+            this.models[model_cnt].setLast(time_recs[last_rec - 1].getFrame()); 
             model_cnt++;
 
             System.out.println(
-               "Frames " + time_recs[first_rec].getFrame() + " - " +
-               time_recs[last_rec - 1].getFrame()); 
+               "Frames " + this.time_recs[first_rec].getFrame() + " - " +
+               this.time_recs[last_rec - 1].getFrame()); 
             System.out.println(
                "\tm = " + fit.getSlope() + ", b = " + fit.getIntercept() + 
                " slope error = " + fit.getSlopeStdErr() + " n = " + fit.getN()
@@ -246,11 +251,11 @@ public class ExtractTiming {
          //this will clearly not give a good result for time, but will
          //allow the data to be plotted as a time series.
          //This will be a place to add a quality flag
-         models[model_cnt] = new LinModel();
-         models[model_cnt].setSlope(1000); 
-         models[model_cnt].setIntercept(0); 
-         models[model_cnt].setFirst(0); 
-         models[model_cnt].setLast(data.frame_1Hz[size_1Hz]); 
+         this.models[model_cnt] = new LinModel();
+         this.models[model_cnt].setSlope(1000); 
+         this.models[model_cnt].setIntercept(0); 
+         this.models[model_cnt].setFirst(0); 
+         this.models[model_cnt].setLast(this.numRecords); 
          model_cnt = 1;
       }
    }
