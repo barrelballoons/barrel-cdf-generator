@@ -423,8 +423,8 @@ public class ExtractTiming {
       //the time that was transmitted
       for(int rec_i = first, offset_i = 0; rec_i < last; rec_i++, offset_i++){
          offsets[offset_i] = 
-            time_recs[rec_i].getMS() - 
-            (NOM_RATE * time_recs[rec_i].getFrame());
+            this.time_recs[rec_i].getMS() - 
+            (NOM_RATE * this.time_recs[rec_i].getFrame());
       }
       
       //find the median offset value
@@ -434,7 +434,10 @@ public class ExtractTiming {
       //and add them to the model
       for (int rec_i = first, offset_i = 0; rec_i < last; rec_i++, offset_i++){
          if(Math.abs(offsets[offset_i] - med) < 200){
-            fit.addData(time_recs[rec_i].getFrame(), time_recs[rec_i].getMS());
+            fit.addData(
+               this.time_recs[rec_i].getFrame(),
+               this.time_recs[rec_i].getMS()
+            );
          }
       }
       return fit;
