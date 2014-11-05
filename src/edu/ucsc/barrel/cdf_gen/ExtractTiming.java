@@ -30,29 +30,32 @@ import java.util.Arrays;
 
 public class ExtractTiming {
    //Set some constant values
-   private static final int MAX_RECS = 500;// max number of mod4 recs for model
-   private static final double NOM_RATE = 999.89;// nominal ms per frame
-   private static final long MSPERWEEK = 604800000L;// mseconds in a week
-   private static final short MINWK = 1200;
-   private static final byte MINPPS = 0;
-   private static final byte MINMS = 1;
-   private static final byte MINFC = 0;
-   private static final short MAXWK = 1880;
-   private static final short MAXPPS = 1000;
-   private static final int MAXMS = 691200000;
-   private static final int MAXFC = 2097152;
-   //ms from Jan 6, 1980 to J2000
-   private static final long GPS_EPOCH = -630763148816L;
-
+   private static final byte
+      MINPPS    = 0,
+      MINMS     = 1,
+      MINFC     = 0;
+   private static final short
+      MINWK     = 1200,
+      MAXWK     = 1880,
+      MAXPPS    = 1000;
+   private static final int
+      MAX_RECS  = 500,// max number of mod4 recs for model
+      MAXMS     = 691200000,
+      MAXFC     = 2097152;
+   private static final long
+      MSPERWEEK = 604800000L,// mseconds in a week
+      GPS_EPOCH = -630763148816L;//ms from Jan 6, 1980 to J2000
+   private static final double
+      NOM_RATE  = 999.89;// nominal ms per frame
+   
    //offsets for spectral data. These offsets will move the epoch variable so
    //it points to the middle of the accumulation time
-   private static final long SSPC_EPOCH_OFFSET = 16000000000L; //31968000000L;
-   private static final long MSPC_EPOCH_OFFSET = 2000000000L; //3996000000L;
-
+   private static final long 
+      SSPC_EPOCH_OFFSET = 16000000000L; //31968000000L;
+      MSPC_EPOCH_OFFSET = 2000000000L; //3996000000L;
 
    private BarrelFrame[] frames;
-   private int
-      numFrames    = 0;
+   private int numFrames, numRecords, numModels;
 
    private class TimeRec{
       private long 
@@ -130,15 +133,13 @@ public class ExtractTiming {
    private int model_cnt = 0;
 
    public ExtractTiming(BarrelFrame[] frames){
-      int numModels, numRecords;
+      this.frames     = frames;
+      this.numFrames  = this.frames.length;
+      this.numRecords = (int)Math.ceil((float)this.numFrames / 4);
+      this.numModels  = (int)Math.ceil((float)this.numFrames / MAX_RECS);
 
-      this.frames    = frames;
-      numFrames      = this.frames.length;
-      numRecords     = (int)Math.ceil((float)this.numFrames / 4);
-      numModels      = (int)Math.ceil((float)this.numFrames / MAX_RECS);
-
-      this.time_recs = new TimeRec[numRecords];
-      this.models    = new LinModel[numModels];
+      this.time_recs  = new TimeRec[numRecords];
+      this.models     = new LinModel[numModels];
    }
 
    public void getTimeRecs(){
