@@ -27,6 +27,10 @@ package edu.ucsc.barrel.cdf_gen;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 
 public class ExtractTiming {
    //Set some constant values
@@ -128,18 +132,18 @@ public class ExtractTiming {
    private TimeRec[] time_recs;
    private int time_rec_cnt = 0;
 
-   //declare array of linear models
-   private LinModel[] models;
-   private int model_cnt = 0;
+   //Store models in an Array List and use a Map to associate them with frames
+   private Map<Integer, Integer> modelRef;
+   private List<LinModel> models;
 
    public ExtractTiming(BarrelFrame[] frames){
       this.frames     = frames;
       this.numFrames  = this.frames.length;
       this.numRecords = (int)Math.ceil((float)this.numFrames / 4);
-      this.numModels  = (int)Math.ceil((float)this.numFrames / MAX_RECS);
 
       this.time_recs  = new TimeRec[numRecords];
-      this.models     = new LinModel[numModels];
+      this.models     = new ArrayList<LinModel>();
+      this.modelRef   = new HashMap<Integer, Integer>();
    }
 
    public void getTimeRecs(){
@@ -204,16 +208,19 @@ public class ExtractTiming {
    public void fillModels(){
       int
          last_rec = 0,
-         frame_i = 0;
+         frame_i  = 0,
+         model_i  = 0,
+         fc       = 0,
+         last_fc  = 0;
       long
          last_frame;
       SimpleRegression
-         fit = null,
+         fit     = null,
          new_fit = null;
-      
-      
+      LinModel linModel;
+
       //create a model for each batch of time records
-      for(int first_rec = 0; first_rec < this.numRecords; first_rec = last_rec){
+      while(int first_rec = 0; first_rec < this.numRecords; first_rec = last_rec){
          //incriment the last_rec by the max, or however many recs are left
          last_rec += Math.min(MAX_RECS, (time_rec_cnt - first_rec));
          
@@ -223,7 +230,7 @@ public class ExtractTiming {
          //Need to add better criteria than this for accepting a new model
          if(new_fit != null){
             fit = new_fit;
-
+            /*
             this.models[model_cnt] = new LinModel();
             this.models[model_cnt].setSlope(fit.getSlope()); 
             this.models[model_cnt].setIntercept(fit.getIntercept()); 
@@ -242,7 +249,29 @@ public class ExtractTiming {
             System.out.println(
                "Failed to get model using " + (last_rec-first_rec) + " records."
             );
+            */
+            //create a new linear model object
+            linModel = new LinModel();
+            linModel.setSlope(fit.getSlope()); 
+            linModel.setIntercept(fit.getIntercept()); 
+            linModel.setFirst(time_recs[first_rec].getFrame()); 
+            linModel.setLast(time_recs[last_rec - 1].getFrame()); 
+            this.models.add(model_i++, lineModel);
+
+            //associate each frame number between the two time records 
+            //with this linear model
+            last_fc = last_rec.getFrame();
+            while (fc <= last_fc && frame_i) {
+               fc = this.frames[frame_i++];
+               this.modelRef.put(fc, model_i);
+            }
          }
+      }
+
+      //Associate any remaining frames with the last model
+      while (frame_i < this.numFrames) {
+         fc = this.frames[frame_i++];
+         this.modelRef.put(fc, model_i);
       }
 
       if(fit == null){
