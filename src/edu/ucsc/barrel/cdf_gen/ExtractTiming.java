@@ -291,6 +291,7 @@ public class ExtractTiming {
       }
    }
 
+/* 
    public void fillEpoch(){
       long fc; 
       int date_offset, size;
@@ -316,10 +317,10 @@ public class ExtractTiming {
             data.time_model_intercept[data_i]) * 1000000
          );
 
-         /*
+         
          //offset epoch to the begining of the accumulation period
-         data.epoch_1Hz[data_i] -= Constants.SING_ACCUM;
-         */
+         //data.epoch_1Hz[data_i] -= Constants.SING_ACCUM;
+         
 
          //save epoch to the various time scales
          //fill the >1Hz times 
@@ -369,12 +370,13 @@ public class ExtractTiming {
             models[model_i].getIntercept()) * 1000000
          );
         
-         /*
+         
          //offset the epoch to the accumulation time of the first frame
-         data.epoch_mod40[data_i] -= (((fc % 40) + 1) * Constants.SING_ACCUM);
-         */
+         //data.epoch_mod40[data_i] -= (((fc % 40) + 1) * Constants.SING_ACCUM);
+         
       }
    }
+*/
 
    public void fixWeekOffset(){
       /*
@@ -417,10 +419,21 @@ public class ExtractTiming {
    }
 
    public long getEpoch(int fc){
-      long epoch = 0;
+      long epoch;
+      LinModel model;
+
+      //lookup the model for this frame counter
+      model = this.models.get(this.modelRef.get(fc));
+      
+      //calculate epoch in ns
+      epoch = (long)(
+         ((fc * model.getSlope()) + model.getIntercept()) * 1000000
+      );
+
       return epoch;
    }
 
+/*
    private int selectModel(final long fc, final int i){
       int model_i = i;
       //select a model for this frame
@@ -439,7 +452,8 @@ public class ExtractTiming {
 
       return model_i;
    }
-
+*/
+   
    private SimpleRegression genModel(int first, int last){
       int cnt = last - first;
       double[] offsets = new double[cnt];
