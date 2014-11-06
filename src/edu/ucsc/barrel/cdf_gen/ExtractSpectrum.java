@@ -173,61 +173,40 @@ public class SpectrumExtract {
    public ExtractSpectrum(BarrelFrame[] frames){
       this.frames     = frames;
       this.numFrames  = this.frames.length;
-      this.numRecords = (int)Math.ceil((float)this.numFrames / 32);
 
       this.raw_spectra = getSpectraRecords();
    }
 
    private HashMap getSpectraRecords(){
       Map <Integer, Integer[]> spectra = new HashMap<Integer, Integer[]>();
-      
-      for (frame_i = 0, rec_i = 0; frame_i < this.numFrames; frame_i++) {
+      int mod32, fg, fc, frame_i, offset;
+      Integer[] spectrum, part_spec;
+
+      for (frame_i = 0; frame_i < this.numFrames; frame_i++) {
          fc = this.frames[frame_i].getFrameCounter();
          if(fc == null || fc == BarrelFrame.INT4_FILL){
             continue;
          }
-
+         
          mod32 = this.frames[frame_i].mod32;
          fg = fc - mod32;
 
-         //check if we are still in the same frame group 
-         //(meaning the same spectrum)
-         if (frameGroup[rec_i] != fg) {
-            epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
-            peak[rec_i] = this.frames[frame_i].getPeak511();
-            frameGroup[rec_i] = fg;
+         //get the spectrum for this frame group
+         spectrum = spectra.get(fg);
 
-            //get the most recent scintillator temperature value
-            scint_temp = getTemp(frame_i, HKPG.T0);
-            dpu_temp = getTemp(frame_i, HKPG.T5);
-
-            //get the adjusted bin edges
-            old_edges = 
-               SpectrumExtract.makeedges(2, scint_temp, dpu_temp, peak[rec_i]);
-
-            //rebin the spectrum
-            rebin[rec_i] = 
-               SpectrumExtract.rebin(raw_spec, old_edges, std_edges);
-
-            //scale the counts and calculate error
-            for(int bin_i = 0; bin_i < 256; bin_i++){
-               if(rebin[rec_i][bin_i] != BarrelFrame.FLOAT_FILL){
-                  width = std_edges[bin_i + 1] - std_edges[bin_i];
-
-                  //divide counts by bin width and adjust the time scale
-                  rebin[rec_i][bin_i] /= (width * 32f);
-                  //get the count error
-                  error[rec_i][bin_i] = 
-                     (float)Math.sqrt(rebin[rec_i][bin_i]) / (width * 32f);
-               }
-            }
-
-            //clear the raw spectrum
-            Arrays.fill(raw_spec, BarrelFrame.FLOAT_FILL);
-
-            //update the record number and frameGroup
-            rec_i++;            
+         //create the spectrum if this was a new frame group
+         if(spectrum == null) {
+            spectrum = new Integer[256];
+            Arrays.fill(spectrum, BarrelFrame.INT4_FILL);
          }
+
+         //fill part of the spectrum from this frame
+         offset = mod32 * 32;
+         part_spec = this.frames[frame_i].getMspc();
+         for (int sample_i = 0; sample_i < part_spec.length; sample_i++) {
+            spectrum[sample_i + offset] = part_spec[sample_i];
+         }
+      }
 
       return spectra;
    }
