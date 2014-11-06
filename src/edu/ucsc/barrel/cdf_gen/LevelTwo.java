@@ -944,7 +944,7 @@ public class LevelTwo extends CDFWriter{
          //fill part of the raw spectrum
          start = mod32 * 32;
          stop = start + 32;
-         part_spec = this.frames[frame_i].getMspc();
+         part_spec = this.frames[frame_i].getSspc();
          for(
             int spec_i = start, sample_i = 0;
             sample_i < stop;
