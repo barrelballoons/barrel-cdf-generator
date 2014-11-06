@@ -869,9 +869,12 @@ public class LevelTwo extends CDFWriter{
       Arrays.fill(epoch,      BarrelFrame.INT8_FILL);
       Arrays.fill(q,          BarrelFrame.INT4_FILL);
       Arrays.fill(peak,       BarrelFrame.FLOAT_FILL);
-      Arrays.fill(raw_spec,   BarrelFrame.FLOAT_FILL);
-      Arrays.fill(rebin, raw_spec);
-      Arrays.fill(error, raw_spec);
+      Arrays.fill(raw_spec,   BarrelFrame.INT4_FILL);
+      for (int spec_i = 0; spec_i < 256; spec_i++){
+         Arrays.fill(error[spec_i], BarrelFrame.FLOAT_FILL);
+         Arrays.fill(rebin[spec_i], BarrelFrame.FLOAT_FILL);
+      }
+      
 
       //get the first valid frame counter
       frame_i = 0;
@@ -932,7 +935,7 @@ public class LevelTwo extends CDFWriter{
             }
 
             //clear the raw spectrum
-            Arrays.fill(raw_spec, BarrelFrame.FLOAT_FILL);
+            Arrays.fill(raw_spec, BarrelFrame.INT4_FILL);
 
             //update the record number and frameGroup
             rec_i++;            
