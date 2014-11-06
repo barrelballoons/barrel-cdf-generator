@@ -269,12 +269,7 @@ public class SpectrumExtract {
 
       if(this.raw_spectra.size() < 2){return;}
       
-      //create array of detector bin numbers we will be searching
-      for(int bin_i = 0; bin_i < PEAK_511_WIDTH; bin_i++){
-         bin_num[bin_i] = SSPC_MIDPOINTS[bin_i + PEAK_511_START];
-      }
-
-      //sum up all of the spectra from this group
+      //iterate through all frames building groups of spectra and do peak fits
       spec_i = this.rawSpectra.iterator();
       while(spec_i.hasNext()){
          fg = spec_i.next();
@@ -317,8 +312,7 @@ public class SpectrumExtract {
                   "Count rate too high: " +
                   length + " " + max_cnts + " " + search_spec[chan_i]
                );
-               return
-                  Arrays.fill((new int[PEAK_511_WIDTH]),BarrelFrame.FLOAT_FILL);
+               return null
             }
          }
       }
@@ -326,32 +320,43 @@ public class SpectrumExtract {
       return sum;
    }
 
-   private static float find511(double[] x, double[] y){
-      double[]
-         search_spec = new double[PEAK_511_WIDTH],
-         bin_num = new double[PEAK_511_WIDTH];
-      GaussianFitter fitter = 
-         new GaussianFitter(new LevenbergMarquardtOptimizer());
-      double[] 
-         fit_params = {10, Constants.DOUBLE_FILL, 1},
-         curve = new double[PEAK_511_WIDTH - 4];
-      int[]
-         high_area = new int[PEAK_511_WIDTH];
+   private static float find511(Map<Integer, Integer[]> records){
+      GaussianFitter 
+         fitter    =  new GaussianFitter(new LevenbergMarquardtOptimizer());
       double
          m, b, 
-         slope = 0,
-         this_low= 0,
-         last_low = 0;
+         slope      = 0,
+         this_low   = 0,
+         last_low   = 0;
+      double[] 
+         y,
+         x          = new double[PEAK_511_WIDTH],
+         curve      = new double[PEAK_511_WIDTH - 4],
+         fit_params = {10, Constants.FLOAT_FILL, 1};
       int
-         apex = 0,
-         high_cnt = 0;
+         bin_i,
+         apex       = 0,
+         high_cnt   = 0;
+      int[]
+         high_area  = new int[PEAK_511_WIDTH];
       
+      //create array of detector bin numbers we will be searching
+      x = Arrays.copyOfRange(
+         SSPC_MIDPOINTS, PEAK_511_START, PEAK_511_START + PEAK_511_WIDTH
+      );
+
+      //Add up all of the samples we have
+      y = integrate(records);
+      if(y == null){
+         return BarrelFrame.FLOAT_FILL;
+      }
+
       // guess at a linear background
       m = (y[PEAK_511_WIDTH - 1] - y[0]) / (x[PEAK_511_WIDTH - 1] - x[0]);
       b = y[0] - m * x[0];
 
       //convert y to cnts/bin_width
-      for(int bin_i = 0; bin_i < x.length; bin_i++){
+      for(bin_i = 0; bin_i < x.length; bin_i++){
          y[bin_i] /= (
             RAW_EDGES[2][bin_i + PEAK_511_START + 1] - 
             RAW_EDGES[2][bin_i + PEAK_511_START]
@@ -359,14 +364,14 @@ public class SpectrumExtract {
       }
 
       //take the second derivitave to find peak
-      for(int bin_i = 2; bin_i < x.length - 2; bin_i++){
+      for(bin_i = 2; bin_i < x.length - 2; bin_i++){
          curve[bin_i - 2] = y[bin_i + 2] - (2 * y[bin_i]) + y[bin_i - 2];
       }
       
       //find low point of second derivitave using moving average
       this_low  = (curve[0] + curve[1] + curve[2]);
       last_low = this_low;
-      for(int bin_i = 2; bin_i < curve.length - 1; bin_i++){
+      for(bin_i = 2; bin_i < curve.length - 1; bin_i++){
          this_low += (curve[bin_i + 1] - curve[bin_i - 2]);
          if(this_low < last_low){
             apex = bin_i + 2;
@@ -377,7 +382,7 @@ public class SpectrumExtract {
       //do the curve fit
       try{
          fit_params[1] = x[apex]; //guess for peak location
-         for(int bin_i = apex - 3; bin_i < apex + 3; bin_i++){
+         for(bin_i = apex - 3; bin_i < apex + 3; bin_i++){
             fitter.addObservedPoint(x[bin_i],  y[bin_i]);
          }
          fit_params = fitter.fit(fit_params);
@@ -387,7 +392,7 @@ public class SpectrumExtract {
             "Payload ID: " + CDF_Gen.getSetting("currentPayload") + 
             " Date: " + CDF_Gen.getSetting("date"));
          System.out.println("Gaussian out of bounds: " + apex);
-         fit_params[1] = Constants.DOUBLE_FILL;
+         fit_params[1] = Constants.FLOAT_FILL;
       }
       return (float)fit_params[1];
    }
