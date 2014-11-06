@@ -172,9 +172,7 @@ public class CDF_Gen{
                barrel_time.getTimeRecs();
                barrel_time.fixWeekOffset();
                barrel_time.fillModels();
-               barrel_time.fillEpoch();
-               barrel_time = null;
-
+               
                if(getSetting("L").indexOf("1") > -1){
                   //create Level One 
                   LevelOne L1 =
