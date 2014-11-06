@@ -813,7 +813,7 @@ public class LevelTwo extends CDFWriter{
          for(
             int spec_i = start, sample_i = 0;
             sample_i < stop;
-            sample_i++, part_i++
+            sample_i++, spec_i++
          ) {
             raw_spec[spec_i] = part_spec[sample_i];
          }
@@ -948,7 +948,7 @@ public class LevelTwo extends CDFWriter{
          for(
             int spec_i = start, sample_i = 0;
             sample_i < stop;
-            sample_i++, part_i++
+            sample_i++, spec_i++
          ) {
             raw_spec[spec_i] = part_spec[sample_i];
          }
