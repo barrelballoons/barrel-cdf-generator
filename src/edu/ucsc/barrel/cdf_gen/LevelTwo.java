@@ -392,6 +392,8 @@ public class LevelTwo extends CDFWriter{
          q          = new int[numRecords];
       int[][]
          raw_mag;
+      long
+         base_epoch;
       long[] 
          epoch      = new long[numRecords];
       float[] 
@@ -413,6 +415,8 @@ public class LevelTwo extends CDFWriter{
       //extract the nominal magnetometer value and calculate |B| for each frame
       for (int frame_i = 0; frame_i < numFrames; frame_i++) {
          raw_mag = this.frames[frame_i].getMag();
+
+         base_epoch = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
 
          //each frame has 4 samples
          for (int sample_i = 0; sample_i < 4; sample_i++) {
@@ -448,9 +452,9 @@ public class LevelTwo extends CDFWriter{
                   );
                   found_fill = false;
             }
-	    frameGroup[rec_i] = this.frames[frame_i].getFrameCounter();
-	    epoch[rec_i] =
-               CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]) + offset ;
+	         
+            frameGroup[rec_i] = this.frames[frame_i].getFrameCounter();
+	         epoch[rec_i] = base_epoch + offset;
          }
          
          q[frame_i] = this.frames[frane_i].get();
@@ -615,6 +619,8 @@ public class LevelTwo extends CDFWriter{
          q          = new int[numRecords];
       int[][] 
          lc_scaled  = new int[numCh][numRecords];
+      long
+         base_epoch;
       long[]
          epoch      = new long[numRecords];
       float 
@@ -647,6 +653,8 @@ public class LevelTwo extends CDFWriter{
       for(int frame_i = 0; frame_i < this.numFrames; frame_i++){
 
          lc_raw = this.frames[frame_i].getFSPC();
+         
+         base_epoch = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
 
          //each frame has 20 samples per channel
          for (int ch_i = 0; ch_i < numCh; ch_i++) {
@@ -665,8 +673,7 @@ public class LevelTwo extends CDFWriter{
                );
 
                frameGroup[rec_i] = this.frames[frame_i].getFrameCounter();
-               epoch[rec_i] =
-                  CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]) + offset ;
+               epoch[rec_i] = base_epoch + offset ;
             }
          }
       }
