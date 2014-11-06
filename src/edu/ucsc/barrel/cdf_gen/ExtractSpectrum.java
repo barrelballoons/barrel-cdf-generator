@@ -30,8 +30,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.lang.ArrayIndexOutOfBoundsException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import org.apache.commons.math3.fitting.GaussianFitter;
 import org.apache.commons.math3.optim.nonlinear.vector.
           jacobian.LevenbergMarquardtOptimizer;
@@ -199,6 +203,8 @@ public class SpectrumExtract {
          SCALE_FACTOR * 32 * 2);
    
    private Map<Integer, Integer[]> raw_spectra;
+   private Map<Integer, Integer>   spectra_part_count;
+   private Map<Integer, Integer>   peaks;
    private BarrelFrame[] frames;
    private int numFrames, numRecords;
 
@@ -206,12 +212,13 @@ public class SpectrumExtract {
       this.frames     = frames;
       this.numFrames  = this.frames.length;
 
-      this.raw_spectra = getSpectraRecords();
+      this.raw_spectra = new LinkedHashMap<Integer, Integer[]>();
+      this.spectra_part_count = new HashMap<Integer, Integer>();
+      getSpectraRecords();
    }
 
    private HashMap getSpectraRecords(){
-      Map <Integer, Integer[]> spectra = new HashMap<Integer, Integer[]>();
-      int mod32, fg, fc, frame_i, offset;
+      int mod32, fg, fc, frame_i, offset, num_parts;
       Integer[] spectrum, part_spec;
 
       for (frame_i = 0; frame_i < this.numFrames; frame_i++) {
@@ -224,7 +231,7 @@ public class SpectrumExtract {
          fg = fc - mod32;
 
          //get the spectrum for this frame group
-         spectrum = spectra.get(fg);
+         spectrum = this.raw_spectra.get(fg);
 
          //create the spectrum if this was a new frame group
          if(spectrum == null) {
@@ -238,62 +245,91 @@ public class SpectrumExtract {
          for (int sample_i = 0; sample_i < part_spec.length; sample_i++) {
             spectrum[sample_i + offset] = part_spec[sample_i];
          }
+
+         //save the spectrum
+         this.raw_spectra.put(fg, spectrum);
+
+         //keep track of how many spectrum parts we have collected
+         num_parts = this.spectra_part_count.get(fg);
+         num_parts = num_parts != null ? num_parts++ : 1;
+         this.spectra_part_count.put(fg, num_parts);
       }
 
       return spectra;
    }
 
    public static void do511Fits(max_recs){
-
-      int length = stop - start;
-
-      int max_cnts = MAX_CNT_FACTOR * length; 
-
-      if(length < 2){return;}
-      
+      int 
+         max_cnts = MAX_CNT_FACTOR * this.raw_spectra.size(),
+         fg;
+      Iterator<Integer> spec_i;
+      List<Integer[]> records = new ArrayList<Integer[]>();
       DescriptiveStatistics stats = new DescriptiveStatistics();
-      float peak;
-      double max_bin, min_bin;
-      double[]
-         search_spec = new double[PEAK_511_WIDTH],
-         bin_num = new double[PEAK_511_WIDTH];
+      Integer[] spectrum;
+
+      if(this.raw_spectra.size() < 2){return;}
       
       //create array of detector bin numbers we will be searching
       for(int bin_i = 0; bin_i < PEAK_511_WIDTH; bin_i++){
-         bin_num[bin_i] = SSPC_MIDPOINTS[bin_i + PEAK_511_START]; 
+         bin_num[bin_i] = SSPC_MIDPOINTS[bin_i + PEAK_511_START];
       }
 
       //sum up all of the spectra from this group
-      for(int spec_i = start; spec_i < stop; spec_i++){
+      spec_i = this.rawSpectra.iterator();
+      while(spec_i.hasNext()){
+         fg = spec_i.next();
+         if(this.spectra_part_count.get(fg) != 32) {
+            continue;
+         }
 
-         //only add the spectrum to the sum if it is complete
-         if((data.sspc_q[spec_i] & Constants.PART_SPEC) == 0){
-            for(int chan_i = 0; chan_i < PEAK_511_WIDTH; chan_i++){
-               search_spec[chan_i] += 
-                  data.sspc[spec_i][chan_i + PEAK_511_START];
-               //check to see if it is likely the 511 line will be washed out
-               if(search_spec[chan_i] > max_cnts){
-                  for(int peak_i = start; peak_i < stop; peak_i++){
-                     data.peak511_bin[peak_i] = Constants.FLOAT_FILL; 
-                  }
-                  System.out.println(
-                     "too many: " + 
-                     length + " " + max_cnts + " " + search_spec[chan_i]
-                  );
-                  return;
-               }
-            }
+         records.add(this.rawSpectra.get(fg));
+
+         if(records.size() >= max_recs){
+            //we have a full set of records, integrate and look for a peak
+            this.peaks.put(fg, find511(records));
+            records = new ArrayList<Integer[]>();
          }
       }
 
-      peak = find511(bin_num, search_spec);
+      //find the peak in any left over records
+      this.peaks.put(fg, find511(records));
 
       for(int peak_i = start; peak_i < stop; peak_i++){
          data.peak511_bin[peak_i] = peak; 
       }
    }
 
+   private static int[] integrate(Map<Integer, Integer[]> records) {
+      Iterator <Integer> rec_i = records.iterator();
+      Integer[] spectrum;
+      int[] sum = new int[PEAK_511_WIDTH];
+
+      while(rec_i.hasNext()){
+         spectrum = records.get(rec_i.next());
+
+         for(int chan_i = 0; chan_i < PEAK_511_WIDTH; chan_i++){
+            //add this spectrum channel to the summed spectrums channel
+            sum[chan_i] += spectrum[chan_i + PEAK_511_START];
+
+            //check to see if it is likely the 511 line will be washed out
+            if(sum[chan_i] > max_cnts){
+               System.out.println(
+                  "Count rate too high: " +
+                  length + " " + max_cnts + " " + search_spec[chan_i]
+               );
+               return
+                  Arrays.fill((new int[PEAK_511_WIDTH]),BarrelFrame.FLOAT_FILL);
+            }
+         }
+      }
+
+      return sum;
+   }
+
    private static float find511(double[] x, double[] y){
+      double[]
+         search_spec = new double[PEAK_511_WIDTH],
+         bin_num = new double[PEAK_511_WIDTH];
       GaussianFitter fitter = 
          new GaussianFitter(new LevenbergMarquardtOptimizer());
       double[] 
