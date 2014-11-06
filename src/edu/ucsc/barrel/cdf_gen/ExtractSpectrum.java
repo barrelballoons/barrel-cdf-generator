@@ -28,10 +28,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-
 import java.util.Arrays;
 import java.lang.ArrayIndexOutOfBoundsException;
-
+import java.util.Map;
+import java.util.HashMap;
 import org.apache.commons.math3.fitting.GaussianFitter;
 import org.apache.commons.math3.optim.nonlinear.vector.
           jacobian.LevenbergMarquardtOptimizer;
@@ -162,12 +162,77 @@ public class SpectrumExtract {
       counts for this spectrum to 2*32*[End Energy Level - Start Enrgy level]
    */
    public static final int
-      MAX_CNT_FACTOR = 
-         (int) (32 * 2 * 
-         (OLD_RAW_EDGES[2][PEAK_511_END] - OLD_RAW_EDGES[2][PEAK_511_START]) * 
-         SCALE_FACTOR);
+      MAX_CNT_FACTOR = (int)
+         ((OLD_RAW_EDGES[2][PEAK_511_END] - OLD_RAW_EDGES[2][PEAK_511_START]) * 
+         SCALE_FACTOR * 32 * 2);
+   
+   private Map<Integer, Integer[]> raw_spectra;
+   private BarrelFrame[] frames;
+   private int numFrames, numRecords;
 
-   public static void do511Fits(int start, int stop){
+   public ExtractSpectrum(BarrelFrame[] frames){
+      this.frames     = frames;
+      this.numFrames  = this.frames.length;
+      this.numRecords = (int)Math.ceil((float)this.numFrames / 32);
+
+      this.raw_spectra = getSpectraRecords();
+   }
+
+   private HashMap getSpectraRecords(){
+      Map <Integer, Integer[]> spectra = new HashMap<Integer, Integer[]>();
+      
+      for (frame_i = 0, rec_i = 0; frame_i < this.numFrames; frame_i++) {
+         fc = this.frames[frame_i].getFrameCounter();
+         if(fc == null || fc == BarrelFrame.INT4_FILL){
+            continue;
+         }
+
+         mod32 = this.frames[frame_i].mod32;
+         fg = fc - mod32;
+
+         //check if we are still in the same frame group 
+         //(meaning the same spectrum)
+         if (frameGroup[rec_i] != fg) {
+            epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
+            peak[rec_i] = this.frames[frame_i].getPeak511();
+            frameGroup[rec_i] = fg;
+
+            //get the most recent scintillator temperature value
+            scint_temp = getTemp(frame_i, HKPG.T0);
+            dpu_temp = getTemp(frame_i, HKPG.T5);
+
+            //get the adjusted bin edges
+            old_edges = 
+               SpectrumExtract.makeedges(2, scint_temp, dpu_temp, peak[rec_i]);
+
+            //rebin the spectrum
+            rebin[rec_i] = 
+               SpectrumExtract.rebin(raw_spec, old_edges, std_edges);
+
+            //scale the counts and calculate error
+            for(int bin_i = 0; bin_i < 256; bin_i++){
+               if(rebin[rec_i][bin_i] != BarrelFrame.FLOAT_FILL){
+                  width = std_edges[bin_i + 1] - std_edges[bin_i];
+
+                  //divide counts by bin width and adjust the time scale
+                  rebin[rec_i][bin_i] /= (width * 32f);
+                  //get the count error
+                  error[rec_i][bin_i] = 
+                     (float)Math.sqrt(rebin[rec_i][bin_i]) / (width * 32f);
+               }
+            }
+
+            //clear the raw spectrum
+            Arrays.fill(raw_spec, BarrelFrame.FLOAT_FILL);
+
+            //update the record number and frameGroup
+            rec_i++;            
+         }
+
+      return spectra;
+   }
+
+   public static void do511Fits(max_recs){
 
       int length = stop - start;
 
