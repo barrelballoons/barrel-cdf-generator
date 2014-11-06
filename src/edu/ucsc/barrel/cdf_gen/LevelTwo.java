@@ -352,11 +352,11 @@ public class LevelTwo extends CDFWriter{
       System.out.println("\nSaving MISC Level Two CDF...");
 
       for(int frame_i = 0; frame_i < this.numFrames; frame_i++){
-        pps_vals[frame_i]   = this.frames.getPPS();
-        version[frame_i]    = this.frames.getDPUVersion();
-        payID[frame_i]      = this.frames.getPayloadID();
-        frameGroup[frame_i] = this.frames.getFrameCounter();
-        epoch[frame_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[frame_i]);
+         pps_vals[frame_i]   = this.frames.getPPS();
+         version[frame_i]    = this.frames.getDPUVersion();
+         payID[frame_i]      = this.frames.getPayloadID();
+         frameGroup[frame_i] = this.frames.getFrameCounter();
+         epoch[frame_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[frame_i]);
       }
 
       String destName = 
