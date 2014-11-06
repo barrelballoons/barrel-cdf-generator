@@ -653,7 +653,7 @@ public class LevelTwo extends CDFWriter{
       for(int frame_i = 0; frame_i < this.numFrames; frame_i++){
 
          lc_raw = this.frames[frame_i].getFSPC();
-         
+
          base_epoch = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
 
          //each frame has 20 samples per channel
@@ -896,8 +896,8 @@ public class LevelTwo extends CDFWriter{
             continue;
          }
 
-         mod4 = this.frames[frame_i].mod4;
-         fg = fc - mod4;
+         mod32 = this.frames[frame_i].mod32;
+         fg = fc - mod32;
 
          //check if we are still in the same frame group 
          //(meaning the same spectrum)
