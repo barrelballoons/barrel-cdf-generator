@@ -39,7 +39,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 public class CDF_Gen{
    
    public static FrameHolder frames;
-   public static SpectrumExtract spectra;
+   public static ExtractSpectrum spectra;
    public static ExtractTiming barrel_time;
 
    private static DataCollector dataPull;
@@ -175,8 +175,9 @@ public class CDF_Gen{
                
                if(getSetting("L").indexOf("1") > -1){
                   //create Level One 
-                  LevelOne L1 =
-						   new LevelOne(getSetting("date"), id, flt, stn, L1_Dir);
+                  LevelOne L1 = new LevelOne(
+                     getSetting("date"),id,flt,stn,L1_Dir,getSetting("dpu")
+                  );
                   L1 = null;
                }
                
@@ -190,10 +191,13 @@ public class CDF_Gen{
                      max_recs = 20;
                   
                   System.out.println("Starting Level Two...");
+
+                  //calibrate the mspc and sspc bins
                   System.out.println("Locating 511 line...");
+                  spectra = new ExtractSpectrum(frames);
 
                   for(int spec_i = 0; spec_i < total_specs, spec_i += max_recs){
-                     SpectrumExtract.do511Fits(
+                     spectra.do511Fits(
                         spec_i, Math.min(total_specs, start_i + max_recs)
                      );
                   }
@@ -202,7 +206,7 @@ public class CDF_Gen{
                   //create Level Two
                   LevelTwo L2 =
 						   new LevelTwo(
-                        getSetting("date"), id, flt, stn, L2_Dir
+                        getSetting("date"),id,flt,stn,L2_Dir,getSetting(dpu)
                      );
 
                   L2 = null;

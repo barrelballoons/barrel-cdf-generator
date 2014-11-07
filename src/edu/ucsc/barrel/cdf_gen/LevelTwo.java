@@ -48,14 +48,15 @@ public class LevelTwo extends CDFWriter{
    private int date;
    public LevelTwo(
       final BarrelFrame[] frames, final int date,
-      final String d, final String p, 
-      final String f, final String s, final String dir 
+      final String d, final String p, final String f, 
+      final String s, final String dir, final String dpu
    ) throws IOException
    {
       super(d, p, f, s, dir, "Level Two");
       this.frames = frames;
       this.numFrames = this.frames.length;
       this.date = date;
+      this.dpu_ver = Integer.valueOf(dpu);
    }
    
    //Convert the EPHM data and save it to CDF files
