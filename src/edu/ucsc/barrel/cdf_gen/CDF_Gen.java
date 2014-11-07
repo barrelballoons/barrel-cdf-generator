@@ -172,7 +172,7 @@ public class CDF_Gen{
                barrel_time.getTimeRecs();
                barrel_time.fixWeekOffset();
                barrel_time.fillModels();
-               
+               /*
                if(getSetting("L").indexOf("1") > -1){
                   //create Level One 
                   LevelOne L1 = new LevelOne(
@@ -180,7 +180,7 @@ public class CDF_Gen{
                   );
                   L1 = null;
                }
-               
+               */
                if(getSetting("L").indexOf("2") > -1){
                   //create a set of linear models that track the location of
                   //the 511 line and store them in the DataHolder object
