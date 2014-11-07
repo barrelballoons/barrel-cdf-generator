@@ -563,9 +563,7 @@ public class ExtractSpectrum {
       String payload = 
          CDF_Gen.getSetting("currentPayload").substring(0,2);
 
-      float[] edges_in = (
-         this.raw_edges[spec_i]
-      );
+      float[] edges_in = this.raw_edges[spec_i];
 
       //initialize array for calibrated edges
       float[] edges_out = new float[edges_in.length];
@@ -656,9 +654,7 @@ public class ExtractSpectrum {
 
    public static float[] createBinEdges(int spec_i, double peak511){
       double factor1, factor2, scale;
-      float[] edges_in = (
-         this.raw_edges[spec_i]
-      );
+      float[] edges_in = this.raw_edges[spec_i];
       double[] edges_nonlin = new double[edges_in.length];
       float[] edges_cal = new float[edges_in.length];
 
