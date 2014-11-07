@@ -201,7 +201,7 @@ public class CDF_Gen{
                         spec_i, Math.min(total_specs, start_i + max_recs)
                      );
                   }
-                  fill511Gaps();
+                  //fill511Gaps();
 
                   //create Level Two
                   LevelTwo L2 =
@@ -222,7 +222,7 @@ public class CDF_Gen{
       //close the log file
       log.close();
    }
-   
+   /*
    public static void fill511Gaps(){
       int 
          size = parseInt(frames.size() / 32),
@@ -297,6 +297,7 @@ public class CDF_Gen{
          }
       }
    }
+   */
 
    private static void loadConfig(String[] args){
 	   String[] setPair;
