@@ -203,17 +203,18 @@ public class ExtractSpectrum {
          SCALE_FACTOR * 32 * 2);
    
    private Map<Integer, Integer[]> raw_spectra;
-   private Map<Integer, Integer>   spectra_part_count;
-   private Map<Integer, Integer>   peaks;
+   private Map<Integer, Integer> spectra_part_count;
+   private List<Integer> peaks;
+   private Map<Integer, Integer> peaks_ref;
    private BarrelFrame[] frames;
    private int numFrames, numRecords;
 
    public ExtractSpectrum(BarrelFrame[] frames, int dpuVer){
-
+      this.peaks      = new ArrayList<Integer>;
+      this.peaks_ref  = new HashMap<Integer, Integer>();
       this.frames     = frames;
       this.numFrames  = this.frames.length;
       this.raw_edges  = dpuVer > 3 ? RAW_EDGES : OLD_RAW_EDGES;
-
       this.raw_spectra = new LinkedHashMap<Integer, Integer[]>();
       this.spectra_part_count = new HashMap<Integer, Integer>();
       getSpectraRecords();
@@ -263,7 +264,9 @@ public class ExtractSpectrum {
    public static void do511Fits(max_recs){
       int 
          max_cnts = MAX_CNT_FACTOR * this.raw_spectra.size(),
-         fg;
+         peak_i   = 0,
+         frame_i  = 0,
+         fg, fc;
       Iterator<Integer> spec_i;
       List<Integer[]> records = new ArrayList<Integer[]>();
       DescriptiveStatistics stats = new DescriptiveStatistics();
@@ -283,13 +286,27 @@ public class ExtractSpectrum {
 
          if(records.size() >= max_recs){
             //we have a full set of records, integrate and look for a peak
-            this.peaks.put(fg, find511(records));
+            this.peaks.add(peak_i, find511(records));
+
+            //associate all frame numbers with this peak
+            while(frame_i < fg){
+               fc = this.frames[frame_i++].getFrameCounter();
+               this.peaks_ref.put(fc, peak_i)
+               frame_i++;
+            }
+
+            peak_i++;
             records = new ArrayList<Integer[]>();
          }
       }
 
       //find the peak in any left over records
-      this.peaks.put(fg, find511(records));
+      this.peaks.add(peak_i, find511(records));
+      while(frame_i < this.frames.length){
+         fc = this.frames[frame_i++].getFrameCounter();
+         this.peaks_ref.put(fc, peak_i)
+         frame_i++;
+      }
    }
 
    private static int[] integrate(Map<Integer, Integer[]> records) {
@@ -816,5 +833,11 @@ public class ExtractSpectrum {
       return specout;
    }
 
+   public Integer getPeakLocation(int fc){
+      Integer peak_i, peak;
 
+      peak_i = this.peaks_ref.get(fc);
+
+      return (peak_i == null ? this.peaks.get(peak_i);
+   }
 }
