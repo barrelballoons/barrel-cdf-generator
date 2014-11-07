@@ -1,5 +1,5 @@
 /*
-SpectrumExtract.java
+ExtractSpectrum.java
 
 Description:
    Creates energy bin edges and rebins spectra.
@@ -42,9 +42,9 @@ import org.apache.commons.math3.optim.nonlinear.vector.
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
-public class SpectrumExtract {
+public class ExtractSpectrum {
 
-   private SpectrumExtract(){}
+   private ExtractSpectrum(){}
 
    //create uncalibrated bin edges
    private static final float[][] 
@@ -208,9 +208,11 @@ public class SpectrumExtract {
    private BarrelFrame[] frames;
    private int numFrames, numRecords;
 
-   public ExtractSpectrum(BarrelFrame[] frames){
+   public ExtractSpectrum(BarrelFrame[] frames, int dpuVer){
+
       this.frames     = frames;
       this.numFrames  = this.frames.length;
+      this.raw_edges  = dpuVer > 3 ? RAW_EDGES : OLD_RAW_EDGES;
 
       this.raw_spectra = new LinkedHashMap<Integer, Integer[]>();
       this.spectra_part_count = new HashMap<Integer, Integer>();
@@ -288,10 +290,6 @@ public class SpectrumExtract {
 
       //find the peak in any left over records
       this.peaks.put(fg, find511(records));
-
-      for(int peak_i = start; peak_i < stop; peak_i++){
-         data.peak511_bin[peak_i] = peak; 
-      }
    }
 
    private static int[] integrate(Map<Integer, Integer[]> records) {
@@ -358,8 +356,8 @@ public class SpectrumExtract {
       //convert y to cnts/bin_width
       for(bin_i = 0; bin_i < x.length; bin_i++){
          y[bin_i] /= (
-            RAW_EDGES[2][bin_i + PEAK_511_START + 1] - 
-            RAW_EDGES[2][bin_i + PEAK_511_START]
+            this.raw_edges[2][bin_i + PEAK_511_START + 1] - 
+            this.raw_edges[2][bin_i + PEAK_511_START]
          );
       }
 
@@ -399,8 +397,7 @@ public class SpectrumExtract {
 
    public static float[] stdEdges(int spec_i, float scale){
       float[] edges = (
-         CDF_Gen.data.getVersion() > 3 ? 
-         RAW_EDGES[spec_i] : OLD_RAW_EDGES[spec_i]
+         this.raw_edges[spec_i]
       );
       float[] result = new float[edges.length];
 
@@ -450,7 +447,6 @@ public class SpectrumExtract {
 
       float[] iter1 = new float[size];
       float[] iter2 = new float[size];
-     
 
       //first iteration of Newton-Raphson  
       for(int i = 0; i < size; i++){
@@ -551,8 +547,7 @@ public class SpectrumExtract {
          CDF_Gen.getSetting("currentPayload").substring(0,2);
 
       float[] edges_in = (
-         CDF_Gen.data.getVersion() > 3 ? 
-         RAW_EDGES[spec_i] : OLD_RAW_EDGES[spec_i]
+         this.raw_edges[spec_i]
       );
 
       //initialize array for calibrated edges
@@ -645,8 +640,7 @@ public class SpectrumExtract {
    public static float[] createBinEdges(int spec_i, double peak511){
       double factor1, factor2, scale;
       float[] edges_in = (
-         CDF_Gen.data.getVersion() > 3 ? 
-         RAW_EDGES[spec_i] : OLD_RAW_EDGES[spec_i]
+         this.raw_edges[spec_i]
       );
       double[] edges_nonlin = new double[edges_in.length];
       float[] edges_cal = new float[edges_in.length];
