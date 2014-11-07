@@ -45,18 +45,18 @@ import java.util.HashMap;
 
 public class LevelTwo extends CDFWriter{
    private BarrelFrame[] frames;
-   private int date;
+   private int date, dpu_ver;
    public LevelTwo(
       final BarrelFrame[] frames, final int date,
       final String d, final String p, final String f, 
-      final String s, final String dir, final String dpu
+      final String s, final String dir, final ver String
    ) throws IOException
    {
       super(d, p, f, s, dir, "Level Two");
       this.frames = frames;
       this.numFrames = this.frames.length;
       this.date = date;
-      this.dpu_ver = Integer.valueOf(dpu);
+      this.dpu_ver = Integer.valueOf(ver);
    }
    
    //Convert the EPHM data and save it to CDF files
@@ -546,7 +546,7 @@ public class LevelTwo extends CDFWriter{
          if(hkpg_raw == BarrelFrame.INT4_FILL){continue;}
 
          //convert the housekeeping data to physical units
-         if(this.frames[frame_i].getDPUVersion() > 3) {
+         if(this.dpu_ver > 3) {
             //for versions 3 and up the T9 and T11 sensors were used for
             //mag statistics rather than solar panel temps
             switch (mod40) {
@@ -609,11 +609,11 @@ public class LevelTwo extends CDFWriter{
       hkpg.close();
    }
 
-   public void doFspcCdf(dpuVer) throws CDFException{
+   public void doFspcCdf() throws CDFException{
       int
          rec_i, offset,
          numRecords = this.frames * 20,
-         numCh = FSPC.getChannels(dpuVer).length;
+         numCh = FSPC.getChannels(this.dpu_ver).length;
       int[] 
          lc_raw     = new int[numRecords];
          frameGroup = new int[numRecords],
@@ -684,7 +684,7 @@ public class LevelTwo extends CDFWriter{
          "_l2_" + "fspc" + "_20" + date +  "_v" + revNum + ".cdf";
 
       FSPC fspc = 
-         new FSPC(destName, "bar_" + id, date, 2, CDF_Gen.data.getVersion());
+         new FSPC(destName, "bar_" + id, date, 2, this.dpu_ver);
 
       for (int ch_i = 0; ch_i < numCh; ch_i++) {
 
