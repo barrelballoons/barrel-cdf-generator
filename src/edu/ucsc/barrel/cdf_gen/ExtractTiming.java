@@ -262,7 +262,7 @@ public class ExtractTiming {
             //with this linear model
             last_fc = last_rec.getFrame();
             while (fc <= last_fc) {
-               fc = this.frames[frame_i++];
+               fc = this.frames[frame_i++].getFrameCounter();
                this.modelRef.put(fc, model_i);
             }
 
