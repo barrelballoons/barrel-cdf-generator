@@ -42,7 +42,7 @@ public class FSPC extends DataProduct{
    private String payload_id;
    private float scale = 2.4414f; // keV/bin
 
-   public final static float[] 
+   static public final float[] 
       BIN_EDGES = {0f, 20f, 40f, 75f, 230f, 350f, 620f}, 
       BIN_CENTERS = {10f, 30f, 57.5f, 152.5f, 290f, 485f}, 
       BIN_WIDTHS = {20f, 20f, 35f, 155f, 120f, 250f},
@@ -50,7 +50,7 @@ public class FSPC extends DataProduct{
       OLD_BIN_CENTERS = {37.5f, 152.5f, 290f, 485f}, 
       OLD_BIN_WIDTHS = {75f, 155f, 120f, 250f};
 
-   public final static String[]
+   static public final String[]
       NEW_LABELS = {"FSPC1a", "FSPC1b", "FSPC1c", "FSPC2", "FSPC3", "FSPC4"},
       OLD_LABELS = {"FSPC1", "FSPC2", "FSPC3",  "FSPC4"};
 

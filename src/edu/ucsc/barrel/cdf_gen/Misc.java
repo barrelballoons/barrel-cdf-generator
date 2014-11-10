@@ -38,6 +38,16 @@ import java.util.Vector;
 import java.util.Arrays;
 
 public class Misc extends DataProduct{
+   static public final short
+      PPS_FILL        = BarrelFrame.INT4_FILL,
+      PAYLOADID_FILL  = BarrelFrame.INT2_FILL,
+      VERSION_FILL    = BarrelFrame.INT2_FILL;
+   static public final int
+      FC_FILL         = BarrelFrame.INT4_FILL,
+      QUALITY_FILL    = BarrelFrame.INT4_FILL;
+   static public final long
+      EPOCH_FILL      = BarrelFrame.TT2000_FILL;
+
    private int date, lvl;
    private String payload_id;
 

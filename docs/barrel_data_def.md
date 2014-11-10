@@ -278,18 +278,18 @@ The magnetometor data has not been "unspun", so there are fluctuations due to pa
 
 *Table 4.6.2* - Level Two EPHM Contents
 
-|     Variable | Datatype |         Units |  
-| ------------ | -------- | ------------- |  
-|   FrameGroup |     INT4 |               |  
-|        Epoch |   TT2000 |            ns |  
-|      Quality |     INT4 |               |
-|      GPS_Lat | INT4[48] | degrees North |  
-|      GPS_Lon | INT4[48] |  degrees East |  
-|      GPS_Alt | INT4[48] |            km |  
-| MLT_Kp2_T89c | INT4[48] |            hr |  
-| MLT_Kp2_T89c | INT4[48] |            hr |  
-|        L_Kp2 | INT4[48] |               |  
-|        L_Kp2 | INT4[48] |               |  
+|     Variable |  Datatype |         Units |  
+| ------------ | --------- | ------------- |  
+|   FrameGroup |     INT4  |               |  
+|        Epoch |   TT2000  |            ns |  
+|      Quality |     INT4  |               |
+|      GPS_Lat | FLOAT[48] | degrees North |  
+|      GPS_Lon | FLOAT[48] |  degrees East |  
+|      GPS_Alt | FLOAT[48] |            km |  
+| MLT_Kp2_T89c | FLOAT[48] |            hr |  
+| MLT_Kp2_T89c | FLOAT[48] |            hr |  
+|        L_Kp2 | FLOAT[48] |               |  
+|        L_Kp2 | FLOAT[48] |               |  
 
 ### 4.7 HKPG - Housekeeping
 
@@ -311,42 +311,42 @@ Housekeeping data are transmitted as digital words calculated by an ADC and mult
 |     modemcounter |     INT2 |                         |
 |       dcdcounter |     INT2 |                         |
 |            weeks |     INT4 |                         |
-|         T0_Scint |     INT8 | &deg;C (Level Two Only) |
-|           T1_Mag |     INT8 | &deg;C (Level Two Only) |
-|    T2_ChargeCont |     INT8 | &deg;C (Level Two Only) |
-|       T3_Battery |     INT8 | &deg;C (Level Two Only) |
-|     T4_PowerConv |     INT8 | &deg;C (Level Two Only) |
-|           T5_DPU |     INT8 | &deg;C (Level Two Only) |
-|         T6_Modem |     INT8 | &deg;C (Level Two Only) |
-|     T7_Structure |     INT8 | &deg;C (Level Two Only) |
-|        T8_Solar1 |     INT8 | &deg;C (Level Two Only) |
-|        T9_Solar2 |     INT8 | &deg;C (Level Two Only) |
-|       T10_Solar3 |     INT8 | &deg;C (Level Two Only) |
-|       T11_Solar4 |     INT8 | &deg;C (Level Two Only) |
-|     T12_TermTemp |     INT8 | &deg;C (Level Two Only) |
-|     T13_TermBatt |     INT8 | &deg;C (Level Two Only) |
-|      T14_TermCap |     INT8 | &deg;C (Level Two Only) |
-|         T15_Stat |     INT8 | &deg;C (Level Two Only) |
-|    V0_VoltAtLoad |     INT8 |      V (Level Two Only) |
-|       V1_Battery |     INT8 |      V (Level Two Only) |
-|        V2_Solar1 |     INT8 |      V (Level Two Only) |
-|     V3\_POS\_DPU |     INT8 |      V (Level Two Only) |
-| V4\_POS\_XRayDet |     INT8 |      V (Level Two Only) |
-|         V5_Modem |     INT8 |      V (Level Two Only) |
-| V6\_NEG_\XRayDet |     INT8 |      V (Level Two Only) |
-|     V7\_NEG\_DPU |     INT8 |      V (Level Two Only) |
-|           V8_Mag |     INT8 |      V (Level Two Only) |
-|        V9_Solar2 |     INT8 |      V (Level Two Only) |
-|       V10_Solar3 |     INT8 |      V (Level Two Only) |
-|       V11_Solar4 |     INT8 |      V (Level Two Only) |
-|     I0_TotalLoad |     INT8 |      A (Level Two Only) |
-|    I1_TotalSolar |     INT8 |      A (Level Two Only) |
-|        I2_Solar1 |     INT8 |      A (Level Two Only) |
-|         I3_POSPU |     INT8 |      A (Level Two Only) |
-| I4\_POS\_XRayDet |     INT8 |     mA (Level Two Only) |
-|         I5_Modem |     INT8 |     mA (Level Two Only) |
-| I6\_NEG\_XRayDet |     INT8 |     mA (Level Two Only) |
-|     I7\_NEG\_DPU |     INT8 |     mA (Level Two Only) |
+|         T0_Scint |     INT2 | &deg;C (Level Two Only) |
+|           T1_Mag |     INT2 | &deg;C (Level Two Only) |
+|    T2_ChargeCont |     INT2 | &deg;C (Level Two Only) |
+|       T3_Battery |     INT2 | &deg;C (Level Two Only) |
+|     T4_PowerConv |     INT2 | &deg;C (Level Two Only) |
+|           T5_DPU |     INT2 | &deg;C (Level Two Only) |
+|         T6_Modem |     INT2 | &deg;C (Level Two Only) |
+|     T7_Structure |     INT2 | &deg;C (Level Two Only) |
+|        T8_Solar1 |     INT2 | &deg;C (Level Two Only) |
+|        T9_Solar2 |     INT2 | &deg;C (Level Two Only) |
+|       T10_Solar3 |     INT2 | &deg;C (Level Two Only) |
+|       T11_Solar4 |     INT2 | &deg;C (Level Two Only) |
+|     T12_TermTemp |     INT2 | &deg;C (Level Two Only) |
+|     T13_TermBatt |     INT2 | &deg;C (Level Two Only) |
+|      T14_TermCap |     INT2 | &deg;C (Level Two Only) |
+|         T15_Stat |     INT2 | &deg;C (Level Two Only) |
+|    V0_VoltAtLoad |     INT2 |      V (Level Two Only) |
+|       V1_Battery |     INT2 |      V (Level Two Only) |
+|        V2_Solar1 |     INT2 |      V (Level Two Only) |
+|     V3\_POS\_DPU |     INT2 |      V (Level Two Only) |
+| V4\_POS\_XRayDet |     INT2 |      V (Level Two Only) |
+|         V5_Modem |     INT2 |      V (Level Two Only) |
+| V6\_NEG_\XRayDet |     INT2 |      V (Level Two Only) |
+|     V7\_NEG\_DPU |     INT2 |      V (Level Two Only) |
+|           V8_Mag |     INT2 |      V (Level Two Only) |
+|        V9_Solar2 |     INT2 |      V (Level Two Only) |
+|       V10_Solar3 |     INT2 |      V (Level Two Only) |
+|       V11_Solar4 |     INT2 |      V (Level Two Only) |
+|     I0_TotalLoad |     INT2 |      A (Level Two Only) |
+|    I1_TotalSolar |     INT2 |      A (Level Two Only) |
+|        I2_Solar1 |     INT2 |      A (Level Two Only) |
+|         I3_POSPU |     INT2 |      A (Level Two Only) |
+| I4\_POS\_XRayDet |     INT2 |     mA (Level Two Only) |
+|         I5_Modem |     INT2 |     mA (Level Two Only) |
+| I6\_NEG\_XRayDet |     INT2 |     mA (Level Two Only) |
+|     I7\_NEG\_DPU |     INT2 |     mA (Level Two Only) |
      
 ### 4.8 MISC - Miscellaneous
 
@@ -361,7 +361,7 @@ The MISC file contains 1Hz data. It holds both the PPS variable and the DPU vers
 |                  Epoch |   TT2000 |        ns |  
 |                GPS_PPS |     INT4 |        ms |  
 |                Version |     INT2 |           |
-|             Payload_ID |     INT4 |           |
+|             Payload_ID |     INT2 |           |
 | Time\_Model\_Intercept |   DOUBLE |           |  
 |     Time\_Model\_Slope |   DOUBLE |           |  
 

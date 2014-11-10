@@ -40,14 +40,24 @@ import java.util.Arrays;
 public class Ephm extends DataProduct{
    static public final int 
       ALT_I = 0, TIME_I = 1, LAT_I = 2, LON_I = 3,
-      MS_WEEK_MIN = 0, MS_WEEK_MAX = 604800000, 
-      LAT_RAW_MIN = -1073741824, LAT_RAW_MAX = 1073741824, 
-      LON_RAW_MIN = -2147483647, LON_RAW_MAX = 2147483647, 
-      ALT_RAW_MIN = 0, ALT_RAW_MAX = 50000000,
-      GPS_FILL = BarrelFrame.INT4_FILL,
-      LAT_MIN = -1073741824,LAT_MAX = 1073741824, 
-      LON_MIN = -2147483647, LON_MAX = 2147483647, 
-      ALT_MIN = 0, ALT_MAX = 50000000;
+      MS_WEEK = 604800000,
+      FC_FILL          = BarrelFrame.INT4_FILL,
+      QUALITY_FILL     = BarrelFrame.INT4_FILL,
+      MS_OF_WEEK_FILL  = BarrelFrame.INT4_FILL,
+      RAW_LAT_FILL     = BarrelFrame.INT4_FILL,
+      RAW_LON_FILL     = BarrelFrame.INT4_FILL,
+      RAW_ALT_FILL     = BarrelFrame.INT4_FILL;
+   static public final long
+      EPOCH_FILL       = BarrelFrame.TT2000_FILL;
+   static public final float
+      LAT_FILL         = BarrelFrame.FLOAT_FILL,
+      LON_FILL         = BarrelFrame.FLOAT_FILL,
+      ALT_FILL         = BarrelFrame.FLOAT_FILL,
+      MLT2_FILL        = BarrelFrame.FLOAT_FILL,
+      MLT6_FILL        = BarrelFrame.FLOAT_FILL,
+      L2_FILL          = BarrelFrame.FLOAT_FILL,
+      L6_FILL          = BarrelFrame.FLOAT_FILL;
+
    private int date, lvl;
    private String payload_id;
 

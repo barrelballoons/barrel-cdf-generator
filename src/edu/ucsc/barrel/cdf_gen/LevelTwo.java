@@ -92,17 +92,17 @@ public class LevelTwo extends CDFWriter{
          complete_gps= new HashMap<Integer, Boolean>(numRecords);
 
       //initialize the data arrays with fill value
-      Arrays.fill(frameGroup, BarrelFrame.INT4_FILL);
-      Arrays.fill(epoch,      BarrelFrame.INT8_FILL);
-      Arrays.fill(q,          BarrelFrame.INT4_FILL);
-      Arrays.fill(gps_time,   BarrelFrame.INT8_FILL);
-      Arrays.fill(lat,        BarrelFrame.FLOAT_FILL);
-      Arrays.fill(lon,        BarrelFrame.FLOAT_FILL);
-      Arrays.fill(alt,        BarrelFrame.FLOAT_FILL);
-      Arrays.fill(mlt2,       BarrelFrame.FLOAT_FILL);
-      Arrays.fill(mlt6,       BarrelFrame.FLOAT_FILL);
-      Arrays.fill(l2,         BarrelFrame.FLOAT_FILL);
-      Arrays.fill(l6,         BarrelFrame.FLOAT_FILL);
+      Arrays.fill(frameGroup, Ephm.FC_FILL);
+      Arrays.fill(epoch,      Ephm.EPOCH_FILL);
+      Arrays.fill(q,          Ephm.QUALITY_FILL);
+      //Arrays.fill(gps_time,   Ephm.GPSTIME_FILL);
+      Arrays.fill(lat,        Ephm.LAT_FILL);
+      Arrays.fill(lon,        Ephm.LON_FILL);
+      Arrays.fill(alt,        Ephm.ALT_FILL);
+      Arrays.fill(mlt2,       Ephm.MLT2_FILL);
+      Arrays.fill(mlt6,       Ephm.MLT6_FILL);
+      Arrays.fill(l2,         Ephm.L2_FILL);
+      Arrays.fill(l6,         Ephm.L6_FILL);
 
       System.out.println("\nSaving EPHM Level Two CDF...");
 
@@ -143,7 +143,7 @@ public class LevelTwo extends CDFWriter{
             //convert mm to km
             case Ephm.ALT_I:
                intVal = this.frames[frame_i].getGps();
-               alt[rec_i] = intVal != BarrelFrame.INT4_FILL ?
+               alt[rec_i] = intVal != Ephm.RAW_ALT_FILL ?
                   intVal / 1000000 :
                   Ephm.ALT_FILL;
             break;
@@ -151,7 +151,7 @@ public class LevelTwo extends CDFWriter{
             //convert lat and lon to physical units
             case Ephm.LAT_I:
                intVal = this.frames[frame_i].getGps();
-               lat[rec_i] = intVal != BarrelFrame.INT4_FILL ? 
+               lat[rec_i] = intVal != Ephm.RAW_LAT_FILL ? 
                   (
                      intVal * 
                      Float.intBitsToFloat(
@@ -162,7 +162,7 @@ public class LevelTwo extends CDFWriter{
             break;
             case Ephm.LON_I:
                intVal = this.frames[frame_i].getGps();
-               lon[rec_i] = intVal != BarrelFrame.INT4_FILL ? 
+               lon[rec_i] = intVal != Ephm.RAW_LON_FILL ? 
                   (
                      intVal * 
                      Float.intBitsToFloat(
@@ -174,7 +174,7 @@ public class LevelTwo extends CDFWriter{
             case Ephm.TIME_I:
                intVal = this.frames[frame_i].getGps();
                //calculate the GPS time
-               if(intVal != BarrelFrame.INT8_FILL){
+               if(intVal != Ephm.MS_OF_WEEK_FILL){
                   sec = intVal / 1000; //convert ms to sec
                   sec %= 86400; //remove any complete days
                   hour = sec / 3600;
@@ -193,9 +193,9 @@ public class LevelTwo extends CDFWriter{
          complete_gps.put(
             frameGroup[rec_i], 
             (
-               (alt[rec_i] != Constants.ALT_FILL) && 
-               (lat[rec_i] != Constants.LAT_FILL) && 
-               (lon[rec_i] != Constants.LON_FILL)
+               (alt[rec_i] != Ephm.ALT_FILL) && 
+               (lat[rec_i] != Ephm.LAT_FILL) && 
+               (lon[rec_i] != Ephm.LON_FILL)
             )
          );
 
@@ -342,12 +342,12 @@ public class LevelTwo extends CDFWriter{
       long[] 
          epoch      = new long[this.numFrames];
 
-      Arrays.fill(frameGroup, BarrelFrame.INT4_FILL);
-      Arrays.fill(epoch,      BarrelFrame.INT8_FILL);
-      Arrays.fill(q,          BarrelFrame.INT4_FILL);
-      Arrays.fill(version,    BarrelFrame.INT2_FILL);
-      Arrays.fill(payID,      BarrelFrame.INT2_FILL);
-      Arrays.fill(pps_vals,   BarrelFrame.INT2_FILL);
+      Arrays.fill(frameGroup, Misc.FC_FILL);
+      Arrays.fill(epoch,      Misc.EPOCH_FILL);
+      Arrays.fill(q,          Misc.QUALITY_FILL);
+      Arrays.fill(version,    Misc.VERSION_FILL);
+      Arrays.fill(payID,      Misc.PAYLOADID_FILL);
+      Arrays.fill(pps_vals,   Misc.PPS_FILL);
 
       System.out.println("\nSaving MISC Level Two CDF...");
 
@@ -402,13 +402,13 @@ public class LevelTwo extends CDFWriter{
          magz       = new float[numRecords],
          magTot     = new float[numRecords];
 
-      Arrays.fill(frameGroup, BarrelFrame.INT4_FILL);
-      Arrays.fill(epoch,      BarrelFrame.INT8_FILL);
-      Arrays.fill(q,          BarrelFrame.INT4_FILL);
-      Arrays.fill(magx,       BarrelFrame.FLOAT_FILL);
-      Arrays.fill(magy,       BarrelFrame.FLOAT_FILL);
-      Arrays.fill(magz,       BarrelFrame.FLOAT_FILL);
-      Arrays.fill(magTot,     BarrelFrame.FLOAT_FILL);
+      Arrays.fill(frameGroup, Magn.FC_FILL);
+      Arrays.fill(epoch,      Magn.EPOCH_FILL);
+      Arrays.fill(q,          Magn.QUALITY_FILL);
+      Arrays.fill(magx,       Magn.MAG_FILL);
+      Arrays.fill(magy,       Magn.MAG_FILL);
+      Arrays.fill(magz,       Magn.MAG_FILL);
+      Arrays.fill(magTot,     Magn.MAG_FILL);
 
       System.out.println("\nSaving Magnetometer Level Two CDF...");
 
@@ -422,22 +422,22 @@ public class LevelTwo extends CDFWriter{
          for (int sample_i = 0; sample_i < 4; sample_i++) {
             rec_i = sample_i + (frame_i * 4);
             offset = sample_i * 250000000;
-            sample = raw_mag[sample_i][Magnetometer.X_AXIS];
-            if(sample != BarrelFrame.INT4_FILL){
+            sample = raw_mag[sample_i][Magn.X_AXIS];
+            if(sample != Magn.RAW_MAG_FILL){
                magx[rec_i] = (sample - 8388608.0f) / 83886.070f;
             } else {
                found_fill = true;
             }
 
-            sample = raw_mag[sample_i][Magnetometer.Y_AXIS];
-            if(sample != BarrelFrame.INT4_FILL){
+            sample = raw_mag[sample_i][Magn.Y_AXIS];
+            if(sample != Magn.RAW_MAG_FILL){
                magy[rec_i] = (sample - 8388608.0f) / 83886.070f;
             } else {
                found_fill = true;
             }
             
-            sample = raw_mag[sample_i][Magnetometer.Z_AXIS];
-            if(sample != BarrelFrame.INT4_FILL){
+            sample = raw_mag[sample_i][Magn.Z_AXIS];
+            if(sample != Magn.RAW_MAG_FILL){
                magz[rec_i] = (sample - 8388608.0f) / 83886.070f;
             } else {
                found_fill = true;
@@ -504,18 +504,19 @@ public class LevelTwo extends CDFWriter{
       float [][]
          hkpg_scaled = new float[40][numRecords];
 
-      Arrays.fill(frameGroup, BarrelFrame.INT4_FILL);
-      Arrays.fill(epoch,      BarrelFrame.INT8_FILL);
-      Arrays.fill(q,          BarrelFrame.INT4_FILL);
-      Arrays.fill(weeks,      BarrelFrame.INT4_FILL);
-      Arrays.fill(cmdCnt,     BarrelFrame.INT2_FILL);
-      Arrays.fill(dcdCnt,     BarrelFrame.INT2_FILL);
-      Arrays.fill(sats,       BarrelFrame.INT2_FILL);
-      Arrays.fill(offset,     BarrelFrame.INT2_FILL);
-      Arrays.fill(termStat,   BarrelFrame.INT2_FILL);
-      Arrays.fill(modemCnt,   BarrelFrame.INT2_FILL);
+      Arrays.fill(frameGroup, HKPG.FC_FILL);
+      Arrays.fill(epoch,      HKPG.EPOCH_FILL);
+      Arrays.fill(q,          HKPG.QUALITY_FILL);
+      Arrays.fill(weeks,      HKPG.WEEKS_FILL);
+      Arrays.fill(cmdCnt,     HKPG.CMDCNT_FILL);
+      Arrays.fill(dcdCnt,     HKPG.DCDCNT_FILL);
+      Arrays.fill(sats,       HKPG.SATS_FILL);
+      Arrays.fill(offset,     HKPG.OFFSET_FILL);
+      Arrays.fill(termStat,   HKPG.TERMSTAT_FILL);
+      Arrays.fill(modemCnt,   HKPG.MODEMCNT_FILL);
+
       for(int var_i = 0; var_i < 36; var_i++){
-         Arrays.fill(hkpg_scaled[var_i],   BarrelFrame.FLOAT_FILL);
+         Arrays.fill(hkpg_scaled[var_i], HKPG.SENSOR_FILL);
       }
       
       System.out.println("\nSaving HKPG...");
@@ -529,7 +530,7 @@ public class LevelTwo extends CDFWriter{
       for(int frame_i = 0, rec_i = -1; frame_i < this.numFrames; frame_i++){
 
          fc = this.frames[frame_i].getFrameCounter();
-         if(fc == null || fc == BarrelFrame.INT4_FILL){
+         if(fc == null || fc == HKPG.FC_FILL){
             continue;
          }
 
@@ -542,18 +543,18 @@ public class LevelTwo extends CDFWriter{
 
          //make sure there is a valid housekeeping value to process
          hkpg_raw = this.frames[frame_i].getHousekeeping();
-         if(hkpg_raw == BarrelFrame.INT4_FILL){continue;}
+         if(hkpg_raw == HKPGHKPG.RAW_SENSOR_FILL){continue;}
 
          //convert the housekeeping data to physical units
          if(this.dpu_ver > 3) {
             //for versions 3 and up the T9 and T11 sensors were used for
             //mag statistics rather than solar panel temps
             switch (mod40) {
-               case HKPG.T9:
+               case HKPGHKPGHKPG.T9:
                   hkpg_scaled[mod40][frame_i] = 
                      ((hkpg_raw - 0x8000) * 0.09094f) - 273.15f;
                break;
-               case HPKG.T11:
+               case HKPGHKPGHKPGHKPG.T11:
                   hkpg_scaled[mod40][frame_i] =  hkpg_raw * 0.0003576f;
                break;
                default:

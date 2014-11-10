@@ -38,6 +38,16 @@ import java.util.Vector;
 import java.util.Arrays;
 
 public class Magn extends DataProduct{
+   static public final int
+      X_AXIS = 0, Y_AXIS = 1, Z_AXIS = 2,
+      FC_FILL       = BarrelFrame.INT4_FILL,
+      QUALITY_FILL  = BarrelFrame.INT4_FILL,
+      RAW_MAG_FILL  = BarrelFrame.INT4_FILL;
+   static public final long
+      EPOCH_FILL = BarrelFrame.TT2000_FILL;
+   static public final float
+      MAG_FILL = BarrelFrame.FLOAT_FILL;
+
    private int date, lvl;
    private String payload_id;
 

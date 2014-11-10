@@ -48,16 +48,37 @@ public class HKPG extends DataProduct{
    private String payload_id;
    List<HkpgVar> vars;
 
-   public static final int
-      V0 = 0, I0 = 1, V1 = 2, I1 = 3, V2 = 4, I2 = 5, V3 = 6, I3 = 7, V4 = 8, 
-      I4 = 9, V5 = 10, I5 = 11, V6 = 12, I6 = 13, V7 = 14, I7 = 15, T0 = 16, 
-      T8 = 17, T1 = 18, T9 = 19, T2 = 20, T10 = 21, T3 = 22, T11 = 23, T4 = 24, 
-      T12 = 25, T5 = 26, T13 = 27, T6 = 28, T14 = 29, T7 = 30, T15 = 31, 
-      V8 = 32, V9 = 33, V10 = 34, V11 = 35, 
+   static public final short
+      RAW_SENSOR_FILL = BarrelFrame.INT2_FILL,
+      WEEKS_FILL      = BarrelFrame.INT2_FILL,
+      CMDCNT_FILL     = BarrelFrame.INT2_FILL,
+      DCDCNT_FILL     = BarrelFrame.INT2_FILL,
+      SATS_FILL       = BarrelFrame.INT2_FILL,
+      OFFSET_FILL     = BarrelFrame.INT2_FILL,
+      TERMSTAT_FILL   = BarrelFrame.INT2_FILL,
+      MODEMCNT_FILL   = BarrelFrame.INT2_FILL;
+
+   static public final int
+      FC_FILL         = BarrelFrame.INT4_FILL,
+      QUALITY_FILL    = BarrelFrame.INT4_FILL;
+
+   static public final long
+      EPOCH_FILL      = BarrelFrame.TT2000_FILL;
+
+   static public final float
+      SENSOR_FILL     = BarrelFrame.FLOAT_FILL;
+
+   static public final int
+      V0 = 0,  I0 = 1,   V1 = 2,  I1 =  3,  V2 = 4,   I2 = 5, 
+      V3 = 6,  I3 = 7,   V4 = 8,  I4 =  9,  V5 = 10,  I5 = 11,
+      V6 = 12, I6 = 13,  V7 = 14, I7 =  15, T0 = 16,  T8 = 17,
+      T1 = 18, T9 = 19,  T2 = 20, T10 = 21, T3 = 22,  T11 = 23,
+      T4 = 24, T12 = 25, T5 = 26, T13 = 27, T6 = 28,  T14 = 29,
+      T7 = 30, T15 = 31, V8 = 32, V9 = 33,  V10 = 34, V11 = 35, 
       SATSOFF = 36, WEEK = 37, CMDCNT = 38, MDMCNT = 39;
    
    //array showing indexes of mod40 data
-   public static final String[] IDS = {
+   static public final String[] IDS = {
       "V0",  "I0", "V1",  "I1",  "V2",  "I2",  "V3", "I3",  "V4", 
       "I4",  "V5", "I5",  "V6",  "I6",  "V7",  "I7", "T0",  "T8",
       "T1",  "T9", "T2",  "T10", "T3",  "T11", "T4", "T12", "T5",
@@ -65,7 +86,7 @@ public class HKPG extends DataProduct{
       "SATSOFF", "WEEK", "CMDCNT", "MDMCNT"
    };
 
-   public static final Map<String, Float> SCALE_FACTORS;
+   static public final Map<String, Float> SCALE_FACTORS;
    static {
       Map<String, Float> scale = new HashMap<String, Float>();
       scales.put("V0" ,  0.0003052f);
@@ -106,7 +127,7 @@ public class HKPG extends DataProduct{
       scales.put("T15",  0.0001526f);
       SCALE_FACTORS = Collections.unmodifiableMap(scale);
    }
-   public static final Map<String, Float> OFFSETS;
+   static public final Map<String, Float> OFFSETS;
    static {
       Map<String, Float> offsets = new HashMap<String, Float>();
       offsets.put("T1" ,  -273.15f);
@@ -126,7 +147,7 @@ public class HKPG extends DataProduct{
       offsets.put("T15",  -273.15f);
       OFFSETS = Collections.unmodifiableMap(offsets);
    }
-   public static final Map<String, String> LABELS;
+   static public final Map<String, String> LABELS;
    static {
       Map<String, String> labels = new HashMap<String, String>();
       labels.put("V0" , "V0_VoltAtLoad");
