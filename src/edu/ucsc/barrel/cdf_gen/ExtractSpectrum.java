@@ -834,6 +834,6 @@ public class ExtractSpectrum {
 
       peak_i = this.peaks_ref.get(fc);
 
-      return (peak_i == null ? this.peaks.get(peak_i);
+      return (peak_i == null ? this.peaks.get(peak_i) : -1);
    }
 }
