@@ -771,7 +771,7 @@ public class LevelTwo extends CDFWriter{
          if (frameGroup[rec_i] != fg) {
             //save the epoch and frameGroup of this spectrum
             epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
-            frameGroup[rec_i] = fg;
+            
 
             //get the most recent scintillator temperature value
             scint_temp = getTemp(frame_i, HKPG.T0);
@@ -780,7 +780,8 @@ public class LevelTwo extends CDFWriter{
             //get the adjusted bin edges
             old_edges = 
                SpectrumExtract.makeedges(
-                  1, scint_temp, dpu_temp, this.frames[frame_i].getPeak511();
+                  1, scint_temp, dpu_temp, 
+                  CDF_Gen.spectra.getPeakLocation(frameGroup[rec_i])
                );
 
             //rebin the spectrum
@@ -804,6 +805,7 @@ public class LevelTwo extends CDFWriter{
             Arrays.fill(raw_spec, BarrelFrame.FLOAT_FILL);
 
             //update the record number and frameGroup
+            frameGroup[rec_i] = fg;
             rec_i++;
          }
 
@@ -907,8 +909,7 @@ public class LevelTwo extends CDFWriter{
          //(meaning the same spectrum)
          if (frameGroup[rec_i] != fg) {
             epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
-            peak[rec_i] = this.frames[frame_i].getPeak511();
-            frameGroup[rec_i] = fg;
+            peak[rec_i] = CDF_Gen.spectra.getPeakLocation(frameGroup[rec_i]);
 
             //get the most recent scintillator temperature value
             scint_temp = getTemp(frame_i, HKPG.T0);
@@ -916,11 +917,11 @@ public class LevelTwo extends CDFWriter{
 
             //get the adjusted bin edges
             old_edges = 
-               SpectrumExtract.makeedges(2, scint_temp, dpu_temp, peak[rec_i]);
+               ExtractSpectrum.makeedges(2, scint_temp, dpu_temp, peak[rec_i]);
 
             //rebin the spectrum
             rebin[rec_i] = 
-               SpectrumExtract.rebin(raw_spec, old_edges, std_edges);
+               ExtractSpectrum.rebin(raw_spec, old_edges, std_edges);
 
             //scale the counts and calculate error
             for(int bin_i = 0; bin_i < 256; bin_i++){
@@ -939,6 +940,7 @@ public class LevelTwo extends CDFWriter{
             Arrays.fill(raw_spec, BarrelFrame.INT4_FILL);
 
             //update the record number and frameGroup
+            frameGroup[rec_i] = fg;
             rec_i++;            
          }
 
