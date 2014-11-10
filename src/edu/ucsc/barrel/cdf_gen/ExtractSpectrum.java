@@ -209,10 +209,10 @@ public class ExtractSpectrum {
    private BarrelFrame[] frames;
    private int numFrames, numRecords;
 
-   public ExtractSpectrum(BarrelFrame[] frames, int dpuVer){
+   public ExtractSpectrum(int dpuVer){
       this.peaks      = new ArrayList<Integer>;
       this.peaks_ref  = new HashMap<Integer, Integer>();
-      this.frames     = frames;
+      this.frames     = CDF_Gen.frames.getFrames();
       this.numFrames  = this.frames.length;
       this.raw_edges  = dpuVer > 3 ? RAW_EDGES : OLD_RAW_EDGES;
       this.raw_spectra = new LinkedHashMap<Integer, Integer[]>();
