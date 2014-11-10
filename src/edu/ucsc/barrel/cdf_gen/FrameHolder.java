@@ -115,7 +115,8 @@ public class FrameHolder{
    }
    
    public int[] getFcRange(){
-      return new int[](this.first_fc, this.last_fc);
+      int[] range = {this.first_fc, this.last_fc};
+      return range;
    }
 
    public BarrelFrame[] getFrames(int start, int stop){

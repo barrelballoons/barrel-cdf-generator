@@ -50,6 +50,10 @@ public class FSPC extends DataProduct{
       OLD_BIN_CENTERS = {37.5f, 152.5f, 290f, 485f}, 
       OLD_BIN_WIDTHS = {75f, 155f, 120f, 250f};
 
+   public final static String[]
+      NEW_LABELS = {"FSPC1a", "FSPC1b", "FSPC1c", "FSPC2", "FSPC3", "FSPC4"},
+      OLD_LABELS = {"FSPC1", "FSPC2", "FSPC3",  "FSPC4"};
+
    public FSPC(final String path, final String pay, int d, int l, int v){
       this.date = d;
       this.lvl = l;

@@ -44,9 +44,8 @@ public class Ephm extends DataProduct{
       LAT_RAW_MIN = -1073741824, LAT_RAW_MAX = 1073741824, 
       LON_RAW_MIN = -2147483647, LON_RAW_MAX = 2147483647, 
       ALT_RAW_MIN = 0, ALT_RAW_MAX = 50000000,
-      GPS_FILL = BarrelFrame.INT4_FILL;
-   static public final
-      LAT_MIN = -1073741824, LAT_MAX = 1073741824, 
+      GPS_FILL = BarrelFrame.INT4_FILL,
+      LAT_MIN = -1073741824,LAT_MAX = 1073741824, 
       LON_MIN = -2147483647, LON_MAX = 2147483647, 
       ALT_MIN = 0, ALT_MAX = 50000000;
    private int date, lvl;

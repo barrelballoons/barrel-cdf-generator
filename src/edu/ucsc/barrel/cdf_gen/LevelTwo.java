@@ -145,7 +145,7 @@ public class LevelTwo extends CDFWriter{
                intVal = this.frames[frame_i].getGps();
                alt[rec_i] = intVal != BarrelFrame.INT4_FILL ?
                   intVal / 1000000 :
-                  Ephm.ALT_FILL
+                  Ephm.ALT_FILL;
             break;
 
             //convert lat and lon to physical units
@@ -195,8 +195,7 @@ public class LevelTwo extends CDFWriter{
             (
                (alt[rec_i] != Constants.ALT_FILL) && 
                (lat[rec_i] != Constants.LAT_FILL) && 
-               (lon[rec_i] != Constants.LON_FILL) ? 
-               true : false;
+               (lon[rec_i] != Constants.LON_FILL)
             )
          );
 
@@ -615,7 +614,7 @@ public class LevelTwo extends CDFWriter{
          numRecords = this.frames * 20,
          numCh = FSPC.getChannels(this.dpu_ver).length;
       int[] 
-         lc_raw     = new int[numRecords];
+         lc_raw     = new int[numRecords],
          frameGroup = new int[numRecords],
          q          = new int[numRecords];
       int[][] 
@@ -635,9 +634,7 @@ public class LevelTwo extends CDFWriter{
          chan_edges = new float[numRecords][numCh + 1],
          lc_error   = new float[numCh][numRecords];
       String[]
-         chan_names = numCh == 6 ? 
-            {'FSPC1a', 'FSPC1b', 'FSPC1c', 'FSPC2', 'FSPC3', 'FSPC4'} :
-            {'FSPC1', 'FSPC2', 'FSPC3', 'FSPC4'};
+         chan_names = (numCh == 6 ? FSPC.NEW_LABELS : FSPC.OLD_LABELS);
 
       Arrays.fill(frameGroup, BarrelFrame.INT4_FILL);
       Arrays.fill(epoch,      BarrelFrame.INT8_FILL);

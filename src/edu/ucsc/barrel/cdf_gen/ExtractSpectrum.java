@@ -210,7 +210,7 @@ public class ExtractSpectrum {
    private int numFrames, numRecords;
 
    public ExtractSpectrum(int dpuVer){
-      this.peaks      = new ArrayList<Integer>;
+      this.peaks      = new ArrayList<Integer>();
       this.peaks_ref  = new HashMap<Integer, Integer>();
       this.frames     = CDF_Gen.frames.getFrames();
       this.numFrames  = this.frames.length;
@@ -261,7 +261,7 @@ public class ExtractSpectrum {
       return spectra;
    }
 
-   public static void do511Fits(max_recs){
+   public static void do511Fits(int max_recs){
       int 
          max_cnts = MAX_CNT_FACTOR * this.raw_spectra.size(),
          peak_i   = 0,
@@ -291,7 +291,7 @@ public class ExtractSpectrum {
             //associate all frame numbers with this peak
             while(frame_i < fg){
                fc = this.frames[frame_i++].getFrameCounter();
-               this.peaks_ref.put(fc, peak_i)
+               this.peaks_ref.put(fc, peak_i);
                frame_i++;
             }
 
@@ -304,7 +304,7 @@ public class ExtractSpectrum {
       this.peaks.add(peak_i, find511(records));
       while(frame_i < this.frames.length){
          fc = this.frames[frame_i++].getFrameCounter();
-         this.peaks_ref.put(fc, peak_i)
+         this.peaks_ref.put(fc, peak_i);
          frame_i++;
       }
    }
@@ -327,7 +327,7 @@ public class ExtractSpectrum {
                   "Count rate too high: " +
                   length + " " + max_cnts + " " + search_spec[chan_i]
                );
-               return null
+               return null;
             }
          }
       }

@@ -55,7 +55,7 @@ public class ExtractTiming {
    //offsets for spectral data. These offsets will move the epoch variable so
    //it points to the middle of the accumulation time
    private static final long 
-      SSPC_EPOCH_OFFSET = 16000000000L; //31968000000L;
+      SSPC_EPOCH_OFFSET = 16000000000L, //31968000000L;
       MSPC_EPOCH_OFFSET = 2000000000L; //3996000000L;
 
    private BarrelFrame[] frames;
@@ -71,10 +71,10 @@ public class ExtractTiming {
          week, pps;
 
       public TimeRec(long fc, long msw, short w, short p){
-         this.week        = w,
+         this.week        = w;
          this.pps         = p;
-         this.frame       = fc,
-         this.ms_of_week  = msw,
+         this.frame       = fc;
+         this.ms_of_week  = msw;
          this.weeks_in_ms = week * MSPERWEEK;
 
          //figure out if we need to add an extra second based on the PPS
@@ -220,7 +220,7 @@ public class ExtractTiming {
       LinModel linModel;
 
       //create a model for each batch of time records
-      while(int first_rec = 0; first_rec < this.numRecords; first_rec = last_rec){
+      for(int first_rec = 0; first_rec < this.numRecords; first_rec = last_rec){
          //incriment the last_rec by the max, or however many recs are left
          last_rec += Math.min(MAX_RECS, (time_rec_cnt - first_rec));
          
