@@ -105,7 +105,7 @@ public class FrameHolder{
       this.ordered_fc.add(fc);
    }
 
-   public BarrelFrame getFrane(int fc) {
+   public BarrelFrame getFrame(int fc) {
       return this.frames.get(fc);
    }
    
@@ -119,7 +119,7 @@ public class FrameHolder{
    }
 
    public BarrelFrame[] getFrames(int start, int stop){
-      BarrelFrame[] 
+      BarrelFrame[]
          results,
          frames = BarrelFrame[stop - start];
       int 
@@ -141,7 +141,11 @@ public class FrameHolder{
       if(range.length != 2){
          CDF_Gen.out.log(2, "Invalid frame range: " + range.join(", "));
       }
-      return this.getFrames.get(range[0], range[1]);
+      return this.getFrames(range[0], range[1]);
+   }
+
+   public BarrelFrame[] getFrames() {
+      return this.getFrames(this.first_fc, this.last_fc);
    }
 
    public int size(){
