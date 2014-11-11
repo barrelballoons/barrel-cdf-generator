@@ -54,42 +54,43 @@ public class BarrelFrame {
       offset      = INT2_FILL,
       termStat    = INT2_FILL,
       modemCnt    = INT2_FILL,
-      dcdCnt      = INT2_FILL;
+      cmdCnt      = INT2_FILL,
+      dcdCnt      = INT2_FILL,
+      rcnt        = INT2_FILL,
+      mod4        = INT2_FILL,
+      mod32       = INT2_FILL,
+      mod40       = INT2_FILL;
    public int 
       fc          = INT4_FILL,
       week        = INT4_FILL,
-      cmdCnt      = INT4_FILL,
-      gps         = INT4_FILL,
-      rcnt        = INT4_FILL,
-      mod4        = INT4_FILL,
-      mod32       = INT4_FILL,
-      mod40       = INT4_FILL;
+      gps         = INT4_FILL;
    private long
       epoch       = INT4_FILL,
       hkpg        = INT4_FILL;
    public float 
       peak511_bin = null;
-   public int[]
+   public short[]
       mspc        = {
-                     INT4_FILL, INT4_FILL, INT4_FILL, INT4_FILL, 
-                     INT4_FILL, INT4_FILL, INT4_FILL, INT4_FILL,
-                     INT4_FILL, INT4_FILL, INT4_FILL, INT4_FILL
+                     INT2_FILL, INT2_FILL, INT2_FILL, INT2_FILL, 
+                     INT2_FILL, INT2_FILL, INT2_FILL, INT2_FILL,
+                     INT2_FILL, INT2_FILL, INT2_FILL, INT2_FILL
                   },
       sspc        = {
-                     INT4_FILL, INT4_FILL, INT4_FILL, INT4_FILL, 
-                     INT4_FILL, INT4_FILL, INT4_FILL, INT4_FILL
-                  },
+                     INT2_FILL, INT2_FILL, INT2_FILL, INT2_FILL, 
+                     INT2_FILL, INT2_FILL, INT2_FILL, INT2_FILL
+                  };
+   public int[]
       mag         = {
                      {INT4_FILL, INT4_FILL, INT4_FILL},
                      {INT4_FILL, INT4_FILL, INT4_FILL},
                      {INT4_FILL, INT4_FILL, INT4_FILL},
                      {INT4_FILL, INT4_FILL, INT4_FILL}
                   };
-   public int[][]
+   public short[][]
       fspc        = null;
    private BigInteger
-      rawFrame = null;
-   boolean valid = true;
+      rawFrame    = null;
+   boolean valid  = true;
  
    public BarrelFrame(final BigInteger frame, final short dpuId){
       //Breakdown frame counter words: 

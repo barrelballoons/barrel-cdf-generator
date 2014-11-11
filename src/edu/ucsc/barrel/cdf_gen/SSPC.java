@@ -156,7 +156,7 @@ public class SSPC extends DataProduct{
          var.attribute("SCALETYP", "linear");
          var.attribute("VALIDMIN", 15999999999L);
          var.attribute("VALIDMAX", 16000000001L);
-         var.attribute("FILLVAL", Long.MIN_VALUE);
+         var.attribute("FILLVAL", BarrelFrame.INT8_FILL);
          this.cdf.addVar("HalfAccumTime", var);
 
          //Fill the "HalfAccumTime" variable
@@ -229,7 +229,7 @@ public class SSPC extends DataProduct{
       var.attribute("DISPLAY_TYPE", "spectrogram");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 1e30f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", BIN_FILL);
       var.attribute("DELTA_PLUS_VAR", "cnt_error");
       var.attribute("DELTA_MINUS_VAR", "cnt_error");
       this.cdf.addVar("SSPC", var);
@@ -252,7 +252,7 @@ public class SSPC extends DataProduct{
       var.attribute("SCALETYP", "log");
       var.attribute("VALIDMIN", 20.0f);
       var.attribute("VALIDMAX", 10000.0f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", BarrelFrame.FLOAT_FILL);
       var.attribute("DELTA_PLUS_VAR", "HalfBinWidth");
       var.attribute("DELTA_MINUS_VAR", "HalfBinWidth");
       this.cdf.addVar("energy", var);
@@ -283,7 +283,7 @@ public class SSPC extends DataProduct{
       var.attribute("SCALETYP", "linear");
       var.attribute("VALIDMIN", 0);
       var.attribute("VALIDMAX", 255);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("UINT2_FILL"));
+      var.attribute("FILLVAL", BarrelFrame.UINT2);
       this.cdf.addVar("channel", var);
 
       //Fill the "channel" variable
@@ -335,7 +335,7 @@ public class SSPC extends DataProduct{
       var.attribute("SCALETYP", "linear");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 200.0f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", BarrelFrame.FLOAT_FILL);
       this.cdf.addVar("HalfBinWidth", var);
 
       //Fill the "BinWidth" variable
@@ -364,7 +364,7 @@ public class SSPC extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 4096.0f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", PEAK_FILL);
       this.cdf.addVar("Peak_511", var);
 
       //Create the count error variable
@@ -386,7 +386,7 @@ public class SSPC extends DataProduct{
       var.attribute("DISPLAY_TYPE", "spectrogram");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 10000.0f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", ERROR_FILL);
       this.cdf.addVar("cnt_error", var);
    }
 }

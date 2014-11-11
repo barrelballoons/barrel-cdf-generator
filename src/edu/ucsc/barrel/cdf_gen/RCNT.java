@@ -54,7 +54,7 @@ public class RCNT extends DataProduct{
       EPOCH_FILL   = BarrelFrame.TT2000_FILL;
 
    static public final float
-      RC_FILL     = BarrelFrame.FLOAT_FILL;
+      RC_FILL      = BarrelFrame.FLOAT_FILL;
 
    private int date, lvl;
    private String payload_id;
@@ -116,7 +116,7 @@ public class RCNT extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 1.0e17f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", RC_FILL);
       this.cdf.addVar("PeakDet", var);
 
       var = new CDFVar(cdf, "LowLevel", CDFConstants.CDF_FLOAT);
@@ -131,7 +131,7 @@ public class RCNT extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 1.0e17f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", RC_FILL);
       this.cdf.addVar("LowLevel", var);
 
       var = new CDFVar(cdf, "HighLevel", CDFConstants.CDF_FLOAT);
@@ -146,7 +146,7 @@ public class RCNT extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 1.0e17f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", RC_FILL);
       this.cdf.addVar("HighLevel", var);
 
       var = new CDFVar(cdf, "Interrupt", CDFConstants.CDF_FLOAT);
@@ -161,7 +161,7 @@ public class RCNT extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 1.0e17f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", RC_FILL);
       this.cdf.addVar("Interrupt", var);
    }
 }
