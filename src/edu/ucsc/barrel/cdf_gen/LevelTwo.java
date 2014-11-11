@@ -618,7 +618,7 @@ public class LevelTwo extends CDFWriter{
          lc_raw     = new int[numRecords],
          frameGroup = new int[numRecords],
          q          = new int[numRecords];
-      int[][] 
+      short[][] 
          lc_scaled  = new int[numCh][numRecords];
       long
          base_epoch;
@@ -637,12 +637,12 @@ public class LevelTwo extends CDFWriter{
       String[]
          chan_names = (numCh == 6 ? FSPC.NEW_LABELS : FSPC.OLD_LABELS);
 
-      Arrays.fill(frameGroup, BarrelFrame.INT4_FILL);
-      Arrays.fill(epoch,      BarrelFrame.INT8_FILL);
-      Arrays.fill(q,          BarrelFrame.INT4_FILL);
+      Arrays.fill(frameGroup, FSPC.FC_FILL);
+      Arrays.fill(epoch,      FSPC.EPOCH_FILL);
+      Arrays.fill(q,          FSPC.QUALITY_FILL);
       for (int ch_i = 0; ch_i < numCh; ch_i++) {
-         Arrays.fill(lc_scaled[chi_i], BarrelFrame.INT4_FILL);
-         Arrays.fill(lc_error[chi_i], BarrelFrame.FLOAT_FILL);
+         Arrays.fill(lc_scaled[chi_i], FSPC.CHANNEL_FILL);
+         Arrays.fill(lc_error[chi_i], FSPC.ERROR_FILL);
       }
 
       System.out.println("\nSaving FSPC...");
@@ -661,7 +661,7 @@ public class LevelTwo extends CDFWriter{
                rec_i  = sample_i + (frame_i * 20);
                offset = sample_i * 50000000;
                sample = lc_raw[ch_i][sample_i];
-               if(sample != BarrelFrame.INT4_FILL){
+               if(sample != FSPC.CHANNEL_FILL){
                   lc_scaled[ch_i][rec_i] = (sample - 8388608.0f) / 83886.070f;
                   lc_error[ch_i][rec_i] =(float)Math.sqrt(sample);
                }
@@ -707,14 +707,15 @@ public class LevelTwo extends CDFWriter{
          peak       = -1, 
          scint_temp = 0, 
          dpu_temp   = 0;
+      short[]
+         part_spec,
+         raw_spec   = new int[48];
       int 
          hkpg_frame, start, stop, mod4, fg, frame_i,
          fc         = null,
          offset     = 90,
          numRecords = (int)Math.ceil(this.numFrames / 4);
       int[]
-         part_spec,
-         raw_spec   = new int[48],
          frameGroup = new int[numRecords],
          q          = new int[numRecords];
       long[]
@@ -730,20 +731,22 @@ public class LevelTwo extends CDFWriter{
          error = new float[numRecords][48];
 
       //initialize the data arrays with fill value
-      Arrays.fill(frameGroup, BarrelFrame.INT4_FILL);
-      Arrays.fill(epoch,      BarrelFrame.INT8_FILL);
-      Arrays.fill(q,          BarrelFrame.INT4_FILL);
-      Arrays.fill(raw_spec,   BarrelFrame.FLOAT_FILL);
-      Arrays.fill(rebin, raw_spec);
-      Arrays.fill(error, raw_spec);
-
+      Arrays.fill(frameGroup,  MSPC.FC_FILL);
+      Arrays.fill(epoch,       MSPC.EPOCH_FILL);
+      Arrays.fill(q,           MSPC.QUALITY_FILL);
+      Arrays.fill(raw_spec,    MSPC.RAW_BIN_FILL);
+      for(int i = 0; i < numRecords; i++){
+         Arrays.fill(rebin[i], MSPC.BIN_FILL);
+         Arrays.fill(error,    MSPC.ERROR_FILL);
+      }
+      
       System.out.println("\nSaving MSPC...");
 
       //get the first valid frame counter
       frame_i = 0;
       while (frame_i < this.frames.length) {
          fc = this.frames[frame_i].getFrameCounter();
-         if(fc != null && fc != BarrelFrame.INT4_FILL){
+         if(fc != null && fc != MSPC.FC_FILL){
             break;
          }
          frame_i++;
@@ -757,7 +760,7 @@ public class LevelTwo extends CDFWriter{
       for(frame_i = 0, rec_i = 0; frame_i < this.numFrames; frame_i++){
           
          fc = this.frames[frame_i].getFrameCounter();
-         if(fc == null || fc == BarrelFrame.INT4_FILL){
+         if(fc == null || fc == MSPC.FC_FILL){
             continue;
          }
 
@@ -788,7 +791,7 @@ public class LevelTwo extends CDFWriter{
 
             //scale the counts and calculate error
             for(int bin_i = 0; bin_i < 48; bin_i++){
-               if(rebin[rec_i][bin_i] != BarrelFrame.FLOAT_FILL){
+               if(rebin[rec_i][bin_i] != MSPC.BIN_FILL){
                   width = std_edges[bin_i + 1] - std_edges[bin_i];
 
                   //divide counts by bin width and adjust the time scale
@@ -800,7 +803,7 @@ public class LevelTwo extends CDFWriter{
             }
 
             //clear the raw spectrum
-            Arrays.fill(raw_spec, BarrelFrame.FLOAT_FILL);
+            Arrays.fill(raw_spec, MSPC.RAW_BIN_FILL);
 
             //update the record number and frameGroup
             frameGroup[rec_i] = fg;
@@ -843,14 +846,15 @@ public class LevelTwo extends CDFWriter{
       float
          scint_temp = 0, 
          dpu_temp   = 0;
+      short[]
+         part_spec,
+         raw_spec   = new int[256];
       int 
          hkpg_frame, start, stop, mod32, fg, frame_i,
          fc         = null,
          offset     = 90,
          numRecords = (int)Math.ceil(this.numFrames / 32);
       int[]
-         part_spec,
-         raw_spec   = new int[256],
          frameGroup = new int[numRecords],
          q          = new int[numRecords];
       long[]
@@ -866,22 +870,21 @@ public class LevelTwo extends CDFWriter{
          error = new float[numRecords][256];
 
       //initialize the data arrays with fill value
-      Arrays.fill(frameGroup, BarrelFrame.INT4_FILL);
-      Arrays.fill(epoch,      BarrelFrame.INT8_FILL);
-      Arrays.fill(q,          BarrelFrame.INT4_FILL);
-      Arrays.fill(peak,       BarrelFrame.FLOAT_FILL);
-      Arrays.fill(raw_spec,   BarrelFrame.INT4_FILL);
+      Arrays.fill(frameGroup, SSPC.FC_FILL);
+      Arrays.fill(epoch,      SSPC.EPOCH_FILL);
+      Arrays.fill(q,          SSPC.QUALITY_FILL);
+      Arrays.fill(peak,       SSPC.PEAK_FILL);
+      Arrays.fill(raw_spec,   SSPC.RAW_BIN_FILL);
       for (int spec_i = 0; spec_i < 256; spec_i++){
-         Arrays.fill(error[spec_i], BarrelFrame.FLOAT_FILL);
-         Arrays.fill(rebin[spec_i], BarrelFrame.FLOAT_FILL);
+         Arrays.fill(error[spec_i], SSPC.ERROR_FILL);
+         Arrays.fill(rebin[spec_i], SSPC.BIN_FILL);
       }
-      
 
       //get the first valid frame counter
       frame_i = 0;
       while (frame_i < this.frames.length) {
          fc = this.frames[frame_i].getFrameCounter();
-         if(fc != null && fc != BarrelFrame.INT4_FILL){
+         if(fc != null && fc != SSPC.FC_FILL){
             break;
          }
          frame_i++;
@@ -896,7 +899,7 @@ public class LevelTwo extends CDFWriter{
       //rebin the sspc spectra
       for (frame_i = 0, rec_i = 0; frame_i < this.numFrames; frame_i++) {
          fc = this.frames[frame_i].getFrameCounter();
-         if(fc == null || fc == BarrelFrame.INT4_FILL){
+         if(fc == null || fc == SSPC.FC_FILL){
             continue;
          }
 
@@ -923,7 +926,7 @@ public class LevelTwo extends CDFWriter{
 
             //scale the counts and calculate error
             for(int bin_i = 0; bin_i < 256; bin_i++){
-               if(rebin[rec_i][bin_i] != BarrelFrame.FLOAT_FILL){
+               if(rebin[rec_i][bin_i] != SSPC.BIN_FILL){
                   width = std_edges[bin_i + 1] - std_edges[bin_i];
 
                   //divide counts by bin width and adjust the time scale
@@ -935,7 +938,7 @@ public class LevelTwo extends CDFWriter{
             }
 
             //clear the raw spectrum
-            Arrays.fill(raw_spec, BarrelFrame.INT4_FILL);
+            Arrays.fill(raw_spec, SSPC.RAW_BIN_FILL);
 
             //update the record number and frameGroup
             frameGroup[rec_i] = fg;
@@ -989,20 +992,20 @@ public class LevelTwo extends CDFWriter{
       long[] epoch = new long[numRecords];
       
       //initialize the data arrays with fill value
-      Arrays.fill(frameGroup,       BarrelFrame.INT4_FILL);
-      Arrays.fill(epoch,            BarrelFrame.INT8_FILL);
-      Arrays.fill(q,                BarrelFrame.INT4_FILL);
-      Arrays.fill(rc[0], BarrelFrame.FLOAT_FILL);
-      Arrays.fill(rc[1], BarrelFrame.FLOAT_FILL);
-      Arrays.fill(rc[2], BarrelFrame.FLOAT_FILL);
-      Arrays.fill(rc[3], BarrelFrame.FLOAT_FILL);
+      Arrays.fill(frameGroup, RCNT.FC_FILL);
+      Arrays.fill(epoch,      RCNT.EPOCH_FILL);
+      Arrays.fill(q,          RCNT.QUALITY_FILL);
+      Arrays.fill(rc[0],      RCNT.RC_FILL);
+      Arrays.fill(rc[1],      RCNT.RC_FILL);
+      Arrays.fill(rc[2],      RCNT.RC_FILL);
+      Arrays.fill(rc[3],      RCNT.RC_FILL);
       
       //change all the units from cnts/4sec to cnts/sec
       for(int frame_i = 0, rec_i = -1; frame_i < this.numFrames; frame_i++){
 
          //make sure we have a valid frame counter
          fc = this.frames[frame_i].getFrameCounter();
-         if(fc == null || fc == BarrelFrame.INT4_FILL){
+         if(fc == null || fc == RCNT.FC_FILL){
             continue;
          }
 
@@ -1020,8 +1023,8 @@ public class LevelTwo extends CDFWriter{
          epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
 
          raw = this.frames[frame_i].getRateCounter();
-         rc[rec_i] = raw != BarrelFrame.INT4_FILL ?
-            raw / 4f : BarrelFrame.FLOAT_FILL;
+         rc[mod4][rec_i] = raw != RCNT.RAW_RC_FILL ?
+            raw / 4f : RCNT.RC_FILL;
       }
          
       System.out.println("\nSaving RCNT...");

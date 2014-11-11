@@ -129,10 +129,10 @@ Note: FSPC channels may also be referred to as *light curves*. In the CDF files 
 |    FrameGroup |     INT4 |           |  
 |         Epoch |   TT2000 |        ns |  
 |       Quality |     INT4 |           |
-| FSPC1 (a/b/c) |     INT4 | cnts/50ms |  
-|         FSPC2 |     INT4 | cnts/50ms |  
-|         FSPC3 |     INT4 | cnts/50ms |  
-|         FSPC4 |     INT4 | cnts/50ms |  
+| FSPC1 (a/b/c) |     INT2 | cnts/50ms |  
+|         FSPC2 |     INT2 | cnts/50ms |  
+|         FSPC3 |     INT2 | cnts/50ms |  
+|         FSPC4 |     INT2 | cnts/50ms |  
 
 *Table 4.1.3* - Level Two FSPC Contents
 
@@ -141,13 +141,13 @@ Note: FSPC channels may also be referred to as *light curves*. In the CDF files 
 |         FrameGroup |     INT4 |           |  
 |              Epoch |   TT2000 |        ns |  
 |            Quality |     INT4 |           |
-|      FSPC1 (a/b/c) |     INT4 | cnts/50ms |  
+|      FSPC1 (a/b/c) |     INT2 | cnts/50ms |  
 | cnt_error1 (a/b/c) |    FLOAT | cnts/50ms |  
-|              FSPC2 |     INT4 | cnts/50ms |  
+|              FSPC2 |     INT2 | cnts/50ms |  
 |         cnt_error2 |    FLOAT | cnts/50ms |  
-|              FSPC3 |     INT4 | cnts/50ms |  
+|              FSPC3 |     INT2 | cnts/50ms |  
 |         cnt_error3 |    FLOAT | cnts/50ms |  
-|              FSPC4 |     INT4 | cnts/50ms |  
+|              FSPC4 |     INT2 | cnts/50ms |  
 |         cnt_error4 |    FLOAT | cnts/50ms |  
 |        FSPC1_Edges | FLOAT[7] |       keV |  
 
@@ -219,18 +219,30 @@ Interrupt counts analyzed (ADC) x-rays as accepted by the DPU board.
 The only difference between L1 and L2 data is that in L1 the units are counts/4seconds and in L2 the units are counts/second.
 
 
-*Table 4.4.1* - Level One and Two RCNT Contents
+*Table 4.4.1* - Level One RCNT Contents
 
-|    Variable | Datatype |  L1 Units |  L2 Units |  
-| ----------- | -------- | --------- | --------- |  
-|  FrameGroup |     INT4 |           |           |  
-|       Epoch |   TT2000 |        ns |        ns |  
-|     Quality |     INT4 |           |           |
-|     PeakDet |     INT8 | cnts/4sec |  cnts/sec |  
-|    LowLevel |     INT8 | cnts/4sec |  cnts/sec |  
-|   Interrupt |     INT8 | cnts/4sec |  cnts/sec |  
-|   HighLevel |     INT8 | cnts/4sec |  cnts/sec |  
+|    Variable | Datatype |  L1 Units |  
+| ----------- | -------- | --------- |  
+|  FrameGroup |     INT4 |           |  
+|       Epoch |   TT2000 |        ns |  
+|     Quality |     INT4 |           |
+|     PeakDet |     INT2 | cnts/4sec |  
+|    LowLevel |     INT2 | cnts/4sec |  
+|   Interrupt |     INT2 | cnts/4sec |  
+|   HighLevel |     INT2 | cnts/4sec |  
 
+
+*Table 4.4.2* - Level Two RCNT Contents
+
+|    Variable | Datatype |  L2 Units |  
+| ----------- | -------- | --------- |  
+|  FrameGroup |     INT4 |           |  
+|       Epoch |   TT2000 |        ns |  
+|     Quality |     INT4 |           |
+|     PeakDet |    FLOAT |  cnts/sec |  
+|    LowLevel |    FLOAT |  cnts/sec |  
+|   Interrupt |    FLOAT |  cnts/sec |  
+|   HighLevel |    FLOAT |  cnts/sec |  
 
 ### 4.5 MAGN - Magnetometer
 

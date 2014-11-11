@@ -38,12 +38,21 @@ import java.util.Vector;
 import java.util.Arrays;
 
 public class MSPC extends DataProduct{
-   private int date, lvl;
-   private String payload_id;
+   static public final short
+      RAW_BIN_FILL = BarrelFrame.INT2_FILL;
 
-   private float scale = 2.4414f; // keV/bin
+   static public final int
+      FC_FILL      = BarrelFrame.INT4_FILL,
+      QUALITY_FILL = BarrelFrame.INT4_FILL;
 
-   public final static float[]
+   static public final long
+      EPOCH_FILL   = BarrelFrame.TT2000_FILL;
+
+   static public final float
+      BIN_FILL     = BarrelFrame.FLOAT_FILL,
+      ERROR_FILL   = BarrelFrame.FLOAT_FILL;
+
+   static public final float[]
       BIN_EDGES = {
          42f, 46f, 50f, 53f, 57f, 60f, 64f, 70f, 78f, 84f, 92f, 100f, 
          106f, 114f, 120f, 128f, 140f, 156f, 168f, 184f, 200f, 212f, 
@@ -64,6 +73,12 @@ public class MSPC extends DataProduct{
          32f, 24f, 32f, 48f, 64f, 48f, 64f, 64f, 48f, 64f, 48f, 64f, 96f, 
          128f, 96f, 128f, 128f, 96f
       };
+
+   private int date, lvl;
+   private String payload_id;
+
+   private float scale = 2.4414f; // keV/bin
+   
 
    public MSPC(final String path, final String pay, int d, int l){
       this.payload_id = pay;
