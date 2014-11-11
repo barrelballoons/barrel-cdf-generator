@@ -122,7 +122,7 @@ public class LevelTwo extends CDFWriter{
 
          //make sure we have a valid frame counter
          fc = this.frames[frame_i].getFrameCounter();
-         if(fc == null || fc == BarrelFrame.INT4_FILL){
+         if(fc == null || fc == Ephm.FC_FILL){
             continue;
          }
 
@@ -1065,7 +1065,7 @@ public class LevelTwo extends CDFWriter{
       while(frame_i > 0){
          raw_temp = this.frames[frame_i].getHousekeeping();
 
-         if(raw_temp != null && raw_temp != BarrelFrame.INT4_FILL){
+         if(raw_temp != null && raw_temp != HKPG.RAW_SENSOR_FILL){
             return
                (float) raw_temp * 
                HKPG.SCALE_FACTORS.get(id) + HKPG.OFFSETS.get(id);
