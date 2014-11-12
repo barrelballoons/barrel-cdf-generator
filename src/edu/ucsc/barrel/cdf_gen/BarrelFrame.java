@@ -44,10 +44,10 @@ public class BarrelFrame {
       dcdCnt      = HKPG.DCD_CNT_FILL,
       hkpg        = HKPG.RAW_SENSOR_FILL,
       week        = HPKG.WEEK_FILL,
-      rcnt        = RCNT.RAW_CNT_FILL;
-   public long
-      fc          = BarrelCDF.FC_FILL,
+      rcnt        = RCNT.RAW_CNT_FILL,
       gps         = Ephm.RAW_GPS_FILL;
+   public long
+      fc          = BarrelCDF.FC_FILL;
    public short[]
       mspc        = {
                      MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL,
