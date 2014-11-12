@@ -43,18 +43,11 @@ public class RCNT extends DataProduct{
    static public final String[] LABELS = {
       "Interrupt", "LowLevel", "PeakDet", "HighLevel"
    };
-   static public final short
-      RAW_RC_FILL = BarrelFrame.INT2_FILL;
-
    static public final int
-      FC_FILL      = BarrelFrame.INT4_FILL,
-      QUALITY_FILL = BarrelFrame.INT4_FILL;
-
-   static public final long
-      EPOCH_FILL   = BarrelFrame.TT2000_FILL;
+      RAW_CNT_FILL = CDFVar.UINT2_FILL;
 
    static public final float
-      RC_FILL      = BarrelFrame.FLOAT_FILL;
+      CNT_FILL     = CDFVar.FLOAT_FILL;
 
    private int date, lvl;
    private String payload_id;
@@ -116,7 +109,7 @@ public class RCNT extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 1.0e17f);
-      var.attribute("FILLVAL", RC_FILL);
+      var.attribute("FILLVAL", CNT_FILL);
       this.cdf.addVar("PeakDet", var);
 
       var = new CDFVar(cdf, "LowLevel", CDFConstants.CDF_FLOAT);
@@ -131,7 +124,7 @@ public class RCNT extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 1.0e17f);
-      var.attribute("FILLVAL", RC_FILL);
+      var.attribute("FILLVAL", CNT_FILL);
       this.cdf.addVar("LowLevel", var);
 
       var = new CDFVar(cdf, "HighLevel", CDFConstants.CDF_FLOAT);
@@ -146,7 +139,7 @@ public class RCNT extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 1.0e17f);
-      var.attribute("FILLVAL", RC_FILL);
+      var.attribute("FILLVAL", CNT_FILL);
       this.cdf.addVar("HighLevel", var);
 
       var = new CDFVar(cdf, "Interrupt", CDFConstants.CDF_FLOAT);
@@ -161,7 +154,7 @@ public class RCNT extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 1.0e17f);
-      var.attribute("FILLVAL", RC_FILL);
+      var.attribute("FILLVAL", CNT_FILL);
       this.cdf.addVar("Interrupt", var);
    }
 }
