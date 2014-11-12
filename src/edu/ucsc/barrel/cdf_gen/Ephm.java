@@ -41,22 +41,15 @@ public class Ephm extends DataProduct{
    static public final int 
       ALT_I = 0, TIME_I = 1, LAT_I = 2, LON_I = 3,
       MS_WEEK = 604800000,
-      FC_FILL          = BarrelFrame.INT4_FILL,
-      QUALITY_FILL     = BarrelFrame.INT4_FILL,
-      MS_OF_WEEK_FILL  = BarrelFrame.INT4_FILL,
-      RAW_LAT_FILL     = BarrelFrame.INT4_FILL,
-      RAW_LON_FILL     = BarrelFrame.INT4_FILL,
-      RAW_ALT_FILL     = BarrelFrame.INT4_FILL;
-   static public final long
-      EPOCH_FILL       = BarrelFrame.TT2000_FILL;
+      RAW_GPS_FILL     = CDFVar.INT4_FILL;
    static public final float
-      LAT_FILL         = BarrelFrame.FLOAT_FILL,
-      LON_FILL         = BarrelFrame.FLOAT_FILL,
-      ALT_FILL         = BarrelFrame.FLOAT_FILL,
-      MLT2_FILL        = BarrelFrame.FLOAT_FILL,
-      MLT6_FILL        = BarrelFrame.FLOAT_FILL,
-      L2_FILL          = BarrelFrame.FLOAT_FILL,
-      L6_FILL          = BarrelFrame.FLOAT_FILL;
+      LAT_FILL         = CDFVar.FLOAT_FILL,
+      LON_FILL         = CDFVar.FLOAT_FILL,
+      ALT_FILL         = CDFVar.FLOAT_FILL,
+      MLT2_FILL        = CDFVar.FLOAT_FILL,
+      MLT6_FILL        = CDFVar.FLOAT_FILL,
+      L2_FILL          = CDFVar.FLOAT_FILL,
+      L6_FILL          = CDFVar.FLOAT_FILL;
 
    private int date, lvl;
    private String payload_id;
@@ -141,7 +134,7 @@ public class Ephm extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", -180f);
       var.attribute("VALIDMAX", 180f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", CDFVar.FLOAT_FILL);
       this.cdf.addVar("GPS_Lon", var);
 
       var = new CDFVar(this.cdf, "GPS_Alt", CDFConstants.CDF_FLOAT);
@@ -156,7 +149,7 @@ public class Ephm extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0f, CDFConstants.CDF_FLOAT);
       var.attribute("VALIDMAX", 50f, CDFConstants.CDF_FLOAT);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", CDFVar.FLOAT_FILL);
       this.cdf.addVar("GPS_Alt", var);
 
       var = new CDFVar(this.cdf, "MLT_Kp2_T89c", CDFConstants.CDF_FLOAT);
@@ -177,7 +170,7 @@ public class Ephm extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 24.0f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", CDFVar.FLOAT_FILL);
       this.cdf.addVar("MLT_Kp2", var);
 
       var = new CDFVar(this.cdf, "MLT_Kp6_T89c", CDFConstants.CDF_FLOAT);
@@ -198,7 +191,7 @@ public class Ephm extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0.0f, CDFConstants.CDF_FLOAT);
       var.attribute("VALIDMAX", 24.0f, CDFConstants.CDF_FLOAT);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", CDFVar.FLOAT_FILL);
       this.cdf.addVar("MLT_Kp6", var);
 
       var = new CDFVar(this.cdf, "L_Kp2", CDFConstants.CDF_FLOAT);
@@ -217,7 +210,7 @@ public class Ephm extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0f, CDFConstants.CDF_FLOAT);
       var.attribute("VALIDMAX", 1000.0f, CDFConstants.CDF_FLOAT);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", CDFVar.FLOAT_FILL);
       this.cdf.addVar("L_Kp2", var);
 
       var = new CDFVar(this.cdf, "L_Kp6", CDFConstants.CDF_FLOAT);
@@ -236,7 +229,7 @@ public class Ephm extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0f);
       var.attribute("VALIDMAX", 1000.0f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", CDFVar.FLOAT_FILL);
       this.cdf.addVar("L_Kp6", var);
    }
 }
