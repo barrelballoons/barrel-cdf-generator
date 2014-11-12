@@ -42,30 +42,23 @@ public class FSPC extends DataProduct{
    private String payload_id;
    private float scale = 2.4414f; // keV/bin
 
-   static public final short
-      CHANNEL_FILL = BarrelFrame.INT2_FILL;
-
    static public final int
-      FC_FILL          = BarrelFrame.INT4_FILL,
-      QUALITY_FILL     = BarrelFrame.INT4_FILL;
-
-   static public final long
-      EPOCH_FILL       = BarrelFrame.TT2000_FILL;
+      CNT_FILL        = CDFVar.UINT2_FILL;
 
    static public final float
-      ERROR_FILL       = BarrelFrame.FLOAT_FILL;
+      ERROR_FILL      = CDFVar.FLOAT_FILL;
 
    static public final float[] 
-      BIN_EDGES        = {0f, 20f, 40f, 75f, 230f, 350f, 620f}, 
-      BIN_CENTERS      = {10f, 30f, 57.5f, 152.5f, 290f, 485f}, 
-      BIN_WIDTHS       = {20f, 20f, 35f, 155f, 120f, 250f},
-      OLD_BIN_EDGES    = {0f, 75f, 230f, 350f, 620f}, 
-      OLD_BIN_CENTERS  = {37.5f, 152.5f, 290f, 485f}, 
-      OLD_BIN_WIDTHS   = {75f, 155f, 120f, 250f};
+      BIN_EDGES       = {0f, 20f, 40f, 75f, 230f, 350f, 620f}, 
+      BIN_CENTERS     = {10f, 30f, 57.5f, 152.5f, 290f, 485f}, 
+      BIN_WIDTHS      = {20f, 20f, 35f, 155f, 120f, 250f},
+      OLD_BIN_EDGES   = {0f, 75f, 230f, 350f, 620f}, 
+      OLD_BIN_CENTERS = {37.5f, 152.5f, 290f, 485f}, 
+      OLD_BIN_WIDTHS  = {75f, 155f, 120f, 250f};
 
    static public final String[]
-      NEW_LABELS       = {"FSPC1a","FSPC1b","FSPC1c","FSPC2","FSPC3","FSPC4"},
-      OLD_LABELS       = {"FSPC1", "FSPC2", "FSPC3",  "FSPC4"};
+      NEW_LABELS      = {"FSPC1a","FSPC1b","FSPC1c","FSPC2","FSPC3","FSPC4"},
+      OLD_LABELS      = {"FSPC1", "FSPC2", "FSPC3",  "FSPC4"};
 
    public FSPC(final String path, final String pay, int d, int l, int v){
       this.date = d;
@@ -145,7 +138,7 @@ public class FSPC extends DataProduct{
       var.attribute("SCALETYP", "linear");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 1e30f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", CDFVar.FLOAT_FILL);
       this.cdf.addVar("FSPC_Edges", var);
 
    }
@@ -154,7 +147,7 @@ public class FSPC extends DataProduct{
       CDFVar var;
 
       //create FSPC variable
-      var = new CDFVar(cdf, "FSPC" + ch, CDFConstants.CDF_INT4);
+      var = new CDFVar(cdf, "FSPC" + ch, CDFConstants.CDF_UINT2);
 
       var.attribute("FIELDNAM", "FSPC" + ch);
       var.attribute("CATDESC", "Fast spectra (50ms) ch. " + ch);
@@ -167,7 +160,7 @@ public class FSPC extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0);
       var.attribute("VALIDMAX", 65535);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("INT4_FILL"));
+      var.attribute("FILLVAL", CNT_FILL;
       var.attribute("DELTA_PLUS_VAR", "cnt_error" + ch);
       var.attribute("DELTA_MINUS_VAR", "cnt_error" + ch);
       this.cdf.addVar("FSPC" + ch, var);
@@ -188,7 +181,7 @@ public class FSPC extends DataProduct{
       var.attribute("SCALETYP", "linear");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 10000.0f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", ERROR_FILL);
       this.cdf.addVar("cnt_error" + ch, var);
    }
 

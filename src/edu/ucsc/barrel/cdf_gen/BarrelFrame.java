@@ -66,7 +66,7 @@ public class BarrelFrame {
                   {Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL},
                   {Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL}
                };
-   public short[][]
+   public int[][]
       fspc        = null;
    private BigInteger
       rawFrame    = null;
