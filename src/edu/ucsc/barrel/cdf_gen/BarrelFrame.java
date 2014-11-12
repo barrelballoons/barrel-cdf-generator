@@ -27,64 +27,45 @@ import java.util.Arrays;
 
 public class BarrelFrame {
 
-   //ISTP defined fill values
-   static public final int 
-      UINT1_FILL  = 255,
-      UINT2_FILL  = 65535,
-      INT1_FILL   = -128,
-      INT2_FILL   = -32768,
-      INT4_FILL   = -2147483648;
-   static public final long
-      INT8_FILL   = -9223372036854775808L,
-      UINT4_FILL  = 4294967295L;
-   static public final float 
-      FLOAT_FILL  = -1.0e+31f;
-   static public final double 
-      DOUBLE_FILL = -1.0e+31;
-   
    static public final int 
       LAST_DAY_FC = 2010752,
       FC_OFFSET   = 2097152;
 
-   private short  
-      pps         = INT2_FILL,
-      payID       = INT2_FILL, 
-      ver         = INT2_FILL,
-      sats        = INT2_FILL,
-      offset      = INT2_FILL,
-      termStat    = INT2_FILL,
-      modemCnt    = INT2_FILL,
-      cmdCnt      = INT2_FILL,
-      dcdCnt      = INT2_FILL,
-      rcnt        = INT2_FILL,
-      mod4        = INT2_FILL,
-      mod32       = INT2_FILL,
-      mod40       = INT2_FILL;
-   public int 
-      fc          = INT4_FILL,
-      week        = INT4_FILL,
-      gps         = INT4_FILL;
-   private long
-      epoch       = INT4_FILL,
-      hkpg        = INT4_FILL;
-   public float 
-      peak511_bin = null;
+   private int
+      mod4, mod32, mod40,
+      pps         = Misc.PPS_FILL,
+      payID       = Misc.PAYLOADID_FILL, 
+      ver         = Misc.VERSION_FILL,
+      sats        = HKPG.SATS_FILL,
+      offset      = HKPG.UTC_OFFSET_FILL,
+      termStat    = HKPG.TERM_STAT_FILL,
+      modemCnt    = HKPG.MODEM_CNT_FILL,
+      cmdCnt      = HKPG.CMD_CNT_FILL,
+      dcdCnt      = HKPG.DCD_CNT_FILL,
+      hkpg        = HKPG.RAW_SENSOR_FILL,
+      week        = HPKG.WEEK_FILL,
+      rcnt        = RCNT.RAW_CNT_FILL;
+   public long
+      fc          = BarrelCDF.FC_FILL,
+      gps         = Ephm.RAW_GPS_FILL;
    public short[]
       mspc        = {
-                     INT2_FILL, INT2_FILL, INT2_FILL, INT2_FILL, 
-                     INT2_FILL, INT2_FILL, INT2_FILL, INT2_FILL,
-                     INT2_FILL, INT2_FILL, INT2_FILL, INT2_FILL
+                     MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL,
+                     MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL,
+                     MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL,
+                     MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL
                   },
       sspc        = {
-                     INT2_FILL, INT2_FILL, INT2_FILL, INT2_FILL, 
-                     INT2_FILL, INT2_FILL, INT2_FILL, INT2_FILL
+                     SSPC.RAW_CNT_FILL, SSPC.RAW_CNT_FILL, SSPC.RAW_CNT_FILL,
+                     SSPC.RAW_CNT_FILL, SSPC.RAW_CNT_FILL, SSPC.RAW_CNT_FILL,
+                     SSPC.RAW_CNT_FILL, SSPC.RAW_CNT_FILL
                   };
    public int[]
       mag         = {
-                     {INT4_FILL, INT4_FILL, INT4_FILL},
-                     {INT4_FILL, INT4_FILL, INT4_FILL},
-                     {INT4_FILL, INT4_FILL, INT4_FILL},
-                     {INT4_FILL, INT4_FILL, INT4_FILL}
+                     {Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL},
+                     {Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL},
+                     {Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL},
+                     {Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL}
                   };
    public short[][]
       fspc        = null;
@@ -433,11 +414,6 @@ public class BarrelFrame {
       return true;
    }
 
-   public boolean setEpoch(final long epoch){
-      this.epoch = epoch;
-      return true;
-   }
-
    public boolean setHousekeeping(final long hkpg){
       boolean valid = true;
       if((hkpg < Constants.HKPG_MIN) || (hkpg > Constants.HKPG_MAX)){
@@ -633,11 +609,6 @@ public class BarrelFrame {
       return true;
    }
 
-   public boolean setPeak511Line(final float peak511_bin){
-      this.peak511_bin = peak511_bin;
-      return true;
-   }
-
    public int getFrameCounter(){
       return this.fc;
    }
@@ -694,10 +665,6 @@ public class BarrelFrame {
       return this.sspc;
    }
 
-   public long getEpoch(){
-      return this.epoch;
-   }
-
    public long getHousekeeping(){
       return this.hkpg;
    }
@@ -712,9 +679,5 @@ public class BarrelFrame {
 
    public int[][] getMag(){
       return this.mag;
-   }
-
-   public float getPeak511Line(){
-      return this.peak511_bin;
    }
 }
