@@ -117,7 +117,7 @@ public class BarrelCDF extends CDFFile{
       var.attribute("SCALETYPE", "linear");
       var.attribute("VALIDMIN", min_epoch);
       var.attribute("VALIDMAX", max_epoch);
-      var.attribute("FILLVAL", Long.MIN_VALUE);
+      var.attribute("FILLVAL", EPOCH_FILL);
       var.attribute("LABLAXIS", "Epoch");
       var.attribute("MONOTON", "INCREASE");
       var.attribute("TIME_BASE", "J2000");
@@ -134,7 +134,7 @@ public class BarrelCDF extends CDFFile{
       var.attribute("FORMAT", "I10");
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0);
-      var.attribute("VALIDMAX", 2147483647);
+      var.attribute("VALIDMAX", FC_FILL);
       var.attribute("FILLVAL", CDFVar.getIstpVal("INT4_FILL"));
       this.addVar("FrameGroup", var);
 
@@ -150,7 +150,7 @@ public class BarrelCDF extends CDFFile{
       var.attribute("SCALETYPE", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0);
-      var.attribute("VALIDMAX", 2147483647);
+      var.attribute("VALIDMAX", QUALITY_FILL);
       var.attribute("FILLVAL", CDFVar.getIstpVal("INT4_FILL"));
       this.addVar("Q", var);
    }
