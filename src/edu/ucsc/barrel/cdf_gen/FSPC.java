@@ -117,7 +117,7 @@ public class FSPC extends DataProduct{
       CDFVar var;
       var = new CDFVar(
             cdf, "FSPC_Edges", CDFConstants.CDF_FLOAT, 
-            true, new  long[] {7L} 
+            true, new  long[] {(this.version <= 3 ? 5L : 7L)} 
          );   
 
       var.attribute("FIELDNAM", "FPSC_Edges");
@@ -126,9 +126,7 @@ public class FSPC extends DataProduct{
       var.attribute(
          "VAR_NOTES", 
          "Each element of the array represents the boundaries that separate " +
-         "each energy channel. That is, FSPC1 lies between elements 0 and 1, " +
-         "FSPC2 between 1 and 2, FSPC3 between 2 and 3, and FSPC4 between 3 " +
-         "and 4." 
+         "each energy channel."
       );
       var.attribute("VAR_TYPE", "support_data");
       var.attribute("DEPEND_0", "Epoch");
