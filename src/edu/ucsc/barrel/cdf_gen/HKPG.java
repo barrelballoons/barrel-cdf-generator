@@ -48,25 +48,17 @@ public class HKPG extends DataProduct{
    private String payload_id;
    List<HkpgVar> vars;
 
-   static public final short
-      RAW_SENSOR_FILL = BarrelFrame.INT2_FILL,
-      WEEKS_FILL      = BarrelFrame.INT2_FILL,
-      CMDCNT_FILL     = BarrelFrame.INT2_FILL,
-      DCDCNT_FILL     = BarrelFrame.INT2_FILL,
-      SATS_FILL       = BarrelFrame.INT2_FILL,
-      OFFSET_FILL     = BarrelFrame.INT2_FILL,
-      TERMSTAT_FILL   = BarrelFrame.INT2_FILL,
-      MODEMCNT_FILL   = BarrelFrame.INT2_FILL;
-
    static public final int
-      FC_FILL         = BarrelFrame.INT4_FILL,
-      QUALITY_FILL    = BarrelFrame.INT4_FILL;
-
-   static public final long
-      EPOCH_FILL      = BarrelFrame.TT2000_FILL;
-
+      RAW_SENSOR_FILL = CDFVar.UINT2,
+      SATS_FILL       = CDFVar.UINT2,
+      UTC_OFFSET_FILL = CDFVar.UINT2,
+      TERM_STAT_FILL  = CDFVar.UINT2,
+      MODEM_CNT_FILL  = CDFVar.UINT2,
+      CMD_CNT_FILL    = CDFVar.UINT2,
+      DCD_CNT_FILL    = CDFVar.UINT2,
+      WEEK_FILL       = CDFVar.UINT2;
    static public final float
-      SENSOR_FILL     = BarrelFrame.FLOAT_FILL;
+      SENSOR_FILL     = CDFVar.FLOAT_FILL;
 
    static public final int
       V0 = 0,  I0 = 1,   V1 = 2,  I1 =  3,  V2 = 4,   I2 = 5, 
@@ -415,31 +407,31 @@ public class HKPG extends DataProduct{
       ));
       vars.add(new HkpgVar(
          "numOfSats", "Number of GPS Satellites", "sats", 
-         0, 0, 31, CDFConstants.CDF_INT2
+         0, 0, 31, CDFConstants.CDF_UINT2
       ));
       vars.add(new HkpgVar(
          "timeOffset", "Leap Seconds", "sec", 
-         0, 0, 255, CDFConstants.CDF_INT2
+         0, 0, 255, CDFConstants.CDF_UINT2
       ));
       vars.add(new HkpgVar(
          "termStatus", "Terminate Status", " ", 
-         0, 0, 1, CDFConstants.CDF_INT2
+         0, 0, 1, CDFConstants.CDF_UINT2
       ));
       vars.add(new HkpgVar(
          "cmdCounter", "Command Counter", "commands", 
-         0, 0, 32767, CDFConstants.CDF_INT4
+         0, 0, 32767, CDFConstants.CDF_UINT2
       ));
       vars.add(new HkpgVar(
          "modemCounter", "Modem Reset Counter", "resets", 
-         0, 0, 255, CDFConstants.CDF_INT2
+         0, 0, 255, CDFConstants.CDF_UINT2
       ));
       vars.add(new HkpgVar(
          "dcdCounter", "Numebr of time the DCD has been de-asserted.", "calls", 
-         0, 0, 255, CDFConstants.CDF_INT2
+         0, 0, 255, CDFConstants.CDF_UINT2
       ));
       vars.add(new HkpgVar(
          "weeks", "Weeks Since 6 Jan 1980", "weeks", 
-         0, 0, 65535, CDFConstants.CDF_INT4
+         0, 0, 65535, CDFConstants.CDF_UINT2
       ));
       vars.add(new HkpgVar(
          "Mag_ADC_Offset", "Magnetometer A-D Board Offset",
@@ -454,15 +446,12 @@ public class HKPG extends DataProduct{
    private void createVar(final HkpgVar v){
       CDFVar var = new CDFVar(this.cdf, v.getName(), v.getType());
 
-      if(v.getType() == CDFConstants.CDF_INT4){
-         var.attribute("FORMAT", "I10");
-         var.attribute("FILLVAL", CDFVar.getIstpVal("INT4_FILL"));
-      }else if(v.getType() == CDFConstants.CDF_INT2){
+      if(v.getType() == CDFConstants.CDF_UINT2){
          var.attribute("FORMAT", "I5");
-         var.attribute("FILLVAL", CDFVar.getIstpVal("INT2_FILL"));
+         var.attribute("FILLVAL", CDFVar.UINT2_FILL);
       }else{
          var.attribute("FORMAT", "F4.3");
-         var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+         var.attribute("FILLVAL", CDFVar.FLOAT_FILL);
       }
       var.attribute("VALIDMIN", v.getMin());
       var.attribute("VALIDMAX", v.getMax());
