@@ -33,40 +33,39 @@ public class BarrelFrame {
 
    private int
       mod4, mod32, mod40,
-      pps         = Misc.PPS_FILL,
-      payID       = Misc.PAYLOADID_FILL, 
-      ver         = Misc.VERSION_FILL,
-      sats        = HKPG.SATS_FILL,
-      offset      = HKPG.UTC_OFFSET_FILL,
-      termStat    = HKPG.TERM_STAT_FILL,
-      modemCnt    = HKPG.MODEM_CNT_FILL,
-      cmdCnt      = HKPG.CMD_CNT_FILL,
-      dcdCnt      = HKPG.DCD_CNT_FILL,
-      hkpg        = HKPG.RAW_SENSOR_FILL,
-      week        = HPKG.WEEK_FILL,
-      rcnt        = RCNT.RAW_CNT_FILL,
-      gps         = Ephm.RAW_GPS_FILL;
+      pps      = Misc.PPS_FILL,
+      payID    = Misc.PAYLOADID_FILL, 
+      ver      = Misc.VERSION_FILL,
+      sats     = HKPG.SATS_FILL,
+      offset   = HKPG.UTC_OFFSET_FILL,
+      termStat = HKPG.TERM_STAT_FILL,
+      modemCnt = HKPG.MODEM_CNT_FILL,
+      cmdCnt   = HKPG.CMD_CNT_FILL,
+      dcdCnt   = HKPG.DCD_CNT_FILL,
+      hkpg     = HKPG.RAW_SENSOR_FILL,
+      week     = HPKG.WEEK_FILL,
+      rcnt     = RCNT.RAW_CNT_FILL,
+      gps      = Ephm.RAW_GPS_FILL;
    public long
-      fc          = BarrelCDF.FC_FILL;
-   public short[]
-      mspc        = {
-                     MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL,
-                     MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL,
-                     MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL,
-                     MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL
-                  },
-      sspc        = {
-                     SSPC.RAW_CNT_FILL, SSPC.RAW_CNT_FILL, SSPC.RAW_CNT_FILL,
-                     SSPC.RAW_CNT_FILL, SSPC.RAW_CNT_FILL, SSPC.RAW_CNT_FILL,
-                     SSPC.RAW_CNT_FILL, SSPC.RAW_CNT_FILL
-                  };
+      fc       = BarrelCDF.FC_FILL;
    public int[]
-      mag         = {
-                     {Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL},
-                     {Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL},
-                     {Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL},
-                     {Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL}
-                  };
+      mspc     = {
+                  MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL,
+                  MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL,
+                  MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL,
+                  MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL
+               },
+      sspc     = {
+                  SSPC.RAW_CNT_FILL, SSPC.RAW_CNT_FILL, SSPC.RAW_CNT_FILL,
+                  SSPC.RAW_CNT_FILL, SSPC.RAW_CNT_FILL, SSPC.RAW_CNT_FILL,
+                  SSPC.RAW_CNT_FILL, SSPC.RAW_CNT_FILL
+               },
+      mag      = {
+                  {Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL},
+                  {Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL},
+                  {Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL},
+                  {Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL}
+               };
    public short[][]
       fspc        = null;
    private BigInteger
@@ -88,8 +87,7 @@ public class BarrelFrame {
       );
       if(!this.valid){
          CDF_Gen.log.writeln(
-            "Found frame from dpu " + this.payId + 
-            " should be dpu " + dpuId
+            "Found frame from dpu " + this.payId + " should be dpu " + dpuId
          );
          return;
       }
