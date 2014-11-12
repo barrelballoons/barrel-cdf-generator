@@ -704,7 +704,6 @@ public class LevelTwo extends CDFWriter{
 
    public void doMspcCdf() throws CDFException{
       float 
-         peak       = -1, 
          scint_temp = 0, 
          dpu_temp   = 0;
       short[]

@@ -347,7 +347,7 @@ public class ExtractSpectrum {
          y,
          x          = new double[PEAK_511_WIDTH],
          curve      = new double[PEAK_511_WIDTH - 4],
-         fit_params = {10, Constants.FLOAT_FILL, 1};
+         fit_params = {10, CDFVar.FLOAT_FILL, 1};
       int
          bin_i,
          apex       = 0,
@@ -407,7 +407,7 @@ public class ExtractSpectrum {
             "Payload ID: " + CDF_Gen.getSetting("currentPayload") + 
             " Date: " + CDF_Gen.getSetting("date"));
          System.out.println("Gaussian out of bounds: " + apex);
-         fit_params[1] = Constants.FLOAT_FILL;
+         fit_params[1] = CDFVar.FLOAT_FILL;
       }
       return (float)fit_params[1];
    }
@@ -629,7 +629,7 @@ public class ExtractSpectrum {
 
       //calculate a correction from 511keV location
       float fac511 = 1.0f;
-      if(peak511 != (Float)CDFVar.getIstpVal("FLOAT_FILL")){
+      if(peak511 != SSPC.PEAK_FILL){
          float start = 
             (peak511 / xtal_compensate - dpu_compensate[0]) / dpu_compensate[1];
          fac511 = 511.0f / binvert(start,factor);
@@ -684,7 +684,7 @@ public class ExtractSpectrum {
       //this also helps compensate incorrect temperature values
 
       scale = SCALE_FACTOR; //nominal keV/bin
-      if(peak511 != Constants.DOUBLE_FILL){
+      if(peak511 != SSPC.PEAK_FILL){
          scale = 
             511.  /* * factor2 / factor1*/ / peak511 / 
             (1.0 - 11.6 / (peak511 + 10.8) + 0.000091 * peak511);
@@ -783,7 +783,7 @@ public class ExtractSpectrum {
          if (a_cnt > 0){ 
             for(int k = 0; k < a_cnt; k++){
                if(specin[a[k]] < 0){
-                  specout[i] = Constants.FLOAT_FILL;
+                  specout[i] = CDFVar.FLOAT_FILL;
                   continue spec_loop;
                }else{
                   specout[i] += 
@@ -794,7 +794,7 @@ public class ExtractSpectrum {
          if (b_cnt > 0){
             for(int k = 0; k < b_cnt; k++){
                if(specin[b[k]] < 0){
-                  specout[i] = Constants.FLOAT_FILL;
+                  specout[i] = CDFVar.FLOAT_FILL;
                   continue spec_loop;
                }else{
                   specout[i] += specin[b[k]];
@@ -804,7 +804,7 @@ public class ExtractSpectrum {
          if (c_cnt > 0){
             for(int k = 0; k < c_cnt; k++){
                if(specin[c[k]] < 0){
-                  specout[i] = Constants.FLOAT_FILL;
+                  specout[i] = CDFVar.FLOAT_FILL;
                   continue spec_loop;
                }else{
                   specout[i] += 
@@ -815,7 +815,7 @@ public class ExtractSpectrum {
          if (d_cnt > 0){
             for(int k = 0; k < d_cnt; k++){
                if(specin[d[k]] < 0){
-                  specout[i] = Constants.FLOAT_FILL;
+                  specout[i] = CDFVar.FLOAT_FILL;
                   continue spec_loop;
                }else{
                   specout[i] += 

@@ -57,8 +57,6 @@ public class FrameHolder{
       this.dpuId = id;
       this.min_alt = alt * 1000000; //convert km to mm
       
-      //set minimum altitude based on either command line argument or
-      //default setting in the Constants class
       System.out.println("Rejecting data bellow " + min_alt + " kilometers.");
       
       //Figure out if the previous CDF file had a frame counter rollover
@@ -96,14 +94,14 @@ public class FrameHolder{
 
       //check for fc rollover
       if(this.fc_rollover){
-         fc += Constants.FC_OFFSET;
+         fc += BarrelFrame.FC_OFFSET;
          frame.setFrameCounter(fc);
       } else {
-         if ((this.last_fc - fc) > Constants.LAST_DAY_FC) {
+         if ((this.last_fc - fc) > BarrelFrame.LAST_DAY_FC) {
             //rollover detected
             this.fc_rollover = true;
             
-            fc += Constants.FC_OFFSET;
+            fc += BarrelFrame.FC_OFFSET;
 
             CDF_Gen.log.writeln(
                "Payload " + payload + " rolled over after fc = " + this.last_fc 
