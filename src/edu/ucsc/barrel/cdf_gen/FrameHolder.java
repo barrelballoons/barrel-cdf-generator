@@ -38,6 +38,7 @@ public class FrameHolder{
       last_fc = 0;
    private Map<Integer, BarrelFrame> frames;
    private List<Integer> ordered_fc;
+   private Map<Integer, Boolean> low_alt_frames;
    
    //variables to keep track of valid altitude range
    private float min_alt;
@@ -47,31 +48,51 @@ public class FrameHolder{
    private boolean fc_rollover = false;
    private Integer last_fc = 0;
 
-   public FrameHolder(final String p, final short id){
+   public FrameHolder(final String p, final short id, float alt){
       this.frames = new HashMap<Integer, BarrelFrame>();
       this.ordered_fc = new LinkedList<Integer>();
+      this.low_alt_frames = new HashMap<Integer, Boolean>();
 
       this.payload = (p.split(","))[0];
       this.dpuId = id;
+      this.min_alt = alt * 1000000; //convert km to mm
       
       //set minimum altitude based on either command line argument or
       //default setting in the Constants class
-      if(CDF_Gen.getSetting("min_alt").equals("")){
-         min_alt = Constants.ALT_MIN;
-      }else{
-         min_alt = Float.parseFloat(CDF_Gen.getSetting("min_alt"));
-      }
       System.out.println("Rejecting data bellow " + min_alt + " kilometers.");
       
       //Figure out if the previous CDF file had a frame counter rollover
       if(new File("fc_rollovers/" + payload).exists()){
-        this.fc_rollover = true; 
+        this.fc_rollover = true;
       }
    }
 
    public void addFrame(BigInteger rawFrame){
       BarrelFrame frame = new BarrelFrame(rawFrame, this.dpuId);
       int fc = frame.getFrameCounter();
+      int mod4fg = fc - mod4;
+
+      //skip this frame if its group has been tagged as low altitude
+      if(this.low_alt_frames.get(mod4fg) == true){
+         return;
+      }
+
+      //check if this frame has an altitude attached to it
+      if(frame.mod4 == Ephm.ALT_I && frame.getGPS() < this.min_alt){
+         //save the framge group
+         this.low_alt_frames.put(mod4fg, true);
+
+         //delete any frames that have already been saved
+         this.frames.remove(fg + Ephm.TIME_I);
+         this.frames.remove(fg + Ephm.LAT_I);
+         this.frames.remove(fg + Ephm.LON_I);
+
+         //blacklist this framegroup
+         this.low_alt_frames.put(mod4fg, true);
+
+         //skip to the next frame
+         return;
+      }
 
       //check for fc rollover
       if(this.fc_rollover){

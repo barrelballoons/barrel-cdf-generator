@@ -59,6 +59,9 @@ public class CDF_Gen{
    
    public static void main(String[] args){
       int time_cnt = 0;
+
+      float min_alt;
+
       //array to hold payload id, lauch order, and launch site
 		String[] payload = new String[3];
 		
@@ -116,8 +119,14 @@ public class CDF_Gen{
          //set working payload
          settings.put("currentPayload", payload_i);
          
+         //check if we have a minimum reject altitude
+         min_alt = (
+            getSetting("min_alt").equals("") ? 
+            5 : Float.parseFloat(settings.get("min_alt")
+         );
+
          //create a new storage object
-         frames = new FrameHolder(payload_i, Short.parseShort(dpu));
+         frames = new FrameHolder(payload_i, Short.parseShort(dpu), min_alt);
          
          //Figure out where the input files are coming from
          if(getSetting("local") == ""){
