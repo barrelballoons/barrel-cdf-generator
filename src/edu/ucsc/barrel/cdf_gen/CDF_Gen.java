@@ -122,7 +122,7 @@ public class CDF_Gen{
          //check if we have a minimum reject altitude
          min_alt = (
             getSetting("min_alt").equals("") ? 
-            5 : Float.parseFloat(settings.get("min_alt")
+            5 : Float.parseFloat(settings.get("min_alt"))
          );
 
          //create a new storage object

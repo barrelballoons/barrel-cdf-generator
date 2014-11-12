@@ -158,7 +158,7 @@ public class FSPC extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0);
       var.attribute("VALIDMAX", 65535);
-      var.attribute("FILLVAL", CNT_FILL;
+      var.attribute("FILLVAL", CNT_FILL);
       var.attribute("DELTA_PLUS_VAR", "cnt_error" + ch);
       var.attribute("DELTA_MINUS_VAR", "cnt_error" + ch);
       this.cdf.addVar("FSPC" + ch, var);
