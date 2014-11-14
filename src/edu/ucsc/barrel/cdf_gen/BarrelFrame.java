@@ -32,10 +32,11 @@ public class BarrelFrame {
       FC_OFFSET   = 2097152;
    public int
       mod4, mod32, mod40;
-   private int
+   private short
       pps      = Misc.PPS_FILL,
       payID    = Misc.PAYLOADID_FILL, 
-      ver      = Misc.VERSION_FILL,
+      ver      = Misc.VERSION_FILL;
+   private int
       sats     = HKPG.SATS_FILL,
       offset   = HKPG.UTC_OFFSET_FILL,
       termStat = HKPG.TERM_STAT_FILL,

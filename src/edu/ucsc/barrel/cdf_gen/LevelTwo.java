@@ -45,11 +45,11 @@ import java.util.HashMap;
 
 public class LevelTwo extends CDFWriter{
    private BarrelFrame[] frames;
-   private int date, dpu_ver;
+   private int date, dpu_ver, numFrames;
    public LevelTwo(
       final BarrelFrame[] frames, final int date,
       final String d, final String p, final String f, 
-      final String s, final String dir, final ver String
+      final String s, final String dir, final String ver
    ) throws IOException
    {
       super(d, p, f, s, dir, "Level Two");
@@ -64,8 +64,10 @@ public class LevelTwo extends CDFWriter{
       Calendar cal;
       Logger geo_coord_file =
          new Logger("pay" + this.id + "_" + this.date + "_gps.txt");
+      Integer
+         fc;
       int
-         year, month, day, day_of_year, hour, min, sec, intVal, mod4, fc, fg,
+         year, month, day, day_of_year, hour, min, sec, intVal, mod4, fg,
          numRecords  = (int)Math.ceil(this.numFrames / 4.0);
       double
          sec_of_day  = 0;
@@ -92,9 +94,9 @@ public class LevelTwo extends CDFWriter{
          complete_gps= new HashMap<Integer, Boolean>(numRecords);
 
       //initialize the data arrays with fill value
-      Arrays.fill(frameGroup, Ephm.FC_FILL);
-      Arrays.fill(epoch,      Ephm.EPOCH_FILL);
-      Arrays.fill(q,          Ephm.QUALITY_FILL);
+      Arrays.fill(frameGroup, BarrelCDF.FC_FILL);
+      Arrays.fill(epoch,      BarrelCDF.EPOCH_FILL);
+      Arrays.fill(q,          BarrelCDF.QUALITY_FILL);
       //Arrays.fill(gps_time,   Ephm.GPSTIME_FILL);
       Arrays.fill(lat,        Ephm.LAT_FILL);
       Arrays.fill(lon,        Ephm.LON_FILL);
@@ -122,7 +124,7 @@ public class LevelTwo extends CDFWriter{
 
          //make sure we have a valid frame counter
          fc = this.frames[frame_i].getFrameCounter();
-         if(fc == null || fc == Ephm.FC_FILL){
+         if(fc == null || fc == BarrelCDF.FC_FILL){
             continue;
          }
 
@@ -142,16 +144,16 @@ public class LevelTwo extends CDFWriter{
          switch(this.frames[frame_i].mod4) {
             //convert mm to km
             case Ephm.ALT_I:
-               intVal = this.frames[frame_i].getGps();
-               alt[rec_i] = intVal != Ephm.RAW_ALT_FILL ?
+               intVal = this.frames[frame_i].getGPS();
+               alt[rec_i] = intVal != Ephm.RAW_GPS_FILL ?
                   intVal / 1000000 :
                   Ephm.ALT_FILL;
             break;
 
             //convert lat and lon to physical units
             case Ephm.LAT_I:
-               intVal = this.frames[frame_i].getGps();
-               lat[rec_i] = intVal != Ephm.RAW_LAT_FILL ? 
+               intVal = this.frames[frame_i].getGPS();
+               lat[rec_i] = intVal != Ephm.RAW_GPS_FILL ? 
                   (
                      intVal * 
                      Float.intBitsToFloat(
@@ -161,8 +163,8 @@ public class LevelTwo extends CDFWriter{
                   Ephm.LAT_FILL;
             break;
             case Ephm.LON_I:
-               intVal = this.frames[frame_i].getGps();
-               lon[rec_i] = intVal != Ephm.RAW_LON_FILL ? 
+               intVal = this.frames[frame_i].getGPS();
+               lon[rec_i] = intVal != Ephm.RAW_GPS_FILL ? 
                   (
                      intVal * 
                      Float.intBitsToFloat(
@@ -172,9 +174,9 @@ public class LevelTwo extends CDFWriter{
                   Ephm.LON_FILL;
             break;
             case Ephm.TIME_I:
-               intVal = this.frames[frame_i].getGps();
+               intVal = this.frames[frame_i].getGPS();
                //calculate the GPS time
-               if(intVal != Ephm.MS_OF_WEEK_FILL){
+               if(intVal != Ephm.RAW_GPS_FILL){
                   sec = intVal / 1000; //convert ms to sec
                   sec %= 86400; //remove any complete days
                   hour = sec / 3600;
@@ -342,9 +344,9 @@ public class LevelTwo extends CDFWriter{
       long[] 
          epoch      = new long[this.numFrames];
 
-      Arrays.fill(frameGroup, Misc.FC_FILL);
-      Arrays.fill(epoch,      Misc.EPOCH_FILL);
-      Arrays.fill(q,          Misc.QUALITY_FILL);
+      Arrays.fill(frameGroup, BarrelCDF.FC_FILL);
+      Arrays.fill(epoch,      BarrelCDF.EPOCH_FILL);
+      Arrays.fill(q,          BarrelCDF.QUALITY_FILL);
       Arrays.fill(version,    Misc.VERSION_FILL);
       Arrays.fill(payID,      Misc.PAYLOADID_FILL);
       Arrays.fill(pps_vals,   Misc.PPS_FILL);
@@ -402,9 +404,9 @@ public class LevelTwo extends CDFWriter{
          magz       = new float[numRecords],
          magTot     = new float[numRecords];
 
-      Arrays.fill(frameGroup, Magn.FC_FILL);
-      Arrays.fill(epoch,      Magn.EPOCH_FILL);
-      Arrays.fill(q,          Magn.QUALITY_FILL);
+      Arrays.fill(frameGroup, BarrelCDF.FC_FILL);
+      Arrays.fill(epoch,      BarrelCDF.EPOCH_FILL);
+      Arrays.fill(q,          BarrelCDF.QUALITY_FILL);
       Arrays.fill(magx,       Magn.MAG_FILL);
       Arrays.fill(magy,       Magn.MAG_FILL);
       Arrays.fill(magz,       Magn.MAG_FILL);
@@ -504,9 +506,9 @@ public class LevelTwo extends CDFWriter{
       float [][]
          hkpg_scaled = new float[40][numRecords];
 
-      Arrays.fill(frameGroup, HKPG.FC_FILL);
-      Arrays.fill(epoch,      HKPG.EPOCH_FILL);
-      Arrays.fill(q,          HKPG.QUALITY_FILL);
+      Arrays.fill(frameGroup, BarrelCDF.FC_FILL);
+      Arrays.fill(epoch,      BarrelCDF.EPOCH_FILL);
+      Arrays.fill(q,          BarrelCDF.QUALITY_FILL);
       Arrays.fill(weeks,      HKPG.WEEKS_FILL);
       Arrays.fill(cmdCnt,     HKPG.CMDCNT_FILL);
       Arrays.fill(dcdCnt,     HKPG.DCDCNT_FILL);
@@ -530,7 +532,7 @@ public class LevelTwo extends CDFWriter{
       for(int frame_i = 0, rec_i = -1; frame_i < this.numFrames; frame_i++){
 
          fc = this.frames[frame_i].getFrameCounter();
-         if(fc == null || fc == HKPG.FC_FILL){
+         if(fc == null || fc == BarrelCDF.FC_FILL){
             continue;
          }
 
@@ -637,9 +639,9 @@ public class LevelTwo extends CDFWriter{
       String[]
          chan_names = (numCh == 6 ? FSPC.NEW_LABELS : FSPC.OLD_LABELS);
 
-      Arrays.fill(frameGroup, FSPC.FC_FILL);
-      Arrays.fill(epoch,      FSPC.EPOCH_FILL);
-      Arrays.fill(q,          FSPC.QUALITY_FILL);
+      Arrays.fill(frameGroup, BarrelCDF.FC_FILL);
+      Arrays.fill(epoch,      BarrelCDF.EPOCH_FILL);
+      Arrays.fill(q,          BarrelCDF.QUALITY_FILL);
       for (int ch_i = 0; ch_i < numCh; ch_i++) {
          Arrays.fill(lc_scaled[chi_i], FSPC.CHANNEL_FILL);
          Arrays.fill(lc_error[chi_i], FSPC.ERROR_FILL);
@@ -730,9 +732,9 @@ public class LevelTwo extends CDFWriter{
          error = new float[numRecords][48];
 
       //initialize the data arrays with fill value
-      Arrays.fill(frameGroup,  MSPC.FC_FILL);
-      Arrays.fill(epoch,       MSPC.EPOCH_FILL);
-      Arrays.fill(q,           MSPC.QUALITY_FILL);
+      Arrays.fill(frameGroup,  BarrelCDF.FC_FILL);
+      Arrays.fill(epoch,       BarrelCDF.EPOCH_FILL);
+      Arrays.fill(q,           BarrelCDF.QUALITY_FILL);
       Arrays.fill(raw_spec,    MSPC.RAW_BIN_FILL);
       for(int i = 0; i < numRecords; i++){
          Arrays.fill(rebin[i], MSPC.BIN_FILL);
@@ -745,7 +747,7 @@ public class LevelTwo extends CDFWriter{
       frame_i = 0;
       while (frame_i < this.frames.length) {
          fc = this.frames[frame_i].getFrameCounter();
-         if(fc != null && fc != MSPC.FC_FILL){
+         if(fc != null && fc != BarrelCDF.FC_FILL){
             break;
          }
          frame_i++;
@@ -759,7 +761,7 @@ public class LevelTwo extends CDFWriter{
       for(frame_i = 0, rec_i = 0; frame_i < this.numFrames; frame_i++){
           
          fc = this.frames[frame_i].getFrameCounter();
-         if(fc == null || fc == MSPC.FC_FILL){
+         if(fc == null || fc == BarrelCDF.FC_FILL){
             continue;
          }
 
@@ -869,9 +871,9 @@ public class LevelTwo extends CDFWriter{
          error = new float[numRecords][256];
 
       //initialize the data arrays with fill value
-      Arrays.fill(frameGroup, SSPC.FC_FILL);
-      Arrays.fill(epoch,      SSPC.EPOCH_FILL);
-      Arrays.fill(q,          SSPC.QUALITY_FILL);
+      Arrays.fill(frameGroup, BarrelCDF.FC_FILL);
+      Arrays.fill(epoch,      BarrelCDF.EPOCH_FILL);
+      Arrays.fill(q,          BarrelCDF.QUALITY_FILL);
       Arrays.fill(peak,       SSPC.PEAK_FILL);
       Arrays.fill(raw_spec,   SSPC.RAW_BIN_FILL);
       for (int spec_i = 0; spec_i < 256; spec_i++){
@@ -883,7 +885,7 @@ public class LevelTwo extends CDFWriter{
       frame_i = 0;
       while (frame_i < this.frames.length) {
          fc = this.frames[frame_i].getFrameCounter();
-         if(fc != null && fc != SSPC.FC_FILL){
+         if(fc != null && fc != BarrelCDF.FC_FILL){
             break;
          }
          frame_i++;
@@ -898,7 +900,7 @@ public class LevelTwo extends CDFWriter{
       //rebin the sspc spectra
       for (frame_i = 0, rec_i = 0; frame_i < this.numFrames; frame_i++) {
          fc = this.frames[frame_i].getFrameCounter();
-         if(fc == null || fc == SSPC.FC_FILL){
+         if(fc == null || fc == BarrelCDF.FC_FILL){
             continue;
          }
 
@@ -991,9 +993,9 @@ public class LevelTwo extends CDFWriter{
       long[] epoch = new long[numRecords];
       
       //initialize the data arrays with fill value
-      Arrays.fill(frameGroup, RCNT.FC_FILL);
-      Arrays.fill(epoch,      RCNT.EPOCH_FILL);
-      Arrays.fill(q,          RCNT.QUALITY_FILL);
+      Arrays.fill(frameGroup, BarrelCDF.FC_FILL);
+      Arrays.fill(epoch,      BarrelCDF.EPOCH_FILL);
+      Arrays.fill(q,          BarrelCDF.QUALITY_FILL);
       Arrays.fill(rc[0],      RCNT.RC_FILL);
       Arrays.fill(rc[1],      RCNT.RC_FILL);
       Arrays.fill(rc[2],      RCNT.RC_FILL);
@@ -1004,7 +1006,7 @@ public class LevelTwo extends CDFWriter{
 
          //make sure we have a valid frame counter
          fc = this.frames[frame_i].getFrameCounter();
-         if(fc == null || fc == RCNT.FC_FILL){
+         if(fc == null || fc == BarrelCDF.FC_FILL){
             continue;
          }
 

@@ -3,12 +3,12 @@ package edu.ucsc.barrel.cdf_gen;
 import gsfc.nssdc.cdf.CDFException;
 
 interface CDFFillerMethods{
-   void doGpsCdf(int first, int last, int date) throws CDFException;
-   void doMiscCdf(int first, int last, int date) throws CDFException;
-   void doMagCdf(int first, int last, int date) throws CDFException;
-   void doHkpgCdf(int first, int last, int date) throws CDFException;
-   void doFspcCdf(int first, int last, int date) throws CDFException;
-   void doMspcCdf(int first, int last, int date) throws CDFException;
-   void doSspcCdf(int first, int last, int date) throws CDFException;
-   void doRcntCdf(int first, int last, int date) throws CDFException;
+   void doGpsCdf () throws CDFException;
+   void doMiscCdf() throws CDFException;
+   void doMagCdf () throws CDFException;
+   void doHkpgCdf() throws CDFException;
+   void doFspcCdf() throws CDFException;
+   void doMspcCdf() throws CDFException;
+   void doSspcCdf() throws CDFException;
+   void doRcntCdf() throws CDFException;
 }

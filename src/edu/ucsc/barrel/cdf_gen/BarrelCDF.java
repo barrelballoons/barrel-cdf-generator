@@ -42,8 +42,9 @@ import java.util.Arrays;
 public class BarrelCDF extends CDFFile{
 
    static public final long
+      EPOCH_FILL   = CDFVar.INT8_FILL;
+   static public final int
       FC_FILL      = CDFVar.UINT4_FILL,
-      EPOCH_FILL   = CDFVar.INT8_FILL,
       QUALITY_FILL = CDFVar.UINT4_FILL;
 
    private String payload_id;
