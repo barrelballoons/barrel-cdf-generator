@@ -62,15 +62,17 @@ public class ExtractTiming {
    private int numFrames, numRecords;
 
    private class TimeRec{
-      private long 
-         ms,//frame timestamp
-         frame,//frame counter
+      private long
          ms_of_week,
-         weeks_in_ms;
-      private short 
+         weeks_in_ms,
+         ms;//frame timestamp
+      private int 
+         frame,//frame counter
          week, pps;
+      private short
+         extra_ms;
 
-      public TimeRec(long fc, long msw, short w, short p){
+      public TimeRec(int fc, long msw, int w, int p){
          this.week        = w;
          this.pps         = p;
          this.frame       = fc;
@@ -78,30 +80,30 @@ public class ExtractTiming {
          this.weeks_in_ms = week * MSPERWEEK;
 
          //figure out if we need to add an extra second based on the PPS
-         int extra_ms = (pps < 241) ? 0 : 1000;
+         this.extra_ms = (short)(pps < 241 ? 0 : 1000);
 
          //calculate the number of milliseconds since J2000 
          this.ms = calcEpoch();
       }
       
       public long  getMS()   {return ms;}
-      public long  getFrame(){return frame;}
       public long  getMSW()  {return ms_of_week;}
-      public short getWeek() {return week;}
-      public short getPPS()  {return pps;}
+      public int   getFrame(){return frame;}
+      public int   getWeek() {return week;}
+      public int   getPPS()  {return pps;}
 
-      public long setFrame(long fc){
+      public int setFrame(int fc){
          this.frame = fc;
       }
       public long setMSW(long msw){
          this.ms_of_week = msw;
          this.ms = calcEpoch();
       }
-      public short setPPS(long p){
+      public int setPPS(int p){
          this.pps = p;
          this.ms = calcEpoch();
       }
-      public short setWeek(long w)  {
+      public int setWeek(int w)  {
          this.week = w;
          this.weeks_in_ms = week * MSPERWEEK;
          this.ms = calcEpoch();
@@ -147,12 +149,14 @@ public class ExtractTiming {
    }
 
    public void getTimeRecs(){
-      short
-         week, pps;
       int
-         current_week, fc_offset, frame_i;
+         current_week, week, pps;
+      int
+         fc_offset, frame_i, rec_i;
       long
-         ms, fc, mod4;
+         ms, mod4;
+      Integer
+         fc;
 
       //get the initial values for current_week
       for(frame_i = 0; frame_i < this.numFrames; frame_i++) {
@@ -164,10 +168,10 @@ public class ExtractTiming {
       }
 
       //cycle through the entire data set and create an array of time records
-      for(frame_i = 0, rec_i = 0; frame_i < this.numFrmaes; frame_i++){
+      for(frame_i = 0, rec_i = 0; frame_i < this.numFrames; frame_i++){
 
          //check if this is a frame which contains the GPS time data 
-         if(this.frames[frame_i].mod4 != GPS.TIME_I){continue;}
+         if(this.frames[frame_i].mod4 != Ephm.TIME_I){continue;}
 
          //make sure all the time components are valid
          fc = this.frames[frame_i].getFrameCounter();
@@ -175,12 +179,12 @@ public class ExtractTiming {
             continue;
          }
 
-         ms = this.frames[frame_i].getGps();
+         ms = this.frames[frame_i].getGPS();
          if((ms < MINMS) || (ms > MAXMS)){
             continue;
          }
 
-         pps = this.frames[frame_i].getPulsePerSecond();
+         pps = this.frames[frame_i].getPPS();
          if((pps < MINPPS) || (pps > MAXPPS)){
             //check if pps is high because it came super early so the
             //dpu didnt have a chance to write "0"
@@ -190,9 +194,9 @@ public class ExtractTiming {
 
          //get week data if this frame has it.
          //If not, use the current_week variable
-         week = this.frames[frame_i].mod40 == HKPG.WEEK ?
-            this.frames[frame_i].getWeeks() :
-            current_week;
+         week = 
+            this.frames[frame_i].mod40 == HKPG.WEEK ?
+               this.frames[frame_i].getWeek() : current_week;
 
          //if the week variable is out of range, use current_week instead
          if((week < MINWK) || (week > MAXWK)){
@@ -256,11 +260,11 @@ public class ExtractTiming {
             linModel.setIntercept(fit.getIntercept()); 
             linModel.setFirst(time_recs[first_rec].getFrame()); 
             linModel.setLast(time_recs[last_rec - 1].getFrame()); 
-            this.models.add(model_i, lineModel);
+            this.models.add(model_i, linModel);
 
             //associate each frame number between the two time records 
             //with this linear model
-            last_fc = last_rec.getFrame();
+            last_fc = this.time_recs[last_rec].getFrame();
             while (fc <= last_fc) {
                fc = this.frames[frame_i++].getFrameCounter();
                this.modelRef.put(fc, model_i);
@@ -281,12 +285,12 @@ public class ExtractTiming {
          linModel.setIntercept(0);
          linModel.setFirst(0);
          linModel.setLast(this.numRecords); 
-         this.models.add(lineModel);
+         this.models.add(linModel);
       }
 
       //Associate any remaining frames with the last model
       while (frame_i < this.numFrames) {
-         fc = this.frames[frame_i++];
+         fc = this.frames[frame_i++].getFrameCounter();
          this.modelRef.put(fc, model_i);
       }
    }
@@ -388,7 +392,7 @@ public class ExtractTiming {
       rolls over.
       */
       
-      short
+      int
          initial_week = this.time_recs[0].getWeek(),
          week;
       long

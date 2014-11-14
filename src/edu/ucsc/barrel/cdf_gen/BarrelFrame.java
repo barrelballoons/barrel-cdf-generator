@@ -643,7 +643,7 @@ public class BarrelFrame {
       return this.dcdCnt;
    }
 
-   public int getWeeks(){
+   public int getWeek(){
       return this.week;
    }
 
