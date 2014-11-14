@@ -29,13 +29,11 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class FrameHolder{
    private String payload;
    private short dpuId;
-   private int 
-      first_fc = 0,
-      last_fc = 0;
    private Map<Integer, BarrelFrame> frames;
    private List<Integer> ordered_fc;
    private Map<Integer, Boolean> low_alt_frames;
@@ -46,7 +44,9 @@ public class FrameHolder{
    
    //variables to  signal frame counter rollover
    private boolean fc_rollover = false;
-   private Integer last_fc = 0;
+   private Integer
+      first_fc = 0,
+      last_fc = 0;
 
    public FrameHolder(final String p, final short id, float alt){
       this.frames = new HashMap<Integer, BarrelFrame>();

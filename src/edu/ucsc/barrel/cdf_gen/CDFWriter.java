@@ -49,7 +49,7 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
    int today, yesterday, tomorrow;
    Calendar dateObj = Calendar.getInstance();
    
-   private DataHolder data;
+   private FrameHolder data;
    
    public CDFWriter(
       final String d, final String p, final String f,
