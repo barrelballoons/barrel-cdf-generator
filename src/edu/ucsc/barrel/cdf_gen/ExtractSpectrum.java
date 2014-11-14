@@ -204,29 +204,34 @@ public class ExtractSpectrum {
    
    private Map<Integer, Integer[]> raw_spectra;
    private Map<Integer, Integer> spectra_part_count;
-   private List<Integer> peaks;
+   private List<Float> peaks;
    private Map<Integer, Integer> peaks_ref;
    private BarrelFrame[] frames;
-   private int numFrames, numRecords;
+   private float[][] raw_edges;
+   private int numFrames, numRecords, max_cnts;
 
    public ExtractSpectrum(int dpuVer){
-      this.peaks      = new ArrayList<Integer>();
-      this.peaks_ref  = new HashMap<Integer, Integer>();
-      this.frames     = CDF_Gen.frames.getFrames();
-      this.numFrames  = this.frames.length;
-      this.raw_edges  = dpuVer > 3 ? RAW_EDGES : OLD_RAW_EDGES;
-      this.raw_spectra = new LinkedHashMap<Integer, Integer[]>();
+      this.peaks              = new ArrayList<Float>();
+      this.peaks_ref          = new HashMap<Integer, Integer>();
+      this.frames             = CDF_Gen.frames.getFrames();
+      this.numFrames          = this.frames.length;
+      this.raw_edges          = dpuVer > 3 ? RAW_EDGES : OLD_RAW_EDGES;
+      this.raw_spectra        = new LinkedHashMap<Integer, Integer[]>();
       this.spectra_part_count = new HashMap<Integer, Integer>();
+
       getSpectraRecords();
+      this.max_cnts = MAX_CNT_FACTOR * this.raw_spectra.size();
    }
 
-   private HashMap getSpectraRecords(){
-      int mod32, fg, fc, frame_i, offset, num_parts;
-      Integer[] spectrum, part_spec;
+   private void getSpectraRecords(){
+      int mod32, fg, frame_i, offset;
+      int[] part_spec;
+      Integer num_parts, fc;
+      Integer[] spectrum;
 
       for (frame_i = 0; frame_i < this.numFrames; frame_i++) {
          fc = this.frames[frame_i].getFrameCounter();
-         if(fc == null || fc == BarrelFrame.INT4_FILL){
+         if(fc == null || fc == BarrelCDF.FC_FILL){
             continue;
          }
          
@@ -239,12 +244,12 @@ public class ExtractSpectrum {
          //create the spectrum if this was a new frame group
          if(spectrum == null) {
             spectrum = new Integer[256];
-            Arrays.fill(spectrum, BarrelFrame.INT4_FILL);
+            Arrays.fill(spectrum, SSPC.RAW_CNT_FILL);
          }
 
          //fill part of the spectrum from this frame
          offset = mod32 * 32;
-         part_spec = this.frames[frame_i].getMspc();
+         part_spec = this.frames[frame_i].getMSPC();
          for (int sample_i = 0; sample_i < part_spec.length; sample_i++) {
             spectrum[sample_i + offset] = part_spec[sample_i];
          }
@@ -257,14 +262,11 @@ public class ExtractSpectrum {
          num_parts = num_parts != null ? num_parts++ : 1;
          this.spectra_part_count.put(fg, num_parts);
       }
-
-      return spectra;
    }
 
-   public static void do511Fits(int max_recs){
+   public void do511Fits(int max_recs){
       int 
-         max_cnts = MAX_CNT_FACTOR * this.raw_spectra.size(),
-         peak_i   = 0,
+         peak_i = 0,
          frame_i  = 0,
          fg, fc;
       Iterator<Integer> spec_i;
@@ -275,14 +277,14 @@ public class ExtractSpectrum {
       if(this.raw_spectra.size() < 2){return;}
       
       //iterate through all frames building groups of spectra and do peak fits
-      spec_i = this.rawSpectra.iterator();
+      spec_i = this.raw_spectra.keySet().iterator();
       while(spec_i.hasNext()){
          fg = spec_i.next();
          if(this.spectra_part_count.get(fg) != 32) {
             continue;
          }
 
-         records.add(this.rawSpectra.get(fg));
+         records.add(this.raw_spectra.get(fg));
 
          if(records.size() >= max_recs){
             //we have a full set of records, integrate and look for a peak
@@ -309,23 +311,22 @@ public class ExtractSpectrum {
       }
    }
 
-   private static int[] integrate(Map<Integer, Integer[]> records) {
-      Iterator <Integer> rec_i = records.iterator();
+   private double[] integrate(List<Integer[]> records) {
+      Iterator <Integer[]> rec_i = records.iterator();
       Integer[] spectrum;
-      int[] sum = new int[PEAK_511_WIDTH];
+      double[] sum = new double[PEAK_511_WIDTH];
 
       while(rec_i.hasNext()){
-         spectrum = records.get(rec_i.next());
+         spectrum = rec_i.next();
 
          for(int chan_i = 0; chan_i < PEAK_511_WIDTH; chan_i++){
             //add this spectrum channel to the summed spectrums channel
             sum[chan_i] += spectrum[chan_i + PEAK_511_START];
 
             //check to see if it is likely the 511 line will be washed out
-            if(sum[chan_i] > max_cnts){
+            if(sum[chan_i] > this.max_cnts){
                System.out.println(
-                  "Count rate too high: " +
-                  length + " " + max_cnts + " " + search_spec[chan_i]
+                  "Count rate too high: " + sum[chan_i] + " > " + this.max_cnts
                );
                return null;
             }
@@ -335,7 +336,7 @@ public class ExtractSpectrum {
       return sum;
    }
 
-   private static float find511(Map<Integer, Integer[]> records){
+   private Float find511(List<Integer[]> records){
       GaussianFitter 
          fitter    =  new GaussianFitter(new LevenbergMarquardtOptimizer());
       double
@@ -350,8 +351,8 @@ public class ExtractSpectrum {
          fit_params = {10, CDFVar.FLOAT_FILL, 1};
       int
          bin_i,
-         apex       = 0,
-         high_cnt   = 0;
+         apex     = 0,
+         high_cnt = 0;
       int[]
          high_area  = new int[PEAK_511_WIDTH];
       
@@ -363,7 +364,7 @@ public class ExtractSpectrum {
       //Add up all of the samples we have
       y = integrate(records);
       if(y == null){
-         return BarrelFrame.FLOAT_FILL;
+         return SSPC.PEAK_FILL;
       }
 
       // guess at a linear background
@@ -412,7 +413,7 @@ public class ExtractSpectrum {
       return (float)fit_params[1];
    }
 
-   public static float[] stdEdges(int spec_i, float scale){
+   public float[] stdEdges(int spec_i, float scale){
       float[] edges = (
          this.raw_edges[spec_i]
       );
@@ -554,10 +555,10 @@ public class ExtractSpectrum {
 
    NOTES: Ported from Michael McCarthy's original IDL code
 */
-   public static float[] makeedges(int spec_i, float peak511){
+   public float[] makeedges(int spec_i, float peak511){
       return makeedges(spec_i, 0f, 0f, peak511);
    }
-   public static float[] makeedges(
+   public float[] makeedges(
       int spec_i, float xtal_temp, float dpu_temp, float peak511
    ){
       String payload = 
@@ -652,7 +653,7 @@ public class ExtractSpectrum {
    }
 
 
-   public static float[] createBinEdges(int spec_i, double peak511){
+   public float[] createBinEdges(int spec_i, double peak511){
       double factor1, factor2, scale;
       float[] edges_in = this.raw_edges[spec_i];
       double[] edges_nonlin = new double[edges_in.length];
@@ -829,7 +830,7 @@ public class ExtractSpectrum {
       return specout;
    }
 
-   public Integer getPeakLocation(int fc){
+   public Float getPeakLocation(int fc){
       Integer peak_i, peak;
 
       peak_i = this.peaks_ref.get(fc);

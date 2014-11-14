@@ -158,7 +158,7 @@ public class ExtractTiming {
       for(frame_i = 0; frame_i < this.numFrames; frame_i++) {
          current_week = this.frames[frame_i].getWeeks();
 
-         if(current_week != BarrelFrame.INT4_FILL){
+         if(current_week != HKPG.WEEK_FILL){
             break;
          }
       }
@@ -171,7 +171,7 @@ public class ExtractTiming {
 
          //make sure all the time components are valid
          fc = this.frames[frame_i].getFrameCounter();
-         if(fc == null || fc == BarrelFrame.INT4_FILL){
+         if(fc == null || fc == BarrelCDF.FC_FILL){
             continue;
          }
 

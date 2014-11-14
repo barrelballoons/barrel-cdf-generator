@@ -30,9 +30,9 @@ public class BarrelFrame {
    static public final int 
       LAST_DAY_FC = 2010752,
       FC_OFFSET   = 2097152;
-
+   public int
+      mod4, mod32, mod40;
    private int
-      mod4, mod32, mod40,
       pps      = Misc.PPS_FILL,
       payID    = Misc.PAYLOADID_FILL, 
       ver      = Misc.VERSION_FILL,
