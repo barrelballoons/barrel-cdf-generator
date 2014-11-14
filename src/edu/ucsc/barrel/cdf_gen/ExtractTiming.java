@@ -160,7 +160,7 @@ public class ExtractTiming {
 
       //get the initial values for current_week
       for(frame_i = 0; frame_i < this.numFrames; frame_i++) {
-         current_week = this.frames[frame_i].getWeeks();
+         current_week = this.frames[frame_i].getWeek();
 
          if(current_week != HKPG.WEEK_FILL){
             break;

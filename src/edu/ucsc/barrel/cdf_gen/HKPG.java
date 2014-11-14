@@ -34,6 +34,7 @@ import java.nio.channels.FileChannel;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Vector;
@@ -42,21 +43,20 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
-
 public class HKPG extends DataProduct{
    private int date, lvl;
    private String payload_id;
    List<HkpgVar> vars;
 
    static public final int
-      RAW_SENSOR_FILL = CDFVar.UINT2,
-      SATS_FILL       = CDFVar.UINT2,
-      UTC_OFFSET_FILL = CDFVar.UINT2,
-      TERM_STAT_FILL  = CDFVar.UINT2,
-      MODEM_CNT_FILL  = CDFVar.UINT2,
-      CMD_CNT_FILL    = CDFVar.UINT2,
-      DCD_CNT_FILL    = CDFVar.UINT2,
-      WEEK_FILL       = CDFVar.UINT2;
+      RAW_SENSOR_FILL = CDFVar.UINT2_FILL,
+      SATS_FILL       = CDFVar.UINT2_FILL,
+      UTC_OFFSET_FILL = CDFVar.UINT2_FILL,
+      TERM_STAT_FILL  = CDFVar.UINT2_FILL,
+      MODEM_CNT_FILL  = CDFVar.UINT2_FILL,
+      CMD_CNT_FILL    = CDFVar.UINT2_FILL,
+      DCD_CNT_FILL    = CDFVar.UINT2_FILL,
+      WEEK_FILL       = CDFVar.UINT2_FILL;
    static public final float
       SENSOR_FILL     = CDFVar.FLOAT_FILL;
 
@@ -80,7 +80,7 @@ public class HKPG extends DataProduct{
 
    static public final Map<String, Float> SCALE_FACTORS;
    static {
-      Map<String, Float> scale = new HashMap<String, Float>();
+      Map<String, Float> scales = new HashMap<String, Float>();
       scales.put("V0" ,  0.0003052f);
       scales.put("V1" ,  0.0003052f);
       scales.put("V2" ,  0.0006104f);
@@ -117,7 +117,7 @@ public class HKPG extends DataProduct{
       scales.put("T13",  0.0003052f);
       scales.put("T14",  0.0003052f);
       scales.put("T15",  0.0001526f);
-      SCALE_FACTORS = Collections.unmodifiableMap(scale);
+      SCALE_FACTORS = Collections.unmodifiableMap(scales);
    }
    static public final Map<String, Float> OFFSETS;
    static {

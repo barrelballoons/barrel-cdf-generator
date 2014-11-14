@@ -114,7 +114,7 @@ public class Ephm extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", -90f);
       var.attribute("VALIDMAX", 90f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", CDFVar.FLOAT_FILL);
       this.cdf.addVar("GPS_Lat", var);
 
       var = new CDFVar(this.cdf, "GPS_Lon", CDFConstants.CDF_FLOAT);
