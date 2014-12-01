@@ -38,7 +38,7 @@ import java.util.Vector;
 import java.util.Arrays;
 
 public class Misc extends DataProduct{
-   static public final short
+   static public final int
       PPS_FILL        = CDFVar.UINT2_FILL,
       PAYLOADID_FILL  = CDFVar.UINT2_FILL,
       VERSION_FILL    = CDFVar.UINT2_FILL;

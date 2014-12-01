@@ -545,18 +545,18 @@ public class LevelTwo extends CDFWriter{
 
          //make sure there is a valid housekeeping value to process
          hkpg_raw = this.frames[frame_i].getHousekeeping();
-         if(hkpg_raw == HKPGHKPG.RAW_SENSOR_FILL){continue;}
+         if(hkpg_raw == HKPG.RAW_SENSOR_FILL){continue;}
 
          //convert the housekeeping data to physical units
          if(this.dpu_ver > 3) {
             //for versions 3 and up the T9 and T11 sensors were used for
             //mag statistics rather than solar panel temps
             switch (mod40) {
-               case HKPGHKPGHKPG.T9:
+               case HKPG.T9:
                   hkpg_scaled[mod40][frame_i] = 
                      ((hkpg_raw - 0x8000) * 0.09094f) - 273.15f;
                break;
-               case HKPGHKPGHKPGHKPG.T11:
+               case HKPG.T11:
                   hkpg_scaled[mod40][frame_i] =  hkpg_raw * 0.0003576f;
                break;
                default:

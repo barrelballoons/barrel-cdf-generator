@@ -32,11 +32,10 @@ public class BarrelFrame {
       FC_OFFSET   = 2097152;
    public int
       mod4, mod32, mod40;
-   private short
+   private int
       pps      = Misc.PPS_FILL,
       payID    = Misc.PAYLOADID_FILL, 
-      ver      = Misc.VERSION_FILL;
-   private int
+      ver      = Misc.VERSION_FILL,
       sats     = HKPG.SATS_FILL,
       offset   = HKPG.UTC_OFFSET_FILL,
       termStat = HKPG.TERM_STAT_FILL,
@@ -44,7 +43,7 @@ public class BarrelFrame {
       cmdCnt   = HKPG.CMD_CNT_FILL,
       dcdCnt   = HKPG.DCD_CNT_FILL,
       hkpg     = HKPG.RAW_SENSOR_FILL,
-      week     = HPKG.WEEK_FILL,
+      week     = HKPG.WEEK_FILL,
       rcnt     = RCNT.RAW_CNT_FILL,
       gps      = Ephm.RAW_GPS_FILL;
    public long
@@ -60,35 +59,36 @@ public class BarrelFrame {
                   SSPC.RAW_CNT_FILL, SSPC.RAW_CNT_FILL, SSPC.RAW_CNT_FILL,
                   SSPC.RAW_CNT_FILL, SSPC.RAW_CNT_FILL, SSPC.RAW_CNT_FILL,
                   SSPC.RAW_CNT_FILL, SSPC.RAW_CNT_FILL
-               },
+               };
+   public int[][]
       mag      = {
                   {Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL},
                   {Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL},
                   {Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL},
                   {Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL}
-               };
-   public int[][]
-      fspc        = null;
+               },
+      fspc     = null;
    private BigInteger
-      rawFrame    = null;
-   boolean valid  = true;
+      rawFrame = null;
+   private boolean
+      valid    = true;
  
-   public BarrelFrame(final BigInteger frame, final short dpuId){
+   public BarrelFrame(final BigInteger frame, final int dpuID){
       //Breakdown frame counter words: 
       //save the frame counter parts as temp variables,
       //they will be written to the main structure once rec_num is calculated.
       //First 5 bits are version, next 6 are id, last 21 are FC
-      this.valid = this.setVersion(
-         frame.shiftRight(1691).and(BigInteger.valueOf(31)).shortValue()
+      this.valid = this.setDPUVersion(
+         frame.shiftRight(1691).and(BigInteger.valueOf(31)).intValue()
       );
 
       //make sure this frame belongs to this payload
       this.valid = this.setPayloadID(
-         frame.shiftRight(1685).and(BigInteger.valueOf(63)).shortValue(), dpuId
+         frame.shiftRight(1685).and(BigInteger.valueOf(63)).intValue(), dpuID
       );
       if(!this.valid){
          CDF_Gen.log.writeln(
-            "Found frame from dpu " + this.payId + " should be dpu " + dpuId
+            "Found frame from dpu " + this.payID + " should be dpu " + dpuID
          );
          return;
       }
@@ -154,34 +154,34 @@ public class BarrelFrame {
     
       //GPS PPS
       this.valid = this.setPPS(
-         frame.shiftRight(1616).and(BigInteger.valueOf(65535)).shortValue()
+         frame.shiftRight(1616).and(BigInteger.valueOf(65535)).intValue()
       );
 
       //mag data 4 sets of xyz vectors. 24 bits/component
       for(int sample_i = 0; sample_i < this.mag.length; sample_i++){
          this.valid = this.setMag(
-            Magnetometer.X_AXIS,
+            Magn.X_AXIS,
             sample_i,
-            frame.shiftRight(1592 - (72 * i)).
+            frame.shiftRight(1592 - (72 * sample_i)).
                and(BigInteger.valueOf(16777215)).intValue()
          );
          this.valid = this.setMag(
-            Magnetometer.Y_AXIS,
+            Magn.Y_AXIS,
             sample_i,
-            frame.shiftRight(1568 - (72 * i)).
+            frame.shiftRight(1568 - (72 * sample_i)).
                and(BigInteger.valueOf(16777215)).intValue()
          );
          this.valid = this.setMag(
-            Magnetometer.Z_AXIS,
+            Magn.Z_AXIS,
             sample_i,
-            frame.shiftRight(1544 - (72 * i)).
+            frame.shiftRight(1544 - (72 * sample_i)).
                and(BigInteger.valueOf(16777215)).intValue()
          );
       }
       
       //mod40 housekeeping data: 16bits
       this.valid = this.setHousekeeping(
-         frame.shiftRight(1312).and(BigInteger.valueOf(65535)).longValue()
+         frame.shiftRight(1312).and(BigInteger.valueOf(65535)).intValue()
       );
       
       //fast spectra: 20Hz data
@@ -190,42 +190,40 @@ public class BarrelFrame {
             sample, 
             frame.shiftRight(1264 - sample * 48).and(
                BigInteger.valueOf(281474976710656L)
-            ).intValue()
+            )
          );
       }
        
-      //medium spectra: 12 channels per frame, 16 bits/channels
+      //medium spectra: 12 channels per frame, 16 bits/channel
       for(int chan_i = 0; chan_i < this.mspc.length; chan_i++){
-         this.setMspc(
-            chan_i,
+         this.setMSPC(
+            (this.mod4 * 12) + chan_i,
             frame.shiftRight(336 - (16 * chan_i)).
             and(BigInteger.valueOf(65535)).intValue()
          );
       }
 
-      //slow spectra: 8 channels per frame, 16 bits/channels
+      //slow spectra: 8 channels per frame, 16 bits/channel
       for(int chan_i = 0; chan_i < this.sspc.length; chan_i++){
-         chan_i = (this.mod32 * 8) + sspc_i;
-         this.valid = this.setSspc(
-            chan_i,
-            frame.shiftRight(144 - (16 * sspc_i))
+         this.valid = this.setSSPC(
+            (this.mod32 * 8) + chan_i,
+            frame.shiftRight(144 - (16 * chan_i))
                .and(BigInteger.valueOf(65535)).intValue()
          );
       }
-      //add to the frame count
-      sspc_frames++;
-      
+
       //rate counter: mod4 data, 16bits
       this.valid = this.setRateCounter(
-         frame.shiftRight(16).and(BigInteger.valueOf(65535)).longValue()
+         frame.shiftRight(16).and(BigInteger.valueOf(65535)).intValue()
       );
    }
+
    public boolean setFrameCounter(final int fc){
    
       this.fc = fc;
 
       //validate frame number
-      if(tmpFC <= Constants.FC_MIN || tmpFC > Constants.FC_MAX){
+      if(fc <= Constants.FC_MIN || fc > Constants.FC_MAX){
          return false;
       }
 
@@ -255,15 +253,15 @@ public class BarrelFrame {
       return true;
    }
 
-   public boolean setPayloadID(final short payID, final short dpuID){
+   public boolean setPayloadID(final int payID, final int dpuID){
       this.payID = payID;
-      if(this.payID != dpuID){
+      if(payID != dpuID){
          return false;
       }
       return true;
    }
 
-   public boolean setPPS(final short pps){
+   public boolean setPPS(final int pps){
       this.pps = pps;
       if((this.pps < Constants.PPS_MIN) || (this.pps > Constants.PPS_MAX)){
          //make sure the value is not out of range because of an early pps
@@ -289,32 +287,32 @@ public class BarrelFrame {
       */
    }
 
-   public boolean setDPUVersion(final short ver){
+   public boolean setDPUVersion(final int ver){
       this.ver = ver;
       return true;
    }
 
-   public boolean setNumSats(final short sats){
+   public boolean setNumSats(final int sats){
       this.sats = sats;
       return true;
    }
 
-   public boolean setUTCOffset(final short offset){
+   public boolean setUTCOffset(final int offset){
       this.offset = offset;
       return true;
    }
 
-   public boolean setTermStatus(final short termStat){
+   public boolean setTermStatus(final int termStat){
       this.termStat = termStat;
       return true;
    }
 
-   public boolean setModemCount(final short modemCnt){
+   public boolean setModemCount(final int modemCnt){
       this.modemCnt = modemCnt;
       return true;
    }
 
-   public boolean setDcdCount(final short dcdCnt){
+   public boolean setDcdCount(final int dcdCnt){
       this.dcdCnt = dcdCnt;
       return true;
    }
@@ -330,7 +328,7 @@ public class BarrelFrame {
    }
 
    public boolean setFSPC(final int sample, final BigInteger raw){
-      int channels = FSPC.getChannels(this.version);
+      Channel[] channels = FSPC.getChannels(this.ver);
       int[] fspc = new int[channels.length];
       int value;
       boolean valid = true;
@@ -388,35 +386,31 @@ public class BarrelFrame {
    }
 
    public boolean setMSPC(final int chan_i, final int mspc){
-      this.mspc[chan_i] = mspc;
-      if(
-         (this.mspc[chan_i] < Constants.MSPC_RAW_MIN) ||
-         (this.mspc[chan_i] > Constants.MSPC_RAW_MAX)
-      ){
-         this.mspc[chan_i] = Constants.MSPC_RAW_FILL;
+      if ((mspc < Constants.MSPC_RAW_MIN) || (mspc > Constants.MSPC_RAW_MAX)) {
+         this.mspc[chan_i] = MSPC.RAW_CNT_FILL;
          //this.mspc_q |= Constants.OUT_OF_RANGE;
          return false;
+      } else {
+         this.mspc[chan_i] = mspc;
+         return true;
       }
-      return true;
    }
 
    public boolean setSSPC(final int chan_i, final int sspc){
-      this.sspc[chan_i] = sspc;
-      if(
-         (sspc[chan_i] < Constants.SSPC_RAW_MIN) ||
-         (sspc[chan_i] > Constants.SSPC_RAW_MAX)
-      ){
-         sspc[chan_i] = Constants.SSPC_RAW_FILL;
+      if ((sspc < Constants.SSPC_RAW_MIN) || (sspc > Constants.SSPC_RAW_MAX)) {
+         this. sspc[chan_i] = SSPC.RAW_CNT_FILL;
          //sspc_q |= Constants.OUT_OF_RANGE;
          return false;
+      } else {
+         this.sspc[chan_i] = sspc;
+         return true;
       }
-      return true;
    }
 
-   public boolean setHousekeeping(final long hkpg){
+   public boolean setHousekeeping(final int hkpg){
       boolean valid = true;
       if((hkpg < Constants.HKPG_MIN) || (hkpg > Constants.HKPG_MAX)){
-         this.hkpg = Constants.HKPG_FILL;
+         this.hkpg = HKPG.RAW_SENSOR_FILL;
          //this.hkpg_q |= Constants.OUT_OF_RANGE;
          return false;
       } else {
@@ -425,8 +419,8 @@ public class BarrelFrame {
 
       switch(this.mod40){
          case 36:
-            this.sats   = (short)(this.hkpg >> 8);
-            this.offset = (short)(this.hkpg & 255);
+            this.sats   = this.hkpg >> 8;
+            this.offset = this.hkpg & 255;
 
             if((this.sats < Constants.SATS_MIN) ||
                (this.sats > Constants.SATS_MAX)
@@ -448,12 +442,12 @@ public class BarrelFrame {
             break;
 
          case 37:
-            this.weeks = (int)this.hkpg;
+            this.week = this.hkpg;
             if(
-               (this.weeks < Constants.WEEKS_MIN) ||
-               (this.weeks > Constants.WEEKS_MAX)
+               (this.week < Constants.WEEKS_MIN) ||
+               (this.week > Constants.WEEKS_MAX)
             ){
-               this.weeks = Constants.WEEKS_FILL;
+               this.week = HKPG.WEEK_FILL;
                //this.hkpg_q |= Constants.OUT_OF_RANGE;
                valid = false;
             }
@@ -461,8 +455,8 @@ public class BarrelFrame {
             break;
 
          case 38:
-            this.termStat = (short)(this.hkpg >> 15);
-            this.cmdCnt = (int)(this.hkpg & 32767);
+            this.termStat = this.hkpg >> 15;
+            this.cmdCnt = this.hkpg & 32767;
 
             if(
                (this.termStat < Constants.TERM_STAT_MIN) ||
@@ -482,8 +476,8 @@ public class BarrelFrame {
             }
             break;
          case 39:
-            this.dcdCnt = (short)(this.hkpg >> 8);
-            this.modemCnt = (short)(this.hkpg & 255);
+            this.dcdCnt = this.hkpg >> 8;
+            this.modemCnt = this.hkpg & 255;
             if(
                (this.dcdCnt < Constants.DCD_CNT_MIN) ||
                (this.dcdCnt > Constants.DCD_CNT_MAX)
@@ -508,9 +502,9 @@ public class BarrelFrame {
       return valid;
    }
 
-   public boolean setRateCounter(final long r){
+   public boolean setRateCounter(final int r){
       if((this.rcnt < Constants.RCNT_MIN) || (this.rcnt > Constants.RCNT_MAX)){
-         this.rcnt = Constants.RCNT_FILL;
+         this.rcnt = RCNT.RAW_CNT_FILL;
          //this.rcnt_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;
          return false;
       } 
@@ -550,16 +544,16 @@ public class BarrelFrame {
 
       //get gps info: 32 bits of mod4 gps data followed by 16 bits of pps data
       switch(this.mod4){
-         case Constants.ALT_I:
+         case Ephm.ALT_I:
             if(
-               (gps[this.mod4] < Constants.ALT_RAW_MIN) ||
-               (gps[this.mod4] > Constants.ALT_RAW_MAX)
+               (this.gps < Constants.ALT_RAW_MIN) ||
+               (this.gps > Constants.ALT_RAW_MAX)
             ){
-               gps[this.mod4] = Constants.ALT_RAW_FILL;
+               this.gps = Ephm.RAW_GPS_FILL;
                //gps_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;  
                valid = false;
             }
-            else if(gps[this.mod4] < Constants.MIN_SCI_ALT){
+            else if(this.gps < Constants.MIN_SCI_ALT){
                /*gps_q[rec_num_mod4] |= Constants.LOW_ALT;
                pps_q[rec_num_1Hz] |= Constants.LOW_ALT;
                hkpg_q[rec_num_mod40] |= Constants.LOW_ALT;
@@ -575,18 +569,18 @@ public class BarrelFrame {
                valid = false;
             }
             break;
-         case Constants.TIME_I:
+         case Ephm.TIME_I:
             if(
-               (gps[this.mod4] < Constants.MS_WEEK_MIN) ||
-               (gps[this.mod4] > Constants.MS_WEEK_MAX)
+               (this.gps < Constants.MS_WEEK_MIN) ||
+               (this.gps > Constants.MS_WEEK_MAX)
             ){
-               gps[this.mod4] = Constants.MS_WEEK_FILL;
+               this.gps = Ephm.RAW_GPS_FILL;
                //gps_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;  
                valid = false;
             }
             break;
-         case Constants.LAT_I:
-         case Constants.LON_I:
+         case Ephm.LAT_I:
+         case Ephm.LON_I:
             break;
          default:
             valid = false;
@@ -595,11 +589,9 @@ public class BarrelFrame {
       return valid;
    }
 
-   public boolean setMag(
-      final int axis, final int sample, final int mag
-   ){
+   public boolean setMag(final int axis, final int sample, final int mag) {
       if((mag < Constants.MAG_MIN) || (mag > Constants.MAG_MAX)){
-         this.mag[sample][axis] = Constants.MAG_FILL;
+         this.mag[sample][axis] = Magn.RAW_MAG_FILL;
          //magn_q[rec_num_4Hz] |= Constants.OUT_OF_RANGE;
          return false;
       }
@@ -608,39 +600,39 @@ public class BarrelFrame {
       return true;
    }
 
-   public int getFrameCounter(){
+   public long getFrameCounter(){
       return this.fc;
    }
 
-   public short getPayloadID(){
-      return this.payId;
+   public int getPayloadID(){
+      return this.payID;
    }
 
-   public short getPPS(){
+   public int getPPS(){
       return this.pps;
    }
 
-   public short getDPUVersion(){
+   public int getDPUVersion(){
       return this.ver;
    }
 
-   public short getNumSats(){
+   public int getNumSats(){
       return this.sats;
    }
 
-   public short getUTCOffset(){
+   public int getUTCOffset(){
       return this.offset;
    }
 
-   public short getTermStatus(){
+   public int getTermStatus(){
       return this.termStat;
    }
 
-   public short getModemCount(){
-      return this.modenCnt;
+   public int getModemCount(){
+      return this.modemCnt;
    }
 
-   public short getDcdCount(){
+   public int getDcdCount(){
       return this.dcdCnt;
    }
 
@@ -652,7 +644,7 @@ public class BarrelFrame {
       return this.cmdCnt;
    }
 
-   public int[] getFSPC(){
+   public int[][] getFSPC(){
       return this.fspc;
    }
 

@@ -135,7 +135,7 @@ public class BarrelCDF extends CDFFile{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0);
       var.attribute("VALIDMAX", FC_FILL);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("INT4_FILL"));
+      var.attribute("FILLVAL", CDFVar.INT4_FILL);
       this.addVar("FrameGroup", var);
 
       var = new CDFVar(this, "Quality", CDFConstants.CDF_INT4);
@@ -151,7 +151,7 @@ public class BarrelCDF extends CDFFile{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0);
       var.attribute("VALIDMAX", QUALITY_FILL);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("INT4_FILL"));
+      var.attribute("FILLVAL", CDFVar.INT4_FILL);
       this.addVar("Q", var);
    }
 }
