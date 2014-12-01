@@ -49,8 +49,7 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
    int today, yesterday, tomorrow;
    Calendar dateObj = Calendar.getInstance();
    
-   private FrameHolder frames;
-   private ExtractTiming time_stamps;
+   public List<Integer> fc_list;
 
    public CDFWriter(
       final String d, final String p, final String f,
@@ -90,14 +89,10 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
          ((dateObj.get(Calendar.MONTH) + 1) * 100) + 
          dateObj.get(Calendar.DATE);
 
-      //get the data storage objects
-      this.frames = CDF_Gen.frames;
-      this.time_stamps = CDF_Gen.barrel_time;
-      
       //get data from DataHolder and save them to CDF files
       try{
          System.out.println(
-            "Creating " + lvl  + "... (" + this.frames.size() + " frames)"
+            "Creating " + lvl  + "... (" + CDF_Gen.frames.size() + " frames)"
          );
       
          writeData();
@@ -107,7 +102,7 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
          System.out.println(ex.getMessage());
       }
    }
-   
+
    private void writeData() throws CDFException{
       File outDir;
 
@@ -126,57 +121,27 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
    }
 
    private void doAllCdf(int date) throws CDFException{
-      int
-         first_fc, last_fc,
-         size = this.frames.size();
-      long
-         rec_date = 0;
-      long[]
-         tt2000_parts; 
-      BarrelFrame
-         frame;
-      Iterator<Integer>
-         fc_i = this.frames.fcIterator();
+      
+      this.fc_list = getFCsRange(date);
 
-      //find the first and last frame coutner values for this day
-      first_i = -1;
-      while (fc_i.hasNext()){
-         last_fc = fc_i.next();
-         frame = this.frames.getFrame(fc);
-         tt2000_parts = CDFTT2000.breakdown(this.time_stamps.getEpoch(fc));
-         rec_date = 
-            tt2000_parts[2] + //day
-            (100 * tt2000_parts[1]) + //month
-            (10000 * (tt2000_parts[0] - 2000)); //year
-         if(first_fc == -1) {
-            if(rec_date == date){
-               //found the first_i index
-               first_fc = last_fc;
-            }
-         }else if(rec_date > date){
-            break;
-         }
-      }
-
-      //make sure we have a valid start and stop index and 
-      //that there are some records to process
-      if(first_fc == -1 || (last_fc - first_fc) == 0) {
+      //make sure we have some records to process
+      if(this.fc_list.size() == 0) {
          return;
       }
 
       //do the 1Hz file
-      doMiscCdf(first_fc, last_fc, date);
+      doMiscCdf();
 
       //mod40 file
-      doHkpgCdf(first_i, last_i, date);  
+      doHkpgCdf(); 
 
       //mod32 file
-      doSspcCdf(first_i, last_i, date);  
+      doSspcCdf();  
 
       //mod4 files
-      doMspcCdf(first_i, last_i, date);
-      doRcntCdf(first_i, last_i, date);  
-      doGpsCdf(first_i, last_i, date);
+      doMspcCdf();
+      doRcntCdf(); 
+      doGpsCdf();
 
       //4Hz file
       /*
@@ -184,7 +149,7 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
          first_i = Math.max(0, (first_i - (first_i % 4)));
          last_i = Math.min(size, (last_i + 4 - (last_i % 4)));
       */
-      doMagCdf(first_i, last_i, date);
+      doMagCdf();
 
       //20Hz file
       /*
@@ -192,7 +157,7 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
          //first_i = Math.max(0, (first_i - (first_i % 20)));
          //last_i = Math.min(size, (last_i + 20 - (last_i % 20)));
       */
-      doFspcCdf(first_i, last_i, date); 
+      doFspcCdf();
       
    }
    

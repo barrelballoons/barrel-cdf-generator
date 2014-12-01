@@ -176,6 +176,38 @@ public class FrameHolder{
       return this.ordered_fc.iterator();
    }
 
+   public List<Integer> getFCsByDate(int date){
+      long
+         rec_date = 0;
+      long[]
+         tt2000_parts; 
+      Integer
+         fc;
+      BarrelFrame
+         frame;
+      List<Integer>
+         fcs = new ArrayList<Integer>();
+      Iterator<Integer>
+         fc_i = this.frames.fcIterator();
+
+      //find the first and last frame coutner values for this day
+      while (fc_i.hasNext()){
+         fc = fc_i.next();
+         frame = CDF_Gen.frames.getFrame(fc);
+         tt2000_parts = CDFTT2000.breakdown(CDF_Gen.time_stamps.getEpoch(fc));
+         rec_date = 
+            tt2000_parts[2] + //day
+            (100 * tt2000_parts[1]) + //month
+            (10000 * (tt2000_parts[0] - 2000)); //year
+         if(rec_date == date){
+            //found the first_fc index
+            fcs.add(fc);
+         }
+      }
+
+      return fcs;
+   }
+
 /*
    public Map<String, Number> getData(String type, int start, int stop){
       Map<Integer, Short> data = new Map<Integer, Short>();
