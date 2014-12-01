@@ -49,8 +49,9 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
    int today, yesterday, tomorrow;
    Calendar dateObj = Calendar.getInstance();
    
-   private FrameHolder data;
-   
+   private FrameHolder frames;
+   private ExtractTiming time_stamps;
+
    public CDFWriter(
       final String d, final String p, final String f,
       final String s, final String dir, final String lvl
@@ -89,13 +90,14 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
          ((dateObj.get(Calendar.MONTH) + 1) * 100) + 
          dateObj.get(Calendar.DATE);
 
-      //get the data storage object
-      data = CDF_Gen.data;
+      //get the data storage objects
+      this.frames = CDF_Gen.frames;
+      this.time_stamps = CDF_Gen.barrel_time;
       
       //get data from DataHolder and save them to CDF files
       try{
          System.out.println(
-            "Creating " + lvl  + "... (" + data.getSize("1Hz") + " frames)"
+            "Creating " + lvl  + "... (" + this.frames.size() + " frames)"
          );
       
          writeData();
@@ -124,153 +126,74 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
    }
 
    private void doAllCdf(int date) throws CDFException{
-      int first_i, last_i, size;
-      long rec_date = 0;
-      long[] tt2000_parts; 
+      int
+         first_fc, last_fc,
+         size = this.frames.size();
+      long
+         rec_date = 0;
+      long[]
+         tt2000_parts; 
+      BarrelFrame
+         frame;
+      Iterator<Integer>
+         fc_i = this.frames.fcIterator();
 
-      //find the first and last indicies for this day for the 1Hz file
+      //find the first and last frame coutner values for this day
       first_i = -1;
-      size = data.getSize("1Hz");
-      for(last_i = 0; last_i < size; last_i++){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_1Hz[last_i]);
+      while (fc_i.hasNext()){
+         last_fc = fc_i.next();
+         frame = this.frames.getFrame(fc);
+         tt2000_parts = CDFTT2000.breakdown(this.time_stamps.getEpoch(fc));
          rec_date = 
             tt2000_parts[2] + //day
             (100 * tt2000_parts[1]) + //month
             (10000 * (tt2000_parts[0] - 2000)); //year
-         if(first_i == -1) {
+         if(first_fc == -1) {
             if(rec_date == date){
                //found the first_i index
-               first_i = last_i;
+               first_fc = last_fc;
             }
          }else if(rec_date > date){
             break;
          }
       }
+
       //make sure we have a valid start and stop index and 
       //that there are some records to process
-      if(first_i != -1 && (last_i - first_i) > 0){
-         doMiscCdf(first_i, last_i, date);
+      if(first_fc == -1 || (last_fc - first_fc) == 0) {
+         return;
       }
 
-      //...for the mod40 file
-      first_i = -1;
-      size = data.getSize("mod40");
-      for(last_i = 0; last_i < size; last_i++){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_mod40[last_i]);
-         rec_date = 
-            tt2000_parts[2] + //day
-            (100 * tt2000_parts[1]) + //month
-            (10000 * (tt2000_parts[0] - 2000)); //year
-         if(first_i == -1) {
-            if(rec_date == date){
-               //found the first_i index
-               first_i = last_i;
-            }
-         }else if(rec_date > date){
-            break;
-         }
-      }
-      if(first_i != -1 && (last_i - first_i) > 0){
-         doHkpgCdf(first_i, last_i, date);  
-      }
+      //do the 1Hz file
+      doMiscCdf(first_fc, last_fc, date);
 
-      //...for the mod32 file
-      first_i = -1;
-      size = data.getSize("mod32");
-      for(last_i = 0; last_i < size; last_i++){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_mod32[last_i]);
-         rec_date = 
-            tt2000_parts[2] + //day
-            (100 * tt2000_parts[1]) + //month
-            (10000 * (tt2000_parts[0] - 2000)); //year
-         if(first_i == -1) {
-            if(rec_date == date){
-               //found the first_i index
-               first_i = last_i;
-            }
-         }else if(rec_date > date){
-            break;
-         }
-      }
-      if(first_i != -1 && (last_i - first_i) > 0){
-         doSspcCdf(first_i, last_i, date);  
-      }
+      //mod40 file
+      doHkpgCdf(first_i, last_i, date);  
 
-      //...for the mod4 file
-      first_i = -1;
-      size = data.getSize("mod4");
-      for(last_i = 0; last_i < size; last_i++){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_mod4[last_i]);
-         rec_date = 
-            tt2000_parts[2] + //day
-            (100 * tt2000_parts[1]) + //month
-            (10000 * (tt2000_parts[0] - 2000)); //year
-         if(first_i == -1) {
-            if(rec_date == date){
-               //found the first_i index
-               first_i = last_i;
-            }
-         }else if(rec_date > date){
-            break;
-         }
-      }
-      if(first_i != -1 && (last_i - first_i) > 0){
-         doMspcCdf(first_i, last_i, date);
-         doRcntCdf(first_i, last_i, date);  
-         doGpsCdf(first_i, last_i, date);
-      }
+      //mod32 file
+      doSspcCdf(first_i, last_i, date);  
 
-      //...for the 4Hz file
-      first_i = -1;
-      size = data.getSize("4Hz");
-      for(last_i = 0; last_i < size; last_i += 4){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_4Hz[last_i]);
-         rec_date = 
-            tt2000_parts[2] + //day
-            (100 * tt2000_parts[1]) + //month
-            (10000 * (tt2000_parts[0] - 2000)); //year
-         if(first_i == -1) {
-            if(rec_date == date){
-               //found the first_i index
-               first_i = last_i;
-            }
-         }else if(rec_date > date){
-            break;
-         }
-      }
-      if(first_i != -1 && (last_i - first_i) > 0){
+      //mod4 files
+      doMspcCdf(first_i, last_i, date);
+      doRcntCdf(first_i, last_i, date);  
+      doGpsCdf(first_i, last_i, date);
+
+      //4Hz file
+      /*
          //make sure the first and last records are not mid-frame
-         //first_i = Math.max(0, (first_i - (first_i % 4)));
-         //last_i = Math.min(size, (last_i + 4 - (last_i % 4)));
+         first_i = Math.max(0, (first_i - (first_i % 4)));
+         last_i = Math.min(size, (last_i + 4 - (last_i % 4)));
+      */
+      doMagCdf(first_i, last_i, date);
 
-         doMagCdf(first_i, last_i, date);
-      }
-
-      //...for the 20Hz file
-      first_i = -1;
-      size = data.getSize("20Hz");
-      for(last_i = 0; last_i < size; last_i += 20){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_20Hz[last_i]);
-         rec_date = 
-            tt2000_parts[2] + //day
-            (100 * tt2000_parts[1]) + //month
-            (10000 * (tt2000_parts[0] - 2000)); //year
-         if(first_i == -1) {
-            if(rec_date == date){
-               //found the first_i index
-               first_i = last_i;
-            }
-         }else if(rec_date > date){
-            break;
-         }
-      }
-      if(first_i != -1 && (last_i - first_i) > 0){
+      //20Hz file
+      /*
          //make sure the first and last records are not mid-frame
          //first_i = Math.max(0, (first_i - (first_i % 20)));
          //last_i = Math.min(size, (last_i + 20 - (last_i % 20)));
-
-         doFspcCdf(first_i, last_i, date); 
-      }
+      */
+      doFspcCdf(first_i, last_i, date); 
+      
    }
    
    public static void copyFile(File sourceFile, File destFile, boolean clobber){

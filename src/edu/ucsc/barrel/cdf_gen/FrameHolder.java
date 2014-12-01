@@ -172,7 +172,7 @@ public class FrameHolder{
       return this.frames.size();
    }
 
-   public BarrelFrame fcIterator(){
+   public Integer fcIterator(){
       return this.ordered_fc.iterator();
    }
 
