@@ -51,9 +51,7 @@ public class FrameHolder{
    
    //variables to  signal frame counter rollover
    private boolean fc_rollover = false;
-   private Integer
-      first_fc = 0,
-      last_fc = 0;
+   private Integer last_fc = 0;
 
    public FrameHolder(final String p, final int id, float alt){
       this.ordered_fc     = new LinkedList<Integer>();
@@ -145,9 +143,8 @@ public class FrameHolder{
          }
       }
       
-      //update the first and last frame numbers
-      this.first_fc = (int) Math.min(this.first_fc, fc);
-      this.last_fc = (int)Math.max(this.last_fc, fc);
+      //update the last frame numbers
+      this.last_fc = (int)fc;
 
       //add the frame to the map
       this.frames.put((int)fc, frame);
@@ -193,7 +190,10 @@ public class FrameHolder{
    }
    
    public int[] getFcRange(){
-      int[] range = {this.first_fc, this.last_fc};
+      int[] range = {
+         this.ordered_fc.get(0), 
+         this.ordered_fc.get(this.ordered_fc.size() - 1)
+      };
       return range;
    }
 
@@ -224,7 +224,8 @@ public class FrameHolder{
    }
 
    public BarrelFrame[] getFrames() {
-      return this.getFrames(this.first_fc, this.last_fc);
+      int[] range = this.getFcRange();
+      return this.getFrames(range[0], range[1]);
    }
 
    public Integer getNumRecords(String cadence) {
@@ -267,7 +268,7 @@ public class FrameHolder{
             (100 * tt2000_parts[1]) + //month
             (10000 * (tt2000_parts[0] - 2000)); //year
          if(rec_date == date){
-            //found the first_fc index
+            //found the first fc index
             fcs.add(fc);
          }
       }
