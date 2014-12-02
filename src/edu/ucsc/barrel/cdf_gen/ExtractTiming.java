@@ -141,9 +141,7 @@ public class ExtractTiming {
    public ExtractTiming(FrameHolder frameHolder){
       this.frames     = frameHolder.getFrames();
       this.numFrames  = frameHolder.getNumFrames();
-      this.numRecords = frameHolder.getNumRecords("mod4");
-
-      this.time_recs  = new TimeRec[numRecords];
+      this.time_recs  = new TimeRec[frameHolder.getNumRecords("mod4")];
       this.models     = new ArrayList<LinModel>();
       this.modelRef   = new HashMap<Integer, Integer>();
    }
@@ -211,6 +209,9 @@ public class ExtractTiming {
          this.time_recs[rec_i] = new TimeRec(fc.intValue(), ms, week, pps);
          rec_i++;
       }
+
+      //save the number of records that were found
+      this.numRecords = rec_i;
    }
    
    public void fillModels(){
@@ -230,7 +231,7 @@ public class ExtractTiming {
       //create a model for each batch of time records
       for(int first_rec = 0; first_rec < this.numRecords; first_rec = last_rec){
          //incriment the last_rec by the max, or however many recs are left
-         last_rec += Math.min(MAX_RECS, (this.numRecords - first_rec));
+         last_rec += Math.min(MAX_RECS, (this.numRecords - first_rec)) - 1;
 
          //try to generate a model
          new_fit = genModel(first_rec, last_rec);
@@ -405,9 +406,6 @@ public class ExtractTiming {
       
       //start looking for rollover
       for(int rec_i = 0; rec_i < this.numRecords; rec_i++){
-         if(this.time_recs[rec_i] == null){
-            continue;
-         }
          //get the msw and week for this record
          msw  = this.time_recs[rec_i].getMSW();
          week = this.time_recs[rec_i].getWeek();
