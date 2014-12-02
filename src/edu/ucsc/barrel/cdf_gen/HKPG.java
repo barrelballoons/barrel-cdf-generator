@@ -48,7 +48,7 @@ public class HKPG extends DataProduct{
    private String payload_id;
    List<HkpgVar> vars;
 
-   static public final int
+   public static final int
       RAW_SENSOR_FILL = CDFVar.UINT2_FILL,
       SATS_FILL       = CDFVar.UINT2_FILL,
       UTC_OFFSET_FILL = CDFVar.UINT2_FILL,
@@ -57,10 +57,10 @@ public class HKPG extends DataProduct{
       CMD_CNT_FILL    = CDFVar.UINT2_FILL,
       DCD_CNT_FILL    = CDFVar.UINT2_FILL,
       WEEK_FILL       = CDFVar.UINT2_FILL;
-   static public final float
+   public static final float
       SENSOR_FILL     = CDFVar.FLOAT_FILL;
 
-   static public final int
+   public static final int
       V0 = 0,  I0 = 1,   V1 = 2,  I1 =  3,  V2 = 4,   I2 = 5, 
       V3 = 6,  I3 = 7,   V4 = 8,  I4 =  9,  V5 = 10,  I5 = 11,
       V6 = 12, I6 = 13,  V7 = 14, I7 =  15, T0 = 16,  T8 = 17,
@@ -70,15 +70,15 @@ public class HKPG extends DataProduct{
       SATSOFF = 36, WEEK = 37, CMDCNT = 38, MDMCNT = 39;
    
    //array showing indexes of mod40 data
-   static public final String[] IDS = {
+   public static final String[] IDS = {
       "V0",  "I0", "V1",  "I1",  "V2",  "I2",  "V3", "I3",  "V4", 
       "I4",  "V5", "I5",  "V6",  "I6",  "V7",  "I7", "T0",  "T8",
       "T1",  "T9", "T2",  "T10", "T3",  "T11", "T4", "T12", "T5",
-      "T13", "T6", "T14", "T7 ", "T15", "V8",  "V9", "V10", "V11", 
+      "T13", "T6", "T14", "T7",  "T15", "V8",  "V9", "V10", "V11", 
       "SATSOFF", "WEEK", "CMDCNT", "MDMCNT"
    };
 
-   static public final Map<String, Float> SCALE_FACTORS;
+   public static final Map<String, Float> SCALE_FACTORS;
    static {
       Map<String, Float> scales = new HashMap<String, Float>();
       scales.put("V0" ,  0.0003052f);
@@ -119,7 +119,7 @@ public class HKPG extends DataProduct{
       scales.put("T15",  0.0001526f);
       SCALE_FACTORS = Collections.unmodifiableMap(scales);
    }
-   static public final Map<String, Float> OFFSETS;
+   public static final Map<String, Float> OFFSETS;
    static {
       Map<String, Float> offsets = new HashMap<String, Float>();
       offsets.put("T1" ,  -273.15f);
@@ -139,7 +139,7 @@ public class HKPG extends DataProduct{
       offsets.put("T15",  -273.15f);
       OFFSETS = Collections.unmodifiableMap(offsets);
    }
-   static public final Map<String, String> LABELS;
+   public static final Map<String, String> LABELS;
    static {
       Map<String, String> labels = new HashMap<String, String>();
       labels.put("V0" , "V0_VoltAtLoad");
