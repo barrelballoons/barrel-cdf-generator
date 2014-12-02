@@ -239,26 +239,7 @@ public class ExtractTiming {
          //Need to add better criteria than this for accepting a new model
          if(new_fit != null){
             fit = new_fit;
-            /*
-            this.models[model_cnt] = new LinModel();
-            this.models[model_cnt].setSlope(fit.getSlope()); 
-            this.models[model_cnt].setIntercept(fit.getIntercept()); 
-            this.models[model_cnt].setFirst(time_recs[first_rec].getFrame()); 
-            this.models[model_cnt].setLast(time_recs[last_rec - 1].getFrame()); 
-            model_cnt++;
 
-            System.out.println(
-               "Frames " + this.time_recs[first_rec].getFrame() + " - " +
-               this.time_recs[last_rec - 1].getFrame()); 
-            System.out.println(
-               "\tm = " + fit.getSlope() + ", b = " + fit.getIntercept() + 
-               " slope error = " + fit.getSlopeStdErr() + " n = " + fit.getN()
-            );
-         }else{
-            System.out.println(
-               "Failed to get model using " + (last_rec-first_rec) + " records."
-            );
-            */
             //create a new linear model object
             linModel = new LinModel();
             linModel.setSlope(fit.getSlope()); 
@@ -276,6 +257,20 @@ public class ExtractTiming {
             }
 
             model_i++;
+
+            System.out.println(
+               "Frames " + this.time_recs[first_rec].getFrame() + " - " +
+               this.time_recs[last_rec].getFrame()); 
+            System.out.println(
+               "\tm = " + fit.getSlope() + 
+               ", b = " + fit.getIntercept() + 
+               " slope error = " + fit.getSlopeStdErr() + 
+               " n = " + fit.getN()
+            );
+         } else {
+            System.out.println(
+               "Failed to get model using " + (last_rec-first_rec) + " records."
+            );
          }
       }
 
