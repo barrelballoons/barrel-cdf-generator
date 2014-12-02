@@ -231,7 +231,7 @@ public class ExtractTiming {
       for(int first_rec = 0; first_rec < this.numRecords; first_rec = last_rec){
          //incriment the last_rec by the max, or however many recs are left
          last_rec += Math.min(MAX_RECS, (this.numRecords - first_rec));
-        System.out.println(first_rec + " " + last_rec); 
+
          //try to generate a model
          new_fit = genModel(first_rec, last_rec);
 
