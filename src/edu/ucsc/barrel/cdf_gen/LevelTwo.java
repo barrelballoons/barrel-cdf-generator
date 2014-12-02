@@ -45,7 +45,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 public class LevelTwo extends CDFWriter{
-   private int dpu_ver, numFrames;
 
    public LevelTwo(
       final String d, final String p, final String f, 
@@ -53,8 +52,6 @@ public class LevelTwo extends CDFWriter{
    ) throws IOException
    {
       super(d, p, f, s, dir, "Level Two");
-      this.dpu_ver = CDF_Gen.frames.getDpuVersion();
-      this.numFrames = this.fc_list.size();
    }
    
    //Convert the EPHM data and save it to CDF files
@@ -73,7 +70,7 @@ public class LevelTwo extends CDFWriter{
       int
          rec_i,
          year, month, day, day_of_year, hour, min, sec, intVal, mod4, fg,
-         numRecords  = (int)Math.ceil(this.numFrames / 4.0);
+         numRecords  = CDF_Gen.frames.getNumRecords("mod4");
       double
          sec_of_day  = 0;
       float
@@ -405,7 +402,7 @@ public class LevelTwo extends CDFWriter{
          found_fill = false;
       int
          rec_i, sample, offset,
-         numRecords = this.numFrames * 4;
+         numRecords  = CDF_Gen.frames.getNumRecords("4Hz");
       int[][]
          raw_mag;
       long
@@ -514,7 +511,7 @@ public class LevelTwo extends CDFWriter{
          fc_i        = this.fc_list.iterator();
       int
          rec_i, fg, hkpg_raw, mod40,
-         numRecords  = (int) Math.ceil(this.numFrames / 40.0);
+         numRecords  = CDF_Gen.frames.getNumRecords("mod40");
       int[]
          sats        = new int[numRecords],
          offset      = new int[numRecords],
@@ -642,7 +639,7 @@ public class LevelTwo extends CDFWriter{
          fc_i        = this.fc_list.iterator();
       int
          rec_i, offset, mod40,
-         numRecords = CDF_Gen.frames.size() * 20,
+         numRecords  = CDF_Gen.frames.getNumRecords("20Hz"),
          numCh = FSPC.getChannels(this.dpu_ver).length;
       int[][] 
          lc_raw     = new int[numCh][numRecords],
@@ -743,7 +740,7 @@ public class LevelTwo extends CDFWriter{
       int 
          rec_i, hkpg_frame, start, stop, mod4, fg,
          offset     = 90,
-         numRecords = (int)Math.ceil(this.numFrames / 4);
+         numRecords  = CDF_Gen.frames.getNumRecords("mod4");
       int[]
          part_spec,
          raw_spec   = new int[48];
@@ -878,7 +875,7 @@ public class LevelTwo extends CDFWriter{
       int 
          rec_i, hkpg_frame, start, stop, mod32, fg,
          offset     = 90,
-         numRecords = (int)Math.ceil(this.numFrames / 32);
+         numRecords  = CDF_Gen.frames.getNumRecords("mod32");
       long[]
          frameGroup = new long[numRecords],
          q          = new long[numRecords],
@@ -1003,7 +1000,7 @@ public class LevelTwo extends CDFWriter{
          fc_i        = this.fc_list.iterator();
       int
          raw, rec_i, mod4, fg,
-         numRecords = (int)Math.ceil(this.numFrames / 4);
+         numRecords  = CDF_Gen.frames.getNumRecords("mod4");
       long[]
          q          = new long[numRecords],
          frameGroup = new long[numRecords],

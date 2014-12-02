@@ -51,7 +51,7 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
    Calendar dateObj = Calendar.getInstance();
    
    public List<Integer> fc_list;
-   public int working_date;
+   public int working_date, dpu_ver, numFrames;
 
    public CDFWriter(
       final String d, final String p, final String f,
@@ -69,6 +69,9 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
       stn = s;
       today = Integer.valueOf(d);
       outputPath = dir;
+
+      this.dpu_ver = CDF_Gen.frames.getDpuVersion();
+      this.numFrames = CDF_Gen.frames.getNumFrames();
 
       //calculate yesterday and tomorrow from today's date
       int year, month, day;
