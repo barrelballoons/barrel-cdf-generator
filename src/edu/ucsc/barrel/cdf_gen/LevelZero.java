@@ -87,6 +87,11 @@ public class LevelZero{
       FileInputStream readFile;
       byte[] bytes;
       StringBuilder hexBuffer;
+      int
+         good_frames  = 0,
+         long_frames  = 0,
+         short_frames = 0;
+      int[] stats;
       
       //keeps track of how many total bytes are transfered
       long byteCount = 0;
@@ -128,21 +133,35 @@ public class LevelZero{
             }
             
             //Process the hex frames
-            splitFrames(hexBuffer.toString(), file_i);
+            stats = splitFrames(hexBuffer.toString(), file_i);
+            good_frames  += stats[0];
+            long_frames  += stats[1];
+            short_frames += stats[2];
             
             if (readFile != null) {
                readFile.close();  
             }   
          }
       }
-      
-      System.out.println("Tranfered " + byteCount + " bytes to " + outName);
+
+      System.out.println(
+         "Tranfered " + byteCount + " bytes to " + outName + "."
+      );
+      System.out.println(
+         "Total Frames: " + (good_frames + short_frames + long_frames) + " (" +
+         good_frames  + " good, " + 
+         long_frames  + " long, " +
+         short_frames + " short)."
+      );
    }
    
-   private void splitFrames(String hexBuff, String file) throws IOException{
+   private int[] splitFrames(String hexBuff, String file) throws IOException{
       //need to work on salvaging partial frames due to buffer misalignment 
       //and syncwords in the data
-      
+      int
+         good_frames  = 0,
+         long_frames  = 0,
+         short_frames = 0;
       String[] frames;
       
       frames = hexBuff.split(syncWord);
@@ -161,6 +180,7 @@ public class LevelZero{
          
          //Make sure the frame length is correct
          if(diff == 0){
+            good_frames++;
             processFrame(frames[frame_i], file);
          }else if(diff < 0){ //frame is too short
             //Try to build a full length frame from adjacent pieces
@@ -180,13 +200,17 @@ public class LevelZero{
                frame_i = frame_j;
                processFrame(tempFrame, file);
             }else{
+               short_frames++;
                System.out.println("Short Frame in file " + file + ".");
             }
          }else if(diff > 0){//frame is too long
+            long_frames++;
             //Long frames wont be saved so move on
             System.out.println("Long Frame in file " + file + ".");
          }
       }
+
+      return (new int[]{good_frames, long_frames, short_frames});
    }
    
    private void processFrame(String frame, String fileName) throws IOException{
