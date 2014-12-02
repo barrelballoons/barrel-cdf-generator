@@ -82,7 +82,7 @@ public class FrameHolder{
       this.dpuId = id;
       this.min_alt = alt * 1000000; //convert km to mm
       
-      System.out.println("Rejecting data bellow " + min_alt + " kilometers.");
+      System.out.println("Rejecting data bellow " + alt + " kilometers.");
       
       //Figure out if the previous CDF file had a frame counter rollover
       if(new File("fc_rollovers/" + payload).exists()){
