@@ -39,9 +39,11 @@ public class FrameHolder{
    private String payload;
    private int
       dpuId, dpuVer;
-   private Map<Integer, BarrelFrame> frames;
    private List<Integer> ordered_fc;
+   private Map<Integer, BarrelFrame> frames;
    private Map<Integer, Boolean> low_alt_frames;
+   private Map<String, Integer> numRecords;
+   private Map<String, Long> currentFrameGroup;
     
    //variables to keep track of valid altitude range
    private float min_alt;
@@ -54,9 +56,27 @@ public class FrameHolder{
       last_fc = 0;
 
    public FrameHolder(final String p, final int id, float alt){
-      this.frames = new HashMap<Integer, BarrelFrame>();
-      this.ordered_fc = new LinkedList<Integer>();
+      this.ordered_fc     = new LinkedList<Integer>();
+      this.frames         = new HashMap<Integer, BarrelFrame>();
       this.low_alt_frames = new HashMap<Integer, Boolean>();
+
+      //Start all of the record counters at 0
+      this.numRecords = new HashMap<String, Integer>(6);
+      this.numRecords.put("20Hz",  0);
+      this.numRecords.put("4Hz",   0);
+      this.numRecords.put("1Hz",   0);
+      this.numRecords.put("mod4",  0);
+      this.numRecords.put("mod32", 0);
+      this.numRecords.put("mod40", 0);
+
+      //Start all of the frameGroups at -1 
+      this.currentFrameGroup = new HashMap<String, Long>(6);
+      this.currentFrameGroup.put("20Hz",  -1L);
+      this.currentFrameGroup.put("4Hz",   -1L);
+      this.currentFrameGroup.put("1Hz",   -1L);
+      this.currentFrameGroup.put("mod4",  -1L);
+      this.currentFrameGroup.put("mod32", -1L);
+      this.currentFrameGroup.put("mod40", -1L);
 
       this.payload = (p.split(","))[0];
       this.dpuId = id;
@@ -74,7 +94,8 @@ public class FrameHolder{
       BarrelFrame frame = new BarrelFrame(rawFrame, this.dpuId);
       long
          fc = frame.getFrameCounter(),
-         mod4fg = fc - frame.mod4;
+         mod4fg = fc - frame.mod4,
+         fg;
       
       //update the dpu version number
       this.dpuVer = frame.getDPUVersion();
@@ -131,6 +152,31 @@ public class FrameHolder{
       //add the frame to the map
       this.frames.put((int)fc, frame);
       this.ordered_fc.add((int)fc);
+
+      //update the record counters and framegroups for 1Hz or faster
+      this.currentFrameGroup.put("20Hz", fc);
+      this.currentFrameGroup.put("4Hz", fc);
+      this.currentFrameGroup.put("1Hz", fc);
+      this.numRecords.put("20Hz", this.numRecords.get("20Hz") + 20);
+      this.numRecords.put("4Hz", this.numRecords.get("4Hz") + 4);
+      this.numRecords.put("1Hz", this.numRecords.get("1Hz") + 1);
+
+      //check to see if the frame group has changed before updating for <1Hz
+      fg = fc - frame.mod4;
+      if (fg != this.currentFrameGroup.get("mod4")) {
+         this.currentFrameGroup.put("mod4", fg);
+         this.numRecords.put("mod4", this.numRecords.get("mod4") + 1);
+      }
+      fg = fc - frame.mod32;
+      if (fg != this.currentFrameGroup.get("mod32")) {
+         this.currentFrameGroup.put("mod32", fg);
+         this.numRecords.put("mod32", this.numRecords.get("mod32") + 1);
+      }
+      fg = fc - frame.mod40;
+      if (fg != this.currentFrameGroup.get("mod40")) {
+         this.currentFrameGroup.put("mod40", fg);
+         this.numRecords.put("mod40", this.numRecords.get("mod40") + 1);
+      }
    }
 
    public int getDpuVersion() {
@@ -181,8 +227,16 @@ public class FrameHolder{
       return this.getFrames(this.first_fc, this.last_fc);
    }
 
-   public int size(){
-      return this.frames.size();
+   public Integer getNumRecords(String cadence) {
+      return this.numRecords.get(cadence);
+   }
+
+   public Integer getNumFrames() {
+      return this.getNumRecords("1Hz");
+   }
+
+   public Integer size(){
+      return this.getNumRecords("1Hz");
    }
 
    public Iterator<Integer> fcIterator(){
