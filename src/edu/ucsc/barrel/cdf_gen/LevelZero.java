@@ -55,14 +55,13 @@ public class LevelZero{
       final String f,
       final String s,
       final String d,
-      final String dpu
+      final int dpu
    ){
-      //set object properties
       syncWord = sync;
       frameLength = length;
       inputPath = inputDir;
       outputPath = outputDir;
-      dpu_id = Integer.parseInt(dpu);
+      dpu_id = dpu;
 
       //get file revision number
       if(CDF_Gen.getSetting("rev") != null){
@@ -208,7 +207,7 @@ public class LevelZero{
          outFile.write(hexToByte(frame));
          
          //add frame to the FrameHolder
-         CDF_Gen.frames.addFrame(binFrame, dpu_id);
+         CDF_Gen.frames.addFrame(binFrame);
       }else{
          System.out.println("Checksum Failed for frame in  " + fileName + "!");
       }

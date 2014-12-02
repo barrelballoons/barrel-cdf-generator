@@ -153,7 +153,7 @@ public class CDF_Gen{
 					flt,
 					stn,
                getSetting("date"),
-               dpu
+               Integer.parseInt(dpu)
             );
             L0.processRawFiles();
             L0.finish();
@@ -207,7 +207,7 @@ public class CDF_Gen{
                   //create Level Two
                   LevelTwo L2 =
 						   new LevelTwo(
-                        getSetting("date"),id,flt,stn,L2_Dir,getSetting(dpu)
+                        getSetting("date"),id,flt,stn,L2_Dir
                      );
 
                   L2 = null;

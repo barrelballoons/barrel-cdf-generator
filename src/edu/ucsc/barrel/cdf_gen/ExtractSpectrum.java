@@ -226,8 +226,9 @@ public class ExtractSpectrum {
    private void getSpectraRecords(){
       int mod32, fg, frame_i, offset;
       int[] part_spec;
-      Integer num_parts, fc;
+      Integer num_parts;
       Integer[] spectrum;
+      Long fc;
 
       for (frame_i = 0; frame_i < this.numFrames; frame_i++) {
          fc = this.frames[frame_i].getFrameCounter();
@@ -236,7 +237,7 @@ public class ExtractSpectrum {
          }
          
          mod32 = this.frames[frame_i].mod32;
-         fg = fc - mod32;
+         fg = fc.intValue() - mod32;
 
          //get the spectrum for this frame group
          spectrum = this.raw_spectra.get(fg);
@@ -292,7 +293,7 @@ public class ExtractSpectrum {
 
             //associate all frame numbers with this peak
             while(frame_i < fg){
-               fc = this.frames[frame_i++].getFrameCounter();
+               fc = (int)this.frames[frame_i++].getFrameCounter();
                this.peaks_ref.put(fc, peak_i);
                frame_i++;
             }
@@ -305,7 +306,7 @@ public class ExtractSpectrum {
       //find the peak in any left over records
       this.peaks.add(peak_i, find511(records));
       while(frame_i < this.frames.length){
-         fc = this.frames[frame_i++].getFrameCounter();
+         fc = (int)this.frames[frame_i++].getFrameCounter();
          this.peaks_ref.put(fc, peak_i);
          frame_i++;
       }
@@ -836,5 +837,12 @@ public class ExtractSpectrum {
       peak_i = this.peaks_ref.get(fc);
 
       return (peak_i == null ? this.peaks.get(peak_i) : -1);
+   }
+   public Float getPeakLocation(Long fc){
+      if(fc == null || fc == BarrelCDF.FC_FILL){
+         return SSPC.PEAK_FILL;
+      } else {
+         return this.getPeakLocation(fc.intValue());
+      }
    }
 }

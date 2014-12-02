@@ -49,11 +49,11 @@ public class LevelTwo extends CDFWriter{
 
    public LevelTwo(
       final String d, final String p, final String f, 
-      final String s, final String dir, final String ver
+      final String s, final String dir
    ) throws IOException
    {
       super(d, p, f, s, dir, "Level Two");
-      this.dpu_ver = Integer.valueOf(ver);
+      this.dpu_ver = CDF_Gen.frames.getDpuVersion();
       this.numFrames = this.fc_list.size();
    }
    
@@ -86,10 +86,9 @@ public class LevelTwo extends CDFWriter{
          mlt6        = new float[numRecords],
          l2          = new float[numRecords],
          l6          = new float[numRecords];
-      int[]
-         frameGroup  = new int[numRecords],
-         q           = new int[numRecords];
       long[]
+         frameGroup  = new int[numRecords],
+         q           = new int[numRecords],
          epoch_parts = new long[9],
          gps_time    = new long[numRecords],
          epoch       = new long[numRecords];

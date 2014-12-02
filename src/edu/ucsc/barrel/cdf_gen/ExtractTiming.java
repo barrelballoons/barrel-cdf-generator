@@ -92,18 +92,18 @@ public class ExtractTiming {
       public int   getWeek() {return week;}
       public int   getPPS()  {return pps;}
 
-      public int setFrame(int fc){
+      public void setFrame(int fc){
          this.frame = fc;
       }
-      public long setMSW(long msw){
+      public void setMSW(long msw){
          this.ms_of_week = msw;
          this.ms = calcEpoch();
       }
-      public int setPPS(int p){
+      public void setPPS(int p){
          this.pps = p;
          this.ms = calcEpoch();
       }
-      public int setWeek(int w)  {
+      public void setWeek(int w)  {
          this.week = w;
          this.weeks_in_ms = week * MSPERWEEK;
          this.ms = calcEpoch();
@@ -150,12 +150,12 @@ public class ExtractTiming {
 
    public void getTimeRecs(){
       int
-         current_week, week, pps;
+         current_week = 0, week, pps;
       int
          fc_offset, frame_i, rec_i;
       long
          ms, mod4;
-      Integer
+      Long
          fc;
 
       //get the initial values for current_week
@@ -165,6 +165,10 @@ public class ExtractTiming {
          if(current_week != HKPG.WEEK_FILL){
             break;
          }
+      }
+      if(current_week == 0 || current_week == HKPG.WEEK_FILL) {
+         CDF_Gen.log.writeln("Could not get week variable for dataset");
+         return;
       }
 
       //cycle through the entire data set and create an array of time records
@@ -204,7 +208,7 @@ public class ExtractTiming {
          }
 
          //create a new time record 
-         this.time_recs[rec_i] = new TimeRec(fc, ms, week, pps);
+         this.time_recs[rec_i] = new TimeRec(fc.intValue(), ms, week, pps);
          rec_i++;
       }
    }
@@ -266,7 +270,7 @@ public class ExtractTiming {
             //with this linear model
             last_fc = this.time_recs[last_rec].getFrame();
             while (fc <= last_fc) {
-               fc = this.frames[frame_i++].getFrameCounter();
+               fc = (int)this.frames[frame_i++].getFrameCounter();
                this.modelRef.put(fc, model_i);
             }
 
@@ -290,7 +294,7 @@ public class ExtractTiming {
 
       //Associate any remaining frames with the last model
       while (frame_i < this.numFrames) {
-         fc = this.frames[frame_i++].getFrameCounter();
+         fc = (int)this.frames[frame_i++].getFrameCounter();
          this.modelRef.put(fc, model_i);
       }
    }
