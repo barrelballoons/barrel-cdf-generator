@@ -141,7 +141,7 @@ public class ExtractTiming {
    public ExtractTiming(FrameHolder frameHolder){
       this.frames     = frameHolder.getFrames();
       this.numFrames  = frameHolder.getNumFrames();
-      this.numRecords = frameHolder.getNumRecords("4Hz");
+      this.numRecords = frameHolder.getNumRecords("mod4");
 
       this.time_recs  = new TimeRec[numRecords];
       this.models     = new ArrayList<LinModel>();
