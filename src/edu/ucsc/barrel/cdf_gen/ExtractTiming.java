@@ -138,10 +138,10 @@ public class ExtractTiming {
    private Map<Integer, Integer> modelRef;
    private List<LinModel> models;
 
-   public ExtractTiming(BarrelFrame[] frames){
-      this.frames     = frames;
-      this.numFrames  = this.frames.length;
-      this.numRecords = (int)Math.ceil((float)this.numFrames / 4);
+   public ExtractTiming(FrameHolder frameHolder){
+      this.frames     = frameHolder.getFrames();
+      this.numFrames  = frameHolder.getNumFrames();
+      this.numRecords = frameHolder.getNumRecords("4Hz");
 
       this.time_recs  = new TimeRec[numRecords];
       this.models     = new ArrayList<LinModel>();
