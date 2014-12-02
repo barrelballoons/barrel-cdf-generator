@@ -208,19 +208,21 @@ public class ExtractSpectrum {
    private Map<Integer, Integer> peaks_ref;
    private BarrelFrame[] frames;
    private float[][] raw_edges;
-   private int numFrames, numRecords, max_cnts;
+   private int numFrames, numRecords, max_cnts, dpuVer;
 
-   public ExtractSpectrum(int dpuVer){
+   public ExtractSpectrum(FrameHolder frameHolder){
+      this.dpuVer             = frameHolder.getDpuVersion();
       this.peaks              = new ArrayList<Float>();
       this.peaks_ref          = new HashMap<Integer, Integer>();
-      this.frames             = CDF_Gen.frames.getFrames();
-      this.numFrames          = this.frames.length;
-      this.raw_edges          = dpuVer > 3 ? RAW_EDGES : OLD_RAW_EDGES;
+      this.frames             = frameHolder.getFrames();
+      this.numFrames          = frameHolder.getNumFrames();
+      this.numRecords         = frameHolder.getNumRecords("mod32");
+      this.max_cnts           = MAX_CNT_FACTOR * this.numRecords;
+      this.raw_edges          = this.dpuVer > 3 ? RAW_EDGES : OLD_RAW_EDGES;
       this.raw_spectra        = new LinkedHashMap<Integer, Integer[]>();
       this.spectra_part_count = new HashMap<Integer, Integer>();
 
       getSpectraRecords();
-      this.max_cnts = MAX_CNT_FACTOR * this.raw_spectra.size();
    }
 
    private void getSpectraRecords(){

@@ -199,7 +199,7 @@ public class CDF_Gen{
 
                   //calibrate the mspc and sspc bins
                   System.out.println("Locating 511 line...");
-                  spectra = new ExtractSpectrum(frames.getDpuVersion());
+                  spectra = new ExtractSpectrum(frames);
 
                   spectra.do511Fits(max_recs);
                   //fill511Gaps();
