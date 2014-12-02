@@ -230,8 +230,8 @@ public class ExtractTiming {
       //create a model for each batch of time records
       for(int first_rec = 0; first_rec < this.numRecords; first_rec = last_rec){
          //incriment the last_rec by the max, or however many recs are left
-         last_rec += Math.min(MAX_RECS, (time_rec_cnt - first_rec));
-         
+         last_rec += Math.min(MAX_RECS, (this.numRecords - first_rec));
+        System.out.println(first_rec + " " + last_rec); 
          //try to generate a model
          new_fit = genModel(first_rec, last_rec);
 
@@ -405,6 +405,9 @@ public class ExtractTiming {
       
       //start looking for rollover
       for(int rec_i = 0; rec_i < this.numRecords; rec_i++){
+         if(this.time_recs[rec_i] == null){
+            continue;
+         }
          //get the msw and week for this record
          msw  = this.time_recs[rec_i].getMSW();
          week = this.time_recs[rec_i].getWeek();
@@ -420,10 +423,7 @@ public class ExtractTiming {
                this.time_recs[rec_i].setMSW(msw + 604800000);
             }
          }
-
-         rec_i++;
       }
-      
    }
 
    public long getEpoch(long fc) {

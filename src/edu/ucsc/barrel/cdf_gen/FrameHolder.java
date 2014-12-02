@@ -80,7 +80,7 @@ public class FrameHolder{
       this.dpuVer = frame.getDPUVersion();
 
       //skip this frame if its group has been tagged as low altitude
-      if(this.low_alt_frames.get((int)mod4fg) == true){
+      if(this.low_alt_frames.containsKey((int)mod4fg)){
          return;
       }
 
