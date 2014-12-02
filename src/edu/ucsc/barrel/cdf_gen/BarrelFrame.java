@@ -46,7 +46,7 @@ public class BarrelFrame {
       week     = HKPG.WEEK_FILL,
       rcnt     = RCNT.RAW_CNT_FILL,
       gps      = Ephm.RAW_GPS_FILL;
-   public long
+   private long
       fc       = BarrelCDF.FC_FILL;
    public int[]
       mspc     = {

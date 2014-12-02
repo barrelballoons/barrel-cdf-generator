@@ -65,9 +65,6 @@ public class CDF_Gen{
       //array to hold payload id, lauch order, and launch site
 		String[] payload = new String[3];
 		
-      //holds a full day of frames
-      BarrelFrame[] frames;
-
       //create a log file
       log = new Logger("log.txt");
 
@@ -126,7 +123,7 @@ public class CDF_Gen{
          );
 
          //create a new storage object
-         frames = new FrameHolder(payload_i, Short.parseShort(dpu), min_alt);
+         frames = new FrameHolder(payload_i, Integer.valueOf(dpu), min_alt);
          
          //Figure out where the input files are coming from
          if(getSetting("local") == ""){
@@ -166,7 +163,7 @@ public class CDF_Gen{
          
             //If we didn't get any data, move on to the next payload.
             if(frames.size() > 0){
-               int[] fc_range = frame.getFcRange();
+               int[] fc_range = frames.getFcRange();
 
                //calculate throughput value
                System.out.println(
@@ -177,7 +174,7 @@ public class CDF_Gen{
    			   );
             
                //Fill the time variable
-               barrel_time = new ExtractTiming(getSetting("date"));
+               barrel_time = new ExtractTiming(frames.getFrames());
                barrel_time.getTimeRecs();
                barrel_time.fixWeekOffset();
                barrel_time.fillModels();
@@ -202,7 +199,7 @@ public class CDF_Gen{
 
                   //calibrate the mspc and sspc bins
                   System.out.println("Locating 511 line...");
-                  spectra = new ExtractSpectrum(frames);
+                  spectra = new ExtractSpectrum(frames.getDpuVersion());
 
                   spectra.do511Fits(max_recs);
                   //fill511Gaps();

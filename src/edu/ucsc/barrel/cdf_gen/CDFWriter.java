@@ -38,6 +38,7 @@ import java.nio.channels.FileChannel;
 import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
+import java.util.List;
 
 public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
    String
@@ -49,7 +50,7 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
    int today, yesterday, tomorrow;
    Calendar dateObj = Calendar.getInstance();
    
-   public Iterator<Integer> fc_i;
+   public List<Integer> fc_list;
    public int working_date;
 
    public CDFWriter(
@@ -123,7 +124,7 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
 
    private void doAllCdf(int date) throws CDFException{
       this.working_date = date; 
-      this.fc_list = getFCsRange(date);
+      this.fc_list = CDF_Gen.frames.getFcByDate(date);
 
       //make sure we have some records to process
       if(this.fc_list.size() == 0) {

@@ -29,15 +29,19 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Iterator;
 
 public class FrameHolder{
    private String payload;
-   private short dpuId;
+   private int
+      dpuId, dpuVer;
    private Map<Integer, BarrelFrame> frames;
    private List<Integer> ordered_fc;
    private Map<Integer, Boolean> low_alt_frames;
-   
+    
    //variables to keep track of valid altitude range
    private float min_alt;
    private boolean low_alt = true;
@@ -48,7 +52,7 @@ public class FrameHolder{
       first_fc = 0,
       last_fc = 0;
 
-   public FrameHolder(final String p, final short id, float alt){
+   public FrameHolder(final String p, final int id, float alt){
       this.frames = new HashMap<Integer, BarrelFrame>();
       this.ordered_fc = new LinkedList<Integer>();
       this.low_alt_frames = new HashMap<Integer, Boolean>();
@@ -67,26 +71,30 @@ public class FrameHolder{
 
    public void addFrame(BigInteger rawFrame){
       BarrelFrame frame = new BarrelFrame(rawFrame, this.dpuId);
-      int fc = frame.getFrameCounter();
-      int mod4fg = fc - mod4;
+      long
+         fc = frame.getFrameCounter(),
+         mod4fg = fc - frame.mod4;
+      
+      //update the dpu version number
+      this.dpuVer = frame.getDPUVersion();
 
       //skip this frame if its group has been tagged as low altitude
-      if(this.low_alt_frames.get(mod4fg) == true){
+      if(this.low_alt_frames.get((int)mod4fg) == true){
          return;
       }
 
       //check if this frame has an altitude attached to it
       if(frame.mod4 == Ephm.ALT_I && frame.getGPS() < this.min_alt){
          //save the framge group
-         this.low_alt_frames.put(mod4fg, true);
+         this.low_alt_frames.put((int)mod4fg, true);
 
          //delete any frames that have already been saved
-         this.frames.remove(fg + Ephm.TIME_I);
-         this.frames.remove(fg + Ephm.LAT_I);
-         this.frames.remove(fg + Ephm.LON_I);
+         this.frames.remove((int)(mod4fg + Ephm.TIME_I));
+         this.frames.remove((int)(mod4fg + Ephm.LAT_I));
+         this.frames.remove((int)(mod4fg + Ephm.LON_I));
 
          //blacklist this framegroup
-         this.low_alt_frames.put(mod4fg, true);
+         this.low_alt_frames.put((int)mod4fg, true);
 
          //skip to the next frame
          return;
@@ -95,7 +103,7 @@ public class FrameHolder{
       //check for fc rollover
       if(this.fc_rollover){
          fc += BarrelFrame.FC_OFFSET;
-         frame.setFrameCounter(fc);
+         frame.setFrameCounter((int)fc);
       } else {
          if ((this.last_fc - fc) > BarrelFrame.LAST_DAY_FC) {
             //rollover detected
@@ -108,7 +116,7 @@ public class FrameHolder{
             );
 
             //offset fc
-            frame.setFrameCounter(fc);
+            frame.setFrameCounter((int)fc);
 
             //create an empty file to indicate rollover
             (new Logger("fc_rollovers/" + payload)).close();
@@ -116,12 +124,16 @@ public class FrameHolder{
       }
       
       //update the first and last frame numbers
-      this.first_fc = Math.min(this.first_fc, fc);
-      this.last_fc = Math.max(this.last_fc, fc);
+      this.first_fc = (int) Math.min(this.first_fc, fc);
+      this.last_fc = (int)Math.max(this.last_fc, fc);
 
       //add the frame to the map
-      this.frames.put(fc, frame);
-      this.ordered_fc.add(fc);
+      this.frames.put((int)fc, frame);
+      this.ordered_fc.add((int)fc);
+   }
+
+   public int getDpuVersion() {
+      return this.dpuVer;
    }
 
    public BarrelFrame getFrame(int fc) {
@@ -141,7 +153,7 @@ public class FrameHolder{
    public BarrelFrame[] getFrames(int start, int stop){
       BarrelFrame[]
          results,
-         frames = BarrelFrame[stop - start];
+         frames = new BarrelFrame[stop - start];
       int 
          fc,
          frame_i = 0;
@@ -159,7 +171,7 @@ public class FrameHolder{
    }
    public BarrelFrame[] getFrames(int[] range){
       if(range.length != 2){
-         CDF_Gen.out.log(2, "Invalid frame range: " + range.join(", "));
+         CDF_Gen.log.writeln("Invalid frame range: " + Arrays.toString(range));
       }
       return this.getFrames(range[0], range[1]);
    }
@@ -172,11 +184,11 @@ public class FrameHolder{
       return this.frames.size();
    }
 
-   public Integer fcIterator(){
+   public Iterator<Integer> fcIterator(){
       return this.ordered_fc.iterator();
    }
 
-   public List<Integer> getFCsByDate(int date){
+   public List<Integer> getFcByDate(int date){
       long
          rec_date = 0;
       long[]
@@ -188,13 +200,13 @@ public class FrameHolder{
       List<Integer>
          fcs = new ArrayList<Integer>();
       Iterator<Integer>
-         fc_i = this.frames.fcIterator();
+         fc_i = this.fcIterator();
 
       //find the first and last frame coutner values for this day
       while (fc_i.hasNext()){
          fc = fc_i.next();
          frame = CDF_Gen.frames.getFrame(fc);
-         tt2000_parts = CDFTT2000.breakdown(CDF_Gen.time_stamps.getEpoch(fc));
+         tt2000_parts = CDFTT2000.breakdown(CDF_Gen.barrel_time.getEpoch(fc));
          rec_date = 
             tt2000_parts[2] + //day
             (100 * tt2000_parts[1]) + //month
