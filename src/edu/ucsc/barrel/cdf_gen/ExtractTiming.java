@@ -218,7 +218,7 @@ public class ExtractTiming {
       int
          last_rec = 0,
          frame_i  = 0,
-         model_i  = 0,
+         model_i  = -1,
          fc       = 0,
          last_fc  = 0;
       long
@@ -240,6 +240,7 @@ public class ExtractTiming {
          //Need to add better criteria than this for accepting a new model
          if(new_fit != null){
             fit = new_fit;
+            model_i++;
 
             //create a new linear model object
             linModel = new LinModel();
@@ -257,8 +258,6 @@ public class ExtractTiming {
                this.modelRef.put(fc, model_i);
             }
 
-            model_i++;
-
             System.out.println(
                "Frames " + this.time_recs[first_rec].getFrame() + " - " +
                this.time_recs[last_rec - 1].getFrame()); 
@@ -275,12 +274,13 @@ public class ExtractTiming {
          }
       }
 
-      if(this.models.size() == 0){
+      if(model_i == -1){
          //no timing models were ever created. 
          //Use slope=1000 and intercept=0 to use frame number epoch.
          //this will clearly not give a good result for time, but will
          //allow the data to be plotted as a time series.
          //This will be a place to add a quality flag
+         model_i++;
          linModel = new LinModel();
          linModel.setSlope(1000);
          linModel.setIntercept(0);
