@@ -49,17 +49,8 @@ public class BarrelFrame {
    private long
       fc       = BarrelCDF.FC_FILL;
    public int[]
-      mspc     = {
-                  MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL,
-                  MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL,
-                  MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL,
-                  MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL, MSPC.RAW_CNT_FILL
-               },
-      sspc     = {
-                  SSPC.RAW_CNT_FILL, SSPC.RAW_CNT_FILL, SSPC.RAW_CNT_FILL,
-                  SSPC.RAW_CNT_FILL, SSPC.RAW_CNT_FILL, SSPC.RAW_CNT_FILL,
-                  SSPC.RAW_CNT_FILL, SSPC.RAW_CNT_FILL
-               };
+      mspc     = new int[12],
+      sspc     = new int[8];
    public int[][]
       mag      = {
                   {Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL},
@@ -196,18 +187,20 @@ public class BarrelFrame {
       }
        
       //medium spectra: 12 channels per frame, 16 bits/channel
+      Arrays.fill(this.mspc, MSPC.RAW_CNT_FILL);
       for(int chan_i = 0; chan_i < this.mspc.length; chan_i++){
          this.setMSPC(
-            (this.mod4 * 12) + chan_i,
+            chan_i,
             frame.shiftRight(336 - (16 * chan_i)).
             and(BigInteger.valueOf(65535)).intValue()
          );
       }
 
       //slow spectra: 8 channels per frame, 16 bits/channel
+      Arrays.fill(this.sspc, SSPC.RAW_CNT_FILL);
       for(int chan_i = 0; chan_i < this.sspc.length; chan_i++){
          this.valid = this.setSSPC(
-            (this.mod32 * 8) + chan_i,
+            chan_i,
             frame.shiftRight(144 - (16 * chan_i))
                .and(BigInteger.valueOf(65535)).intValue()
          );
@@ -399,7 +392,7 @@ public class BarrelFrame {
 
    public boolean setSSPC(final int chan_i, final int sspc){
       if ((sspc < Constants.SSPC_RAW_MIN) || (sspc > Constants.SSPC_RAW_MAX)) {
-         this. sspc[chan_i] = SSPC.RAW_CNT_FILL;
+         this.sspc[chan_i] = SSPC.RAW_CNT_FILL;
          //sspc_q |= Constants.OUT_OF_RANGE;
          return false;
       } else {
