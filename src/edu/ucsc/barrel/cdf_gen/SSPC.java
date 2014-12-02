@@ -276,7 +276,7 @@ public class SSPC extends DataProduct{
       var.attribute("SCALETYP", "linear");
       var.attribute("VALIDMIN", 0);
       var.attribute("VALIDMAX", 255);
-      var.attribute("FILLVAL", CDFVar.UINT2);
+      var.attribute("FILLVAL", CDFVar.UINT2_FILL);
       this.cdf.addVar("channel", var);
 
       //Fill the "channel" variable

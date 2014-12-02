@@ -426,7 +426,10 @@ public class ExtractTiming {
       
    }
 
-   public long getEpoch(int fc){
+   public long getEpoch(long fc) {
+      return getEpoch((int)fc);
+   }
+   public long getEpoch(int fc) {
       long epoch;
       LinModel model;
 

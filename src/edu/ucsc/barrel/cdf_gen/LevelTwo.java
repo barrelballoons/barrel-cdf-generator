@@ -69,7 +69,7 @@ public class LevelTwo extends CDFWriter{
       BarrelFrame
          frame;
       Iterator<Integer>
-         fc_i;
+         fc_i        = this.fc_list.iterator();
       int
          rec_i,
          year, month, day, day_of_year, hour, min, sec, intVal, mod4, fg,
@@ -338,7 +338,7 @@ public class LevelTwo extends CDFWriter{
       BarrelFrame
          frame;
       Iterator<Integer>
-         fc_i;
+         fc_i       = this.fc_list.iterator();
       int
          rec_i;
       int[]
@@ -346,8 +346,8 @@ public class LevelTwo extends CDFWriter{
          payID      = new int[this.numFrames],
          pps_vals   = new int[this.numFrames];
       long[] 
-         frameGroup = new int[this.numFrames],
-         q          = new int[this.numFrames],
+         frameGroup = new long[this.numFrames],
+         q          = new long[this.numFrames],
          epoch      = new long[this.numFrames];
 
       Arrays.fill(frameGroup, BarrelCDF.FC_FILL);
@@ -359,7 +359,6 @@ public class LevelTwo extends CDFWriter{
 
       System.out.println("\nSaving MISC Level Two CDF...");
 
-      fc_i = this.fc_list.iterator();
       rec_i = -1;
       while (fc_i.hasNext()) {
          fc = fc_i.next();
@@ -401,20 +400,19 @@ public class LevelTwo extends CDFWriter{
       BarrelFrame
          frame;
       Iterator<Integer>
-         fc_i;
+         fc_i        = this.fc_list.iterator();
       boolean 
          found_fill = false;
       int
          rec_i, sample, offset,
          numRecords = this.numFrames * 4;
-      int[]
-         frameGroup = new int[numRecords],
-         q          = new int[numRecords];
       int[][]
          raw_mag;
       long
          base_epoch;
       long[] 
+         frameGroup = new long[numRecords],
+         q          = new long[numRecords],
          epoch      = new long[numRecords];
       float[] 
          magx       = new float[numRecords],
@@ -433,7 +431,6 @@ public class LevelTwo extends CDFWriter{
       System.out.println("\nSaving Magnetometer Level Two CDF...");
 
       //extract the nominal magnetometer value and calculate |B| for each frame
-      fc_i = this.fc_list.iterator();
       rec_i = -1;
       while (fc_i.hasNext()) {
          fc = fc_i.next();
@@ -514,9 +511,9 @@ public class LevelTwo extends CDFWriter{
       BarrelFrame
          frame;
       Iterator<Integer>
-         fc_i;
+         fc_i        = this.fc_list.iterator();
       int
-         rec_i, fg, hkpg_raw,
+         rec_i, fg, hkpg_raw, mod40,
          numRecords  = (int) Math.ceil(this.numFrames / 40.0);
       int[]
          sats        = new int[numRecords],
@@ -524,25 +521,25 @@ public class LevelTwo extends CDFWriter{
          termStat    = new int[numRecords],
          modemCnt    = new int[numRecords],
          dcdCnt      = new int[numRecords],
-         frameGroup  = new int[numRecords],
-         q           = new int[numRecords],
          cmdCnt      = new int[numRecords],
          weeks       = new int[numRecords];
       long[]
-         epoch       = new long[numRecords];
+         epoch       = new long[numRecords],
+         frameGroup  = new long[numRecords],
+         q           = new long[numRecords];
       float [][]
          hkpg_scaled = new float[40][numRecords];
 
       Arrays.fill(frameGroup, BarrelCDF.FC_FILL);
       Arrays.fill(epoch,      BarrelCDF.EPOCH_FILL);
 //      Arrays.fill(q,          BarrelCDF.QUALITY_FILL);
-      Arrays.fill(weeks,      HKPG.WEEKS_FILL);
-      Arrays.fill(cmdCnt,     HKPG.CMDCNT_FILL);
-      Arrays.fill(dcdCnt,     HKPG.DCDCNT_FILL);
+      Arrays.fill(weeks,      HKPG.WEEK_FILL);
+      Arrays.fill(cmdCnt,     HKPG.CMD_CNT_FILL);
+      Arrays.fill(dcdCnt,     HKPG.DCD_CNT_FILL);
       Arrays.fill(sats,       HKPG.SATS_FILL);
-      Arrays.fill(offset,     HKPG.OFFSET_FILL);
-      Arrays.fill(termStat,   HKPG.TERMSTAT_FILL);
-      Arrays.fill(modemCnt,   HKPG.MODEMCNT_FILL);
+      Arrays.fill(offset,     HKPG.UTC_OFFSET_FILL);
+      Arrays.fill(termStat,   HKPG.TERM_STAT_FILL);
+      Arrays.fill(modemCnt,   HKPG.MODEM_CNT_FILL);
 
       for(int var_i = 0; var_i < 36; var_i++){
          Arrays.fill(hkpg_scaled[var_i], HKPG.SENSOR_FILL);
@@ -556,14 +553,13 @@ public class LevelTwo extends CDFWriter{
 
       HKPG hkpg = new HKPG(destName, "bar_" + id, this.working_date, 2);
 
-      fc_i = this.fc_list.iterator();
       rec_i = -1;
       while (fc_i.hasNext()) {
          fc = fc_i.next();
          frame = CDF_Gen.frames.getFrame(fc);
-         raw_mag = frame.getMag();
          mod40 = frame.mod40;
-         
+         fg = fc - mod40;
+
          if (rec_i == -1 || frameGroup[rec_i] != fg) {
             rec_i++;
             frameGroup[rec_i] = fg;
@@ -587,23 +583,23 @@ public class LevelTwo extends CDFWriter{
                break;
                default:
                   hkpg_scaled[mod40][rec_i] = 
-                     (hkpk_raw * HKPG.SCALE_FACTORS.get(mod40)) +
+                     (hkpg_raw * HKPG.SCALE_FACTORS.get(mod40)) +
                      HKPG.OFFSETS.get(mod40);
                break;
             }
          } else {
             hkpg_scaled[mod40][rec_i] = 
-               (hkpk_raw * HKPG.SCALE_FACTORS.get(mod40)) +
+               (hkpg_raw * HKPG.SCALE_FACTORS.get(mod40)) +
                HKPG.OFFSETS.get(mod40);
          }
 
          sats[rec_i]     = frame.getNumSats();
          offset[rec_i]   = frame.getUTCOffset();
-         termStat[rec_i] = frame.getTermStat();
+         termStat[rec_i] = frame.getTermStatus();
          modemCnt[rec_i] = frame.getModemCount();
          dcdCnt[rec_i]   = frame.getDcdCount();
          cmdCnt[rec_i]   = frame.getCommandCounter();
-         weeks[rec_i]    = frame.getWeeks();
+         weeks[rec_i]    = frame.getWeek();
          epoch[rec_i]    = CDF_Gen.barrel_time.getEpoch(fg);
       }
 
@@ -643,20 +639,19 @@ public class LevelTwo extends CDFWriter{
       BarrelFrame
          frame;
       Iterator<Integer>
-         fc_i;
+         fc_i        = this.fc_list.iterator();
       int
-         rec_i, offset,
+         rec_i, offset, mod40,
          numRecords = CDF_Gen.frames.size() * 20,
          numCh = FSPC.getChannels(this.dpu_ver).length;
-      int[] 
-         lc_raw     = new int[numRecords],
-         frameGroup = new int[numRecords],
-         q          = new int[numRecords];
-      short[][] 
+      int[][] 
+         lc_raw     = new int[numCh][numRecords],
          lc_scaled  = new int[numCh][numRecords];
       long
          base_epoch;
       long[]
+         frameGroup = new long[numRecords],
+         q          = new long[numRecords],
          epoch      = new long[numRecords];
       float 
          scint_temp = 20f,
@@ -664,7 +659,7 @@ public class LevelTwo extends CDFWriter{
          peak       = -1f;
       float[] 
          old_edges, 
-         std_edges  = SpectrumExtract.stdEdges(0, 2.4414f);
+         std_edges  = CDF_Gen.spectra.stdEdges(0, 2.4414f);
       float[][] 
          chan_edges = new float[numRecords][numCh + 1],
          lc_error   = new float[numCh][numRecords];
@@ -675,15 +670,14 @@ public class LevelTwo extends CDFWriter{
       Arrays.fill(epoch,      BarrelCDF.EPOCH_FILL);
 //      Arrays.fill(q,          BarrelCDF.QUALITY_FILL);
       for (int ch_i = 0; ch_i < numCh; ch_i++) {
-         Arrays.fill(lc_scaled[chi_i], FSPC.CHANNEL_FILL);
-         Arrays.fill(lc_error[chi_i], FSPC.ERROR_FILL);
+         Arrays.fill(lc_scaled[ch_i], FSPC.CNT_FILL);
+         Arrays.fill(lc_error[ch_i], FSPC.ERROR_FILL);
       }
 
       System.out.println("\nSaving FSPC...");
       
       //convert the light curves counts to cnts/sec and 
       //figure out the channel width :)
-      fc_i = this.fc_list.iterator();
       rec_i = -1;
       while (fc_i.hasNext()) {
          fc         = fc_i.next();
@@ -694,22 +688,22 @@ public class LevelTwo extends CDFWriter{
 
          //each frame has 20 samples per channel
          for (int ch_i = 0; ch_i < numCh; ch_i++) {
-            for (int sample_i = 0; sample_i < 20; sample_i++) {
+            for (int sample_i = 0, sample; sample_i < 20; sample_i++) {
                rec_i++;
                offset = sample_i * 50000000;
                sample = lc_raw[ch_i][sample_i];
-               if(sample != FSPC.CHANNEL_FILL){
-                  lc_scaled[ch_i][rec_i] = (sample - 8388608.0f) / 83886.070f;
+               if(sample != FSPC.CNT_FILL){
+                  lc_scaled[ch_i][rec_i] = sample;
                   lc_error[ch_i][rec_i] =(float)Math.sqrt(sample);
                }
 
                //get the adjusted bin edges
-               chan_edges[rec_i] = SpectrumExtract.createBinEdges(
+               chan_edges[rec_i] = CDF_Gen.spectra.createBinEdges(
                   0, CDF_Gen.spectra.getPeakLocation(fc)
                );
 
                frameGroup[rec_i] = fc;
-               epoch[rec_i] = base_epoch + offset ;
+               epoch[rec_i] = base_epoch + offset;
             }
          }
       }
@@ -745,28 +739,25 @@ public class LevelTwo extends CDFWriter{
       BarrelFrame
          frame;
       Iterator<Integer>
-         fc_i;
-      float 
-         scint_temp = 0, 
-         dpu_temp   = 0;
-      short[]
-         part_spec,
-         raw_spec   = new int[48];
+         fc_i        = this.fc_list.iterator();
       int 
          rec_i, hkpg_frame, start, stop, mod4, fg,
          offset     = 90,
          numRecords = (int)Math.ceil(this.numFrames / 4);
       int[]
-         frameGroup = new int[numRecords],
-         q          = new int[numRecords];
+         part_spec,
+         raw_spec   = new int[48];
       long[]
+         frameGroup = new long[numRecords],
+         q          = new long[numRecords],
          epoch      = new long[numRecords];
-
       float
+         scint_temp = 0, 
+         dpu_temp   = 0,
          width;
       float[]
          old_edges,
-         std_edges  = SpectrumExtract.stdEdges(1, 2.4414f);
+         std_edges  = CDF_Gen.spectra.stdEdges(1, 2.4414f);
       float[][]
          rebin = new float[numRecords][48],
          error = new float[numRecords][48];
@@ -775,9 +766,9 @@ public class LevelTwo extends CDFWriter{
       Arrays.fill(frameGroup,  BarrelCDF.FC_FILL);
       Arrays.fill(epoch,       BarrelCDF.EPOCH_FILL);
 //      Arrays.fill(q,           BarrelCDF.QUALITY_FILL);
-      Arrays.fill(raw_spec,    MSPC.RAW_BIN_FILL);
+      Arrays.fill(raw_spec,    MSPC.RAW_CNT_FILL);
       for(int i = 0; i < numRecords; i++){
-         Arrays.fill(rebin[i], MSPC.BIN_FILL);
+         Arrays.fill(rebin[i], MSPC.CNT_FILL);
          Arrays.fill(error,    MSPC.ERROR_FILL);
       }
       
@@ -790,7 +781,6 @@ public class LevelTwo extends CDFWriter{
       frameGroup[0] = fg;
 
       //rebin the mspc spectra
-      fc_i = this.fc_list.iterator();
       rec_i = 0;
       while (fc_i.hasNext()) {
          fc    = fc_i.next();
@@ -802,7 +792,7 @@ public class LevelTwo extends CDFWriter{
          //(meaning the same spectrum)
          if (frameGroup[rec_i] != fg) {
             //save the epoch and frameGroup of this spectrum
-            epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(framegroup[rec_i]);
+            epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
 
             //get the most recent scintillator temperature value
             scint_temp = getTemp(frame, HKPG.T0);
@@ -821,7 +811,7 @@ public class LevelTwo extends CDFWriter{
 
             //scale the counts and calculate error
             for(int bin_i = 0; bin_i < 48; bin_i++){
-               if(rebin[rec_i][bin_i] != MSPC.BIN_FILL){
+               if(rebin[rec_i][bin_i] != MSPC.CNT_FILL){
                   width = std_edges[bin_i + 1] - std_edges[bin_i];
 
                   //divide counts by bin width and adjust the time scale
@@ -833,7 +823,7 @@ public class LevelTwo extends CDFWriter{
             }
 
             //clear the raw spectrum
-            Arrays.fill(raw_spec, MSPC.RAW_BIN_FILL);
+            Arrays.fill(raw_spec, MSPC.RAW_CNT_FILL);
 
             //update the record number and frameGroup
             rec_i++;            
@@ -843,7 +833,7 @@ public class LevelTwo extends CDFWriter{
          //fill part of the raw spectrum
          start = mod4 * 4;
          stop = start + 4;
-         part_spec = frame.getMspc();
+         part_spec = frame.getMSPC();
          for(
             int spec_i = start, sample_i = 0;
             sample_i < stop;
@@ -859,9 +849,9 @@ public class LevelTwo extends CDFWriter{
 
       MSPC mspc = new MSPC(destName, "bar_" + id, this.working_date, 2);
       System.out.println("mspc");
-      mspc.getCDF().addData("MSPC", mspc_rebin);
+      mspc.getCDF().addData("MSPC", rebin);
       System.out.println("mspc error");
-      mspc.getCDF().addData("cnt_error", mspc_error);
+      mspc.getCDF().addData("cnt_error", error);
       System.out.println("FrameGroup");
       mspc.getCDF().addData("FrameGroup", frameGroup);
       System.out.println("Epoch");
@@ -878,41 +868,40 @@ public class LevelTwo extends CDFWriter{
       BarrelFrame
          frame;
       Iterator<Integer>
-         fc_i;
+         fc_i        = this.fc_list.iterator();
       float
          scint_temp = 0, 
          dpu_temp   = 0;
-      short[]
+      int[]
          part_spec,
          raw_spec   = new int[256];
       int 
          rec_i, hkpg_frame, start, stop, mod32, fg,
          offset     = 90,
          numRecords = (int)Math.ceil(this.numFrames / 32);
-      int[]
-         frameGroup = new int[numRecords],
-         q          = new int[numRecords];
       long[]
+         frameGroup = new long[numRecords],
+         q          = new long[numRecords],
          epoch      = new long[numRecords];
       float
          width;
       float[]
          old_edges,
-         std_edges  = SpectrumExtract.stdEdges(2, 2.4414f);
+         std_edges  = CDF_Gen.spectra.stdEdges(2, 2.4414f),
          peak       = new float[numRecords];
       float[][]
-         rebin = new float[numRecords][256],
-         error = new float[numRecords][256];
+         rebin      = new float[numRecords][256],
+         error      = new float[numRecords][256];
 
       //initialize the data arrays with fill value
       Arrays.fill(frameGroup, BarrelCDF.FC_FILL);
       Arrays.fill(epoch,      BarrelCDF.EPOCH_FILL);
 //      Arrays.fill(q,          BarrelCDF.QUALITY_FILL);
       Arrays.fill(peak,       SSPC.PEAK_FILL);
-      Arrays.fill(raw_spec,   SSPC.RAW_BIN_FILL);
+      Arrays.fill(raw_spec,   SSPC.RAW_CNT_FILL);
       for (int spec_i = 0; spec_i < 256; spec_i++){
          Arrays.fill(error[spec_i], SSPC.ERROR_FILL);
-         Arrays.fill(rebin[spec_i], SSPC.BIN_FILL);
+         Arrays.fill(rebin[spec_i], SSPC.CNT_FILL);
       }
 
       System.out.println("\nSaving SSPC...");
@@ -924,7 +913,6 @@ public class LevelTwo extends CDFWriter{
       frameGroup[0] = fg;
 
       //rebin the sspc spectra
-      fc_i = this.fc_list.iterator();
       rec_i = 0;
       while (fc_i.hasNext()) {
          fc    = fc_i.next();
@@ -935,7 +923,7 @@ public class LevelTwo extends CDFWriter{
          //check if we are still in the same frame group 
          //(meaning the same spectrum)
          if (frameGroup[rec_i] != fg) {
-            epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(framegroup[rec_i]);
+            epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
             peak[rec_i] = CDF_Gen.spectra.getPeakLocation(frameGroup[rec_i]);
 
             //get the most recent scintillator temperature value
@@ -944,7 +932,7 @@ public class LevelTwo extends CDFWriter{
 
             //get the adjusted bin edges
             old_edges = 
-               ExtractSpectrum.makeedges(2, scint_temp, dpu_temp, peak[rec_i]);
+               CDF_Gen.spectra.makeedges(2, scint_temp, dpu_temp, peak[rec_i]);
 
             //rebin the spectrum
             rebin[rec_i] = 
@@ -952,7 +940,7 @@ public class LevelTwo extends CDFWriter{
 
             //scale the counts and calculate error
             for(int bin_i = 0; bin_i < 256; bin_i++){
-               if(rebin[rec_i][bin_i] != SSPC.BIN_FILL){
+               if(rebin[rec_i][bin_i] != SSPC.CNT_FILL){
                   width = std_edges[bin_i + 1] - std_edges[bin_i];
 
                   //divide counts by bin width and adjust the time scale
@@ -964,7 +952,7 @@ public class LevelTwo extends CDFWriter{
             }
 
             //clear the raw spectrum
-            Arrays.fill(raw_spec, SSPC.RAW_BIN_FILL);
+            Arrays.fill(raw_spec, SSPC.RAW_CNT_FILL);
 
             //update the record number and frameGroup
             rec_i++;            
@@ -974,7 +962,7 @@ public class LevelTwo extends CDFWriter{
          //fill part of the raw spectrum
          start = mod32 * 32;
          stop = start + 32;
-         part_spec = frame.getSspc();
+         part_spec = frame.getSSPC();
          for(
             int spec_i = start, sample_i = 0;
             sample_i < stop;
@@ -991,9 +979,9 @@ public class LevelTwo extends CDFWriter{
       SSPC sspc = new SSPC(destName, "bar_" + id, this.working_date, 2);
 
       System.out.println("sspc");
-      sspc.getCDF().addData("SSPC", sspc_rebin);
+      sspc.getCDF().addData("SSPC", rebin);
       System.out.println("sspc error");
-      sspc.getCDF().addData("cnt_error", sspc_error);
+      sspc.getCDF().addData("cnt_error", error);
       System.out.println("Peak_511");
       sspc.getCDF().addData("Peak_511", peak);
       System.out.println("FrameGroup");
@@ -1012,28 +1000,27 @@ public class LevelTwo extends CDFWriter{
       BarrelFrame
          frame;
       Iterator<Integer>
-         fc_i;
+         fc_i        = this.fc_list.iterator();
       int
-         numRecords = (int)Math.ceil(this.numFrames / 4),
-         raw, rec_i;
-      int[]
-         frameGroup = new int[numRecords],
-         q = new int[numRecords];
-      float[][] rc = new float[4][numRecords];
-      
-      long[] epoch = new long[numRecords];
+         raw, rec_i, mod4, fg,
+         numRecords = (int)Math.ceil(this.numFrames / 4);
+      long[]
+         q          = new long[numRecords],
+         frameGroup = new long[numRecords],
+         epoch      = new long[numRecords];
+      float[][]
+         rc         = new float[4][numRecords];
       
       //initialize the data arrays with fill value
       Arrays.fill(frameGroup, BarrelCDF.FC_FILL);
       Arrays.fill(epoch,      BarrelCDF.EPOCH_FILL);
 //      Arrays.fill(q,          BarrelCDF.QUALITY_FILL);
-      Arrays.fill(rc[0],      RCNT.RC_FILL);
-      Arrays.fill(rc[1],      RCNT.RC_FILL);
-      Arrays.fill(rc[2],      RCNT.RC_FILL);
-      Arrays.fill(rc[3],      RCNT.RC_FILL);
+      Arrays.fill(rc[0],      RCNT.CNT_FILL);
+      Arrays.fill(rc[1],      RCNT.CNT_FILL);
+      Arrays.fill(rc[2],      RCNT.CNT_FILL);
+      Arrays.fill(rc[3],      RCNT.CNT_FILL);
       
       //change all the units from cnts/4sec to cnts/sec
-      fc_i = this.fc_list.iterator();
       rec_i = -1;
       while (fc_i.hasNext()) {
          fc    = fc_i.next();
@@ -1051,8 +1038,8 @@ public class LevelTwo extends CDFWriter{
          epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(fg);
 
          raw = frame.getRateCounter();
-         rc[mod4][rec_i] = raw != RCNT.RAW_RC_FILL ?
-            raw / 4f : RCNT.RC_FILL;
+         rc[mod4][rec_i] = raw != RCNT.RAW_CNT_FILL ?
+            raw / 4f : RCNT.CNT_FILL;
       }
          
       System.out.println("\nSaving RCNT...");
@@ -1085,7 +1072,7 @@ public class LevelTwo extends CDFWriter{
       int
          raw_temp,
          first_fc = (CDF_Gen.frames.getFcRange())[0],
-         fc = startFrame.getFrameCounter() - startFrame.mod40 + id_number;
+         fc = (int)startFrame.getFrameCounter() - startFrame.mod40 + id_number;
       String
          id = HKPG.IDS[id_number];
 
@@ -1099,7 +1086,7 @@ public class LevelTwo extends CDFWriter{
                HKPG.SCALE_FACTORS.get(id) + HKPG.OFFSETS.get(id);
          }
          
-         frame_i -= 40;
+         fc -= 40;
       }
 
       return 0.0f;

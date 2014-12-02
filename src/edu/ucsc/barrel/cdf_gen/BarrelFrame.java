@@ -657,7 +657,7 @@ public class BarrelFrame {
       return this.sspc;
    }
 
-   public long getHousekeeping(){
+   public int getHousekeeping(){
       return this.hkpg;
    }
 
