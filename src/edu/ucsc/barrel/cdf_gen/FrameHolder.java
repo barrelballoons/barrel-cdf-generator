@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
+import gsfc.nssdc.cdf.util.CDFTT2000;
 
 public class FrameHolder{
    private String payload;
@@ -164,7 +165,7 @@ public class FrameHolder{
             frame_i++;
          }
       }
-
+      results = new BarrelFrame[frame_i];
       System.arraycopy(frames, 0, results, 0, frame_i);
 
       return results;

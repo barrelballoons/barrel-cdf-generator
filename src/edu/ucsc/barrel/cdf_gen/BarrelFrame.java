@@ -96,6 +96,7 @@ public class BarrelFrame {
       this.valid = this.setFrameCounter(
          frame.shiftRight(1664).and(BigInteger.valueOf(2097151)).intValue()
       );
+      if(!this.valid){return;}
 
       this.valid = this.setGPS(
          frame.shiftRight(1632).and(BigInteger.valueOf(4294967295L)).intValue()
@@ -220,12 +221,12 @@ public class BarrelFrame {
 
    public boolean setFrameCounter(final int fc){
    
-      this.fc = fc;
-
       //validate frame number
       if(fc <= Constants.FC_MIN || fc > Constants.FC_MAX){
          return false;
       }
+
+      this.fc = fc;
 
       //if there was a rollover, flag the data
       /*
