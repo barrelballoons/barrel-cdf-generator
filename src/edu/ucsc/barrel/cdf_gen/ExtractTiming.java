@@ -230,11 +230,12 @@ public class ExtractTiming {
 
       //create a model for each batch of time records
       for(int first_rec = 0; first_rec < this.numRecords; first_rec = last_rec){
+
          //incriment the last_rec by the max, or however many recs are left
-         last_rec += Math.min(MAX_RECS, (this.numRecords - first_rec)) - 1;
+         last_rec += Math.min(MAX_RECS, (this.numRecords - first_rec));
 
          //try to generate a model
-         new_fit = genModel(first_rec, last_rec);
+         new_fit = genModel(first_rec, last_rec - 1);
 
          //Need to add better criteria than this for accepting a new model
          if(new_fit != null){
@@ -250,8 +251,8 @@ public class ExtractTiming {
 
             //associate each frame number between the two time records 
             //with this linear model
-            last_fc = this.time_recs[last_rec].getFrame();
-            while (fc <= last_fc) {
+            last_fc = this.time_recs[last_rec - 1].getFrame();
+            while (fc <= last_fc - 1) {
                fc = (int)this.frames[frame_i++].getFrameCounter();
                this.modelRef.put(fc, model_i);
             }
@@ -260,7 +261,7 @@ public class ExtractTiming {
 
             System.out.println(
                "Frames " + this.time_recs[first_rec].getFrame() + " - " +
-               this.time_recs[last_rec].getFrame()); 
+               this.time_recs[last_rec - 1].getFrame()); 
             System.out.println(
                "\tm = " + fit.getSlope() + 
                ", b = " + fit.getIntercept() + 
