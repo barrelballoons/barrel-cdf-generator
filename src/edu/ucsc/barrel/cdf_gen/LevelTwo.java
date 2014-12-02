@@ -87,8 +87,8 @@ public class LevelTwo extends CDFWriter{
          l2          = new float[numRecords],
          l6          = new float[numRecords];
       long[]
-         frameGroup  = new int[numRecords],
-         q           = new int[numRecords],
+         frameGroup  = new long[numRecords],
+         q           = new long[numRecords],
          epoch_parts = new long[9],
          gps_time    = new long[numRecords],
          epoch       = new long[numRecords];
@@ -247,7 +247,7 @@ public class LevelTwo extends CDFWriter{
             );
          String line;
          int 
-            rec_i = 0,
+            mag_rec_i = 0,
             this_frame = 0,
             last_frame = 0;
          
@@ -263,29 +263,29 @@ public class LevelTwo extends CDFWriter{
             ){
                //make sure the mag coordinates were calculated correctly
                if(mag_coords[8].indexOf("*") == -1){
-                  l2[rec_i] = Math.abs(Float.parseFloat(mag_coords[8]));
+                  l2[mag_rec_i] = Math.abs(Float.parseFloat(mag_coords[8]));
                }else{
-                  l2[rec_i] = 9999;
+                  l2[mag_rec_i] = 9999;
                }
                if(mag_coords[9].indexOf("*") == -1){
-                  mlt2[rec_i] = Float.parseFloat(mag_coords[9]);
+                  mlt2[mag_rec_i] = Float.parseFloat(mag_coords[9]);
                }else{
-                  mlt2[rec_i] = 9999;
+                  mlt2[mag_rec_i] = 9999;
                }
                if(mag_coords[11].indexOf("*") == -1){
-                  l6[rec_i] = Math.abs(Float.parseFloat(mag_coords[11]));
+                  l6[mag_rec_i] = Math.abs(Float.parseFloat(mag_coords[11]));
                }else{
-                  l6[rec_i] = 9999;
+                  l6[mag_rec_i] = 9999;
                }
                if(mag_coords[12].indexOf("*") == -1){
-                  mlt6[rec_i] = Float.parseFloat(mag_coords[12]);
+                  mlt6[mag_rec_i] = Float.parseFloat(mag_coords[12]);
                }else{
-                  mlt6[rec_i] = 9999;
+                  mlt6[mag_rec_i] = 9999;
                }
             }
 
             last_frame = this_frame;
-            rec_i++;
+            mag_rec_i++;
          }
 
          mag_coord_file.close();
@@ -344,10 +344,10 @@ public class LevelTwo extends CDFWriter{
       int[]
          version    = new int[this.numFrames],
          payID      = new int[this.numFrames],
-         pps_vals   = new int[this.numFrames],
-         frameGroup = new int[this.numFrames],
-         q          = new int[this.numFrames];
+         pps_vals   = new int[this.numFrames];
       long[] 
+         frameGroup = new int[this.numFrames],
+         q          = new int[this.numFrames],
          epoch      = new long[this.numFrames];
 
       Arrays.fill(frameGroup, BarrelCDF.FC_FILL);
