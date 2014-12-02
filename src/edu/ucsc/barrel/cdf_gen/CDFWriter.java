@@ -49,7 +49,8 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
    int today, yesterday, tomorrow;
    Calendar dateObj = Calendar.getInstance();
    
-   public List<Integer> fc_list;
+   public Iterator<Integer> fc_i;
+   public int working_date;
 
    public CDFWriter(
       final String d, final String p, final String f,
@@ -121,7 +122,7 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
    }
 
    private void doAllCdf(int date) throws CDFException{
-      
+      this.working_date = date; 
       this.fc_list = getFCsRange(date);
 
       //make sure we have some records to process
