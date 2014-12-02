@@ -192,15 +192,16 @@ public class LevelZero{
    private void processFrame(String frame, String fileName) throws IOException{
       BigInteger binFrame = new BigInteger(frame, 16);
       
-      //check that checksum
-      int sum = 0;
-      
-      int cksm = Integer.parseInt(
-         frame.substring((frame.length() - 4), frame.length()), 16
-      );
+      //calculate checksum
+      int
+         sum = 0,
+         cksm = Integer.parseInt(
+            frame.substring((frame.length() - 4), frame.length()), 16
+         );
       for(int word_i = 0; word_i < (frame.length() - 4); word_i += 4){
          sum += Integer.parseInt(frame.substring(word_i, (word_i + 4)), 16);
       }
+
       if(cksm == (0xffff & sum)){ 
          //checksum passed!
          //write to level zero file
