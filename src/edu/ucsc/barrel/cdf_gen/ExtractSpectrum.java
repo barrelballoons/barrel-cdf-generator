@@ -228,17 +228,19 @@ public class ExtractSpectrum {
    private void getSpectraRecords(){
       int mod32, fg, frame_i, offset;
       int[] part_spec;
+      BarrelFrame frame;
       Integer num_parts;
       Integer[] spectrum;
       Long fc;
 
       for (frame_i = 0; frame_i < this.numFrames; frame_i++) {
-         fc = this.frames[frame_i].getFrameCounter();
+         frame = this.frames[frame_i];
+         fc = frame.getFrameCounter();
          if(fc == null || fc == BarrelCDF.FC_FILL){
             continue;
          }
          
-         mod32 = this.frames[frame_i].mod32;
+         mod32 = frame.mod32;
          fg = fc.intValue() - mod32;
 
          //get the spectrum for this frame group
@@ -251,8 +253,8 @@ public class ExtractSpectrum {
          }
 
          //fill part of the spectrum from this frame
-         offset = mod32 * 32;
-         part_spec = this.frames[frame_i].getMSPC();
+         offset = mod32 * 8;
+         part_spec = frame.getSSPC();
          for (int sample_i = 0; sample_i < part_spec.length; sample_i++) {
             spectrum[sample_i + offset] = part_spec[sample_i];
          }
