@@ -39,7 +39,7 @@ import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
 
-public class LevelOne extends CDFWriter{
+//public class LevelOne extends CDFWriter{
 /*
    public LevelOne(
       final String d, final String p, 
@@ -926,4 +926,4 @@ public class LevelOne extends CDFWriter{
       cdf.close();
    }
    */
- }
+ //}
