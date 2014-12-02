@@ -567,37 +567,56 @@ public class LevelTwo extends CDFWriter{
          if(hkpg_raw == HKPG.RAW_SENSOR_FILL){continue;}
 
          //convert the housekeeping data to physical units
-         if(this.dpu_ver > 3) {
+         switch (mod40) {
             //for versions 3 and up the T9 and T11 sensors were used for
             //mag statistics rather than solar panel temps
-            switch (mod40) {
-               case HKPG.T9:
+            case HKPG.T9:
+               if(this.dpu_ver > 3) {
                   hkpg_scaled[mod40][rec_i] = 
                      ((hkpg_raw - 0x8000) * 0.09094f) - 273.15f;
-               break;
-               case HKPG.T11:
-                  hkpg_scaled[mod40][rec_i] =  hkpg_raw * 0.0003576f;
-               break;
-               default:
+               } else {
                   hkpg_scaled[mod40][rec_i] = 
-                     (hkpg_raw * HKPG.SCALE_FACTORS.get(mod40)) +
-                     HKPG.OFFSETS.get(mod40);
-               break;
-            }
-         } else {
-            hkpg_scaled[mod40][rec_i] = 
-               (hkpg_raw * HKPG.SCALE_FACTORS.get(mod40)) +
-               HKPG.OFFSETS.get(mod40);
+                     (hkpg_raw * HKPG.SCALE_FACTORS.get(HKPG.IDS[mod40])) +
+                     HKPG.OFFSETS.get(HKPG.IDS[mod40]);
+               }
+            break;
+            case HKPG.T11:
+               if(this.dpu_ver > 3) {
+                  hkpg_scaled[mod40][rec_i] =  hkpg_raw * 0.0003576f;
+               } else {
+                  hkpg_scaled[mod40][rec_i] = 
+                     (hkpg_raw * HKPG.SCALE_FACTORS.get(HKPG.IDS[mod40])) +
+                     HKPG.OFFSETS.get(HKPG.IDS[mod40]);
+               }
+            break;
+            
+            case HKPG.SATSOFF:
+               sats[rec_i]     = frame.getNumSats();
+               offset[rec_i]   = frame.getUTCOffset();
+            break;
+
+            case HKPG.WEEK:
+               weeks[rec_i]    = frame.getWeek();
+            break;
+
+            case HKPG.CMDCNT:
+               termStat[rec_i] = frame.getTermStatus();
+               cmdCnt[rec_i]   = frame.getCommandCounter();
+            break;
+
+            case HKPG.MDMCNT:
+               modemCnt[rec_i] = frame.getModemCount();
+               dcdCnt[rec_i]   = frame.getDcdCount();
+            break;
+
+            default:
+               hkpg_scaled[mod40][rec_i] = 
+                  (hkpg_raw * HKPG.SCALE_FACTORS.get(HKPG.IDS[mod40])) +
+                  HKPG.OFFSETS.get(HKPG.IDS[mod40]);
+            break;
          }
 
-         sats[rec_i]     = frame.getNumSats();
-         offset[rec_i]   = frame.getUTCOffset();
-         termStat[rec_i] = frame.getTermStatus();
-         modemCnt[rec_i] = frame.getModemCount();
-         dcdCnt[rec_i]   = frame.getDcdCount();
-         cmdCnt[rec_i]   = frame.getCommandCounter();
-         weeks[rec_i]    = frame.getWeek();
-         epoch[rec_i]    = CDF_Gen.barrel_time.getEpoch(fg);
+         epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(fg);
       }
 
       for(int var_i = 0; var_i < 36; var_i++){
