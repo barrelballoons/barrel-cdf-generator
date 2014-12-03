@@ -620,7 +620,7 @@ public class LevelTwo extends CDFWriter{
       }
 
       for(int var_i = 0; var_i < 36; var_i++){
-         String label = HKPG.LABELS.get(var_i);
+         String label = HKPG.LABELS.get(HKPG.IDS[var_i]);
          System.out.println(label + "...");
          hkpg.getCDF().addData(label, hkpg_scaled[var_i]);
       }
