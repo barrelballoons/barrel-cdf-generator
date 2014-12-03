@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import org.apache.commons.math3.fitting.GaussianFitter;
@@ -204,8 +205,7 @@ public class ExtractSpectrum {
    
    private Map<Integer, Integer[]> raw_spectra;
    private Map<Integer, Integer> spectra_part_count;
-   private List<Float> peaks;
-   private Map<Integer, Integer> peaks_ref;
+   private Map<Integer, Float> peaks;
    private BarrelFrame[] frames;
    private float[][] raw_edges;
    private int numFrames, numRecords, max_cnts, dpuVer;
@@ -213,8 +213,7 @@ public class ExtractSpectrum {
 
    public ExtractSpectrum(FrameHolder frameHolder){
       this.dpuVer             = frameHolder.getDpuVersion();
-      this.peaks              = new ArrayList<Float>();
-      this.peaks_ref          = new HashMap<Integer, Integer>();
+      this.peaks              = new TreeMap<Integer, Float>();
       this.frames             = frameHolder.getFrames();
       this.numFrames          = frameHolder.getNumFrames();
       this.numRecords         = frameHolder.getNumRecords("mod32");
@@ -272,10 +271,7 @@ public class ExtractSpectrum {
    }
 
    public void do511Fits(int max_recs){
-      int 
-         peak_i = 0,
-         frame_i  = 0,
-         fg, fc;
+      int fg = 0;
       Iterator<Integer> spec_i;
       List<Integer[]> records = new ArrayList<Integer[]>();
       DescriptiveStatistics stats = new DescriptiveStatistics();
@@ -296,27 +292,14 @@ public class ExtractSpectrum {
 
          if(records.size() >= max_recs){
             //we have a full set of records, integrate and look for a peak
-            this.peaks.add(peak_i, find511(records));
+            this.peaks.put(fg, find511(records));
 
-            //associate all frame numbers with this peak
-            while(frame_i < fg){
-               frame = this.frames[frame_i++];
-               fc = (int)frame.getFrameCounter();
-               this.peaks_ref.put(fc, peak_i);
-            }
-
-            peak_i++;
             records = new ArrayList<Integer[]>();
          }
       }
 
       //find the peak in any left over records
-      this.peaks.add(peak_i, find511(records));
-      while(frame_i < this.frames.length){
-         frame = this.frames[frame_i++];
-         fc = (int)frame.getFrameCounter();
-         this.peaks_ref.put(fc, peak_i);
-      }
+      this.peaks.put(fg, find511(records));
    }
 
    private double[] integrate(List<Integer[]> records) {
@@ -839,11 +822,27 @@ public class ExtractSpectrum {
    }
 
    public Float getPeakLocation(int fc){
-      Integer peak_i, peak;
+      Integer
+         fg,
+         prev_fg = 0,
+         next_fg = 0;
+      Iterator<Integer> fg_i = this.peaks.keySet().iterator();
+      
+      //fg_i is sorted so the earliest fg will come first. 
+      //We want to scan through all fg's that have peaks until we find
+      //find the first peak with an fg larger than the target fc 
+      while (fg_i.hasNext()) {
+         prev_fg = next_fg;
+         next_fg = fg_i.next();
+         if(fc <= next_fg){
+            break;
+         }
+      }
 
-      peak_i = this.peaks_ref.get(fc);
+      //select whichever fg is closest to the target fc
+      fg = ((next_fg - fc) > (fc - prev_fg)) ? prev_fg : next_fg;
 
-      return (peak_i == null ? this.peaks.get(peak_i) : -1);
+      return this.peaks.get(fg);
    }
    public Float getPeakLocation(Long fc){
       if(fc == null || fc == BarrelCDF.FC_FILL){
