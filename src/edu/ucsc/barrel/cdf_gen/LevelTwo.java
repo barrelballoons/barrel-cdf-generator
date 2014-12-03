@@ -57,8 +57,7 @@ public class LevelTwo extends CDFWriter{
    //Convert the EPHM data and save it to CDF files
    public void doGpsCdf() throws CDFException{
       Calendar cal;
-      Logger geo_coord_file =
-         new Logger("pay" + this.id + "_" + this.working_date + "_gps.txt");
+      Logger geo_coord_file;
       String[] 
          mag_coords;
       Integer
@@ -137,7 +136,7 @@ public class LevelTwo extends CDFWriter{
          //get the epoch of the frameGroup
          epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(fg);
 
-         switch(frame.mod4) {
+         switch(mod4) {
             //convert mm to km
             case Ephm.ALT_I:
                intVal = frame.getGPS();
@@ -196,7 +195,12 @@ public class LevelTwo extends CDFWriter{
                (lon[rec_i] != Ephm.LON_FILL)
             )
          );
+      }
 
+      //write a text file containing gps coordinates
+      geo_coord_file = 
+         new Logger("pay" + this.id + "_" + this.working_date + "_gps.txt");
+      for (rec_i = 0; rec_i < numRecords; rec_i++) {
          //calculate the current time in seconds of day
          epoch_parts = CDFTT2000.breakdown(epoch[rec_i]);
          sec_of_day = 
@@ -212,7 +216,7 @@ public class LevelTwo extends CDFWriter{
          geo_coord_file.writeln(
             String.format(
                "%07d %02.6f %03.6f %03.6f %04d %03d %02.3f", 
-               fg, alt[rec_i], lat[rec_i], lon[rec_i],
+               frameGroup[rec_i], alt[rec_i], lat[rec_i], east_lon,
                (year + 2000), day_of_year, sec_of_day
             )
          );
@@ -244,15 +248,16 @@ public class LevelTwo extends CDFWriter{
             );
          String line;
          int 
-            mag_rec_i = 0,
             this_frame = 0,
             last_frame = 0;
-         
+
+         rec_i = 0;
          while((line = mag_coord_file.readLine()) != null){
             line = line.trim();
             mag_coords = line.split("\\s+");
 
             //check for repeated frame
+            last_frame = this_frame;
             this_frame = Integer.parseInt(mag_coords[0]);
             if(
                (this_frame != last_frame) && 
@@ -260,29 +265,28 @@ public class LevelTwo extends CDFWriter{
             ){
                //make sure the mag coordinates were calculated correctly
                if(mag_coords[8].indexOf("*") == -1){
-                  l2[mag_rec_i] = Math.abs(Float.parseFloat(mag_coords[8]));
+                  l2[rec_i] = Math.abs(Float.parseFloat(mag_coords[8]));
                }else{
-                  l2[mag_rec_i] = 9999;
+                  l2[rec_i] = 9999;
                }
                if(mag_coords[9].indexOf("*") == -1){
-                  mlt2[mag_rec_i] = Float.parseFloat(mag_coords[9]);
+                  mlt2[rec_i] = Float.parseFloat(mag_coords[9]);
                }else{
-                  mlt2[mag_rec_i] = 9999;
+                  mlt2[rec_i] = 9999;
                }
                if(mag_coords[11].indexOf("*") == -1){
-                  l6[mag_rec_i] = Math.abs(Float.parseFloat(mag_coords[11]));
+                  l6[rec_i] = Math.abs(Float.parseFloat(mag_coords[11]));
                }else{
-                  l6[mag_rec_i] = 9999;
+                  l6[rec_i] = 9999;
                }
                if(mag_coords[12].indexOf("*") == -1){
-                  mlt6[mag_rec_i] = Float.parseFloat(mag_coords[12]);
+                  mlt6[rec_i] = Float.parseFloat(mag_coords[12]);
                }else{
-                  mlt6[mag_rec_i] = 9999;
+                  mlt6[rec_i] = 9999;
                }
             }
 
-            last_frame = this_frame;
-            mag_rec_i++;
+            rec_i++;
          }
 
          mag_coord_file.close();
@@ -785,7 +789,7 @@ public class LevelTwo extends CDFWriter{
       Arrays.fill(raw_spec,    MSPC.RAW_CNT_FILL);
       for(int i = 0; i < numRecords; i++){
          Arrays.fill(rebin[i], MSPC.CNT_FILL);
-         Arrays.fill(error,    MSPC.ERROR_FILL);
+         Arrays.fill(error[i], MSPC.ERROR_FILL);
       }
       
       System.out.println("\nSaving MSPC...");
@@ -852,7 +856,7 @@ public class LevelTwo extends CDFWriter{
          part_spec = frame.getMSPC();
          for(
             int spec_i = start, sample_i = 0;
-            sample_i < stop;
+            spec_i < stop;
             sample_i++, spec_i++
          ) {
             raw_spec[spec_i] = part_spec[sample_i];
