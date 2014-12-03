@@ -60,6 +60,7 @@ public class ExtractTiming {
 
    private BarrelFrame[] frames;
    private int numFrames, numRecords;
+   private int[] fcRange;
 
    private class TimeRec{
       private long
@@ -141,6 +142,7 @@ public class ExtractTiming {
    public ExtractTiming(FrameHolder frameHolder){
       this.frames     = frameHolder.getFrames();
       this.numFrames  = frameHolder.getNumFrames();
+      this.fcRange    = frameHolder.getFcRange();
       this.time_recs  = new TimeRec[frameHolder.getNumRecords("mod4")];
       this.models     = new ArrayList<LinModel>();
       this.modelRef   = new HashMap<Integer, Integer>();
@@ -426,6 +428,10 @@ public class ExtractTiming {
    public long getEpoch(int fc) {
       long epoch;
       LinModel model;
+
+      //force fc to be in range
+      if(fc < this.fcRange[0]){fc = this.fcRange[0];}
+      if(fc > this.fcRange[1]){fc = this.fcRange[1];}
 
       //lookup the model for this frame counter
       model = this.models.get(this.modelRef.get(fc));

@@ -122,6 +122,27 @@ public class HKPG extends DataProduct{
    public static final Map<String, Float> OFFSETS;
    static {
       Map<String, Float> offsets = new HashMap<String, Float>();
+      offsets.put("V0" ,  0f);
+      offsets.put("V1" ,  0f);
+      offsets.put("V2" ,  0f);
+      offsets.put("V3" ,  0f);
+      offsets.put("V4" ,  0f);
+      offsets.put("V5" ,  0f);
+      offsets.put("V6" ,  0f);
+      offsets.put("V7" ,  0f);
+      offsets.put("V8" ,  0f);
+      offsets.put("V9" ,  0f);
+      offsets.put("V10",  0f);
+      offsets.put("V11",  0f);
+      offsets.put("I0" ,  0f);
+      offsets.put("I1" ,  0f);
+      offsets.put("I2" ,  0f);
+      offsets.put("I3" ,  0f);
+      offsets.put("I4" ,  0f);
+      offsets.put("I5" ,  0f);
+      offsets.put("I6" ,  0f);
+      offsets.put("I7" ,  0f);
+      offsets.put("T0" ,  -273.15f);
       offsets.put("T1" ,  -273.15f);
       offsets.put("T2" ,  -273.15f);
       offsets.put("T3" ,  -273.15f);
