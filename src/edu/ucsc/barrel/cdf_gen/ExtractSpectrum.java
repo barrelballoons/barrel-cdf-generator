@@ -209,6 +209,7 @@ public class ExtractSpectrum {
    private BarrelFrame[] frames;
    private float[][] raw_edges;
    private int numFrames, numRecords, max_cnts, dpuVer;
+   private int[] fcRange;
 
    public ExtractSpectrum(FrameHolder frameHolder){
       this.dpuVer             = frameHolder.getDpuVersion();
@@ -217,6 +218,7 @@ public class ExtractSpectrum {
       this.frames             = frameHolder.getFrames();
       this.numFrames          = frameHolder.getNumFrames();
       this.numRecords         = frameHolder.getNumRecords("mod32");
+      this.fcRange            = frameHolder.getFcRange();
       this.max_cnts           = MAX_CNT_FACTOR * this.numRecords;
       this.raw_edges          = this.dpuVer > 3 ? RAW_EDGES : OLD_RAW_EDGES;
       this.raw_spectra        = new LinkedHashMap<Integer, Integer[]>();
@@ -278,6 +280,7 @@ public class ExtractSpectrum {
       List<Integer[]> records = new ArrayList<Integer[]>();
       DescriptiveStatistics stats = new DescriptiveStatistics();
       Integer[] spectrum;
+      BarrelFrame frame;
 
       if(this.raw_spectra.size() < 2){return;}
       
@@ -297,9 +300,9 @@ public class ExtractSpectrum {
 
             //associate all frame numbers with this peak
             while(frame_i < fg){
-               fc = (int)this.frames[frame_i++].getFrameCounter();
+               frame = this.frames[frame_i++];
+               fc = (int)frame.getFrameCounter();
                this.peaks_ref.put(fc, peak_i);
-               frame_i++;
             }
 
             peak_i++;
@@ -310,9 +313,9 @@ public class ExtractSpectrum {
       //find the peak in any left over records
       this.peaks.add(peak_i, find511(records));
       while(frame_i < this.frames.length){
-         fc = (int)this.frames[frame_i++].getFrameCounter();
+         frame = this.frames[frame_i++];
+         fc = (int)frame.getFrameCounter();
          this.peaks_ref.put(fc, peak_i);
-         frame_i++;
       }
    }
 
