@@ -125,7 +125,7 @@ public class BarrelCDF extends CDFFile{
       var.attribute("REFERENCE_POSITION", "Rotating Earch Geoid");
       this.addVar("Epoch", var);
 
-      var = new CDFVar(this, "FrameGroup", CDFConstants.CDF_INT4);
+      var = new CDFVar(this, "FrameGroup", CDFConstants.CDF_UINT4);
       var.attribute("FIELDNAM", "Frame Number");
       var.attribute("CATDESC", "DPU Frame Counter");
       var.attribute("LABLAXIS", "Frame");
@@ -135,7 +135,7 @@ public class BarrelCDF extends CDFFile{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0);
       var.attribute("VALIDMAX", FC_FILL);
-      var.attribute("FILLVAL", CDFVar.INT4_FILL);
+      var.attribute("FILLVAL", CDFVar.UINT4_FILL);
       this.addVar("FrameGroup", var);
 
       var = new CDFVar(this, "Quality", CDFConstants.CDF_INT4);
