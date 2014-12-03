@@ -1085,26 +1085,60 @@ public class LevelTwo extends CDFWriter{
 
    private float getTemp(BarrelFrame startFrame, int id_number) {
       BarrelFrame frame = null;
+      int[] fcRange = CDF_Gen.frames.getFcRange();
       int
          raw_temp,
-         first_fc = (CDF_Gen.frames.getFcRange())[0],
-         fc = (int)startFrame.getFrameCounter() - startFrame.mod40 + id_number;
+         //this is the ideal fc: the spectrum's frame offset by the mod40
+         //housekeeping index of the temp sensor
+         target = 
+            (int)startFrame.getFrameCounter() - startFrame.mod40 + id_number,
+         prev   = target,
+         next   = target,
+         //get the bounds of our search
+         first  = fcRange[0],
+         last   = fcRange[1];
+
       String
          id = HKPG.IDS[id_number];
 
-      while(fc >= first_fc){
-         frame = CDF_Gen.frames.getFrame(fc);
-         raw_temp = frame.getHousekeeping();
-
-         if(raw_temp != HKPG.RAW_SENSOR_FILL){
-            return
-               (float) raw_temp * 
-               HKPG.SCALE_FACTORS.get(id) + HKPG.OFFSETS.get(id);
+      //With each iteration, decrease 'prev' and increase 'next' by 40 frames
+      //Since they are started on frames that should contain the correct 
+      //temp sensor, each 40 frame offset will should also contain the correct
+      //sensor. Keep going until one of them finds a valid temp
+      while(prev >= first || next <= last){
+         //first check prev
+         if (prev > first) { //only proceed if prev is in bounds
+            frame = CDF_Gen.frames.getFrame(prev);
+            if(frame != null) {//make sure there is a frame for this fc
+               raw_temp = frame.getHousekeeping();
+               if(raw_temp != HKPG.RAW_SENSOR_FILL){
+                  //found a valid temp, we are done
+                  return
+                     (float) raw_temp * 
+                     HKPG.SCALE_FACTORS.get(id) + HKPG.OFFSETS.get(id);
+               }
+            }
+            //nothing found so step back
+            prev -= 40;
          }
-         
-         fc -= 40;
+
+         //didnt have it for prev, check next
+         if (next < last) {
+            frame = CDF_Gen.frames.getFrame(next);
+            if(frame != null) {
+            raw_temp = frame.getHousekeeping();
+               if(raw_temp != HKPG.RAW_SENSOR_FILL){
+                  return
+                     (float) raw_temp * 
+                     HKPG.SCALE_FACTORS.get(id) + HKPG.OFFSETS.get(id);
+               }
+            }
+            next += 40;
+         }
       }
 
+      //every frame with the correct mod40 offset was checked
+      //and no valid temp was found :(
       return 0.0f;
    }
  }
