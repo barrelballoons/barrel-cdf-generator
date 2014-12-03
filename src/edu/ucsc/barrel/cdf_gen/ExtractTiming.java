@@ -222,6 +222,7 @@ public class ExtractTiming {
          frame_i  = 0,
          model_i  = -1,
          fc       = 0,
+         fg       = 0,
          last_fc  = 0;
       long
          last_frame;
@@ -229,6 +230,7 @@ public class ExtractTiming {
          fit     = null,
          new_fit = null;
       LinModel linModel;
+      BarrelFrame frame;
 
       //create a model for each batch of time records
       for(int first_rec = 0; first_rec < this.numRecords; first_rec = last_rec){
@@ -256,8 +258,24 @@ public class ExtractTiming {
             //with this linear model
             last_fc = this.time_recs[last_rec - 1].getFrame();
             while (fc <= last_fc - 1) {
-               fc = (int)this.frames[frame_i++].getFrameCounter();
+               frame = this.frames[frame_i++];
+               fc = (int)frame.getFrameCounter();
                this.modelRef.put(fc, model_i);
+
+               //make sure any frame group that can be derived from this frame
+               //also has a model set
+               fg = fc - frame.mod4;
+               if(!this.modelRef.containsKey(fg)){
+                  this.modelRef.put(fg, model_i);
+               }
+               fg = fc - frame.mod32;
+               if(!this.modelRef.containsKey(fg)){
+                  this.modelRef.put(fg, model_i);
+               }
+               fg = fc - frame.mod40;
+               if(!this.modelRef.containsKey(fg)){
+                  this.modelRef.put(fg, model_i);
+               }
             }
 
             System.out.println(
