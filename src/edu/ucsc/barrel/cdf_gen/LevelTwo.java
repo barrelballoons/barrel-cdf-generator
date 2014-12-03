@@ -847,8 +847,8 @@ public class LevelTwo extends CDFWriter{
          }
 
          //fill part of the raw spectrum
-         start = mod4 * 4;
-         stop = start + 4;
+         start = mod4 * 12;
+         stop = start + 12;
          part_spec = frame.getMSPC();
          for(
             int spec_i = start, sample_i = 0;
@@ -976,12 +976,12 @@ public class LevelTwo extends CDFWriter{
          }
 
          //fill part of the raw spectrum
-         start = mod32 * 32;
-         stop = start + 32;
+         start = mod32 * 8;
+         stop = start + 8;
          part_spec = frame.getSSPC();
          for(
             int spec_i = start, sample_i = 0;
-            sample_i < stop;
+            spec_i < stop;
             sample_i++, spec_i++
          ) {
             raw_spec[spec_i] = part_spec[sample_i];
