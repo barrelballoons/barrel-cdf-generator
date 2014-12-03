@@ -75,11 +75,12 @@ public class LevelTwo extends CDFWriter{
       float
          east_lon    = 0;
       float[]
-         mlt2, mlt6, l2, l6,
+         mlt2, mlt6, l2, l6, tmpFlt,
          lat         = new float[numRecords],
          lon         = new float[numRecords],
          alt         = new float[numRecords];
       long[]
+         tmpLng,
          frameGroup  = new long[numRecords],
          q           = new long[numRecords],
          epoch_parts = new long[9],
@@ -89,9 +90,6 @@ public class LevelTwo extends CDFWriter{
          complete_gps= new HashMap<Integer, Boolean>(numRecords);
 
       //initialize the data arrays with fill value
-      Arrays.fill(frameGroup, BarrelCDF.FC_FILL);
-      Arrays.fill(epoch,      BarrelCDF.EPOCH_FILL);
-//      Arrays.fill(q,          BarrelCDF.QUALITY_FILL);
       //Arrays.fill(gps_time,   Ephm.GPSTIME_FILL);
       Arrays.fill(lat,        Ephm.LAT_FILL);
       Arrays.fill(lon,        Ephm.LON_FILL);
@@ -190,7 +188,27 @@ public class LevelTwo extends CDFWriter{
          );
       }
       //update numRecords with the real number found for today
-      numRecords = rec_i;
+      numRecords = rec_i + 1;
+
+      //trim down the arrays that were just filled
+      tmpFlt = alt;
+      alt = new float[numRecords];
+      System.arraycopy(tmpFlt, 0, alt, 0, numRecords);
+      tmpFlt = lat;
+      lat = new float[numRecords];
+      System.arraycopy(tmpFlt, 0, lat, 0, numRecords);
+      tmpFlt = lon;
+      lon = new float[numRecords];
+      System.arraycopy(tmpFlt, 0, lon, 0, numRecords);
+      tmpLng = gps_time;
+      gps_time = new long[numRecords];
+      System.arraycopy(tmpLng, 0, gps_time, 0, numRecords);
+      tmpLng = epoch;
+      epoch = new long[numRecords];
+      System.arraycopy(tmpLng, 0, epoch, 0, numRecords);
+      tmpLng = frameGroup;
+      frameGroup = new long[numRecords];
+      System.arraycopy(tmpLng, 0, frameGroup, 0, numRecords);
 
       //write a text file containing gps coordinates
       geo_coord_file = 
@@ -310,7 +328,7 @@ public class LevelTwo extends CDFWriter{
          "_l2_" + "ephm" + "_20" + this.working_date +  "_v" + revNum + ".cdf";
      
       Ephm ephm = new Ephm(destName, "bar_" + id, this.working_date, 2);
-
+      
       System.out.println("GPS_Alt");
       ephm.getCDF().addData("GPS_Alt", alt);
       System.out.println("GPS_Lon");
