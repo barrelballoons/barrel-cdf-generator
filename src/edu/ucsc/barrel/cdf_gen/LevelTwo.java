@@ -69,19 +69,16 @@ public class LevelTwo extends CDFWriter{
       int
          rec_i,
          year, month, day, day_of_year, hour, min, sec, intVal, mod4, fg,
-         numRecords  = CDF_Gen.frames.getNumRecords("mod4");
+         numRecords  = CDF_Gen.frames.getNumRecords("mod4");//initial guess
       double
          sec_of_day  = 0;
       float
          east_lon    = 0;
       float[]
+         mlt2, mlt6, l2, l6,
          lat         = new float[numRecords],
          lon         = new float[numRecords],
-         alt         = new float[numRecords],
-         mlt2        = new float[numRecords],
-         mlt6        = new float[numRecords],
-         l2          = new float[numRecords],
-         l6          = new float[numRecords];
+         alt         = new float[numRecords];
       long[]
          frameGroup  = new long[numRecords],
          q           = new long[numRecords],
@@ -99,10 +96,6 @@ public class LevelTwo extends CDFWriter{
       Arrays.fill(lat,        Ephm.LAT_FILL);
       Arrays.fill(lon,        Ephm.LON_FILL);
       Arrays.fill(alt,        Ephm.ALT_FILL);
-      Arrays.fill(mlt2,       Ephm.MLT2_FILL);
-      Arrays.fill(mlt6,       Ephm.MLT6_FILL);
-      Arrays.fill(l2,         Ephm.L2_FILL);
-      Arrays.fill(l6,         Ephm.L6_FILL);
 
       System.out.println("\nSaving EPHM Level Two CDF...");
 
@@ -196,6 +189,8 @@ public class LevelTwo extends CDFWriter{
             )
          );
       }
+      //update numRecords with the real number found for today
+      numRecords = rec_i;
 
       //write a text file containing gps coordinates
       geo_coord_file = 
@@ -204,11 +199,11 @@ public class LevelTwo extends CDFWriter{
          //calculate the current time in seconds of day
          epoch_parts = CDFTT2000.breakdown(epoch[rec_i]);
          sec_of_day = 
-            (epoch_parts[3] * 3600) + // hours
-            (epoch_parts[4] * 60) + //minutes
-            epoch_parts[5] + //seconds
-            (epoch_parts[6] * 0.001) + //ms
-            (epoch_parts[7] * 0.000001) + //us
+            (epoch_parts[3] * 3600)       + // hours
+            (epoch_parts[4] * 60)         + //minutes
+             epoch_parts[5]               + //seconds
+            (epoch_parts[6] * 0.001)      + //ms
+            (epoch_parts[7] * 0.000001)   + //us
             (epoch_parts[8] * 0.000000001); //ns
          //convert signed longitude to east longitude
          east_lon = (lon[rec_i] > 0) ? lon[rec_i] : lon[rec_i] + 360;
@@ -239,6 +234,14 @@ public class LevelTwo extends CDFWriter{
       }
       
       //Read the magnetic coordinates into a set of arrays
+      l2   = new float[numRecords];
+      l6   = new float[numRecords];
+      mlt2 = new float[numRecords];
+      mlt6 = new float[numRecords];
+      Arrays.fill(l2,   Ephm.L2_FILL);
+      Arrays.fill(l6,   Ephm.L6_FILL);
+      Arrays.fill(mlt2, Ephm.MLT2_FILL);
+      Arrays.fill(mlt6, Ephm.MLT6_FILL);
       try{
          BufferedReader mag_coord_file = 
             new BufferedReader(
@@ -293,7 +296,7 @@ public class LevelTwo extends CDFWriter{
 
          //clean up after ourselves
          geo_coord_file.delete();
-         (new File("pay" + id + "_" + this.working_date + "_gps_out.txt")).delete();
+         (new File("pay"+id+"_"+this.working_date+"_gps_out.txt")).delete();
 
       }catch(IOException ex){
          System.out.println("Could not read magnetic coordinate file:");
