@@ -806,15 +806,13 @@ public class LevelTwo extends CDFWriter{
          fc_i        = this.fc_list.iterator();
       int 
          rec_i, hkpg_frame, start, stop, mod4, fg,
-         offset     = 90,
-         numRecords  = CDF_Gen.frames.getNumRecords("mod4");
+         offset = 90,
+         numRecords = CDF_Gen.frames.getNumRecords("mod4");
       int[]
          part_spec,
-         raw_spec   = new int[48];
+         raw_spec = new int[48];
       long[]
-         frameGroup = new long[numRecords],
-         q          = new long[numRecords],
-         epoch      = new long[numRecords];
+         frameGroup, q, epoch;
       float
          scint_temp = 0, 
          dpu_temp   = 0,
@@ -823,20 +821,42 @@ public class LevelTwo extends CDFWriter{
          old_edges,
          std_edges  = CDF_Gen.spectra.stdEdges(1, 2.4414f);
       float[][]
-         rebin = new float[numRecords][48],
-         error = new float[numRecords][48];
+         rebin, error;
+      List<Integer> fg_list = new ArrayList<Integer>();
+      Map<Integer, Integer> rec_nums = new HashMap<Integer, Integer>();
 
-      //initialize the data arrays with fill value
-      Arrays.fill(frameGroup,  BarrelCDF.FC_FILL);
-      Arrays.fill(epoch,       BarrelCDF.EPOCH_FILL);
-//      Arrays.fill(q,           BarrelCDF.QUALITY_FILL);
-      Arrays.fill(raw_spec,    MSPC.RAW_CNT_FILL);
+      System.out.println("\nSaving MSPC...");
+
+      fc_i = this.fc_list.iterator();
+      rec_i = -1;
+      while (fc_i.hasNext()) {
+         fc = fc_i.next();
+         frame = CDF_Gen.frames.getFrame(fc);
+
+         last_fg = fg;
+         fg = fc - frame.mod40;
+
+         if (fg != last_fg) {
+            rec_i++;
+            fg_list.add(rec_i, fg);
+         }
+
+         rec_nums.put(fc, rec_i);
+      }
+      numRecords = rec_i + 1;
+
+      rebin       = new float[numRecords][48],
+      error       = new float[numRecords][48];
+      epoch       = new long[numRecords];
+      frameGroup  = new long[numRecords];
+      q           = new long[numRecords];
+      hkpg_scaled = new float[40][numRecords];
+
+      Arrays.fill(raw_spec, MSPC.RAW_CNT_FILL);
       for(int i = 0; i < numRecords; i++){
          Arrays.fill(rebin[i], MSPC.CNT_FILL);
          Arrays.fill(error[i], MSPC.ERROR_FILL);
       }
-      
-      System.out.println("\nSaving MSPC...");
 
       //get the first frame group
       fc    = this.fc_list.get(0);
