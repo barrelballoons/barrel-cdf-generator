@@ -528,28 +528,57 @@ public class LevelTwo extends CDFWriter{
       BarrelFrame
          frame;
       Iterator<Integer>
-         fc_i        = this.fc_list.iterator();
+         fc_i;
       int
-         rec_i, fg, hkpg_raw, mod40,
-         numRecords  = CDF_Gen.frames.getNumRecords("mod40");
+         fg = 0,
+         last_fg = 0,
+         rec_i, hkpg_raw, mod40, numRecords;
       int[]
-         sats        = new int[numRecords],
-         offset      = new int[numRecords],
-         termStat    = new int[numRecords],
-         modemCnt    = new int[numRecords],
-         dcdCnt      = new int[numRecords],
-         cmdCnt      = new int[numRecords],
-         weeks       = new int[numRecords];
+         sats, offset, termStat, modemCnt, dcdCnt, cmdCnt, weeks;
       long[]
-         epoch       = new long[numRecords],
-         frameGroup  = new long[numRecords],
-         q           = new long[numRecords];
+         epoch, frameGroup, q;
       float [][]
-         hkpg_scaled = new float[40][numRecords];
+         hkpg_scaled;
 
-      Arrays.fill(frameGroup, BarrelCDF.FC_FILL);
-      Arrays.fill(epoch,      BarrelCDF.EPOCH_FILL);
-//      Arrays.fill(q,          BarrelCDF.QUALITY_FILL);
+      List<Integer> fg_list = new ArrayList<Integer>();
+      Map<Integer, Integer> rec_nums = new HashMap<Integer, Integer>();
+
+      fc_i = this.fc_list.iterator();
+      rec_i = -1;
+      while (fc_i.hasNext()) {
+         fc = fc_i.next();
+         frame = CDF_Gen.frames.getFrame(fc);
+
+         //calculate the next frameGroup
+         last_fg = fg;
+         fg = fc - frame.mod40;
+
+         //figure out if we are still in the same record
+         if (fg != last_fg) {
+            rec_i++;
+            fg_list.add(rec_i, fg);
+         }
+
+         //remember what record number this fc matches
+         rec_nums.put(fc, rec_i);
+      }
+      //save the number of records that were found
+      numRecords = rec_i + 1;
+
+      //create data arrays
+      sats        = new int[numRecords];
+      offset      = new int[numRecords];
+      termStat    = new int[numRecords];
+      modemCnt    = new int[numRecords];
+      dcdCnt      = new int[numRecords];
+      cmdCnt      = new int[numRecords];
+      weeks       = new int[numRecords];
+      epoch       = new long[numRecords];
+      frameGroup  = new long[numRecords];
+      q           = new long[numRecords];
+      hkpg_scaled = new float[40][numRecords];
+
+      //initialize the multiplexed data arrays with fill value
       Arrays.fill(weeks,      HKPG.WEEK_FILL);
       Arrays.fill(cmdCnt,     HKPG.CMD_CNT_FILL);
       Arrays.fill(dcdCnt,     HKPG.DCD_CNT_FILL);
@@ -570,17 +599,18 @@ public class LevelTwo extends CDFWriter{
 
       HKPG hkpg = new HKPG(destName, "bar_" + id, this.working_date, 2);
 
-      rec_i = -1;
+      fc_i = this.fc_list.iterator();
       while (fc_i.hasNext()) {
          fc = fc_i.next();
          frame = CDF_Gen.frames.getFrame(fc);
          mod40 = frame.mod40;
-         fg = fc - mod40;
+         rec_i = rec_nums.get(fc);
 
-         if (rec_i == -1 || frameGroup[rec_i] != fg) {
-            rec_i++;
-            frameGroup[rec_i] = fg;
-         }
+         //recall the frameGroup of this record
+         frameGroup[rec_i] = fg_list.get(rec_i);
+         
+         //get the epoch of the frameGroup
+         epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
 
          //make sure there is a valid housekeeping value to process
          hkpg_raw = frame.getHousekeeping();
@@ -635,8 +665,6 @@ public class LevelTwo extends CDFWriter{
                   HKPG.OFFSETS.get(HKPG.IDS[mod40]);
             break;
          }
-
-         epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(fg);
       }
 
       for(int var_i = 0; var_i < 36; var_i++){
