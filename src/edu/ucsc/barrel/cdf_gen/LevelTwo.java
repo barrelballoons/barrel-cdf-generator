@@ -805,9 +805,10 @@ public class LevelTwo extends CDFWriter{
       Iterator<Integer>
          fc_i        = this.fc_list.iterator();
       int 
-         rec_i, hkpg_frame, start, stop, mod4, fg,
-         offset = 90,
-         numRecords = CDF_Gen.frames.getNumRecords("mod4");
+         rec_i, hkpg_frame, start, stop, mod4, numRecords,
+         fg      = 0,
+         last_fg = 0,
+         offset  = 90;
       int[]
          part_spec,
          raw_spec = new int[48];
@@ -819,7 +820,7 @@ public class LevelTwo extends CDFWriter{
          width;
       float[]
          old_edges,
-         std_edges  = CDF_Gen.spectra.stdEdges(1, 2.4414f);
+         std_edges = CDF_Gen.spectra.stdEdges(1, 2.4414f);
       float[][]
          rebin, error;
       List<Integer> fg_list = new ArrayList<Integer>();
@@ -834,7 +835,7 @@ public class LevelTwo extends CDFWriter{
          frame = CDF_Gen.frames.getFrame(fc);
 
          last_fg = fg;
-         fg = fc - frame.mod40;
+         fg = fc - frame.mod4;
 
          if (fg != last_fg) {
             rec_i++;
@@ -845,7 +846,7 @@ public class LevelTwo extends CDFWriter{
       }
       numRecords = rec_i + 1;
 
-      rebin       = new float[numRecords][48],
+      rebin       = new float[numRecords][48];
       error       = new float[numRecords][48];
       epoch       = new long[numRecords];
       frameGroup  = new long[numRecords];
@@ -858,19 +859,13 @@ public class LevelTwo extends CDFWriter{
          Arrays.fill(error[i], MSPC.ERROR_FILL);
       }
 
-      //get the first frame group
-      fc    = this.fc_list.get(0);
-      frame = CDF_Gen.frames.getFrame(fc); 
-      fg    = fc - frame.mod4;
-      frameGroup[0] = fg;
-
       //rebin the mspc spectra
-      rec_i = 0;
+      fc_i = this.fc_list.iterator();
       while (fc_i.hasNext()) {
          fc    = fc_i.next();
          frame = CDF_Gen.frames.getFrame(fc);
-         mod4  = frame.mod4;
-         fg    = fc - mod4;
+         frameGroup[rec_i] = fg_list.get(rec_i);
+         epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
 
          //check if we are still in the same frame group 
          //(meaning the same spectrum)
@@ -915,7 +910,7 @@ public class LevelTwo extends CDFWriter{
          }
 
          //fill part of the raw spectrum
-         start = mod4 * 12;
+         start = frame.mod4 * 12;
          stop = start + 12;
          part_spec = frame.getMSPC();
          for(
