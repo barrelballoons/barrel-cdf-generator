@@ -803,7 +803,7 @@ public class LevelTwo extends CDFWriter{
       BarrelFrame
          frame;
       Iterator<Integer>
-         fc_i        = this.fc_list.iterator();
+         fc_i;
       int 
          rec_i, sample_i, spec_offset, numRecords,
          fg      = 0,
@@ -933,7 +933,7 @@ public class LevelTwo extends CDFWriter{
       BarrelFrame
          frame;
       Iterator<Integer>
-         fc_i  = this.fc_list.iterator();
+         fc_i;
       int 
          rec_i, sample_i, spec_offset, numRecords, mod32,
          fg      = 0,
@@ -1064,45 +1064,57 @@ public class LevelTwo extends CDFWriter{
       BarrelFrame
          frame;
       Iterator<Integer>
-         fc_i        = this.fc_list.iterator();
+         fc_i;
       int
-         raw, rec_i, mod4, fg,
-         numRecords  = CDF_Gen.frames.getNumRecords("mod4");
+         raw, rec_i, numRecords,
+         fg         = 0,
+         last_fg    = 0;
       long[]
-         q          = new long[numRecords],
-         frameGroup = new long[numRecords],
-         epoch      = new long[numRecords];
+         q, frameGroup, epoch;
       float[][]
-         rc         = new float[4][numRecords];
-      
-      //initialize the data arrays with fill value
-      Arrays.fill(frameGroup, BarrelCDF.FC_FILL);
-      Arrays.fill(epoch,      BarrelCDF.EPOCH_FILL);
-//      Arrays.fill(q,          BarrelCDF.QUALITY_FILL);
-      Arrays.fill(rc[0],      RCNT.CNT_FILL);
-      Arrays.fill(rc[1],      RCNT.CNT_FILL);
-      Arrays.fill(rc[2],      RCNT.CNT_FILL);
-      Arrays.fill(rc[3],      RCNT.CNT_FILL);
-      
-      //change all the units from cnts/4sec to cnts/sec
+         rc;
+      List<Integer> fg_list = new ArrayList<Integer>();
+      Map<Integer, Integer> rec_nums = new HashMap<Integer, Integer>();
+
+      fc_i = this.fc_list.iterator();
       rec_i = -1;
       while (fc_i.hasNext()) {
-         fc    = fc_i.next();
+         fc = fc_i.next();
          frame = CDF_Gen.frames.getFrame(fc);
-         mod4 = frame.mod4;
-         fg = fc - mod4;
 
-         //figure out if we are still in the same record
-         if (rec_i == -1 || frameGroup[rec_i] != fg) {
+         last_fg = fg;
+         fg = fc - frame.mod4;
+
+         if (fg != last_fg) {
             rec_i++;
-            frameGroup[rec_i] = fg;
+            fg_list.add(rec_i, fg);
          }
-         
-         //get the epoch the the frameGroup frame
-         epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(fg);
+         rec_nums.put(fc, rec_i);
+      }
+      numRecords = rec_i + 1;
 
+      frameGroup = new long[numRecords];
+      epoch      = new long[numRecords];
+      q          = new long[numRecords];
+      rc         = new float[4][numRecords];
+
+      Arrays.fill(rc[0], RCNT.CNT_FILL);
+      Arrays.fill(rc[1], RCNT.CNT_FILL);
+      Arrays.fill(rc[2], RCNT.CNT_FILL);
+      Arrays.fill(rc[3], RCNT.CNT_FILL);
+
+      //change all the units from cnts/4sec to cnts/sec
+      fc_i = this.fc_list.iterator();
+      while (fc_i.hasNext()) {
+         fc = fc_i.next();
+         rec_i = rec_nums.get(fc);
+         frame = CDF_Gen.frames.getFrame(fc);
+
+         frameGroup[rec_i] = fg_list.get(rec_i);
+         epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
          raw = frame.getRateCounter();
-         rc[mod4][rec_i] = raw != RCNT.RAW_CNT_FILL ?
+
+         rc[frame.mod4][rec_i] = raw != RCNT.RAW_CNT_FILL ?
             raw / 4f : RCNT.CNT_FILL;
       }
          
