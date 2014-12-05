@@ -57,8 +57,8 @@ public class FSPC extends DataProduct{
       OLD_BIN_WIDTHS  = {75f, 155f, 120f, 250f};
 
    static public final String[]
-      NEW_LABELS      = {"FSPC1a","FSPC1b","FSPC1c","FSPC2","FSPC3","FSPC4"},
-      OLD_LABELS      = {"FSPC1", "FSPC2", "FSPC3",  "FSPC4"};
+      NEW_LABELS      = {"1a","1b","1c","2","3","4"},
+      OLD_LABELS      = {"1", "2", "3", "4"};
 
    public FSPC(final String path, final String pay, int d, int l, int v){
       this.date = d;

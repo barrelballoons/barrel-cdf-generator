@@ -323,26 +323,26 @@ public class BarrelFrame {
 
    public boolean setFSPC(final int sample, final BigInteger raw){
       Channel[] channels = FSPC.getChannels(this.ver);
-      int[] fspc = new int[channels.length];
-      int value;
+      this.fspc = new int[channels.length][20];
       boolean valid = true;
 
-      for(int ch_i = 0; ch_i < channels.length; ch_i++){
-          value = 
-             raw.shiftRight(channels[ch_i].start)
-             .and(BigInteger.valueOf(channels[ch_i].width)).intValue();
-         if(
-            (value < Constants.FSPC_RAW_MIN) ||
-            (value > Constants.FSPC_RAW_MAX)
-         ){
-            fspc[ch_i] = Constants.FSPC_RAW_FILL;
-            //fspc_q[ch_i] |= Constants.OUT_OF_RANGE;
-            valid = false;
-         } else {
-            fspc[ch_i] = value;
+      for (int sample_i = 0 ; sample_i < 20; sample_i++) {
+         for(int ch_i = 0; ch_i < channels.length; ch_i++){
+            this.fspc[ch_i][sample_i] = 
+                raw.
+                shiftRight(channels[ch_i].start - (sample_i * 48)).
+                and(BigInteger.valueOf(channels[ch_i].width - (sample_i * 48)))
+                .intValue();
+            if(
+               (this.fspc[ch_i][sample_i] < Constants.FSPC_RAW_MIN) ||
+               (this.fspc[ch_i][sample_i] > Constants.FSPC_RAW_MAX)
+            ){
+               this.fspc[ch_i][sample_i] = Constants.FSPC_RAW_FILL;
+               //fspc_q[ch_i] |= Constants.OUT_OF_RANGE;
+               valid = false;
+            }
          }
       }
-
       return valid;
 /*
       lc1[rec_num_20Hz + lc_i] =

@@ -742,7 +742,7 @@ public class LevelTwo extends CDFWriter{
       
       //convert the light curves counts to cnts/sec and 
       //figure out the channel width :)
-      rec_i = -1;
+      rec_i = 0;
       while (fc_i.hasNext()) {
          fc         = fc_i.next();
          frame      = CDF_Gen.frames.getFrame(fc);
@@ -753,12 +753,11 @@ public class LevelTwo extends CDFWriter{
          //each frame has 20 samples per channel
          for (int ch_i = 0; ch_i < numCh; ch_i++) {
             for (int sample_i = 0, sample; sample_i < 20; sample_i++) {
-               rec_i++;
                offset = sample_i * 50000000;
                sample = lc_raw[ch_i][sample_i];
                if(sample != FSPC.CNT_FILL){
-                  lc_scaled[ch_i][rec_i] = sample;
-                  lc_error[ch_i][rec_i] =(float)Math.sqrt(sample);
+                  lc_scaled[ch_i][rec_i + sample_i] = sample;
+                  lc_error[ch_i][rec_i + sample_i] =(float)Math.sqrt(sample);
                }
 
                //get the adjusted bin edges
@@ -766,10 +765,11 @@ public class LevelTwo extends CDFWriter{
                   0, CDF_Gen.spectra.getPeakLocation(fc)
                );
 
-               frameGroup[rec_i] = fc;
-               epoch[rec_i] = base_epoch + offset;
+               frameGroup[rec_i + sample_i] = fc;
+               epoch[rec_i + sample_i] = base_epoch + offset;
             }
          }
+         rec_i++;
       }
 
       String destName = 
@@ -780,7 +780,6 @@ public class LevelTwo extends CDFWriter{
          new FSPC(destName, "bar_" + id, this.working_date, 2, this.dpu_ver);
 
       for (int ch_i = 0; ch_i < numCh; ch_i++) {
-
          System.out.println("FSPC" + chan_names[ch_i]);
          fspc.getCDF().addData("FSPC" + chan_names[ch_i], lc_scaled[ch_i]);
          fspc.getCDF().addData("cnt_error" + chan_names[ch_i], lc_error[ch_i]);
