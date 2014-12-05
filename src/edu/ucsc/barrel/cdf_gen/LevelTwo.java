@@ -935,107 +935,108 @@ public class LevelTwo extends CDFWriter{
       BarrelFrame
          frame;
       Iterator<Integer>
-         fc_i        = this.fc_list.iterator();
+         fc_i  = this.fc_list.iterator();
+      int 
+         rec_i, sample_i, spec_offset, numRecords, mod32,
+         fg      = 0,
+         last_fg = 0;
+      int[]
+         part_spec;
+      int[][]
+         raw_spec;
+      long[]
+         frameGroup, q, epoch;
       float
          scint_temp = 0, 
-         dpu_temp   = 0;
-      int[]
-         part_spec,
-         raw_spec   = new int[256];
-      int 
-         rec_i, hkpg_frame, start, stop, mod32, fg,
-         offset     = 90,
-         numRecords  = CDF_Gen.frames.getNumRecords("mod32");
-      long[]
-         frameGroup = new long[numRecords],
-         q          = new long[numRecords],
-         epoch      = new long[numRecords];
-      float
+         dpu_temp   = 0,
          width;
       float[]
-         old_edges,
-         std_edges  = CDF_Gen.spectra.stdEdges(2, 2.4414f),
-         peak       = new float[numRecords];
+         old_edges, peak,
+         std_edges = CDF_Gen.spectra.stdEdges(1, 2.4414f);
       float[][]
-         rebin      = new float[numRecords][256],
-         error      = new float[numRecords][256];
-
-      //initialize the data arrays with fill value
-      Arrays.fill(frameGroup, BarrelCDF.FC_FILL);
-      Arrays.fill(epoch,      BarrelCDF.EPOCH_FILL);
-//      Arrays.fill(q,          BarrelCDF.QUALITY_FILL);
-      Arrays.fill(peak,       SSPC.PEAK_FILL);
-      Arrays.fill(raw_spec,   SSPC.RAW_CNT_FILL);
-      for (int spec_i = 0; spec_i < 256; spec_i++){
-         Arrays.fill(error[spec_i], SSPC.ERROR_FILL);
-         Arrays.fill(rebin[spec_i], SSPC.CNT_FILL);
-      }
+         rebin, error;
+      List<Integer> fg_list = new ArrayList<Integer>();
+      Map<Integer, Integer> rec_nums = new HashMap<Integer, Integer>();
 
       System.out.println("\nSaving SSPC...");
 
-      //get the first frame group
-      fc    = this.fc_list.get(0);
-      frame = CDF_Gen.frames.getFrame(fc); 
-      fg    = fc - frame.mod32;
-      frameGroup[0] = fg;
+      fc_i = this.fc_list.iterator();
+      rec_i = -1;
+      while (fc_i.hasNext()) {
+         fc = fc_i.next();
+         frame = CDF_Gen.frames.getFrame(fc);
 
-      //rebin the sspc spectra
-      rec_i = 0;
+         last_fg = fg;
+         fg = fc - frame.mod32;
+
+         if (fg != last_fg) {
+            rec_i++;
+            fg_list.add(rec_i, fg);
+         }
+
+         rec_nums.put(fc, rec_i);
+      }
+      numRecords = rec_i + 1;
+
+      raw_spec   = new int[numRecords][256];
+      error      = new float[numRecords][256];
+      rebin      = new float[numRecords][256];
+      peak       = new float[numRecords];
+      epoch      = new long[numRecords];
+      frameGroup = new long[numRecords];
+      q          = new long[numRecords];
+
+      for(int i = 0; i < numRecords; i++){
+         Arrays.fill(raw_spec[i], SSPC.RAW_CNT_FILL);
+         Arrays.fill(rebin[i],    SSPC.CNT_FILL);
+         Arrays.fill(error[i],    SSPC.ERROR_FILL);
+      }
+
+      //fill data arrays
+      fc_i = this.fc_list.iterator();
       while (fc_i.hasNext()) {
          fc    = fc_i.next();
          frame = CDF_Gen.frames.getFrame(fc);
-         mod32 = frame.mod32;
-         fg = fc - mod32;
-
-         //check if we are still in the same frame group 
-         //(meaning the same spectrum)
-         if (frameGroup[rec_i] != fg) {
-            epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
-            peak[rec_i] = CDF_Gen.spectra.getPeakLocation(frameGroup[rec_i]);
-
-            //get the most recent scintillator temperature value
-            scint_temp = getTemp(frame, HKPG.T0);
-            dpu_temp   = getTemp(frame, HKPG.T5);
-
-            //get the adjusted bin edges
-            old_edges = 
-               CDF_Gen.spectra.makeedges(2, scint_temp, dpu_temp, peak[rec_i]);
-
-            //rebin the spectrum
-            rebin[rec_i] = 
-               ExtractSpectrum.rebin(raw_spec, old_edges, std_edges);
-
-            //scale the counts and calculate error
-            for(int bin_i = 0; bin_i < 256; bin_i++){
-               if(rebin[rec_i][bin_i] != SSPC.CNT_FILL){
-                  width = std_edges[bin_i + 1] - std_edges[bin_i];
-
-                  //divide counts by bin width and adjust the time scale
-                  rebin[rec_i][bin_i] /= (width * 32f);
-                  //get the count error
-                  error[rec_i][bin_i] = 
-                     (float)Math.sqrt(rebin[rec_i][bin_i]) / (width * 32f);
-               }
-            }
-
-            //clear the raw spectrum
-            Arrays.fill(raw_spec, SSPC.RAW_CNT_FILL);
-
-            //update the record number and frameGroup
-            rec_i++;            
-            frameGroup[rec_i] = fg;
-         }
+         frameGroup[rec_i] = fg_list.get(rec_i);
+         epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
+         peak[rec_i] = CDF_Gen.spectra.getPeakLocation(frameGroup[rec_i]);
 
          //fill part of the raw spectrum
-         start = mod32 * 8;
-         stop = start + 8;
+         spec_offset = frame.mod32 * 8;
          part_spec = frame.getSSPC();
-         for(
-            int spec_i = start, sample_i = 0;
-            spec_i < stop;
-            sample_i++, spec_i++
-         ) {
-            raw_spec[spec_i] = part_spec[sample_i];
+         for (sample_i = 0; sample_i < 8; sample_i++) {
+            raw_spec[rec_i][spec_offset + sample_i] = part_spec[sample_i];
+         }
+      }
+
+      //calibrate the spectral data
+      for (rec_i = 0; rec_i < numRecords; rec_i++) {
+         
+         frame = CDF_Gen.frames.getFrame((int)frameGroup[rec_i]);
+
+         //get the most recent scintillator temperature value
+         scint_temp = getTemp(frame, HKPG.T0);
+         dpu_temp   = getTemp(frame, HKPG.T5);
+
+         //get the adjusted bin edges
+         old_edges = 
+            CDF_Gen.spectra.makeedges(2, scint_temp, dpu_temp, peak[rec_i]);
+
+         //rebin the spectrum
+         rebin[rec_i] = 
+            ExtractSpectrum.rebin(raw_spec[rec_i], old_edges, std_edges);
+
+         //scale the counts and calculate error
+         for(int bin_i = 0; bin_i < 256; bin_i++){
+            if(rebin[rec_i][bin_i] != SSPC.CNT_FILL){
+               width = std_edges[bin_i + 1] - std_edges[bin_i];
+
+               //divide counts by bin width and adjust the time scale
+               rebin[rec_i][bin_i] /= (width * 32f);
+               //get the count error
+               error[rec_i][bin_i] = 
+                  (float)Math.sqrt(rebin[rec_i][bin_i]) / (width * 32f);
+            }
          }
       }
 
