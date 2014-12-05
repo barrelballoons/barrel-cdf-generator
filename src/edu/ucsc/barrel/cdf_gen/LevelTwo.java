@@ -854,7 +854,7 @@ public class LevelTwo extends CDFWriter{
       frameGroup = new long[numRecords];
       q          = new long[numRecords];
 
-      for(int i = 0; i < numRecords; i++){
+      for (int i = 0; i < numRecords; i++) {
          Arrays.fill(raw_spec[i], MSPC.RAW_CNT_FILL);
          Arrays.fill(rebin[i], MSPC.CNT_FILL);
          Arrays.fill(error[i], MSPC.ERROR_FILL);
@@ -864,6 +864,7 @@ public class LevelTwo extends CDFWriter{
       fc_i = this.fc_list.iterator();
       while (fc_i.hasNext()) {
          fc    = fc_i.next();
+         rec_i = rec_nums.get(fc);
          frame = CDF_Gen.frames.getFrame(fc);
          frameGroup[rec_i] = fg_list.get(rec_i);
          epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
@@ -878,12 +879,9 @@ public class LevelTwo extends CDFWriter{
 
       //calibrate the spectral data
       for (rec_i = 0; rec_i < numRecords; rec_i++) {
-         
-         frame = CDF_Gen.frames.getFrame((int)frameGroup[rec_i]);
-
          //get the most recent scintillator temperature value
-         scint_temp = getTemp(frame, HKPG.T0);
-         dpu_temp   = getTemp(frame, HKPG.T5);
+         scint_temp = getTemp((int)frameGroup[rec_i], HKPG.T0);
+         dpu_temp   = getTemp((int)frameGroup[rec_i], HKPG.T5);
 
          //get the adjusted bin edges
          old_edges = 
@@ -952,7 +950,7 @@ public class LevelTwo extends CDFWriter{
          width;
       float[]
          old_edges, peak,
-         std_edges = CDF_Gen.spectra.stdEdges(1, 2.4414f);
+         std_edges = CDF_Gen.spectra.stdEdges(2, 2.4414f);
       float[][]
          rebin, error;
       List<Integer> fg_list = new ArrayList<Integer>();
@@ -986,7 +984,7 @@ public class LevelTwo extends CDFWriter{
       frameGroup = new long[numRecords];
       q          = new long[numRecords];
 
-      for(int i = 0; i < numRecords; i++){
+      for (int i = 0; i < numRecords; i++) {
          Arrays.fill(raw_spec[i], SSPC.RAW_CNT_FILL);
          Arrays.fill(rebin[i],    SSPC.CNT_FILL);
          Arrays.fill(error[i],    SSPC.ERROR_FILL);
@@ -996,6 +994,7 @@ public class LevelTwo extends CDFWriter{
       fc_i = this.fc_list.iterator();
       while (fc_i.hasNext()) {
          fc    = fc_i.next();
+         rec_i = rec_nums.get(fc);
          frame = CDF_Gen.frames.getFrame(fc);
          frameGroup[rec_i] = fg_list.get(rec_i);
          epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
@@ -1011,12 +1010,9 @@ public class LevelTwo extends CDFWriter{
 
       //calibrate the spectral data
       for (rec_i = 0; rec_i < numRecords; rec_i++) {
-         
-         frame = CDF_Gen.frames.getFrame((int)frameGroup[rec_i]);
-
          //get the most recent scintillator temperature value
-         scint_temp = getTemp(frame, HKPG.T0);
-         dpu_temp   = getTemp(frame, HKPG.T5);
+         scint_temp = getTemp((int)frameGroup[rec_i], HKPG.T0);
+         dpu_temp   = getTemp((int)frameGroup[rec_i], HKPG.T5);
 
          //get the adjusted bin edges
          old_edges = 
@@ -1135,15 +1131,15 @@ public class LevelTwo extends CDFWriter{
       rcnt.close();
    }
 
-   private float getTemp(BarrelFrame startFrame, int id_number) {
+   private float getTemp(int start_fc, int id_number) {
+
       BarrelFrame frame = null;
       int[] fcRange = CDF_Gen.frames.getFcRange();
       int
          raw_temp,
          //this is the ideal fc: the spectrum's frame offset by the mod40
          //housekeeping index of the temp sensor
-         target = 
-            (int)startFrame.getFrameCounter() - startFrame.mod40 + id_number,
+         target = start_fc - (start_fc % 40) + id_number,
          prev   = target,
          next   = target,
          //get the bounds of our search
