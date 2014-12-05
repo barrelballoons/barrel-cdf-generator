@@ -134,21 +134,18 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
          return;
       }
 
-      //do the 1Hz file
-      doMiscCdf();
-
-      //mod40 file
-      doHkpgCdf(); 
-
-      //mod32 file
-      doSspcCdf();  
-
-      //mod4 files
+      //spectral files
+      /*
+         //make sure the first and last records are not mid-frame
+         //first_i = Math.max(0, (first_i - (first_i % 20)));
+         //last_i = Math.min(size, (last_i + 20 - (last_i % 20)));
+      */
+      doFspcCdf();
       doMspcCdf();
+      doSspcCdf();  
       doRcntCdf(); 
-      doGpsCdf();
 
-      //4Hz file
+      //magnetometer
       /*
          //make sure the first and last records are not mid-frame
          first_i = Math.max(0, (first_i - (first_i % 4)));
@@ -156,13 +153,12 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
       */
       doMagCdf();
 
-      //20Hz file
-      /*
-         //make sure the first and last records are not mid-frame
-         //first_i = Math.max(0, (first_i - (first_i % 20)));
-         //last_i = Math.min(size, (last_i + 20 - (last_i % 20)));
-      */
-      doFspcCdf();
+      //housekeeping and misc
+      doHkpgCdf();
+      doMiscCdf();
+      
+      //do EPHM last because it takes the longest
+      doGpsCdf();
       
    }
    
