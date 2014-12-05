@@ -805,13 +805,14 @@ public class LevelTwo extends CDFWriter{
       Iterator<Integer>
          fc_i        = this.fc_list.iterator();
       int 
-         rec_i, hkpg_frame, start, stop, mod4, numRecords,
+         rec_i, sample_i, spec_offset, numRecords,
          fg      = 0,
          last_fg = 0,
          offset  = 90;
       int[]
-         part_spec,
-         raw_spec = new int[48];
+         part_spec;
+      int[][]
+         raw_spec;
       long[]
          frameGroup, q, epoch;
       float
@@ -846,20 +847,20 @@ public class LevelTwo extends CDFWriter{
       }
       numRecords = rec_i + 1;
 
-      rebin       = new float[numRecords][48];
-      error       = new float[numRecords][48];
-      epoch       = new long[numRecords];
-      frameGroup  = new long[numRecords];
-      q           = new long[numRecords];
-      hkpg_scaled = new float[40][numRecords];
+      raw_spec   = new int[numRecords][48];
+      rebin      = new float[numRecords][48];
+      error      = new float[numRecords][48];
+      epoch      = new long[numRecords];
+      frameGroup = new long[numRecords];
+      q          = new long[numRecords];
 
-      Arrays.fill(raw_spec, MSPC.RAW_CNT_FILL);
       for(int i = 0; i < numRecords; i++){
+         Arrays.fill(raw_spec[i], MSPC.RAW_CNT_FILL);
          Arrays.fill(rebin[i], MSPC.CNT_FILL);
          Arrays.fill(error[i], MSPC.ERROR_FILL);
       }
 
-      //rebin the mspc spectra
+      //fill data arrays
       fc_i = this.fc_list.iterator();
       while (fc_i.hasNext()) {
          fc    = fc_i.next();
@@ -867,58 +868,45 @@ public class LevelTwo extends CDFWriter{
          frameGroup[rec_i] = fg_list.get(rec_i);
          epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
 
-         //check if we are still in the same frame group 
-         //(meaning the same spectrum)
-         if (frameGroup[rec_i] != fg) {
-            //save the epoch and frameGroup of this spectrum
-            epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
-
-            //get the most recent scintillator temperature value
-            scint_temp = getTemp(frame, HKPG.T0);
-            dpu_temp   = getTemp(frame, HKPG.T5);
-
-            //get the adjusted bin edges
-            old_edges = 
-               CDF_Gen.spectra.makeedges(
-                  1, scint_temp, dpu_temp, 
-                  CDF_Gen.spectra.getPeakLocation(frameGroup[rec_i])
-               );
-
-            //rebin the spectrum
-            rebin[rec_i] = 
-               ExtractSpectrum.rebin(raw_spec, old_edges, std_edges);
-
-            //scale the counts and calculate error
-            for(int bin_i = 0; bin_i < 48; bin_i++){
-               if(rebin[rec_i][bin_i] != MSPC.CNT_FILL){
-                  width = std_edges[bin_i + 1] - std_edges[bin_i];
-
-                  //divide counts by bin width and adjust the time scale
-                  rebin[rec_i][bin_i] /= (width * 4f);
-                  //get the count error
-                  error[rec_i][bin_i] = 
-                     (float)Math.sqrt(rebin[rec_i][bin_i]) / (width * 4f);
-               }
-            }
-
-            //clear the raw spectrum
-            Arrays.fill(raw_spec, MSPC.RAW_CNT_FILL);
-
-            //update the record number and frameGroup
-            rec_i++;            
-            frameGroup[rec_i] = fg;
-         }
-
          //fill part of the raw spectrum
-         start = frame.mod4 * 12;
-         stop = start + 12;
+         spec_offset = frame.mod4 * 12;
          part_spec = frame.getMSPC();
-         for(
-            int spec_i = start, sample_i = 0;
-            spec_i < stop;
-            sample_i++, spec_i++
-         ) {
-            raw_spec[spec_i] = part_spec[sample_i];
+         for (sample_i = 0; sample_i < 12; sample_i++) {
+            raw_spec[rec_i][spec_offset + sample_i] = part_spec[sample_i];
+         }
+      }
+
+      //calibrate the spectral data
+      for (rec_i = 0; rec_i < numRecords; rec_i++) {
+         
+         frame = CDF_Gen.frames.getFrame((int)frameGroup[rec_i]);
+
+         //get the most recent scintillator temperature value
+         scint_temp = getTemp(frame, HKPG.T0);
+         dpu_temp   = getTemp(frame, HKPG.T5);
+
+         //get the adjusted bin edges
+         old_edges = 
+            CDF_Gen.spectra.makeedges(
+               1, scint_temp, dpu_temp, 
+               CDF_Gen.spectra.getPeakLocation(frameGroup[rec_i])
+            );
+
+         //rebin the spectrum
+         rebin[rec_i] = 
+            ExtractSpectrum.rebin(raw_spec[rec_i], old_edges, std_edges);
+
+         //scale the counts and calculate error
+         for(int bin_i = 0; bin_i < 48; bin_i++){
+            if(rebin[rec_i][bin_i] != MSPC.CNT_FILL){
+               width = std_edges[bin_i + 1] - std_edges[bin_i];
+
+               //divide counts by bin width and adjust the time scale
+               rebin[rec_i][bin_i] /= (width * 4f);
+               //get the count error
+               error[rec_i][bin_i] = 
+                  (float)Math.sqrt(rebin[rec_i][bin_i]) / (width * 4f);
+            }
          }
       }
 
