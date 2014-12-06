@@ -197,8 +197,8 @@ public class FSPC extends DataProduct{
          ch[1] = new Channel(30, 511);
          ch[2] = new Channel(22, 255);
          ch[3] = new Channel(13, 511);
-         ch[4] = new Channel(6, 127);
-         ch[5] = new Channel(0, 63);
+         ch[4] = new Channel(6,  127);
+         ch[5] = new Channel(0,  63);
       }
 
       return ch;

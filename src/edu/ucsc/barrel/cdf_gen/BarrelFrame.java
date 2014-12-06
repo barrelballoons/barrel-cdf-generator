@@ -177,11 +177,16 @@ public class BarrelFrame {
       );
       
       //fast spectra: 20Hz data
+      //initialize the fspc array with the correct number of channels
+      Channel[] channels = FSPC.getChannels(this.ver);
+      this.fspc = new int[channels.length][20];
       for(int sample = 0; sample < 20; sample++){
          this.valid = this.setFSPC(
+            channels,
             sample, 
-            frame.shiftRight(1264 - sample * 48).and(
-               BigInteger.valueOf(281474976710656L)
+            //frame.shiftRight(1264 - sample * 48).and(
+            frame.shiftRight(1296 - sample * 48).and(
+               BigInteger.valueOf(281474976710655L)
             )
          );
       }
@@ -321,26 +326,21 @@ public class BarrelFrame {
       return true;
    }
 
-   public boolean setFSPC(final int sample, final BigInteger raw){
-      Channel[] channels = FSPC.getChannels(this.ver);
-      this.fspc = new int[channels.length][20];
+   public boolean setFSPC(Channel[] channels, int sample, BigInteger raw){
       boolean valid = true;
-
-      for (int sample_i = 0 ; sample_i < 20; sample_i++) {
-         for(int ch_i = 0; ch_i < channels.length; ch_i++){
-            this.fspc[ch_i][sample_i] = 
-                raw.
-                shiftRight(channels[ch_i].start - (sample_i * 48)).
-                and(BigInteger.valueOf(channels[ch_i].width - (sample_i * 48)))
-                .intValue();
-            if(
-               (this.fspc[ch_i][sample_i] < Constants.FSPC_RAW_MIN) ||
-               (this.fspc[ch_i][sample_i] > Constants.FSPC_RAW_MAX)
-            ){
-               this.fspc[ch_i][sample_i] = Constants.FSPC_RAW_FILL;
-               //fspc_q[ch_i] |= Constants.OUT_OF_RANGE;
-               valid = false;
-            }
+      for(int ch_i = 0; ch_i < channels.length; ch_i++){
+         this.fspc[ch_i][sample] = 
+            raw.
+            shiftRight(channels[ch_i].start).
+            and(BigInteger.valueOf(channels[ch_i].width))
+            .intValue();
+         if(
+            (this.fspc[ch_i][sample] < Constants.FSPC_RAW_MIN) ||
+            (this.fspc[ch_i][sample] > Constants.FSPC_RAW_MAX)
+         ){
+            this.fspc[ch_i][sample] = Constants.FSPC_RAW_FILL;
+            //fspc_q[ch_i] |= Constants.OUT_OF_RANGE;
+            valid = false;
          }
       }
       return valid;

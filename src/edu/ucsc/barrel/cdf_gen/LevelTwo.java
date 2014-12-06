@@ -708,6 +708,8 @@ public class LevelTwo extends CDFWriter{
          rec_i, offset, mod40,
          numRecords  = CDF_Gen.frames.getNumRecords("20Hz"),
          numCh = FSPC.getChannels(this.dpu_ver).length;
+      int[]
+         multiplier = (numCh == 6 ? new int[]{2,2,2,1,1,1}:new int[]{1,1,1,1});
       int[][] 
          lc_raw     = new int[numCh][numRecords],
          lc_scaled  = new int[numCh][numRecords];
@@ -730,14 +732,6 @@ public class LevelTwo extends CDFWriter{
       String[]
          chan_names = (numCh == 6 ? FSPC.NEW_LABELS : FSPC.OLD_LABELS);
 
-      Arrays.fill(frameGroup, BarrelCDF.FC_FILL);
-      Arrays.fill(epoch,      BarrelCDF.EPOCH_FILL);
-//      Arrays.fill(q,          BarrelCDF.QUALITY_FILL);
-      for (int ch_i = 0; ch_i < numCh; ch_i++) {
-         Arrays.fill(lc_scaled[ch_i], FSPC.CNT_FILL);
-         Arrays.fill(lc_error[ch_i], FSPC.ERROR_FILL);
-      }
-
       System.out.println("\nSaving FSPC...");
       
       //convert the light curves counts to cnts/sec and 
@@ -755,9 +749,13 @@ public class LevelTwo extends CDFWriter{
             for (int sample_i = 0, sample; sample_i < 20; sample_i++) {
                offset = sample_i * 50000000;
                sample = lc_raw[ch_i][sample_i];
+
                if(sample != FSPC.CNT_FILL){
-                  lc_scaled[ch_i][rec_i + sample_i] = sample;
+                  lc_scaled[ch_i][rec_i + sample_i] = sample * multiplier[ch_i];
                   lc_error[ch_i][rec_i + sample_i] =(float)Math.sqrt(sample);
+               } else {
+                  lc_scaled[ch_i][rec_i + sample_i] = FSPC.CNT_FILL;
+                  lc_error[ch_i][rec_i + sample_i] = FSPC.ERROR_FILL;
                }
 
                //get the adjusted bin edges
