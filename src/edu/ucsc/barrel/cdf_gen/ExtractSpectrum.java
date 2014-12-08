@@ -45,8 +45,6 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 public class ExtractSpectrum {
 
-   private ExtractSpectrum(){}
-
    //create uncalibrated bin edges
    private static final float[][] 
       OLD_RAW_EDGES = {
@@ -211,6 +209,7 @@ public class ExtractSpectrum {
    private int numFrames, numRecords, max_cnts, dpuVer;
    private int[] fcRange;
 
+   private ExtractSpectrum(){}
    public ExtractSpectrum(FrameHolder frameHolder){
       this.dpuVer             = frameHolder.getDpuVersion();
       this.peaks              = new TreeMap<Integer, Float>();
@@ -265,7 +264,7 @@ public class ExtractSpectrum {
 
          //keep track of how many spectrum parts we have collected
          num_parts = this.spectra_part_count.get(fg);
-         num_parts = num_parts != null ? num_parts++ : 1;
+         num_parts = num_parts != null ? num_parts + 1 : 1;
          this.spectra_part_count.put(fg, num_parts);
       }
    }
@@ -280,7 +279,7 @@ public class ExtractSpectrum {
 
       if(this.raw_spectra.size() < 2){return;}
       
-      //iterate through all frames building groups of spectra and do peak fits
+      //do peak fits on the raw spectra
       spec_i = this.raw_spectra.keySet().iterator();
       while(spec_i.hasNext()){
          fg = spec_i.next();
@@ -346,7 +345,7 @@ public class ExtractSpectrum {
          high_cnt = 0;
       int[]
          high_area  = new int[PEAK_511_WIDTH];
-      
+
       //create array of detector bin numbers we will be searching
       x = Arrays.copyOfRange(
          SSPC_MIDPOINTS, PEAK_511_START, PEAK_511_START + PEAK_511_WIDTH
