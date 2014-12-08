@@ -723,11 +723,6 @@ public class ExtractSpectrum {
          widths_out[i] = eb2[i] - eb1[i];
       }
 
-      //make sure there are no fill values in the input array
-      for (int sample_i = 0; sample_i < specin.length; sample_i++) {
-         if()
-      }
-
       //This loops over each bin of the OUTPUT spectrum and sees which bins of
       //the the INPUT spectrum overlap it:
       spec_loop:
@@ -779,7 +774,7 @@ public class ExtractSpectrum {
          //this bin of the output spectrum
          if (a_cnt > 0){ 
             for(int k = 0; k < a_cnt; k++){
-               if(specin[a[k]] < 0){
+               if(specin[a[k]] < 0 || specin[a[k]] == CDFVar.UINT2_FILL){
                   specout[i] = CDFVar.FLOAT_FILL;
                   continue spec_loop;
                }else{
@@ -790,7 +785,7 @@ public class ExtractSpectrum {
          }
          if (b_cnt > 0){
             for(int k = 0; k < b_cnt; k++){
-               if(specin[b[k]] < 0){
+               if(specin[b[k]] < 0 || specin[b[k]] == CDFVar.UINT2_FILL){
                   specout[i] = CDFVar.FLOAT_FILL;
                   continue spec_loop;
                }else{
@@ -800,7 +795,7 @@ public class ExtractSpectrum {
          }
          if (c_cnt > 0){
             for(int k = 0; k < c_cnt; k++){
-               if(specin[c[k]] < 0){
+               if(specin[c[k]] < 0 || specin[c[k]] == CDFVar.UINT2_FILL){
                   specout[i] = CDFVar.FLOAT_FILL;
                   continue spec_loop;
                }else{
@@ -811,7 +806,7 @@ public class ExtractSpectrum {
          }
          if (d_cnt > 0){
             for(int k = 0; k < d_cnt; k++){
-               if(specin[d[k]] < 0){
+               if(specin[d[k]] < 0 || specin[d[k]] == CDFVar.UINT2_FILL){
                   specout[i] = CDFVar.FLOAT_FILL;
                   continue spec_loop;
                }else{
