@@ -723,6 +723,11 @@ public class ExtractSpectrum {
          widths_out[i] = eb2[i] - eb1[i];
       }
 
+      //make sure there are no fill values in the input array
+      for (int sample_i = 0; sample_i < specin.length; sample_i++) {
+         if()
+      }
+
       //This loops over each bin of the OUTPUT spectrum and sees which bins of
       //the the INPUT spectrum overlap it:
       spec_loop:
