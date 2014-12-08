@@ -184,8 +184,8 @@ public class BarrelFrame {
          this.valid = this.setFSPC(
             channels,
             sample, 
-            //frame.shiftRight(1264 - sample * 48).and(
-            frame.shiftRight(1296 - sample * 48).and(
+            frame.shiftRight(1264 - sample * 48).and(
+            //frame.shiftRight(1296 - sample * 48).and(
                BigInteger.valueOf(281474976710655L)
             )
          );
@@ -338,7 +338,7 @@ public class BarrelFrame {
             (this.fspc[ch_i][sample] < Constants.FSPC_RAW_MIN) ||
             (this.fspc[ch_i][sample] > Constants.FSPC_RAW_MAX)
          ){
-            this.fspc[ch_i][sample] = Constants.FSPC_RAW_FILL;
+            this.fspc[ch_i][sample] = FSPC.CNT_FILL;
             //fspc_q[ch_i] |= Constants.OUT_OF_RANGE;
             valid = false;
          }
