@@ -474,8 +474,8 @@ public class HKPG extends DataProduct{
          var.attribute("FORMAT", "F4.3");
          var.attribute("FILLVAL", CDFVar.FLOAT_FILL);
       }
-      var.attribute("VALIDMIN", v.getMin());
-      var.attribute("VALIDMAX", v.getMax());
+      var.attribute("VALIDMIN", v.getMin(), CDFConstants.CDF_FLOAT);
+      var.attribute("VALIDMAX", v.getMax(), CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", v.getName());
       var.attribute("CATDESC", v.getDesc());
       var.attribute("LABLAXIS", v.getName());
