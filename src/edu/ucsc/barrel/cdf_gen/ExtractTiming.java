@@ -439,14 +439,16 @@ public class ExtractTiming {
          fc,
          prev_fc = 0,
          next_fc = 0;
-      Iterator<Integer> fc_i = this.models.keySet().iterator();
+      Iterator<Integer> prev_fc_i = this.models.keySet().iterator();
+      Iterator<Integer> next_fc_i = this.models.keySet().iterator();
+      next_fc_i.next();
 
       //fc_i is sorted so the earliest fc will come first. 
       //We want to scan through all fc's that have peaks until we find
       //find the first peak with an fc larger than the target fc 
-      while (fc_i.hasNext()) {
-         prev_fc = next_fc;
-         next_fc = fc_i.next();
+      while (next_fc_i.hasNext()) {
+         prev_fc = prev_fc_i.next();
+         next_fc = next_fc_i.next();
          if(target <= next_fc){
             break;
          }
@@ -454,7 +456,6 @@ public class ExtractTiming {
 
       //select whichever fg is closest to the target fc
       fc = ((next_fc - target) > (target - prev_fc)) ? prev_fc : next_fc;
-
       model = this.models.get(fc);
 
       //calculate epoch in ns
