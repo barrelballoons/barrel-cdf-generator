@@ -215,7 +215,6 @@ public class ExtractTiming {
       //save the number of records that were found
       this.numRecords = rec_i;
 
-System.out.println(rec_i);
       return rec_i;
    }
    
@@ -228,7 +227,8 @@ System.out.println(rec_i);
          fg       = 0,
          last_fc  = 0;
       long
-         last_frame;
+         last_frame,
+         mid_frame;
       SimpleRegression
          fit     = null,
          new_fit = null;
@@ -255,36 +255,15 @@ System.out.println(rec_i);
             linModel.setIntercept(fit.getIntercept()); 
             linModel.setFirst(time_recs[first_rec].getFrame()); 
             linModel.setLast(time_recs[last_rec - 1].getFrame()); 
-            this.models.add(model_i, linModel);
 
-            //associate each frame number between the two time records 
-            //with this linear model
-            last_fc = this.time_recs[last_rec - 1].getFrame();
-            while (fc <= last_fc - 1) {
-
-               frame = this.frames[frame_i++];
-               fc = (int)frame.getFrameCounter();
-               this.modelRef.put(fc, model_i);
-
-               //make sure any frame group that can be derived from this frame
-               //also has a model set
-               fg = fc - frame.mod4;
-               if(!this.modelRef.containsKey(fg)){
-                  this.modelRef.put(fg, model_i);
-               }
-               fg = fc - frame.mod32;
-               if(!this.modelRef.containsKey(fg)){
-                  this.modelRef.put(fg, model_i);
-               }
-               fg = fc - frame.mod40;
-               if(!this.modelRef.containsKey(fg)){
-                  this.modelRef.put(fg, model_i);
-               }
-            }
+            //associate this model with the fc of the midpoint frame
+            mid_frame = linModel.getFirst(); //first set it to the first frame
+            mid_frame += //then bump it up by half the frame range used
+              (long)((linModel.getLast() - mid_frame) / 2);
+            this.models.add(mid_frame, linModel);
 
             System.out.println(
-               "Frames " + this.time_recs[first_rec].getFrame() + " - " +
-               this.time_recs[last_rec - 1].getFrame()); 
+               "Frames " + linModel.getFirst() + " - " + linModel.getLast()); 
             System.out.println(
                "\tm = " + fit.getSlope() + 
                ", b = " + fit.getIntercept() + 
@@ -314,24 +293,10 @@ System.out.println(rec_i);
       }
 
       //Associate any remaining frames with the last model
-      while (frame_i < this.numFrames) {
-         frame = this.frames[frame_i++];
-         fc = (int)frame.getFrameCounter();
-         this.modelRef.put(fc, model_i);
-
-         fg = fc - frame.mod4;
-         if(!this.modelRef.containsKey(fg)){
-            this.modelRef.put(fg, model_i);
-         }
-         fg = fc - frame.mod32;
-         if(!this.modelRef.containsKey(fg)){
-            this.modelRef.put(fg, model_i);
-         }
-         fg = fc - frame.mod40;
-         if(!this.modelRef.containsKey(fg)){
-            this.modelRef.put(fg, model_i);
-         }
-      }
+      mid_frame = linModel.getFirst(); //first set it to the first frame
+      mid_frame += //then bump it up by half the frame range used
+        (long)((linModel.getLast() - mid_frame) / 2);
+      this.models.add(mid_frame, linModel);
    }
 
 /* 
