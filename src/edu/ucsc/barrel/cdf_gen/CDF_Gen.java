@@ -175,9 +175,10 @@ public class CDF_Gen{
             
                //Fill the time variable
                barrel_time = new ExtractTiming(frames);
-               barrel_time.getTimeRecs();
-               barrel_time.fixWeekOffset();
-               barrel_time.fillModels();
+               if(barrel_time.getTimeRecs() > 2) {
+                  barrel_time.fixWeekOffset();
+                  barrel_time.fillModels();
+               }
                /*
                if(getSetting("L").indexOf("1") > -1){
                   //create Level One 

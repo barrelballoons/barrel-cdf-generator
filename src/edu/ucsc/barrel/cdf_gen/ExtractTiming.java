@@ -148,7 +148,7 @@ public class ExtractTiming {
       this.modelRef   = new HashMap<Integer, Integer>();
    }
 
-   public void getTimeRecs(){
+   public int getTimeRecs(){
       int
          current_week = 0, week, pps;
       int
@@ -168,7 +168,7 @@ public class ExtractTiming {
       }
       if(current_week == 0 || current_week == HKPG.WEEK_FILL) {
          CDF_Gen.log.writeln("Could not get week variable for dataset");
-         return;
+         return 0;
       }
 
       //cycle through the entire data set and create an array of time records
@@ -214,6 +214,9 @@ public class ExtractTiming {
 
       //save the number of records that were found
       this.numRecords = rec_i;
+
+System.out.println(rec_i);
+      return rec_i;
    }
    
    public void fillModels(){
@@ -258,6 +261,7 @@ public class ExtractTiming {
             //with this linear model
             last_fc = this.time_recs[last_rec - 1].getFrame();
             while (fc <= last_fc - 1) {
+
                frame = this.frames[frame_i++];
                fc = (int)frame.getFrameCounter();
                this.modelRef.put(fc, model_i);
@@ -311,8 +315,22 @@ public class ExtractTiming {
 
       //Associate any remaining frames with the last model
       while (frame_i < this.numFrames) {
-         fc = (int)this.frames[frame_i++].getFrameCounter();
+         frame = this.frames[frame_i++];
+         fc = (int)frame.getFrameCounter();
          this.modelRef.put(fc, model_i);
+
+         fg = fc - frame.mod4;
+         if(!this.modelRef.containsKey(fg)){
+            this.modelRef.put(fg, model_i);
+         }
+         fg = fc - frame.mod32;
+         if(!this.modelRef.containsKey(fg)){
+            this.modelRef.put(fg, model_i);
+         }
+         fg = fc - frame.mod40;
+         if(!this.modelRef.containsKey(fg)){
+            this.modelRef.put(fg, model_i);
+         }
       }
    }
 
@@ -452,6 +470,15 @@ public class ExtractTiming {
       if(fc > this.fcRange[1]){fc = this.fcRange[1];}
 
       //lookup the model for this frame counter
+      if(this.modelRef.get(fc) == null){
+      System.out.println(this.fcRange[0]);
+      System.out.println(this.fcRange[1]);
+System.out.println("fc " +fc);
+      }
+      if(this.models.get(this.modelRef.get(fc)) == null){
+System.out.println("fc " +fc);
+System.out.println(this.modelRef.get(fc ));
+      }
       model = this.models.get(this.modelRef.get(fc));
       
       //calculate epoch in ns

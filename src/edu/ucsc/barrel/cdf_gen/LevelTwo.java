@@ -275,6 +275,7 @@ public class LevelTwo extends CDFWriter{
             //check for repeated frame
             last_frame = this_frame;
             this_frame = Integer.parseInt(mag_coords[0]);
+
             if(
                (this_frame != last_frame) && 
                (complete_gps.get(this_frame) == true)
@@ -308,8 +309,8 @@ public class LevelTwo extends CDFWriter{
          mag_coord_file.close();
 
          //clean up after ourselves
-      //   geo_coord_file.delete();
-        // (new File("pay"+id+"_"+this.working_date+"_gps_out.txt")).delete();
+         geo_coord_file.delete();
+         (new File("pay"+id+"_"+this.working_date+"_gps_out.txt")).delete();
 
       }catch(IOException ex){
          System.out.println("Could not read magnetic coordinate file:");
@@ -761,6 +762,9 @@ public class LevelTwo extends CDFWriter{
                }
 
                //get the adjusted bin edges
+               if(CDF_Gen.spectra.getPeakLocation(fc) == null){
+               System.out.println(fc);
+               }
                chan_edges[rec_i] = CDF_Gen.spectra.createBinEdges(
                   0, CDF_Gen.spectra.getPeakLocation(fc)
                );
