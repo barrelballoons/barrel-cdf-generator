@@ -29,8 +29,7 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.Iterator;
 
 public class ExtractTiming {
    //Set some constant values
@@ -135,17 +134,16 @@ public class ExtractTiming {
    private TimeRec[] time_recs;
    private int time_rec_cnt = 0;
 
-   //Store models in an Array List and use a Map to associate them with frames
-   private Map<Integer, Integer> modelRef;
-   private List<LinModel> models;
+   private Map<Integer, LinModel> models;
+   private Map<Integer, Long> epochs;
 
    public ExtractTiming(FrameHolder frameHolder){
       this.frames     = frameHolder.getFrames();
       this.numFrames  = frameHolder.getNumFrames();
       this.fcRange    = frameHolder.getFcRange();
       this.time_recs  = new TimeRec[frameHolder.getNumRecords("mod4")];
-      this.models     = new ArrayList<LinModel>();
-      this.modelRef   = new HashMap<Integer, Integer>();
+      this.models     = new HashMap<Integer, LinModel>();
+      this.epochs     = new HashMap<Integer, Long>();
    }
 
    public int getTimeRecs(){
@@ -225,14 +223,12 @@ public class ExtractTiming {
          model_i  = -1,
          fc       = 0,
          fg       = 0,
-         last_fc  = 0;
-      long
-         last_frame,
+         last_fc  = 0,
          mid_frame;
       SimpleRegression
          fit     = null,
          new_fit = null;
-      LinModel linModel;
+      LinModel linModel = null;
       BarrelFrame frame;
 
       //create a model for each batch of time records
@@ -256,11 +252,14 @@ public class ExtractTiming {
             linModel.setFirst(time_recs[first_rec].getFrame()); 
             linModel.setLast(time_recs[last_rec - 1].getFrame()); 
 
+            //find the mid frame number by first getting the first frame
+            mid_frame = (int)linModel.getFirst();
+            //then bump it up by half the frame range used
+            mid_frame += 
+              (int)((linModel.getLast() - mid_frame) / 2);
+
             //associate this model with the fc of the midpoint frame
-            mid_frame = linModel.getFirst(); //first set it to the first frame
-            mid_frame += //then bump it up by half the frame range used
-              (long)((linModel.getLast() - mid_frame) / 2);
-            this.models.add(mid_frame, linModel);
+            this.models.put(mid_frame, linModel);
 
             System.out.println(
                "Frames " + linModel.getFirst() + " - " + linModel.getLast()); 
@@ -289,14 +288,15 @@ public class ExtractTiming {
          linModel.setIntercept(0);
          linModel.setFirst(0);
          linModel.setLast(this.numRecords); 
-         this.models.add(linModel);
       }
 
       //Associate any remaining frames with the last model
-      mid_frame = linModel.getFirst(); //first set it to the first frame
-      mid_frame += //then bump it up by half the frame range used
-        (long)((linModel.getLast() - mid_frame) / 2);
-      this.models.add(mid_frame, linModel);
+      if (linModel != null) {
+         mid_frame = (int)linModel.getFirst(); //first set it to the first frame
+         mid_frame += //then bump it up by half the frame range used
+           (long)((linModel.getLast() - mid_frame) / 2);
+         this.models.put(mid_frame, linModel);
+      }
    }
 
 /* 
@@ -427,33 +427,46 @@ public class ExtractTiming {
       return getEpoch((int)fc);
    }
    public long getEpoch(int fc) {
+      Long epoch = this.epochs.get(fc);
+      
+      return (epoch == null ? calcEpoch(fc) : epoch);
+   }
+
+   public long calcEpoch(int target) {
       long epoch;
       LinModel model;
+      int
+         fc,
+         prev_fc = 0,
+         next_fc = 0;
+      Iterator<Integer> fc_i = this.models.keySet().iterator();
 
-      //force fc to be in range
-      if(fc < this.fcRange[0]){fc = this.fcRange[0];}
-      if(fc > this.fcRange[1]){fc = this.fcRange[1];}
+      //fc_i is sorted so the earliest fc will come first. 
+      //We want to scan through all fc's that have peaks until we find
+      //find the first peak with an fc larger than the target fc 
+      while (fc_i.hasNext()) {
+         prev_fc = next_fc;
+         next_fc = fc_i.next();
+         if(target <= next_fc){
+            break;
+         }
+      }
 
-      //lookup the model for this frame counter
-      if(this.modelRef.get(fc) == null){
-      System.out.println(this.fcRange[0]);
-      System.out.println(this.fcRange[1]);
-System.out.println("fc " +fc);
-      }
-      if(this.models.get(this.modelRef.get(fc)) == null){
-System.out.println("fc " +fc);
-System.out.println(this.modelRef.get(fc ));
-      }
-      model = this.models.get(this.modelRef.get(fc));
-      
+      //select whichever fg is closest to the target fc
+      fc = ((next_fc - target) > (target - prev_fc)) ? prev_fc : next_fc;
+
+      model = this.models.get(fc);
+
       //calculate epoch in ns
       epoch = (long)(
-         ((fc * model.getSlope()) + model.getIntercept()) * 1000000
+         ((target * model.getSlope()) + model.getIntercept()) * 1000000
       );
+     
+      //save the epoch for next time
+      this.epochs.put(fc, epoch);
 
       return epoch;
    }
-
 /*
    private int selectModel(final long fc, final int i){
       int model_i = i;
