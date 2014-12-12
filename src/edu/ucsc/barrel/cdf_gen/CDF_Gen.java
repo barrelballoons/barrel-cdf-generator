@@ -161,8 +161,8 @@ public class CDF_Gen{
                "Completed Level 0 for payload " + getSetting("currentPayload")
             );
          
-            //If we didn't get any data, move on to the next payload.
-            if(frames.size() > 0){
+            //If we didn't get enough data, move on to the next payload.
+            if(frames.size() > 100){
                int[] fc_range = frames.getFcRange();
 
                //calculate throughput value
