@@ -822,26 +822,36 @@ public class ExtractSpectrum {
 
    public Float getPeakLocation(int fc){
       Integer
-         fg,
+         fg      = 0,
          prev_fg = 0,
-         next_fg = 0;
+         next_fg = 0,
+         numModels = this.peaks.size();
       Iterator<Integer> prev_fg_i = this.peaks.keySet().iterator();
       Iterator<Integer> next_fg_i = this.peaks.keySet().iterator();
       next_fg_i.next();
       
-      //fg_i is sorted so the earliest fg will come first. 
-      //We want to scan through all fg's that have peaks until we find
-      //find the first peak with an fg larger than the target fc 
-      while (next_fg_i.hasNext()) {
-         prev_fg = prev_fg_i.next();
-         next_fg = next_fg_i.next();
-         if(fc <= next_fg){
-            break;
+      //check if there are enough records to search
+      if (numModels == 0) {
+         System.out.println("No peaks found.");
+         System.exit(1);
+      } else if(numModels == 1) {
+         //chose the only option
+         fg = prev_fg_i.next();
+      } else {
+         //fg_i is sorted so the earliest fg will come first. 
+         //We want to scan through all fg's that have peaks until we find
+         //find the first peak with an fg larger than the target fc 
+         while (next_fg_i.hasNext()) {
+            prev_fg = prev_fg_i.next();
+            next_fg = next_fg_i.next();
+            if(fc <= next_fg){
+               break;
+            }
          }
-      }
 
-      //select whichever fg is closest to the target fc
-      fg = ((next_fg - fc) > (fc - prev_fg)) ? prev_fg : next_fg;
+         //select whichever fg is closest to the target fc
+         fg = ((next_fg - fc) > (fc - prev_fg)) ? prev_fg : next_fg;
+      }
 
       return this.peaks.get(fg);
    }

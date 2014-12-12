@@ -763,7 +763,6 @@ public class LevelTwo extends CDFWriter{
 
                //get the adjusted bin edges
                if(CDF_Gen.spectra.getPeakLocation(fc) == null){
-               System.out.println(fc);
                }
                chan_edges[rec_i] = CDF_Gen.spectra.createBinEdges(
                   0, CDF_Gen.spectra.getPeakLocation(fc)

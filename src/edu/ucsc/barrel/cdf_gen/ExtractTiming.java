@@ -436,29 +436,39 @@ public class ExtractTiming {
       long epoch;
       LinModel model;
       int
-         fc,
+         fc      = 0,
          prev_fc = 0,
-         next_fc = 0;
+         next_fc = 0,
+         numModels = this.models.keySet().size();
       Iterator<Integer> prev_fc_i = this.models.keySet().iterator();
       Iterator<Integer> next_fc_i = this.models.keySet().iterator();
       next_fc_i.next();
 
-      //fc_i is sorted so the earliest fc will come first. 
-      //We want to scan through all fc's that have peaks until we find
-      //find the first peak with an fc larger than the target fc 
-      while (next_fc_i.hasNext()) {
-         prev_fc = prev_fc_i.next();
-         next_fc = next_fc_i.next();
-         if(target <= next_fc){
-            break;
+      //check if there are enough records to search
+      if (numModels == 0) {
+         System.out.println("No timing models found.");
+         System.exit(1);
+      } else if(numModels == 1) {
+         //chose the only option
+         fc = prev_fc_i.next();
+      } else {
+         //fc_i is sorted so the earliest fc will come first. 
+         //We want to scan through all fc's that have peaks until we find
+         //find the first peak with an fc larger than the target fc 
+         while (next_fc_i.hasNext()) {
+            prev_fc = prev_fc_i.next();
+            next_fc = next_fc_i.next();
+
+            if(target <= next_fc){
+               break;
+            }
          }
+         //select whichever fg is closest to the target fc
+         fc = ((next_fc - target) > (target - prev_fc)) ? prev_fc : next_fc;
       }
-
-      //select whichever fg is closest to the target fc
-      fc = ((next_fc - target) > (target - prev_fc)) ? prev_fc : next_fc;
-      model = this.models.get(fc);
-
+      
       //calculate epoch in ns
+      model = this.models.get(fc);
       epoch = (long)(
          ((target * model.getSlope()) + model.getIntercept()) * 1000000
       );
