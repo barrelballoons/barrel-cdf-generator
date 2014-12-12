@@ -99,25 +99,23 @@ public class FrameHolder{
       this.dpuVer = frame.getDPUVersion();
 
       //skip this frame if its group has been tagged as low altitude
-      if(this.low_alt_frames.containsKey((int)mod4fg)){
-         return;
-      }
+      //if(this.low_alt_frames.containsKey((int)mod4fg)){
+      //   return;
+      //}
 
       //check if this frame has an altitude attached to it
       if(frame.mod4 == Ephm.ALT_I && frame.getGPS() < this.min_alt){
-         //save the framge group
-         this.low_alt_frames.put((int)mod4fg, true);
 
          //delete any frames that have already been saved
-         this.frames.remove((int)(mod4fg + Ephm.TIME_I));
-         this.frames.remove((int)(mod4fg + Ephm.LAT_I));
-         this.frames.remove((int)(mod4fg + Ephm.LON_I));
+         //this.frames.remove((int)(mod4fg + Ephm.TIME_I));
+         //this.frames.remove((int)(mod4fg + Ephm.LAT_I));
+         //this.frames.remove((int)(mod4fg + Ephm.LON_I));
 
          //blacklist this framegroup
          this.low_alt_frames.put((int)mod4fg, true);
 
          //skip to the next frame
-         return;
+         //return;
       }
 
       //check for fc rollover
