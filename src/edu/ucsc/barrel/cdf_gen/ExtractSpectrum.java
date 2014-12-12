@@ -828,7 +828,6 @@ public class ExtractSpectrum {
          numModels = this.peaks.size();
       Iterator<Integer> prev_fg_i = this.peaks.keySet().iterator();
       Iterator<Integer> next_fg_i = this.peaks.keySet().iterator();
-      next_fg_i.next();
       
       //check if there are enough records to search
       if (numModels == 0) {
@@ -836,11 +835,12 @@ public class ExtractSpectrum {
          System.exit(1);
       } else if(numModels == 1) {
          //chose the only option
-         fg = prev_fg_i.next();
+         fg = next_fg_i.next();
       } else {
          //fg_i is sorted so the earliest fg will come first. 
          //We want to scan through all fg's that have peaks until we find
          //find the first peak with an fg larger than the target fc 
+         next_fg_i.next();
          while (next_fg_i.hasNext()) {
             prev_fg = prev_fg_i.next();
             next_fg = next_fg_i.next();

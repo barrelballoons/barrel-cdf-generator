@@ -442,7 +442,6 @@ public class ExtractTiming {
          numModels = this.models.keySet().size();
       Iterator<Integer> prev_fc_i = this.models.keySet().iterator();
       Iterator<Integer> next_fc_i = this.models.keySet().iterator();
-      next_fc_i.next();
 
       //check if there are enough records to search
       if (numModels == 0) {
@@ -450,11 +449,12 @@ public class ExtractTiming {
          System.exit(1);
       } else if(numModels == 1) {
          //chose the only option
-         fc = prev_fc_i.next();
+         fc = next_fc_i.next();
       } else {
          //fc_i is sorted so the earliest fc will come first. 
          //We want to scan through all fc's that have peaks until we find
          //find the first peak with an fc larger than the target fc 
+         next_fc_i.next();
          while (next_fc_i.hasNext()) {
             prev_fc = prev_fc_i.next();
             next_fc = next_fc_i.next();
