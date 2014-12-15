@@ -40,7 +40,8 @@ public class FrameHolder{
    private int
       dpuId, dpuVer;
    private List<Integer> ordered_fc;
-   private Map<Integer, BarrelFrame> frames;
+   private Map<Integer, Integer> fc_frame_ref;
+   private List<BarrelFrame> frames;
    private Map<Integer, Boolean> low_alt_frames;
    private Map<String, Integer> numRecords;
    private Map<String, Long> currentFrameGroup;
@@ -55,7 +56,8 @@ public class FrameHolder{
 
    public FrameHolder(final String p, final int id, float alt){
       this.ordered_fc     = new LinkedList<Integer>();
-      this.frames         = new HashMap<Integer, BarrelFrame>();
+      this.fc_frame_ref   = new HashMap<Integer, Integer>();
+      this.frames         = new ArrayList<BarrelFrame>();
       this.low_alt_frames = new HashMap<Integer, Boolean>();
 
       //Start all of the record counters at 0
@@ -145,8 +147,9 @@ public class FrameHolder{
       this.last_fc = (int)fc;
 
       //add the frame to the map
-      this.frames.put((int)fc, frame);
+      this.fc_frame_ref.put((int)fc, this.frames.size());
       this.ordered_fc.add((int)fc);
+      this.frames.add(frame);
 
       //update the record counters and framegroups for 1Hz or faster
       this.currentFrameGroup.put("20Hz", fc);
@@ -179,12 +182,9 @@ public class FrameHolder{
    }
 
    public BarrelFrame getFrame(int fc) {
-      return this.frames.get(fc);
-   }
-   
-   public int[] getDateFrames(int date){
-      int[] range = new int[2];
-      return range;
+      Integer frame_i = this.fc_frame_ref.get(fc);
+
+      return frame_i == null ? null : this.frames.get(frame_i);
    }
    
    public int[] getFcRange(){
@@ -195,35 +195,31 @@ public class FrameHolder{
       return range;
    }
 
-   public BarrelFrame[] getFrames(int start, int stop){
+   public BarrelFrame[] getAllFrames(){
       BarrelFrame[]
          results,
-         frames = new BarrelFrame[stop - start];
+         frames = new BarrelFrame[this.frames.size()];
+         //frames = this.frames.size();
       int 
          fc,
          frame_i = 0;
-      
-      for (fc = start; fc <= stop; fc++) {
-         if(this.frames.containsKey(fc)){
-            frames[frame_i] = this.frames.get(fc);
-            frame_i++;
-         }
-      }
-      results = new BarrelFrame[frame_i];
-      System.arraycopy(frames, 0, results, 0, frame_i);
+      Iterator<BarrelFrame> fc_i = this.frames.iterator();
+      return this.frames.toArray(new BarrelFrame[0]);
+      //while(fc_i.hasNext()) {
+      //   fc = fc_i.next();
+      //   frames[frame_i] = this.frames.get(fc);
+     //    frame_i++;
+     // }
+     //for (fc = start; fc <= stop; fc++) {
+     //   if(this.frames.containsKey(fc)){
+     //      frames[frame_i] = this.frames.get(fc);
+     //      frame_i++;
+     //   }
+     //}
+     //results = new BarrelFrame[frame_i];
+     //System.arraycopy(frames, 0, results, 0, frame_i);
 
-      return results;
-   }
-   public BarrelFrame[] getFrames(int[] range){
-      if(range.length != 2){
-         CDF_Gen.log.writeln("Invalid frame range: " + Arrays.toString(range));
-      }
-      return this.getFrames(range[0], range[1]);
-   }
-
-   public BarrelFrame[] getFrames() {
-      int[] range = this.getFcRange();
-      return this.getFrames(range[0], range[1]);
+     // return results;
    }
 
    public Integer getNumRecords(String cadence) {

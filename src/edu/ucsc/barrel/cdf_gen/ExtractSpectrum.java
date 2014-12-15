@@ -213,7 +213,7 @@ public class ExtractSpectrum {
    public ExtractSpectrum(FrameHolder frameHolder){
       this.dpuVer             = frameHolder.getDpuVersion();
       this.peaks              = new TreeMap<Integer, Float>();
-      this.frames             = frameHolder.getFrames();
+      this.frames             = frameHolder.getAllFrames();
       this.numFrames          = frameHolder.getNumFrames();
       this.numRecords         = frameHolder.getNumRecords("mod32");
       this.fcRange            = frameHolder.getFcRange();

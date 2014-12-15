@@ -138,7 +138,7 @@ public class ExtractTiming {
    private Map<Integer, Long> epochs;
 
    public ExtractTiming(FrameHolder frameHolder){
-      this.frames     = frameHolder.getFrames();
+      this.frames     = frameHolder.getAllFrames();
       this.numFrames  = frameHolder.getNumFrames();
       this.fcRange    = frameHolder.getFcRange();
       this.time_recs  = new TimeRec[frameHolder.getNumRecords("mod4")];
