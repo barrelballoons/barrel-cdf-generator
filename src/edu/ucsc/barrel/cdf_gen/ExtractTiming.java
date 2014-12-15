@@ -27,62 +27,105 @@ package edu.ucsc.barrel.cdf_gen;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Iterator;
 
 public class ExtractTiming {
    //Set some constant values
-   private static final int MAX_RECS = 500;// max number of mod4 recs for model
-   private static final double NOM_RATE = 999.89;// nominal ms per frame
-   private static final long MSPERWEEK = 604800000L;// mseconds in a week
-   private static final short MINWK = 1200;
-   private static final byte MINPPS = 0;
-   private static final byte MINMS = 1;
-   private static final byte MINFC = 0;
-   private static final short MAXWK = 1880;
-   private static final short MAXPPS = 1000;
-   private static final int MAXMS = 691200000;
-   private static final int MAXFC = 2097152;
-   //ms from Jan 6, 1980 to J2000
-   private static final long GPS_EPOCH = -630763148816L;
-
+   private static final byte
+      MINPPS    = 0,
+      MINMS     = 1,
+      MINFC     = 0;
+   private static final short
+      MINWK     = 1200,
+      MAXWK     = 1880,
+      MAXPPS    = 1000;
+   private static final int
+      MAX_RECS  = 500,// max number of mod4 recs for model
+      MAXMS     = 691200000,
+      MAXFC     = 2097152;
+   private static final long
+      MSPERWEEK = 604800000L,// mseconds in a week
+      GPS_EPOCH = -630763148816L;//ms from Jan 6, 1980 to J2000
+   private static final double
+      NOM_RATE  = 999.89;// nominal ms per frame
+   
    //offsets for spectral data. These offsets will move the epoch variable so
    //it points to the middle of the accumulation time
-   private static final long SSPC_EPOCH_OFFSET = 16000000000L; //31968000000L;
-   private static final long MSPC_EPOCH_OFFSET = 2000000000L; //3996000000L;
+   private static final long 
+      SSPC_EPOCH_OFFSET = 16000000000L, //31968000000L;
+      MSPC_EPOCH_OFFSET = 2000000000L; //3996000000L;
 
+   private BarrelFrame[] frames;
+   private int numFrames, numRecords;
+   private int[] fcRange;
 
    private class TimeRec{
-      private long ms;//frame timestamp
-      private long frame;//frame counter
+      private long
+         ms_of_week,
+         weeks_in_ms,
+         ms;//frame timestamp
+      private int 
+         frame,//frame counter
+         week, pps;
+      private short
+         extra_ms;
 
-      public TimeRec(long fc, long msw, short weeks, short pps){
+      public TimeRec(int fc, long msw, int w, int p){
+         this.week        = w;
+         this.pps         = p;
+         this.frame       = fc;
+         this.ms_of_week  = msw;
+         this.weeks_in_ms = week * MSPERWEEK;
+
          //figure out if we need to add an extra second based on the PPS
-         int extra_ms = (pps < 241) ? 0 : 1000;
-
-         //get the number of ms between GPS_START_TIME and start of this week
-         long weeks_in_ms = weeks * MSPERWEEK;
-
-         //save the frame number
-         frame = fc;
+         this.extra_ms = (short)(pps < 241 ? 0 : 1000);
 
          //calculate the number of milliseconds since J2000 
-         ms = weeks_in_ms + msw + extra_ms - pps + GPS_EPOCH;
+         this.ms = calcEpoch();
       }
       
-      public long getMS(){return ms;}
-      public long getFrame(){return frame;}
+      public long  getMS()   {return ms;}
+      public long  getMSW()  {return ms_of_week;}
+      public int   getFrame(){return frame;}
+      public int   getWeek() {return week;}
+      public int   getPPS()  {return pps;}
+
+      public void setFrame(int fc){
+         this.frame = fc;
+      }
+      public void setMSW(long msw){
+         this.ms_of_week = msw;
+         this.ms = calcEpoch();
+      }
+      public void setPPS(int p){
+         this.pps = p;
+         this.ms = calcEpoch();
+      }
+      public void setWeek(int w)  {
+         this.week = w;
+         this.weeks_in_ms = week * MSPERWEEK;
+         this.ms = calcEpoch();
+      }
+      
+      private long calcEpoch() {
+         return
+            this.weeks_in_ms +this.ms_of_week +extra_ms -this.pps +GPS_EPOCH;
+      }
    }
    
    private class LinModel{
       private long first_frame, last_frame;
       private double slope, intercept;
 
-      public void setFirst(long fc){first_frame = fc;}
-      public void setLast(long fc){last_frame = fc;}
-      public void setSlope(double s){slope = s;}
-      public void setIntercept(double i){intercept = i;}
+      public void   setFirst(long fc){first_frame = fc;}
+      public void   setLast(long fc){last_frame = fc;}
+      public void   setSlope(double s){slope = s;}
+      public void   setIntercept(double i){intercept = i;}
 
-      public long getFirst(){return first_frame;}
-      public long getLast(){return last_frame;}
+      public long   getFirst(){return first_frame;}
+      public long   getLast(){return last_frame;}
       public double getSlope(){return slope;}
       public double getIntercept(){return intercept;}
    }
@@ -91,50 +134,59 @@ public class ExtractTiming {
    private TimeRec[] time_recs;
    private int time_rec_cnt = 0;
 
-   //declare array of linear models
-   private LinModel[] models;
-   private int model_cnt = 0;
+   private Map<Integer, LinModel> models;
+   private Map<Integer, Long> epochs;
 
-   //holder for external data set
-   private DataHolder data;
-   
-   public ExtractTiming(String d){
-      //get DataHolder storage object
-      data = CDF_Gen.data;
-      
-      int temp, day, fc, week, ms, pps, cnt, mod40;
-      int rec_i = 0, frame_i = 0;
-      
-      time_recs = new TimeRec[data.getSize("mod4")];
-      models = new LinModel[(data.getSize("1Hz") / MAX_RECS) + 1];
+   public ExtractTiming(FrameHolder frameHolder){
+      this.frames     = frameHolder.getAllFrames();
+      this.numFrames  = frameHolder.getNumFrames();
+      this.fcRange    = frameHolder.getFcRange();
+      this.time_recs  = new TimeRec[frameHolder.getNumRecords("mod4")];
+      this.models     = new HashMap<Integer, LinModel>();
+      this.epochs     = new HashMap<Integer, Long>();
    }
 
-   public void getTimeRecs(){
-      int fc_offset, rec_mod40_i, rec_1Hz_i;
-      short week, pps;
-      long ms, fc;
+   public int getTimeRecs(){
+      int
+         current_week = 0, week, pps;
+      int
+         fc_offset, frame_i, rec_i;
+      long
+         ms, mod4;
+      Long
+         fc;
+
+      //get the initial values for current_week
+      for(frame_i = 0; frame_i < this.numFrames; frame_i++) {
+         current_week = this.frames[frame_i].getWeek();
+
+         if(current_week != HKPG.WEEK_FILL){
+            break;
+         }
+      }
+      if(current_week == 0 || current_week == HKPG.WEEK_FILL) {
+         CDF_Gen.log.writeln("Could not get week variable for dataset");
+         return 0;
+      }
 
       //cycle through the entire data set and create an array of time records
-      for(int rec_mod4_i = 0; rec_mod4_i < time_recs.length; rec_mod4_i++){
-         //make sure we have a valid ms
-         ms = data.ms_of_week[rec_mod4_i];
-         if((ms < MINMS) || (ms > MAXMS)){continue;}
+      for(frame_i = 0, rec_i = 0; frame_i < this.numFrames; frame_i++){
 
-         //get initial fc from the mod4 framegroup
-         fc = data.frame_mod4[rec_mod4_i]; //last good fc from this mod4 group
-         
-         //check if fc is a fill value
-         if(fc == Constants.FC_FILL){continue;}
+         //check if this is a frame which contains the GPS time data 
+         if(this.frames[frame_i].mod4 != Ephm.TIME_I){continue;}
 
-         //Offset the frame number to be that of the GPS_Time frame
-         fc = fc - (fc % 4) + Constants.TIME_I; 
+         //make sure all the time components are valid
+         fc = this.frames[frame_i].getFrameCounter();
+         if(fc == null || fc == BarrelCDF.FC_FILL){
+            continue;
+         }
 
-         //get the indices of other cadence data
-         rec_1Hz_i = data.convertIndex(rec_mod4_i, fc, "mod4", "1Hz");
-         rec_mod40_i = data.convertIndex(rec_mod4_i, fc, "mod4", "mod40");
+         ms = this.frames[frame_i].getGPS();
+         if((ms < MINMS) || (ms > MAXMS)){
+            continue;
+         }
 
-         //figure out if pps is valid 
-         pps = (short)data.pps[rec_1Hz_i];
+         pps = this.frames[frame_i].getPPS();
          if((pps < MINPPS) || (pps > MAXPPS)){
             //check if pps is high because it came super early so the
             //dpu didnt have a chance to write "0"
@@ -142,68 +194,112 @@ public class ExtractTiming {
             else{continue;}
          }
 
-         //get number of weeks since GPS_START_TIME
-         week = (short)data.weeks[rec_mod40_i];
-         if((week < MINWK) || (week > MAXWK)){continue;}
-         time_recs[time_rec_cnt] = new TimeRec(fc, ms, week, pps);
-         time_rec_cnt++;
+         //get week data if this frame has it.
+         //If not, use the current_week variable
+         week = 
+            this.frames[frame_i].mod40 == HKPG.WEEK ?
+               this.frames[frame_i].getWeek() : current_week;
+
+         //if the week variable is out of range, use current_week instead
+         if((week < MINWK) || (week > MAXWK)){
+            week = current_week;
+         }
+
+         //create a new time record 
+         this.time_recs[rec_i] = new TimeRec(fc.intValue(), ms, week, pps);
+         rec_i++;
       }
+
+      //save the number of records that were found
+      this.numRecords = rec_i;
+
+      return rec_i;
    }
    
    public void fillModels(){
-      int last_rec = 0, frame_i = 0, size_1Hz;
-      long last_frame;
-      SimpleRegression fit = null, new_fit = null;
-      
-      size_1Hz = data.getSize("1Hz");
+      int
+         last_rec = 0,
+         frame_i  = 0,
+         model_i  = -1,
+         fc       = 0,
+         fg       = 0,
+         last_fc  = 0,
+         mid_frame;
+      SimpleRegression
+         fit     = null,
+         new_fit = null;
+      LinModel linModel = null;
+      BarrelFrame frame;
+
       //create a model for each batch of time records
-      for(int first_rec = 0; first_rec < time_rec_cnt; first_rec = last_rec){
+      for(int first_rec = 0; first_rec < this.numRecords; first_rec = last_rec){
+
          //incriment the last_rec by the max, or however many recs are left
-         last_rec += Math.min(MAX_RECS, (time_rec_cnt - first_rec));
-         
+         last_rec += Math.min(MAX_RECS, (this.numRecords - first_rec));
+
          //try to generate a model
-         new_fit = genModel(first_rec, last_rec);
+         new_fit = genModel(first_rec, last_rec - 1);
 
          //Need to add better criteria than this for accepting a new model
          if(new_fit != null){
             fit = new_fit;
+            model_i++;
 
-            models[model_cnt] = new LinModel();
-            models[model_cnt].setSlope(fit.getSlope()); 
-            models[model_cnt].setIntercept(fit.getIntercept()); 
-            models[model_cnt].setFirst(time_recs[first_rec].getFrame()); 
-            models[model_cnt].setLast(time_recs[last_rec - 1].getFrame()); 
-            model_cnt++;
+            //create a new linear model object
+            linModel = new LinModel();
+            linModel.setSlope(fit.getSlope()); 
+            linModel.setIntercept(fit.getIntercept()); 
+            linModel.setFirst(time_recs[first_rec].getFrame()); 
+            linModel.setLast(time_recs[last_rec - 1].getFrame()); 
+
+            //find the mid frame number by first getting the first frame
+            mid_frame = (int)linModel.getFirst();
+            //then bump it up by half the frame range used
+            mid_frame += 
+              (int)((linModel.getLast() - mid_frame) / 2);
+
+            //associate this model with the fc of the midpoint frame
+            this.models.put(mid_frame, linModel);
 
             System.out.println(
-               "Frames " + time_recs[first_rec].getFrame() + " - " +
-               time_recs[last_rec - 1].getFrame()); 
+               "Frames " + linModel.getFirst() + " - " + linModel.getLast()); 
             System.out.println(
-               "\tm = " + fit.getSlope() + ", b = " + fit.getIntercept() + 
-               " slope error = " + fit.getSlopeStdErr() + " n = " + fit.getN()
+               "\tm = " + fit.getSlope() + 
+               ", b = " + fit.getIntercept() + 
+               " slope error = " + fit.getSlopeStdErr() + 
+               " n = " + fit.getN()
             );
-         }else{
+         } else {
             System.out.println(
                "Failed to get model using " + (last_rec-first_rec) + " records."
             );
          }
       }
 
-      if(fit == null){
-         //no timing model was ever created. 
+      if(model_i == -1){
+         //no timing models were ever created. 
          //Use slope=1000 and intercept=0 to use frame number epoch.
          //this will clearly not give a good result for time, but will
          //allow the data to be plotted as a time series.
          //This will be a place to add a quality flag
-         models[model_cnt] = new LinModel();
-         models[model_cnt].setSlope(1000); 
-         models[model_cnt].setIntercept(0); 
-         models[model_cnt].setFirst(0); 
-         models[model_cnt].setLast(data.frame_1Hz[size_1Hz]); 
-         model_cnt = 1;
+         model_i++;
+         linModel = new LinModel();
+         linModel.setSlope(1000);
+         linModel.setIntercept(0);
+         linModel.setFirst(0);
+         linModel.setLast(this.numRecords); 
+      }
+
+      //Associate any remaining frames with the last model
+      if (linModel != null) {
+         mid_frame = (int)linModel.getFirst(); //first set it to the first frame
+         mid_frame += //then bump it up by half the frame range used
+           (long)((linModel.getLast() - mid_frame) / 2);
+         this.models.put(mid_frame, linModel);
       }
    }
 
+/* 
    public void fillEpoch(){
       long fc; 
       int date_offset, size;
@@ -229,10 +325,10 @@ public class ExtractTiming {
             data.time_model_intercept[data_i]) * 1000000
          );
 
-         /*
+         
          //offset epoch to the begining of the accumulation period
-         data.epoch_1Hz[data_i] -= Constants.SING_ACCUM;
-         */
+         //data.epoch_1Hz[data_i] -= Constants.SING_ACCUM;
+         
 
          //save epoch to the various time scales
          //fill the >1Hz times 
@@ -282,12 +378,13 @@ public class ExtractTiming {
             models[model_i].getIntercept()) * 1000000
          );
         
-         /*
+         
          //offset the epoch to the accumulation time of the first frame
-         data.epoch_mod40[data_i] -= (((fc % 40) + 1) * Constants.SING_ACCUM);
-         */
+         //data.epoch_mod40[data_i] -= (((fc % 40) + 1) * Constants.SING_ACCUM);
+         
       }
    }
+*/
 
    public void fixWeekOffset(){
       /*
@@ -299,30 +396,89 @@ public class ExtractTiming {
       rolls over.
       */
       
-      int initial_week = 0, initial_ms = 0;
+      int
+         initial_week = this.time_recs[0].getWeek(),
+         week;
+      long
+         initial_ms = this.time_recs[0].getMSW(),
+         msw;
       
       //start looking for rollover
-      for(int ms_i = 0; ms_i < data.getSize("mod4"); ms_i++){
-         //try to find and initial set of 
-         //timestamps and week variables if needed.
-         if(initial_week == 0){initial_week = data.weeks[ms_i / 10];}
-         if(initial_ms == 0){initial_ms = data.ms_of_week[ms_i];}
+      for(int rec_i = 0; rec_i < this.numRecords; rec_i++){
+         //get the msw and week for this record
+         msw  = this.time_recs[rec_i].getMSW();
+         week = this.time_recs[rec_i].getWeek();
 
          //check to see if the ms_of_week rolled over
          //the value given by the gps might jump around a bit, so make sure 
          //the roll back is significant (>1min)
-         if((data.ms_of_week[ms_i] - initial_ms) < -60000){
+         if((msw - initial_ms) < -60000){
             //check if the week variable was updated
-            if(data.weeks[ms_i/10] != 0 && data.weeks[ms_i/10] == initial_week){
+            if(week == initial_week){
                //the week variable has not yet updated,
                // add 1 week of ms to the ms_of_week variable
-               data.ms_of_week[ms_i] += 604800000;
+               this.time_recs[rec_i].setMSW(msw + 604800000);
             }
          }
       }
-      
    }
-   
+
+   public long getEpoch(long fc) {
+      return getEpoch((int)fc);
+   }
+   public long getEpoch(int fc) {
+      Long epoch = this.epochs.get(fc);
+      
+      return (epoch == null ? calcEpoch(fc) : epoch);
+   }
+
+   public long calcEpoch(int target) {
+      long epoch;
+      LinModel model;
+      int
+         fc      = 0,
+         prev_fc = 0,
+         next_fc = 0,
+         numModels = this.models.keySet().size();
+      Iterator<Integer> prev_fc_i = this.models.keySet().iterator();
+      Iterator<Integer> next_fc_i = this.models.keySet().iterator();
+
+      //check if there are enough records to search
+      if (numModels == 0) {
+         System.out.println("No timing models found.");
+         System.exit(1);
+      } else if(numModels == 1) {
+         //chose the only option
+         fc = next_fc_i.next();
+      } else {
+         //fc_i is sorted so the earliest fc will come first. 
+         //We want to scan through all fc's that have peaks until we find
+         //find the first peak with an fc larger than the target fc 
+         next_fc_i.next();
+         while (next_fc_i.hasNext()) {
+            prev_fc = prev_fc_i.next();
+            next_fc = next_fc_i.next();
+
+            if(target <= next_fc){
+               break;
+            }
+         }
+         //select whichever fg is closest to the target fc
+         fc = ((next_fc - target) > (target - prev_fc)) ? prev_fc : next_fc;
+      }
+      
+      //calculate epoch in ns
+      model = this.models.get(fc);
+      epoch = (long)(
+         ((target * model.getSlope()) + model.getIntercept()) * 1000000
+      );
+     
+      //save the epoch for next time
+      this.epochs.put(fc, epoch);
+
+      return epoch;
+   }
+/*
    private int selectModel(final long fc, final int i){
       int model_i = i;
       //select a model for this frame
@@ -341,7 +497,8 @@ public class ExtractTiming {
 
       return model_i;
    }
-
+*/
+   
    private SimpleRegression genModel(int first, int last){
       int cnt = last - first;
       double[] offsets = new double[cnt];
@@ -356,8 +513,8 @@ public class ExtractTiming {
       //the time that was transmitted
       for(int rec_i = first, offset_i = 0; rec_i < last; rec_i++, offset_i++){
          offsets[offset_i] = 
-            time_recs[rec_i].getMS() - 
-            (NOM_RATE * time_recs[rec_i].getFrame());
+            this.time_recs[rec_i].getMS() - 
+            (NOM_RATE * this.time_recs[rec_i].getFrame());
       }
       
       //find the median offset value
@@ -367,7 +524,10 @@ public class ExtractTiming {
       //and add them to the model
       for (int rec_i = first, offset_i = 0; rec_i < last; rec_i++, offset_i++){
          if(Math.abs(offsets[offset_i] - med) < 200){
-            fit.addData(time_recs[rec_i].getFrame(), time_recs[rec_i].getMS());
+            fit.addData(
+               this.time_recs[rec_i].getFrame(),
+               this.time_recs[rec_i].getMS()
+            );
          }
       }
       return fit;

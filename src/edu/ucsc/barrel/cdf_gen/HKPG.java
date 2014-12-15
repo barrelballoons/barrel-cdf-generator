@@ -34,18 +34,174 @@ import java.nio.channels.FileChannel;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Vector;
 import java.util.Arrays;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
-
 public class HKPG extends DataProduct{
    private int date, lvl;
    private String payload_id;
-   List<HkpgVar> vars;   
+   List<HkpgVar> vars;
+
+   public static final int
+      RAW_SENSOR_FILL = CDFVar.UINT2_FILL,
+      SATS_FILL       = CDFVar.UINT2_FILL,
+      UTC_OFFSET_FILL = CDFVar.UINT2_FILL,
+      TERM_STAT_FILL  = CDFVar.UINT2_FILL,
+      MODEM_CNT_FILL  = CDFVar.UINT2_FILL,
+      CMD_CNT_FILL    = CDFVar.UINT2_FILL,
+      DCD_CNT_FILL    = CDFVar.UINT2_FILL,
+      WEEK_FILL       = CDFVar.UINT2_FILL;
+   public static final float
+      SENSOR_FILL     = CDFVar.FLOAT_FILL;
+
+   public static final int
+      V0 = 0,  I0 = 1,   V1 = 2,  I1 =  3,  V2 = 4,   I2 = 5, 
+      V3 = 6,  I3 = 7,   V4 = 8,  I4 =  9,  V5 = 10,  I5 = 11,
+      V6 = 12, I6 = 13,  V7 = 14, I7 =  15, T0 = 16,  T8 = 17,
+      T1 = 18, T9 = 19,  T2 = 20, T10 = 21, T3 = 22,  T11 = 23,
+      T4 = 24, T12 = 25, T5 = 26, T13 = 27, T6 = 28,  T14 = 29,
+      T7 = 30, T15 = 31, V8 = 32, V9 = 33,  V10 = 34, V11 = 35, 
+      SATSOFF = 36, WEEK = 37, CMDCNT = 38, MDMCNT = 39;
    
+   //array showing indexes of mod40 data
+   public static final String[] IDS = {
+      "V0",  "I0", "V1",  "I1",  "V2",  "I2",  "V3", "I3",  "V4", 
+      "I4",  "V5", "I5",  "V6",  "I6",  "V7",  "I7", "T0",  "T8",
+      "T1",  "T9", "T2",  "T10", "T3",  "T11", "T4", "T12", "T5",
+      "T13", "T6", "T14", "T7",  "T15", "V8",  "V9", "V10", "V11", 
+      "SATSOFF", "WEEK", "CMDCNT", "MDMCNT"
+   };
+
+   public static final Map<String, Float> SCALE_FACTORS;
+   static {
+      Map<String, Float> scales = new HashMap<String, Float>();
+      scales.put("V0" ,  0.0003052f);
+      scales.put("V1" ,  0.0003052f);
+      scales.put("V2" ,  0.0006104f);
+      scales.put("V3" ,  0.0001526f);
+      scales.put("V4" ,  0.0001526f);
+      scales.put("V5" ,  0.0003052f);
+      scales.put("V6" , -0.0001526f);
+      scales.put("V7" , -0.0001526f);
+      scales.put("V8" ,  0.0001526f);
+      scales.put("V9" ,  0.0006104f);
+      scales.put("V10",  0.0006104f);
+      scales.put("V11",  0.0006104f);
+      scales.put("I0" ,  0.05086f  );
+      scales.put("I1" ,  0.06104f  );
+      scales.put("I2" ,  0.06104f  );
+      scales.put("I3" ,  0.01017f  );
+      scales.put("I4" ,  0.001017f );
+      scales.put("I5" ,  0.05086f  );
+      scales.put("I6" , -0.0001261f);
+      scales.put("I7" , -0.001017f );
+      scales.put("T0" ,  0.007629f );
+      scales.put("T1" ,  0.007629f );
+      scales.put("T2" ,  0.007629f );
+      scales.put("T3" ,  0.007629f );
+      scales.put("T4" ,  0.007629f );
+      scales.put("T5" ,  0.007629f );
+      scales.put("T6" ,  0.007629f );
+      scales.put("T7" ,  0.007629f );
+      scales.put("T8" ,  0.007629f );
+      scales.put("T9" ,  0.007629f );
+      scales.put("T10",  0.007629f );
+      scales.put("T11",  0.007629f );
+      scales.put("T12",  0.007629f );
+      scales.put("T13",  0.0003052f);
+      scales.put("T14",  0.0003052f);
+      scales.put("T15",  0.0001526f);
+      SCALE_FACTORS = Collections.unmodifiableMap(scales);
+   }
+   public static final Map<String, Float> OFFSETS;
+   static {
+      Map<String, Float> offsets = new HashMap<String, Float>();
+      offsets.put("V0" ,  0f);
+      offsets.put("V1" ,  0f);
+      offsets.put("V2" ,  0f);
+      offsets.put("V3" ,  0f);
+      offsets.put("V4" ,  0f);
+      offsets.put("V5" ,  0f);
+      offsets.put("V6" ,  0f);
+      offsets.put("V7" ,  0f);
+      offsets.put("V8" ,  0f);
+      offsets.put("V9" ,  0f);
+      offsets.put("V10",  0f);
+      offsets.put("V11",  0f);
+      offsets.put("I0" ,  0f);
+      offsets.put("I1" ,  0f);
+      offsets.put("I2" ,  0f);
+      offsets.put("I3" ,  0f);
+      offsets.put("I4" ,  0f);
+      offsets.put("I5" ,  0f);
+      offsets.put("I6" ,  0f);
+      offsets.put("I7" ,  0f);
+      offsets.put("T0" ,  -273.15f);
+      offsets.put("T1" ,  -273.15f);
+      offsets.put("T2" ,  -273.15f);
+      offsets.put("T3" ,  -273.15f);
+      offsets.put("T4" ,  -273.15f);
+      offsets.put("T5" ,  -273.15f);
+      offsets.put("T6" ,  -273.15f);
+      offsets.put("T7" ,  -273.15f);
+      offsets.put("T8" ,  -273.15f);
+      offsets.put("T9" ,  -273.15f);
+      offsets.put("T10",  -273.15f);
+      offsets.put("T11",  -273.15f);
+      offsets.put("T12",  -273.15f);
+      offsets.put("T13",  -273.15f);
+      offsets.put("T14",  -273.15f);
+      offsets.put("T15",  -273.15f);
+      OFFSETS = Collections.unmodifiableMap(offsets);
+   }
+   public static final Map<String, String> LABELS;
+   static {
+      Map<String, String> labels = new HashMap<String, String>();
+      labels.put("V0" , "V0_VoltAtLoad");
+      labels.put("V1" , "V1_Battery");
+      labels.put("V2" , "V2_Solar1");
+      labels.put("V3" , "V3_POS_DPU");
+      labels.put("V4" , "V4_POS_XRayDet");
+      labels.put("V5" , "V5_Modem");
+      labels.put("V6" , "V6_NEG_XRayDet");
+      labels.put("V7" , "V7_NEG_DPU");
+      labels.put("V8" , "V8_Mag");
+      labels.put("V9" , "V9_Solar2");
+      labels.put("V10", "V10_Solar3");
+      labels.put("V11", "V11_Solar4");
+      labels.put("I0" , "I0_TotalLoad");
+      labels.put("I1" , "I1_TotalSolar");
+      labels.put("I2" , "I2_Solar1");
+      labels.put("I3" , "I3_POS_DPU");
+      labels.put("I4" , "I4_POS_XRayDet");
+      labels.put("I5" , "I5_Modem");
+      labels.put("I6" , "I6_NEG_XRayDet");
+      labels.put("I7" , "I7_NEG_DPU");
+      labels.put("T0" , "T0_Scint");
+      labels.put("T1" , "T1_Mag");
+      labels.put("T2" , "T2_ChargeCont");
+      labels.put("T3" , "T3_Battery");
+      labels.put("T4" , "T4_PowerConv");
+      labels.put("T5" , "T5_DPU");
+      labels.put("T6" , "T6_Modem");
+      labels.put("T7" , "T7_Structure");
+      labels.put("T8" , "T8_Solar1");
+      labels.put("T9" , "T9_Solar2");
+      labels.put("T10", "T10_Solar3");
+      labels.put("T11", "T11_Solar4");
+      labels.put("T12", "T12_TermTemp");
+      labels.put("T13", "T13_TermBatt");
+      labels.put("T14", "T14_TermCap");
+      labels.put("T15", "T15_CCStat");
+      LABELS = Collections.unmodifiableMap(labels);
+   }
+
    //define a data object to hold housekeeping variable attirbutes
    private class HkpgVar{
       private String name, desc, units;
@@ -73,8 +229,9 @@ public class HKPG extends DataProduct{
       private float getMax(){return max;}
       private long getType(){return type;}
    }
-
+   
    public HKPG(final String path,final String pay, int d, int l){
+
       this.date = d;
       this.lvl = l;
       this.payload_id = pay;
@@ -271,31 +428,31 @@ public class HKPG extends DataProduct{
       ));
       vars.add(new HkpgVar(
          "numOfSats", "Number of GPS Satellites", "sats", 
-         0, 0, 31, CDFConstants.CDF_INT2
+         0, 0, 31, CDFConstants.CDF_UINT2
       ));
       vars.add(new HkpgVar(
          "timeOffset", "Leap Seconds", "sec", 
-         0, 0, 255, CDFConstants.CDF_INT2
+         0, 0, 255, CDFConstants.CDF_UINT2
       ));
       vars.add(new HkpgVar(
          "termStatus", "Terminate Status", " ", 
-         0, 0, 1, CDFConstants.CDF_INT2
+         0, 0, 1, CDFConstants.CDF_UINT2
       ));
       vars.add(new HkpgVar(
          "cmdCounter", "Command Counter", "commands", 
-         0, 0, 32767, CDFConstants.CDF_INT4
+         0, 0, 32767, CDFConstants.CDF_UINT2
       ));
       vars.add(new HkpgVar(
          "modemCounter", "Modem Reset Counter", "resets", 
-         0, 0, 255, CDFConstants.CDF_INT2
+         0, 0, 255, CDFConstants.CDF_UINT2
       ));
       vars.add(new HkpgVar(
          "dcdCounter", "Numebr of time the DCD has been de-asserted.", "calls", 
-         0, 0, 255, CDFConstants.CDF_INT2
+         0, 0, 255, CDFConstants.CDF_UINT2
       ));
       vars.add(new HkpgVar(
          "weeks", "Weeks Since 6 Jan 1980", "weeks", 
-         0, 0, 65535, CDFConstants.CDF_INT4
+         0, 0, 65535, CDFConstants.CDF_UINT2
       ));
       vars.add(new HkpgVar(
          "Mag_ADC_Offset", "Magnetometer A-D Board Offset",
@@ -310,18 +467,15 @@ public class HKPG extends DataProduct{
    private void createVar(final HkpgVar v){
       CDFVar var = new CDFVar(this.cdf, v.getName(), v.getType());
 
-      if(v.getType() == CDFConstants.CDF_INT4){
-         var.attribute("FORMAT", "I10");
-         var.attribute("FILLVAL", CDFVar.getIstpVal("INT4_FILL"));
-      }else if(v.getType() == CDFConstants.CDF_INT2){
+      if(v.getType() == CDFConstants.CDF_UINT2){
          var.attribute("FORMAT", "I5");
-         var.attribute("FILLVAL", CDFVar.getIstpVal("INT2_FILL"));
+         var.attribute("FILLVAL", CDFVar.UINT2_FILL);
       }else{
          var.attribute("FORMAT", "F4.3");
-         var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+         var.attribute("FILLVAL", CDFVar.FLOAT_FILL);
       }
-      var.attribute("VALIDMIN", v.getMin());
-      var.attribute("VALIDMAX", v.getMax());
+      var.attribute("VALIDMIN", v.getMin(), CDFConstants.CDF_FLOAT);
+      var.attribute("VALIDMAX", v.getMax(), CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", v.getName());
       var.attribute("CATDESC", v.getDesc());
       var.attribute("LABLAXIS", v.getName());

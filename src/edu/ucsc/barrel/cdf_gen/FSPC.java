@@ -42,13 +42,23 @@ public class FSPC extends DataProduct{
    private String payload_id;
    private float scale = 2.4414f; // keV/bin
 
-   public final static float[] 
-      BIN_EDGES = {0f, 20f, 40f, 75f, 230f, 350f, 620f}, 
-      BIN_CENTERS = {10f, 30f, 57.5f, 152.5f, 290f, 485f}, 
-      BIN_WIDTHS = {20f, 20f, 35f, 155f, 120f, 250f},
-      OLD_BIN_EDGES = {0f, 75f, 230f, 350f, 620f}, 
+   static public final int
+      CNT_FILL        = CDFVar.UINT2_FILL;
+
+   static public final float
+      ERROR_FILL      = CDFVar.FLOAT_FILL;
+
+   static public final float[] 
+      BIN_EDGES       = {0f, 20f, 40f, 75f, 230f, 350f, 620f}, 
+      BIN_CENTERS     = {10f, 30f, 57.5f, 152.5f, 290f, 485f}, 
+      BIN_WIDTHS      = {20f, 20f, 35f, 155f, 120f, 250f},
+      OLD_BIN_EDGES   = {0f, 75f, 230f, 350f, 620f}, 
       OLD_BIN_CENTERS = {37.5f, 152.5f, 290f, 485f}, 
-      OLD_BIN_WIDTHS = {75f, 155f, 120f, 250f};
+      OLD_BIN_WIDTHS  = {75f, 155f, 120f, 250f};
+
+   static public final String[]
+      NEW_LABELS      = {"1a","1b","1c","2","3","4"},
+      OLD_LABELS      = {"1", "2", "3", "4"};
 
    public FSPC(final String path, final String pay, int d, int l, int v){
       this.date = d;
@@ -107,7 +117,7 @@ public class FSPC extends DataProduct{
       CDFVar var;
       var = new CDFVar(
             cdf, "FSPC_Edges", CDFConstants.CDF_FLOAT, 
-            true, new  long[] {7L} 
+            true, new  long[] {(this.version <= 3 ? 5L : 7L)} 
          );   
 
       var.attribute("FIELDNAM", "FPSC_Edges");
@@ -116,9 +126,7 @@ public class FSPC extends DataProduct{
       var.attribute(
          "VAR_NOTES", 
          "Each element of the array represents the boundaries that separate " +
-         "each energy channel. That is, FSPC1 lies between elements 0 and 1, " +
-         "FSPC2 between 1 and 2, FSPC3 between 2 and 3, and FSPC4 between 3 " +
-         "and 4." 
+         "each energy channel."
       );
       var.attribute("VAR_TYPE", "support_data");
       var.attribute("DEPEND_0", "Epoch");
@@ -128,7 +136,7 @@ public class FSPC extends DataProduct{
       var.attribute("SCALETYP", "linear");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 1e30f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", CDFVar.FLOAT_FILL);
       this.cdf.addVar("FSPC_Edges", var);
 
    }
@@ -137,7 +145,7 @@ public class FSPC extends DataProduct{
       CDFVar var;
 
       //create FSPC variable
-      var = new CDFVar(cdf, "FSPC" + ch, CDFConstants.CDF_INT4);
+      var = new CDFVar(cdf, "FSPC" + ch, CDFConstants.CDF_UINT2);
 
       var.attribute("FIELDNAM", "FSPC" + ch);
       var.attribute("CATDESC", "Fast spectra (50ms) ch. " + ch);
@@ -150,7 +158,7 @@ public class FSPC extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0);
       var.attribute("VALIDMAX", 65535);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("INT4_FILL"));
+      var.attribute("FILLVAL", CNT_FILL);
       var.attribute("DELTA_PLUS_VAR", "cnt_error" + ch);
       var.attribute("DELTA_MINUS_VAR", "cnt_error" + ch);
       this.cdf.addVar("FSPC" + ch, var);
@@ -171,7 +179,38 @@ public class FSPC extends DataProduct{
       var.attribute("SCALETYP", "linear");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 10000.0f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", ERROR_FILL);
       this.cdf.addVar("cnt_error" + ch, var);
+   }
+
+   public static Channel[] getChannels(int version){
+      Channel[] ch;
+      if (version < 3) {
+         ch = new Channel[4];
+         ch[0] = new Channel(32, 65535);
+         ch[1] = new Channel(16, 65535);
+         ch[2] = new Channel(8, 255);
+         ch[3] = new Channel(0, 255);
+      } else {
+         ch = new Channel[6];
+         ch[0] = new Channel(39, 511);
+         ch[1] = new Channel(30, 511);
+         ch[2] = new Channel(22, 255);
+         ch[3] = new Channel(13, 511);
+         ch[4] = new Channel(6,  127);
+         ch[5] = new Channel(0,  63);
+      }
+
+      return ch;
+   }
+}
+
+class Channel{
+   public int start = 0;
+   public int width = 0;
+
+   public Channel(int s, int w){
+      start = s;
+      width = w;
    }
 }

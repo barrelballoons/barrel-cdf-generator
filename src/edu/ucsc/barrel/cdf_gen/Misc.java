@@ -38,6 +38,11 @@ import java.util.Vector;
 import java.util.Arrays;
 
 public class Misc extends DataProduct{
+   static public final int
+      PPS_FILL        = CDFVar.UINT2_FILL,
+      PAYLOADID_FILL  = CDFVar.UINT2_FILL,
+      VERSION_FILL    = CDFVar.UINT2_FILL;
+
    private int date, lvl;
    private String payload_id;
 
@@ -83,7 +88,7 @@ public class Misc extends DataProduct{
    protected void addVars(){
       CDFVar var;
       
-      var = new CDFVar(cdf, "GPS_PPS", CDFConstants.CDF_INT2);
+      var = new CDFVar(cdf, "GPS_PPS", CDFConstants.CDF_UINT2);
       var.attribute("FIELDNAM", "Pulse Per Second");
       var.attribute("CATDESC", "Milliseconds before GPS pulse arrived.");
       var.attribute("LABLAXIS", "PPS");
@@ -95,10 +100,10 @@ public class Misc extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0);
       var.attribute("VALIDMAX", 1000);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("INT2_FILL"));
+      var.attribute("FILLVAL", CDFVar.UINT2_FILL);
       this.cdf.addVar("GPS_PPS", var);
 
-      var = new CDFVar(cdf, "Version", CDFConstants.CDF_INT2);
+      var = new CDFVar(cdf, "Version", CDFConstants.CDF_UINT2);
       var.attribute("FIELDNAM", "Software Version");
       var.attribute("CATDESC", "Software Version.");
       var.attribute("LABLAXIS", "Version");
@@ -109,10 +114,10 @@ public class Misc extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0);
       var.attribute("VALIDMAX", 32);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("INT2_FILL"));
+      var.attribute("FILLVAL", CDFVar.UINT2_FILL);
       this.cdf.addVar("Version", var);
 
-      var = new CDFVar(cdf, "Payload_ID", CDFConstants.CDF_INT2);
+      var = new CDFVar(cdf, "Payload_ID", CDFConstants.CDF_UINT2);
       var.attribute("FIELDNAM", "Payload ID");
       var.attribute("CATDESC", "ID transmitted by the payload's DPU.");
       var.attribute("LABLAXIS", "ID");
@@ -123,7 +128,7 @@ public class Misc extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0);
       var.attribute("VALIDMAX", 64);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("INT2_FILL"));
+      var.attribute("FILLVAL", CDFVar.UINT2_FILL);
       this.cdf.addVar("Payload_ID", var);
    }
 }

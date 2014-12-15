@@ -1,5 +1,5 @@
 /*
-SpectrumExtract.java
+ExtractSpectrum.java
 
 Description:
    Creates energy bin edges and rebins spectra.
@@ -28,59 +28,78 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-
 import java.util.Arrays;
 import java.lang.ArrayIndexOutOfBoundsException;
-
+import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import org.apache.commons.math3.fitting.GaussianFitter;
 import org.apache.commons.math3.optim.nonlinear.vector.
           jacobian.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
-public class SpectrumExtract {
-
-   private SpectrumExtract(){}
+public class ExtractSpectrum {
 
    //create uncalibrated bin edges
    private static final float[][] 
       OLD_RAW_EDGES = {
-      {0f, 75f, 230f, 350f, 619f},
       {
-         42f, 46f, 50f, 53f, 57f, 60f, 64f, 70f, 78f, 84f, 92f, 100f, 
-         106f, 114f, 120f, 128f, 140f, 156f, 168f, 184f, 200f, 212f, 228f, 
-         240f, 256f, 280f, 312f, 336f, 368f, 400f, 424f, 456f, 480f, 512f, 
-         560f, 624f, 672f, 736f, 800f, 848f, 912f, 960f, 1024f, 1120f, 
-         1248f, 1344f, 1472f, 1600f, 1696f
+         0f,   75f,   230f,   350f,  619f
       },
       {
-         0f, 1f, 2f, 3f, 4f, 5f, 6f, 7f, 8f, 9f, 10f, 11f, 12f, 13f, 14f, 15f, 
-         16f, 17f, 18f, 19f, 20f, 21f, 22f, 23f, 24f, 25f, 26f, 27f, 28f, 29f, 
-         30f, 31f, 32f, 33f, 34f, 35f, 36f, 37f, 38f, 39f, 40f, 41f, 42f, 43f, 
-         44f, 45f, 46f, 47f, 48f, 49f, 50f, 51f, 52f, 53f, 54f, 55f, 56f, 57f, 
-         58f, 59f, 60f, 61f, 62f, 63f, 64f, 66f, 68f, 70f, 72f, 74f, 76f, 78f, 
-         80f, 82f, 84f, 86f, 88f, 90f, 92f, 94f, 96f, 98f, 100f, 102f, 104f, 
-         106f, 108f, 110f, 112f, 114f, 116f, 118f, 120f, 122f, 124f, 126f, 
-         128f, 132f, 136f, 140f, 144f, 148f, 152f, 156f, 160f, 164f, 168f, 
-         172f, 176f, 180f, 184f, 188f, 192f, 196f, 200f, 204f, 208f, 212f, 
-         216f, 220f, 224f, 228f, 232f, 236f, 240f, 244f, 248f, 252f, 256f, 
-         264f, 272f, 280f, 288f, 296f, 304f, 312f, 320f, 328f, 336f, 344f, 
-         352f, 360f, 368f, 376f, 384f, 392f, 400f, 408f, 416f, 424f, 432f, 
-         440f, 448f,  456f, 464f, 472f, 480f, 488f, 496f, 504f, 512f, 528f, 
-         544f, 560f, 576f, 592f, 608f, 624f, 640f, 656f, 672f, 688f, 704f, 
-         720f, 736f, 752f, 768f, 784f, 800f, 816f, 832f, 848f, 864f, 880f, 
-         896f, 912f, 928f, 944f, 960f, 976f, 992f, 1008f, 1024f, 1056f, 
-         1088f, 1120f, 1152f, 1184f, 1216f, 1248f, 1280f, 1312f, 1344f, 
-         1376f, 1408f, 1440f, 1472f, 1504f, 1536f, 1568f, 1600f, 1632f, 
-         1664f, 1696f, 1728f, 1760f, 1792f, 1824f, 1856f, 1888f, 1920f, 
-         1952f, 1984f, 2016f, 2048f, 2112f, 2176f, 2240f, 2304f, 2368f, 
-         2432f, 2496f, 2560f, 2624f, 2688f, 2752f, 2816f, 2880f, 2944f, 
-         3008f, 3072f, 3136f, 3200f, 3264f, 3328f, 3392f, 3456f, 3520f, 
-         3584f, 3648f, 3712f, 3776f, 3840f, 3904f, 3968f, 4032f, 4096f
+         42f,   46f,   50f,   53f,   57f,   60f,   64f,   70f,
+         78f,   84f,   92f,   100f,  106f,  114f,  120f,  128f,
+         140f,  156f,  168f,  184f,  200f,  212f,  228f,  240f,
+         256f,  280f,  312f,  336f,  368f,  400f,  424f,  456f,
+         480f,  512f,  560f,  624f,  672f,  736f,  800f,  848f,
+         912f,  960f,  1024f, 1120f, 1248f, 1344f, 1472f, 1600f,
+         1696f
+      },
+      {
+         0f,    1f,    2f,    3f,    4f,    5f,    6f,    7f, 
+         8f,    9f,    10f,   11f,   12f,   13f,   14f,   15f,
+         16f,   17f,   18f,   19f,   20f,   21f,   22f,   23f,
+         24f,   25f,   26f,   27f,   28f,   29f,   30f,   31f,
+         32f,   33f,   34f,   35f,   36f,   37f,   38f,   39f,
+         40f,   41f,   42f,   43f,   44f,   45f,   46f,   47f,
+         48f,   49f,   50f,   51f,   52f,   53f,   54f,   55f,
+         56f,   57f,   58f,   59f,   60f,   61f,   62f,   63f,
+         64f,   66f,   68f,   70f,   72f,   74f,   76f,   78f, 
+         80f,   82f,   84f,   86f,   88f,   90f,   92f,   94f,
+         96f,   98f,   100f,  102f,  104f,  106f,  108f,  110f,
+         112f,  114f,  116f,  118f,  120f,  122f,  124f,  126f,
+         128f,  132f,  136f,  140f,  144f,  148f,  152f,  156f,
+         160f,  164f,  168f,  172f,  176f,  180f,  184f,  188f,
+         192f,  196f,  200f,  204f,  208f,  212f,  216f,  220f,
+         224f,  228f,  232f,  236f,  240f,  244f,  248f,  252f,
+         256f,  264f,  272f,  280f,  288f,  296f,  304f,  312f,
+         320f,  328f,  336f,  344f,  352f,  360f,  368f,  376f,
+         384f,  392f,  400f,  408f,  416f,  424f,  432f,  440f,
+         448f,  456f,  464f,  472f,  480f,  488f,  496f,  504f,
+         512f,  528f,  544f,  560f,  576f,  592f,  608f,  624f,
+         640f,  656f,  672f,  688f,  704f,  720f,  736f,  752f,
+         768f,  784f,  800f,  816f,  832f,  848f,  864f,  880f,
+         896f,  912f,  928f,  944f,  960f,  976f,  992f,  1008f,
+         1024f, 1056f, 1088f, 1120f, 1152f, 1184f, 1216f, 1248f,
+         1280f, 1312f, 1344f, 1376f, 1408f, 1440f, 1472f, 1504f,
+         1536f, 1568f, 1600f, 1632f, 1664f, 1696f, 1728f, 1760f,
+         1792f, 1824f, 1856f, 1888f, 1920f, 1952f, 1984f, 2016f,
+         2048f, 2112f, 2176f, 2240f, 2304f, 2368f, 2432f, 2496f,
+         2560f, 2624f, 2688f, 2752f, 2816f, 2880f, 2944f, 3008f,
+         3072f, 3136f, 3200f, 3264f, 3328f, 3392f, 3456f, 3520f,
+         3584f, 3648f, 3712f, 3776f, 3840f, 3904f, 3968f, 4032f,
+         4096f
       }
       },
       RAW_EDGES = {
-      {0f, 20f, 40, 75f, 230f, 350f, 619f},
+      {
+         0f, 20f, 40, 75f, 230f, 350f, 619f
+      },
       {
          42f, 46f, 50f, 53f, 57f, 60f, 64f, 70f, 78f, 84f, 92f, 100f, 
          106f, 114f, 120f, 128f, 140f, 156f, 168f, 184f, 200f, 212f, 228f, 
@@ -89,59 +108,75 @@ public class SpectrumExtract {
          1248f, 1344f, 1472f, 1600f, 1696f
       },
       {
-         0f, 1f, 2f, 3f, 4f, 5f, 6f, 7f, 8f, 9f, 10f, 11f, 12f, 13f, 14f, 15f, 
-         16f, 17f, 18f, 19f, 20f, 21f, 22f, 23f, 24f, 25f, 26f, 27f, 28f, 29f, 
-         30f, 31f, 32f, 33f, 34f, 35f, 36f, 37f, 38f, 39f, 40f, 41f, 42f, 43f, 
-         44f, 45f, 46f, 47f, 48f, 49f, 50f, 51f, 52f, 53f, 54f, 55f, 56f, 57f, 
-         58f, 59f, 60f, 61f, 62f, 63f, 64f, 66f, 68f, 70f, 72f, 74f, 76f, 78f, 
-         80f, 82f, 84f, 86f, 88f, 90f, 92f, 94f, 96f, 98f, 100f, 102f, 104f, 
-         106f, 108f, 110f, 112f, 114f, 116f, 118f, 120f, 122f, 124f, 126f, 
-         128f, 132f, 136f, 140f, 144f, 148f, 152f, 156f, 160f, 164f, 168f, 
-         172f, 176f, 180f, 184f, 188f, 192f, 196f, 200f, 204f, 208f, 212f, 
-         216f, 220f, 224f, 228f, 232f, 236f, 240f, 244f, 248f, 252f, 256f, 
-         264f, 272f, 280f, 288f, 296f, 304f, 312f, 320f, 328f, 336f, 344f, 
-         352f, 360f, 368f, 376f, 384f, 392f, 400f, 408f, 416f, 424f, 432f, 
-         440f, 448f,  456f, 464f, 472f, 480f, 488f, 496f, 504f, 512f, 528f, 
-         544f, 560f, 576f, 592f, 608f, 624f, 640f, 656f, 672f, 688f, 704f, 
-         720f, 736f, 752f, 768f, 784f, 800f, 816f, 832f, 848f, 864f, 880f, 
-         896f, 912f, 928f, 944f, 960f, 976f, 992f, 1008f, 1024f, 1056f, 
-         1088f, 1120f, 1152f, 1184f, 1216f, 1248f, 1280f, 1312f, 1344f, 
-         1376f, 1408f, 1440f, 1472f, 1504f, 1536f, 1568f, 1600f, 1632f, 
-         1664f, 1696f, 1728f, 1760f, 1792f, 1824f, 1856f, 1888f, 1920f, 
-         1952f, 1984f, 2016f, 2048f, 2112f, 2176f, 2240f, 2304f, 2368f, 
-         2432f, 2496f, 2560f, 2624f, 2688f, 2752f, 2816f, 2880f, 2944f, 
-         3008f, 3072f, 3136f, 3200f, 3264f, 3328f, 3392f, 3456f, 3520f, 
-         3584f, 3648f, 3712f, 3776f, 3840f, 3904f, 3968f, 4032f, 4096f
+         0f,    1f,    2f,    3f,    4f,    5f,    6f,    7f,
+         8f,    9f,    10f,   11f,   12f,   13f,   14f,   15f, 
+         16f,   17f,   18f,   19f,   20f,   21f,   22f,   23f,
+         24f,   25f,   26f,   27f,   28f,   29f,   30f,   31f,
+         32f,   33f,   34f,   35f,   36f,   37f,   38f,   39f,
+         40f,   41f,   42f,   43f,   44f,   45f,   46f,   47f,
+         48f,   49f,   50f,   51f,   52f,   53f,   54f,   55f, 
+         56f,   57f,   58f,   59f,   60f,   61f,   62f,   63f,
+         64f,   66f,   68f,   70f,   72f,   74f,   76f,   78f,
+         80f,   82f,   84f,   86f,   88f,   90f,   92f,   94f,
+         96f,   98f,   100f,  102f,  104f,  106f,  108f,  110f,
+         112f,  114f,  116f,  118f,  120f,  122f,  124f,  126f, 
+         128f,  132f,  136f,  140f,  144f,  148f,  152f,  156f,
+         160f,  164f,  168f,  172f,  176f,  180f,  184f,  188f,
+         192f,  196f,  200f,  204f,  208f,  212f,  216f,  220f,
+         224f,  228f,  232f,  236f,  240f,  244f,  248f,  252f,
+         256f,  264f,  272f,  280f,  288f,  296f,  304f,  312f,
+         320f,  328f,  336f,  344f,  352f,  360f,  368f,  376f,
+         384f,  392f,  400f,  408f,  416f,  424f,  432f,  440f,
+         448f,  456f,  464f,  472f,  480f,  488f,  496f,  504f,
+         512f,  528f,  544f,  560f,  576f,  592f,  608f,  624f,
+         640f,  656f,  672f,  688f,  704f,  720f,  736f,  752f,
+         768f,  784f,  800f,  816f,  832f,  848f,  864f,  880f,
+         896f,  912f,  928f,  944f,  960f,  976f,  992f,  1008f,
+         1024f, 1056f, 1088f, 1120f, 1152f, 1184f, 1216f, 1248f,
+         1280f, 1312f, 1344f, 1376f, 1408f, 1440f, 1472f, 1504f,
+         1536f, 1568f, 1600f, 1632f, 1664f, 1696f, 1728f, 1760f,
+         1792f, 1824f, 1856f, 1888f, 1920f, 1952f, 1984f, 2016f,
+         2048f, 2112f, 2176f, 2240f, 2304f, 2368f, 2432f, 2496f,
+         2560f, 2624f, 2688f, 2752f, 2816f, 2880f, 2944f, 3008f,
+         3072f, 3136f, 3200f, 3264f, 3328f, 3392f, 3456f, 3520f,
+         3584f, 3648f, 3712f, 3776f, 3840f, 3904f, 3968f, 4032f,
+         4096f
       }
    };
 
    private static final double[] SSPC_MIDPOINTS = {
-      0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5,  
-      11.5, 12.5, 13.5, 14.5, 15.5, 16.5, 17.5, 18.5, 19.5, 20.5,  
-      21.5, 22.5, 23.5, 24.5, 25.5, 26.5, 27.5, 28.5, 29.5, 30.5,  
-      31.5, 32.5, 33.5, 34.5, 35.5, 36.5, 37.5, 38.5, 39.5, 40.5,  
-      41.5, 42.5, 43.5, 44.5, 45.5, 46.5, 47.5, 48.5, 49.5, 50.5,  
-      51.5, 52.5, 53.5, 54.5, 55.5, 56.5, 57.5, 58.5, 59.5, 60.5,  
-      61.5, 62.5, 63.5, 65, 67, 69, 71, 73, 75, 77, 79, 81,  
-      83, 85, 87, 89, 91, 93, 95, 97, 99, 101, 103, 105,  
-      107, 109, 111, 113, 115, 117, 119, 121, 123, 125,  
-      127, 130, 134, 138, 142, 146, 150, 154, 158, 162,  
-      166, 170, 174, 178, 182, 186, 190, 194, 198, 202,  
-      206, 210, 214, 218, 222, 226, 230, 234, 238, 242,  
-      246, 250, 254, 260, 268, 276, 284, 292, 300, 308,  
-      316, 324, 332, 340, 348, 356, 364, 372, 380, 388,  
-      396, 404, 412, 420, 428, 436, 444, 452, 460, 468,  
-      476, 484, 492, 500, 508, 520, 536, 552, 568, 584,  
-      600, 616, 632, 648, 664, 680, 696, 712, 728, 744,  
-      760, 776, 792, 808, 824, 840, 856, 872, 888, 904,  
-      920, 936, 952, 968, 984, 1000, 1016, 1040, 1072, 1104,  
-      1136, 1168, 1200, 1232, 1264, 1296, 1328, 1360, 1392,  
-      1424, 1456, 1488, 1520, 1552, 1584, 1616, 1648, 1680,  
-      1712, 1744, 1776, 1808, 1840, 1872, 1904, 1936, 1968,  
-      2000, 2032, 2080, 2144, 2208, 2272, 2336, 2400, 2464,  
-      2528, 2592, 2656, 2720, 2784, 2848, 2912, 2976, 3040,  
-      3104, 3168, 3232, 3296, 3360, 3424, 3488, 3552, 3616,  
-      3680, 3744, 3808, 3872, 3936, 4000, 4064
+      0.5,  1.5,  2.5,  3.5,  4.5,  5.5,  6.5,  7.5,
+      8.5,  9.5,  10.5, 11.5, 12.5, 13.5, 14.5, 15.5,
+      16.5, 17.5, 18.5, 19.5, 20.5, 21.5, 22.5, 23.5,
+      24.5, 25.5, 26.5, 27.5, 28.5, 29.5, 30.5, 31.5,
+      32.5, 33.5, 34.5, 35.5, 36.5, 37.5, 38.5, 39.5,
+      40.5, 41.5, 42.5, 43.5, 44.5, 45.5, 46.5, 47.5,
+      48.5, 49.5, 50.5, 51.5, 52.5, 53.5, 54.5, 55.5,
+      56.5, 57.5, 58.5, 59.5, 60.5, 61.5, 62.5, 63.5,
+      65,   67,   69,   71,   73,   75,   77,   79,
+      81,   83,   85,   87,   89,   91,   93,   95,   
+      97,   99,   101,  103,  105,  107,  109,  111,
+      113,  115,  117,  119,  121,  123,  125,  127,
+      130,  134,  138,  142,  146,  150,  154,  158,
+      162,  166,  170,  174,  178,  182,  186,  190,
+      194,  198,  202,  206,  210,  214,  218,  222,
+      226,  230,  234,  238,  242,  246,  250,  254,
+      260,  268,  276,  284,  292,  300,  308,  316,
+      324,  332,  340,  348,  356,  364,  372,  380,
+      388,  396,  404,  412,  420,  428,  436,  444,
+      452,  460,  468,  476,  484,  492,  500,  508,
+      520,  536,  552,  568,  584,  600,  616,  632,
+      648,  664,  680,  696,  712,  728,  744,  760,
+      776,  792,  808,  824,  840,  856,  872,  888,
+      904,  920,  936,  952,  968,  984,  1000, 1016,
+      1040, 1072, 1104, 1136, 1168, 1200, 1232, 1264,
+      1296, 1328, 1360, 1392, 1424, 1456, 1488, 1520,
+      1552, 1584, 1616, 1648, 1680, 1712, 1744, 1776,
+      1808, 1840, 1872, 1904, 1936, 1968, 2000, 2032,
+      2080, 2144, 2208, 2272, 2336, 2400, 2464, 2528, 
+      2592, 2656, 2720, 2784, 2848, 2912, 2976, 3040,
+      3104, 3168, 3232, 3296, 3360, 3424, 3488, 3552,
+      3616, 3680, 3744, 3808, 3872, 3936, 4000, 4064
    };
 
    //nominal scaling factor for converting raw bins to energy levels
@@ -162,97 +197,187 @@ public class SpectrumExtract {
       counts for this spectrum to 2*32*[End Energy Level - Start Enrgy level]
    */
    public static final int
-      MAX_CNT_FACTOR = 
-         (int) (32 * 2 * 
-         (OLD_RAW_EDGES[2][PEAK_511_END]-OLD_RAW_EDGES[2][PEAK_511_START]) * 
-         SCALE_FACTOR);
+      MAX_CNT_FACTOR = (int)
+         ((OLD_RAW_EDGES[2][PEAK_511_END] - OLD_RAW_EDGES[2][PEAK_511_START]) * 
+         SCALE_FACTOR * 32 * 2);
+   
+   private Map<Integer, Integer[]> raw_spectra;
+   private Map<Integer, Integer> spectra_part_count;
+   private Map<Integer, Float> peaks;
+   private BarrelFrame[] frames;
+   private float[][] raw_edges;
+   private int numFrames, numRecords, max_cnts, dpuVer;
+   private int[] fcRange;
 
-   public static void do511Fits(int start, int stop){ 
-      DataHolder data = CDF_Gen.data;
+   private ExtractSpectrum(){}
+   public ExtractSpectrum(FrameHolder frameHolder){
+      this.dpuVer             = frameHolder.getDpuVersion();
+      this.peaks              = new TreeMap<Integer, Float>();
+      this.frames             = frameHolder.getAllFrames();
+      this.numFrames          = frameHolder.getNumFrames();
+      this.numRecords         = frameHolder.getNumRecords("mod32");
+      this.fcRange            = frameHolder.getFcRange();
+      this.max_cnts           = MAX_CNT_FACTOR * this.numRecords;
+      this.raw_edges          = this.dpuVer > 3 ? RAW_EDGES : OLD_RAW_EDGES;
+      this.raw_spectra        = new LinkedHashMap<Integer, Integer[]>();
+      this.spectra_part_count = new HashMap<Integer, Integer>();
 
-      int length = stop - start;
+      getSpectraRecords();
+   }
 
-      int max_cnts = MAX_CNT_FACTOR * length; 
+   private void getSpectraRecords(){
+      int mod32, fg, frame_i, offset;
+      int[] part_spec;
+      BarrelFrame frame;
+      Integer num_parts;
+      Integer[] spectrum;
+      Long fc;
 
-      if(length < 2){return;}
-      
+      for (frame_i = 0; frame_i < this.numFrames; frame_i++) {
+         frame = this.frames[frame_i];
+         fc = frame.getFrameCounter();
+         if(fc == null || fc == BarrelCDF.FC_FILL){
+            continue;
+         }
+         
+         mod32 = frame.mod32;
+         fg = fc.intValue() - mod32;
+
+         //get the spectrum for this frame group
+         spectrum = this.raw_spectra.get(fg);
+
+         //create the spectrum if this was a new frame group
+         if(spectrum == null) {
+            spectrum = new Integer[256];
+            Arrays.fill(spectrum, SSPC.RAW_CNT_FILL);
+         }
+
+         //fill part of the spectrum from this frame
+         offset = mod32 * 8;
+         part_spec = frame.getSSPC();
+         for (int sample_i = 0; sample_i < part_spec.length; sample_i++) {
+            spectrum[sample_i + offset] = part_spec[sample_i];
+         }
+
+         //save the spectrum
+         this.raw_spectra.put(fg, spectrum);
+
+         //keep track of how many spectrum parts we have collected
+         num_parts = this.spectra_part_count.get(fg);
+         num_parts = num_parts != null ? num_parts + 1 : 1;
+         this.spectra_part_count.put(fg, num_parts);
+      }
+   }
+
+   public void do511Fits(int max_recs){
+      int fg = 0;
+      Iterator<Integer> spec_i;
+      List<Integer[]> records = new ArrayList<Integer[]>();
       DescriptiveStatistics stats = new DescriptiveStatistics();
-      float peak;
-      double max_bin, min_bin;
-      double[]
-         search_spec = new double[PEAK_511_WIDTH],
-         bin_num = new double[PEAK_511_WIDTH];
+      Integer[] spectrum;
+      BarrelFrame frame;
+
+      if(this.raw_spectra.size() < 2){return;}
       
-      //create array of detector bin numbers we will be searching
-      for(int bin_i = 0; bin_i < PEAK_511_WIDTH; bin_i++){
-         bin_num[bin_i] = SSPC_MIDPOINTS[bin_i + PEAK_511_START]; 
+      //do peak fits on the raw spectra
+      spec_i = this.raw_spectra.keySet().iterator();
+      while(spec_i.hasNext()){
+         fg = spec_i.next();
+         if(this.spectra_part_count.get(fg) != 32) {
+            continue;
+         }
+
+         records.add(this.raw_spectra.get(fg));
+
+         if(records.size() >= max_recs){
+            //we have a full set of records, integrate and look for a peak
+            this.peaks.put(fg, find511(records));
+
+            records = new ArrayList<Integer[]>();
+         }
       }
 
-      //sum up all of the spectra from this group
-      for(int spec_i = start; spec_i < stop; spec_i++){
+      //find the peak in any left over records
+      this.peaks.put(fg, find511(records));
+   }
 
-         //only add the spectrum to the sum if it is complete
-         if((data.sspc_q[spec_i] & Constants.PART_SPEC) == 0){
-            for(int chan_i = 0; chan_i < PEAK_511_WIDTH; chan_i++){
-               search_spec[chan_i] += 
-                  data.sspc[spec_i][chan_i + PEAK_511_START];
-               //check to see if it is likely the 511 line will be washed out
-               if(search_spec[chan_i] > max_cnts){
-                  for(int peak_i = start; peak_i < stop; peak_i++){
-                     data.peak511_bin[peak_i] = Constants.FLOAT_FILL; 
-                  }
-                  System.out.println("too many: " + length + " " + max_cnts + " " + search_spec[chan_i]);
-                  return;
-               }
+   private double[] integrate(List<Integer[]> records) {
+      Iterator <Integer[]> rec_i = records.iterator();
+      Integer[] spectrum;
+      double[] sum = new double[PEAK_511_WIDTH];
+
+      while(rec_i.hasNext()){
+         spectrum = rec_i.next();
+
+         for(int chan_i = 0; chan_i < PEAK_511_WIDTH; chan_i++){
+            //add this spectrum channel to the summed spectrums channel
+            sum[chan_i] += spectrum[chan_i + PEAK_511_START];
+
+            //check to see if it is likely the 511 line will be washed out
+            if(sum[chan_i] > this.max_cnts){
+               System.out.println(
+                  "Count rate too high: " + sum[chan_i] + " > " + this.max_cnts
+               );
+               return null;
             }
          }
       }
 
-      peak = find511(bin_num, search_spec);
-
-      for(int peak_i = start; peak_i < stop; peak_i++){
-         data.peak511_bin[peak_i] = peak; 
-      }
+      return sum;
    }
 
-   private static float find511(double[] x, double[] y){
-      GaussianFitter fitter = 
-         new GaussianFitter(new LevenbergMarquardtOptimizer());
-      double[] 
-         fit_params = {10, Constants.DOUBLE_FILL, 1},
-         curve = new double[PEAK_511_WIDTH - 4];
-      int[]
-         high_area = new int[PEAK_511_WIDTH];
+   private Float find511(List<Integer[]> records){
+      GaussianFitter 
+         fitter    =  new GaussianFitter(new LevenbergMarquardtOptimizer());
       double
          m, b, 
-         slope = 0,
-         this_low= 0,
-         last_low = 0;
+         slope      = 0,
+         this_low   = 0,
+         last_low   = 0;
+      double[] 
+         y,
+         x          = new double[PEAK_511_WIDTH],
+         curve      = new double[PEAK_511_WIDTH - 4],
+         fit_params = {10, CDFVar.FLOAT_FILL, 1};
       int
-         apex = 0,
+         bin_i,
+         apex     = 0,
          high_cnt = 0;
-      
+      int[]
+         high_area  = new int[PEAK_511_WIDTH];
+
+      //create array of detector bin numbers we will be searching
+      x = Arrays.copyOfRange(
+         SSPC_MIDPOINTS, PEAK_511_START, PEAK_511_START + PEAK_511_WIDTH
+      );
+
+      //Add up all of the samples we have
+      y = integrate(records);
+      if(y == null){
+         return SSPC.PEAK_FILL;
+      }
+
       // guess at a linear background
       m = (y[PEAK_511_WIDTH - 1] - y[0]) / (x[PEAK_511_WIDTH - 1] - x[0]);
       b = y[0] - m * x[0];
 
       //convert y to cnts/bin_width
-      for(int bin_i = 0; bin_i < x.length; bin_i++){
+      for(bin_i = 0; bin_i < x.length; bin_i++){
          y[bin_i] /= (
-            RAW_EDGES[2][bin_i + PEAK_511_START + 1] - 
-            RAW_EDGES[2][bin_i + PEAK_511_START]
+            this.raw_edges[2][bin_i + PEAK_511_START + 1] - 
+            this.raw_edges[2][bin_i + PEAK_511_START]
          );
       }
 
       //take the second derivitave to find peak
-      for(int bin_i = 2; bin_i < x.length - 2; bin_i++){
+      for(bin_i = 2; bin_i < x.length - 2; bin_i++){
          curve[bin_i - 2] = y[bin_i + 2] - (2 * y[bin_i]) + y[bin_i - 2];
       }
       
       //find low point of second derivitave using moving average
       this_low  = (curve[0] + curve[1] + curve[2]);
       last_low = this_low;
-      for(int bin_i = 2; bin_i < curve.length - 1; bin_i++){
+      for(bin_i = 2; bin_i < curve.length - 1; bin_i++){
          this_low += (curve[bin_i + 1] - curve[bin_i - 2]);
          if(this_low < last_low){
             apex = bin_i + 2;
@@ -263,7 +388,7 @@ public class SpectrumExtract {
       //do the curve fit
       try{
          fit_params[1] = x[apex]; //guess for peak location
-         for(int bin_i = apex - 3; bin_i < apex + 3; bin_i++){
+         for(bin_i = apex - 3; bin_i < apex + 3; bin_i++){
             fitter.addObservedPoint(x[bin_i],  y[bin_i]);
          }
          fit_params = fitter.fit(fit_params);
@@ -273,15 +398,14 @@ public class SpectrumExtract {
             "Payload ID: " + CDF_Gen.getSetting("currentPayload") + 
             " Date: " + CDF_Gen.getSetting("date"));
          System.out.println("Gaussian out of bounds: " + apex);
-         fit_params[1] = Constants.DOUBLE_FILL;
+         fit_params[1] = CDFVar.FLOAT_FILL;
       }
       return (float)fit_params[1];
    }
 
-   public static float[] stdEdges(int spec_i, float scale){
+   public float[] stdEdges(int spec_i, float scale){
       float[] edges = (
-         CDF_Gen.data.getVersion() > 3 ? 
-         RAW_EDGES[spec_i] : OLD_RAW_EDGES[spec_i]
+         this.raw_edges[spec_i]
       );
       float[] result = new float[edges.length];
 
@@ -331,7 +455,6 @@ public class SpectrumExtract {
 
       float[] iter1 = new float[size];
       float[] iter2 = new float[size];
-     
 
       //first iteration of Newton-Raphson  
       for(int i = 0; i < size; i++){
@@ -422,19 +545,16 @@ public class SpectrumExtract {
 
    NOTES: Ported from Michael McCarthy's original IDL code
 */
-   public static float[] makeedges(int spec_i, float peak511){
+   public float[] makeedges(int spec_i, float peak511){
       return makeedges(spec_i, 0f, 0f, peak511);
    }
-   public static float[] makeedges(
+   public float[] makeedges(
       int spec_i, float xtal_temp, float dpu_temp, float peak511
    ){
       String payload = 
          CDF_Gen.getSetting("currentPayload").substring(0,2);
 
-      float[] edges_in = (
-         CDF_Gen.data.getVersion() > 3 ? 
-         RAW_EDGES[spec_i] : OLD_RAW_EDGES[spec_i]
-      );
+      float[] edges_in = this.raw_edges[spec_i];
 
       //initialize array for calibrated edges
       float[] edges_out = new float[edges_in.length];
@@ -500,7 +620,7 @@ public class SpectrumExtract {
 
       //calculate a correction from 511keV location
       float fac511 = 1.0f;
-      if(peak511 != (Float)CDFVar.getIstpVal("FLOAT_FILL")){
+      if(peak511 != SSPC.PEAK_FILL){
          float start = 
             (peak511 / xtal_compensate - dpu_compensate[0]) / dpu_compensate[1];
          fac511 = 511.0f / binvert(start,factor);
@@ -523,12 +643,9 @@ public class SpectrumExtract {
    }
 
 
-   public static float[] createBinEdges(int spec_i, double peak511){
+   public float[] createBinEdges(int spec_i, double peak511){
       double factor1, factor2, scale;
-      float[] edges_in = (
-         CDF_Gen.data.getVersion() > 3 ? 
-         RAW_EDGES[spec_i] : OLD_RAW_EDGES[spec_i]
-      );
+      float[] edges_in = this.raw_edges[spec_i];
       double[] edges_nonlin = new double[edges_in.length];
       float[] edges_cal = new float[edges_in.length];
 
@@ -558,7 +675,7 @@ public class SpectrumExtract {
       //this also helps compensate incorrect temperature values
 
       scale = SCALE_FACTOR; //nominal keV/bin
-      if(peak511 != Constants.DOUBLE_FILL){
+      if(peak511 != SSPC.PEAK_FILL){
          scale = 
             511.  /* * factor2 / factor1*/ / peak511 / 
             (1.0 - 11.6 / (peak511 + 10.8) + 0.000091 * peak511);
@@ -656,8 +773,8 @@ public class SpectrumExtract {
          //this bin of the output spectrum
          if (a_cnt > 0){ 
             for(int k = 0; k < a_cnt; k++){
-               if(specin[a[k]] < 0){
-                  specout[i] = Constants.FLOAT_FILL;
+               if(specin[a[k]] < 0 || specin[a[k]] == CDFVar.UINT2_FILL){
+                  specout[i] = CDFVar.FLOAT_FILL;
                   continue spec_loop;
                }else{
                   specout[i] += 
@@ -667,8 +784,8 @@ public class SpectrumExtract {
          }
          if (b_cnt > 0){
             for(int k = 0; k < b_cnt; k++){
-               if(specin[b[k]] < 0){
-                  specout[i] = Constants.FLOAT_FILL;
+               if(specin[b[k]] < 0 || specin[b[k]] == CDFVar.UINT2_FILL){
+                  specout[i] = CDFVar.FLOAT_FILL;
                   continue spec_loop;
                }else{
                   specout[i] += specin[b[k]];
@@ -677,8 +794,8 @@ public class SpectrumExtract {
          }
          if (c_cnt > 0){
             for(int k = 0; k < c_cnt; k++){
-               if(specin[c[k]] < 0){
-                  specout[i] = Constants.FLOAT_FILL;
+               if(specin[c[k]] < 0 || specin[c[k]] == CDFVar.UINT2_FILL){
+                  specout[i] = CDFVar.FLOAT_FILL;
                   continue spec_loop;
                }else{
                   specout[i] += 
@@ -688,8 +805,8 @@ public class SpectrumExtract {
          }
          if (d_cnt > 0){
             for(int k = 0; k < d_cnt; k++){
-               if(specin[d[k]] < 0){
-                  specout[i] = Constants.FLOAT_FILL;
+               if(specin[d[k]] < 0 || specin[d[k]] == CDFVar.UINT2_FILL){
+                  specout[i] = CDFVar.FLOAT_FILL;
                   continue spec_loop;
                }else{
                   specout[i] += 
@@ -703,5 +820,46 @@ public class SpectrumExtract {
       return specout;
    }
 
+   public Float getPeakLocation(int fc){
+      Integer
+         fg      = 0,
+         prev_fg = 0,
+         next_fg = 0,
+         numModels = this.peaks.size();
+      Iterator<Integer> prev_fg_i = this.peaks.keySet().iterator();
+      Iterator<Integer> next_fg_i = this.peaks.keySet().iterator();
+      
+      //check if there are enough records to search
+      if (numModels == 0) {
+         System.out.println("No peaks found.");
+         System.exit(1);
+      } else if(numModels == 1) {
+         //chose the only option
+         fg = next_fg_i.next();
+      } else {
+         //fg_i is sorted so the earliest fg will come first. 
+         //We want to scan through all fg's that have peaks until we find
+         //find the first peak with an fg larger than the target fc 
+         next_fg_i.next();
+         while (next_fg_i.hasNext()) {
+            prev_fg = prev_fg_i.next();
+            next_fg = next_fg_i.next();
+            if(fc <= next_fg){
+               break;
+            }
+         }
 
+         //select whichever fg is closest to the target fc
+         fg = ((next_fg - fc) > (fc - prev_fg)) ? prev_fg : next_fg;
+      }
+
+      return this.peaks.get(fg);
+   }
+   public Float getPeakLocation(Long fc){
+      if(fc == null || fc == BarrelCDF.FC_FILL){
+         return SSPC.PEAK_FILL;
+      } else {
+         return this.getPeakLocation(fc.intValue());
+      }
+   }
 }

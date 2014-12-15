@@ -41,6 +41,11 @@ import java.util.Arrays;
 
 public class BarrelCDF extends CDFFile{
 
+   static public final long
+      EPOCH_FILL   = CDFVar.INT8_FILL,
+      FC_FILL      = CDFVar.UINT4_FILL,
+      QUALITY_FILL = CDFVar.UINT4_FILL;
+
    private String payload_id;
 
    public BarrelCDF(final String path, final String pay, int l){
@@ -112,7 +117,7 @@ public class BarrelCDF extends CDFFile{
       var.attribute("SCALETYPE", "linear");
       var.attribute("VALIDMIN", min_epoch);
       var.attribute("VALIDMAX", max_epoch);
-      var.attribute("FILLVAL", Long.MIN_VALUE);
+      var.attribute("FILLVAL", EPOCH_FILL);
       var.attribute("LABLAXIS", "Epoch");
       var.attribute("MONOTON", "INCREASE");
       var.attribute("TIME_BASE", "J2000");
@@ -120,7 +125,7 @@ public class BarrelCDF extends CDFFile{
       var.attribute("REFERENCE_POSITION", "Rotating Earch Geoid");
       this.addVar("Epoch", var);
 
-      var = new CDFVar(this, "FrameGroup", CDFConstants.CDF_INT4);
+      var = new CDFVar(this, "FrameGroup", CDFConstants.CDF_UINT4);
       var.attribute("FIELDNAM", "Frame Number");
       var.attribute("CATDESC", "DPU Frame Counter");
       var.attribute("LABLAXIS", "Frame");
@@ -129,8 +134,8 @@ public class BarrelCDF extends CDFFile{
       var.attribute("FORMAT", "I10");
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0);
-      var.attribute("VALIDMAX", 2147483647);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("INT4_FILL"));
+      var.attribute("VALIDMAX", FC_FILL);
+      var.attribute("FILLVAL", CDFVar.UINT4_FILL);
       this.addVar("FrameGroup", var);
 
       var = new CDFVar(this, "Quality", CDFConstants.CDF_INT4);
@@ -145,8 +150,8 @@ public class BarrelCDF extends CDFFile{
       var.attribute("SCALETYPE", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0);
-      var.attribute("VALIDMAX", 2147483647);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("INT4_FILL"));
+      var.attribute("VALIDMAX", QUALITY_FILL);
+      var.attribute("FILLVAL", CDFVar.INT4_FILL);
       this.addVar("Q", var);
    }
 }

@@ -38,6 +38,13 @@ import java.util.Vector;
 import java.util.Arrays;
 
 public class Magn extends DataProduct{
+   static public final int
+      X_AXIS = 0, Y_AXIS = 1, Z_AXIS = 2,
+      RAW_MAG_FILL  = CDFVar.INT4_FILL;
+  
+   static public final float
+      MAG_FILL      = CDFVar.FLOAT_FILL;
+
    private int date, lvl;
    private String payload_id;
 
@@ -104,7 +111,7 @@ public class Magn extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", -1e31f);
       var.attribute("VALIDMAX", 1e31f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", CDFVar.FLOAT_FILL);
       this.cdf.addVar("Total", var);
 
       /*
@@ -155,7 +162,7 @@ public class Magn extends DataProduct{
       var.attribute("VALIDMAX", 1e31f);
       //var.attribute("DELTA_PLUS_VAR", "error");
       //var.attribute("DELTA_MINUS_VAR", "error");
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", CDFVar.FLOAT_FILL);
       this.cdf.addVar("MAG_" + axis, var);
    }
 }

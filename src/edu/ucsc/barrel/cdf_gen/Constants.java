@@ -36,20 +36,6 @@ public class Constants{
       LOW_ALT = 16, //Indicator that the payload has dropped below MIN_SCI_ALT
       OUT_OF_RANGE = 32; //The rare case that the DPU returns unacceptable data
 
-   //Index references for various data storage arrays 
-   static public final int 
-      //gps index
-      ALT_I = 0, TIME_I = 1, LAT_I = 2, LON_I = 3, 
-      //housekeeping index
-      V0 = 0, I0 = 1, V1 = 2, I1 = 3, V2 = 4, I2 = 5, V3 = 6, I3 = 7, V4 = 8, 
-      I4 = 9, V5 = 10, I5 = 11, V6 = 12, I6 = 13, V7 = 14, I7 = 15, T0 = 16, 
-      T8 = 17, T1 = 18, T9 = 19, T2 = 20, T10 = 21, T3 = 22, T11 = 23, T4 = 24, 
-      T12 = 25, T5 = 26, T13 = 27, T6 = 28, T14 = 29, T7 = 30, T15 = 31, 
-      V8 = 32, V9 = 33, V10 = 34, V11 = 35, 
-      SATSOFF = 36, WEEK = 37, CMDCNT = 38, MDMCNT = 39,
-      //rate counter index
-      INTER = 0, LL = 1, PD = 2, HL = 3;
-
    //fill values for vaious CDF variable types
    static public final int 
       UINT1_FILL = 255,
@@ -88,7 +74,7 @@ public class Constants{
       LON_RAW_MIN = -2147483647, LON_RAW_MAX = 2147483647, 
          LON_RAW_FILL = INT4_FILL,
       ALT_RAW_MIN = 0, ALT_RAW_MAX = 50000000, ALT_RAW_FILL = INT4_FILL,
-      FC_MIN = 0, FC_MAX = 2097151, FC_FILL = INT4_FILL;
+      FC_MIN = 1, FC_MAX = 2097151, FC_FILL = INT4_FILL;
    public static final long
       HKPG_MIN = 0, HKPG_MAX = 65535, HKPG_FILL = INT4_FILL,
       RCNT_MIN = 0, RCNT_MAX = 65535, RCNT_FILL = INT4_FILL;
