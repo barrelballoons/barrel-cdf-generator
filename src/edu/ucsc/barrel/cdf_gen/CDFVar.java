@@ -47,24 +47,21 @@ public class CDFVar implements CDFComponent{
    private Variable var;
    private CDFFile owner;
 
-   //create a list of ISTP compliant limits and fill values
-   private static final Map<String, Number> ISTP_CONSTANTS;
-   static {
-      Map<String, Number> map = new HashMap<String, Number>();
-      map.put("FLOAT_FILL", -1e31f);
-      map.put("DOUBLE_FILL", -1e31);
-      map.put("INT1_FILL",-128);
-      map.put("INT2_FILL", -32768);
-      map.put("INT4_FILL", -2147483648);
-      map.put("UINT1_FILL", 255);
-      map.put("UINT2_FILL", 65535);
-      map.put("UINT4_FILL", 4294967295L);
-      ISTP_CONSTANTS = Collections.unmodifiableMap(map);
-   }
-   static public Number getIstpVal(String key){
-      return ISTP_CONSTANTS.get(key);
-   }
-
+   //ISTP defined fill values
+   static public final int 
+      UINT1_FILL  = 255,
+      UINT2_FILL  = 65535,
+      INT1_FILL   = -128,
+      INT2_FILL   = -32768,
+      INT4_FILL   = -2147483648;
+   static public final long
+      INT8_FILL   = -9223372036854775808L,
+      UINT4_FILL  = 4294967295L;
+   static public final float 
+      FLOAT_FILL  = -1.0e+31f;
+   static public final double 
+      DOUBLE_FILL = -1.0e+31;
+      
    public CDFVar(
       final CDFFile o, final String n, long t, boolean r_v, final long[] s
    ){

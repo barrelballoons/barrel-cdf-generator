@@ -1,5 +1,5 @@
 /*
-Rcnt.java
+RCNT.java
 
 Description:
    Creates RCNT CDF files.
@@ -37,11 +37,22 @@ import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
 
-public class Rcnt extends DataProduct{
+public class RCNT extends DataProduct{
+   static public final int
+      INTER = 0, LL = 1, PD = 2, HL = 3;
+   static public final String[] LABELS = {
+      "Interrupt", "LowLevel", "PeakDet", "HighLevel"
+   };
+   static public final int
+      RAW_CNT_FILL = CDFVar.UINT2_FILL;
+
+   static public final float
+      CNT_FILL     = CDFVar.FLOAT_FILL;
+
    private int date, lvl;
    private String payload_id;
 
-   public Rcnt(final String path, final String pay, int d, int l){
+   public RCNT(final String path, final String pay, int d, int l){
       this.payload_id = pay;
       this.date = d;
       this.lvl = l;
@@ -98,7 +109,7 @@ public class Rcnt extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 1.0e17f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", CNT_FILL);
       this.cdf.addVar("PeakDet", var);
 
       var = new CDFVar(cdf, "LowLevel", CDFConstants.CDF_FLOAT);
@@ -113,7 +124,7 @@ public class Rcnt extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 1.0e17f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", CNT_FILL);
       this.cdf.addVar("LowLevel", var);
 
       var = new CDFVar(cdf, "HighLevel", CDFConstants.CDF_FLOAT);
@@ -128,7 +139,7 @@ public class Rcnt extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 1.0e17f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", CNT_FILL);
       this.cdf.addVar("HighLevel", var);
 
       var = new CDFVar(cdf, "Interrupt", CDFConstants.CDF_FLOAT);
@@ -143,7 +154,7 @@ public class Rcnt extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 1.0e17f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", CNT_FILL);
       this.cdf.addVar("Interrupt", var);
    }
 }

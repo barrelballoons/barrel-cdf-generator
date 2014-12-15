@@ -38,11 +38,15 @@ import java.util.Vector;
 import java.util.Arrays;
 
 public class SSPC extends DataProduct{
-   private int date, lvl;
-   private String payload_id;
-   private float scale = 2.4414f; // keV/bin
+   static public final int
+      RAW_CNT_FILL = CDFVar.UINT2_FILL;
 
-   public final static float[] 
+   static public final float
+      CNT_FILL     = CDFVar.FLOAT_FILL,
+      ERROR_FILL   = CDFVar.FLOAT_FILL,
+      PEAK_FILL    = CDFVar.FLOAT_FILL;
+
+   static public final float[] 
       BIN_EDGES = {
          0f, 1f, 2f, 3f, 4f, 5f, 6f, 7f, 8f, 9f, 10f, 11f, 12f, 13f, 14f, 15f, 
          16f, 17f, 18f, 19f, 20f, 21f, 22f, 23f, 24f, 25f, 26f, 27f, 28f, 29f, 
@@ -116,7 +120,11 @@ public class SSPC extends DataProduct{
          64f, 64f, 64f, 64f, 64f, 64f, 64f, 64f, 64f, 64f, 64f, 64f, 64f, 
          64f, 64f, 64f, 64f
       };
-
+   
+   private int date, lvl;
+   private String payload_id;
+   private float scale = 2.4414f; // keV/bin
+   
    public SSPC(final String path, final String pay, int d, int l){
       this.payload_id = pay;
       this.date = d;
@@ -141,7 +149,7 @@ public class SSPC extends DataProduct{
          var.attribute("SCALETYP", "linear");
          var.attribute("VALIDMIN", 15999999999L);
          var.attribute("VALIDMAX", 16000000001L);
-         var.attribute("FILLVAL", Long.MIN_VALUE);
+         var.attribute("FILLVAL", CDFVar.INT8_FILL);
          this.cdf.addVar("HalfAccumTime", var);
 
          //Fill the "HalfAccumTime" variable
@@ -214,7 +222,7 @@ public class SSPC extends DataProduct{
       var.attribute("DISPLAY_TYPE", "spectrogram");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 1e30f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", CNT_FILL);
       var.attribute("DELTA_PLUS_VAR", "cnt_error");
       var.attribute("DELTA_MINUS_VAR", "cnt_error");
       this.cdf.addVar("SSPC", var);
@@ -237,7 +245,7 @@ public class SSPC extends DataProduct{
       var.attribute("SCALETYP", "log");
       var.attribute("VALIDMIN", 20.0f);
       var.attribute("VALIDMAX", 10000.0f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", CDFVar.FLOAT_FILL);
       var.attribute("DELTA_PLUS_VAR", "HalfBinWidth");
       var.attribute("DELTA_MINUS_VAR", "HalfBinWidth");
       this.cdf.addVar("energy", var);
@@ -268,7 +276,7 @@ public class SSPC extends DataProduct{
       var.attribute("SCALETYP", "linear");
       var.attribute("VALIDMIN", 0);
       var.attribute("VALIDMAX", 255);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("UINT2_FILL"));
+      var.attribute("FILLVAL", CDFVar.UINT2_FILL);
       this.cdf.addVar("channel", var);
 
       //Fill the "channel" variable
@@ -320,7 +328,7 @@ public class SSPC extends DataProduct{
       var.attribute("SCALETYP", "linear");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 200.0f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", CDFVar.FLOAT_FILL);
       this.cdf.addVar("HalfBinWidth", var);
 
       //Fill the "BinWidth" variable
@@ -349,7 +357,7 @@ public class SSPC extends DataProduct{
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 4096.0f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", PEAK_FILL);
       this.cdf.addVar("Peak_511", var);
 
       //Create the count error variable
@@ -371,7 +379,7 @@ public class SSPC extends DataProduct{
       var.attribute("DISPLAY_TYPE", "spectrogram");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 10000.0f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", ERROR_FILL);
       this.cdf.addVar("cnt_error", var);
    }
 }

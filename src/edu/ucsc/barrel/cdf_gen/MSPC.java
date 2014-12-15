@@ -38,12 +38,14 @@ import java.util.Vector;
 import java.util.Arrays;
 
 public class MSPC extends DataProduct{
-   private int date, lvl;
-   private String payload_id;
+   static public final int
+      RAW_CNT_FILL = CDFVar.UINT2_FILL;
 
-   private float scale = 2.4414f; // keV/bin
+   static public final float
+      CNT_FILL     = CDFVar.FLOAT_FILL,
+      ERROR_FILL   = CDFVar.FLOAT_FILL;
 
-   public final static float[]
+   static public final float[]
       BIN_EDGES = {
          42f, 46f, 50f, 53f, 57f, 60f, 64f, 70f, 78f, 84f, 92f, 100f, 
          106f, 114f, 120f, 128f, 140f, 156f, 168f, 184f, 200f, 212f, 
@@ -64,6 +66,12 @@ public class MSPC extends DataProduct{
          32f, 24f, 32f, 48f, 64f, 48f, 64f, 64f, 48f, 64f, 48f, 64f, 96f, 
          128f, 96f, 128f, 128f, 96f
       };
+
+   private int date, lvl;
+   private String payload_id;
+
+   private float scale = 2.4414f; // keV/bin
+   
 
    public MSPC(final String path, final String pay, int d, int l){
       this.payload_id = pay;
@@ -89,7 +97,7 @@ public class MSPC extends DataProduct{
          var.attribute("SCALETYP", "linear");
          var.attribute("VALIDMIN", 1999999999L);
          var.attribute("VALIDMAX", 2000000001L);
-         var.attribute("FILLVAL", Long.MIN_VALUE);
+         var.attribute("FILLVAL", CDFVar.INT8_FILL);
          this.cdf.addVar("HalfAccumTime", var);
 
          //Fill the "HalfAccumTime" variable
@@ -164,7 +172,7 @@ public class MSPC extends DataProduct{
       var.attribute("VALIDMAX", 1707.0f);
       var.attribute("DELTA_PLUS_VAR", "cnt_error");
       var.attribute("DELTA_MINUS_VAR", "cnt_error");
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", CNT_FILL);
       this.cdf.addVar("MSPC", var);
 
       //Create the "energy" variable
@@ -186,7 +194,7 @@ public class MSPC extends DataProduct{
       var.attribute("SCALETYP", "log");
       var.attribute("VALIDMIN", 100.0f);
       var.attribute("VALIDMAX", 4100.0f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", CDFVar.FLOAT_FILL);
       var.attribute("DELTA_PLUS_VAR", "HalfBinWidth");
       var.attribute("DELTA_MINUS_VAR", "HalfBinWidth");
       this.cdf.addVar("energy", var);
@@ -218,7 +226,7 @@ public class MSPC extends DataProduct{
       var.attribute("DISPLAY_TYPE", "spectrogram");
       var.attribute("VALIDMIN", 0.0f);
       var.attribute("VALIDMAX", 10000.0f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", ERROR_FILL);
       this.cdf.addVar("cnt_error", var);
       
       //Create the "channel" variable
@@ -239,7 +247,7 @@ public class MSPC extends DataProduct{
       var.attribute("SCALETYP", "linear");
       var.attribute("VALIDMIN", 0);
       var.attribute("VALIDMAX", 48);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("UINT1_FILL"));
+      var.attribute("FILLVAL", CDFVar.UINT1_FILL);
       this.cdf.addVar("channel", var);
 
       //Fill the "channel" variable
@@ -269,7 +277,7 @@ public class MSPC extends DataProduct{
       var.attribute("SCALETYP", "linear");
       var.attribute("VALIDMIN", 3.0f);
       var.attribute("VALIDMAX", 157.0f);
-      var.attribute("FILLVAL", CDFVar.getIstpVal("FLOAT_FILL"));
+      var.attribute("FILLVAL", CDFVar.FLOAT_FILL);
       this.cdf.addVar("HalfBinWidth", var);
 
       //Fill the "BinWidth" variable
