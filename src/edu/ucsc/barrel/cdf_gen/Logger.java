@@ -41,10 +41,7 @@ public class Logger extends File{
 
       //Open the Log file for writing
       try{
-         // if file doesnt exists, then create it
-         if (!this.exists()) {
-            this.createNewFile();
-         }
+         this.createNewFile();
 
          FileWriter fw = new FileWriter(this.getAbsoluteFile());
          bw = new BufferedWriter(fw);

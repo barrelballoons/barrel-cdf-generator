@@ -32,34 +32,40 @@ public class ExtractTiming {
    //Set some constant values
    private static final int MAX_RECS = 500;// max number of mod4 recs for model
    private static final double NOM_RATE = 999.89;// nominal ms per frame
-   private static final int MSPERWEEK = 604800000;// mseconds in a week
+   private static final long MSPERWEEK = 604800000L;// mseconds in a week
    private static final short MINWK = 1200;
    private static final byte MINPPS = 0;
    private static final byte MINMS = 1;
    private static final byte MINFC = 0;
    private static final short MAXWK = 1880;
    private static final short MAXPPS = 1000;
-   private static final int MAXMS = 604800000;
+   private static final int MAXMS = 691200000;
    private static final int MAXFC = 2097152;
+   //ms from Jan 6, 1980 to J2000
+   private static final long GPS_EPOCH = -630763148816L;
+
+   //offsets for spectral data. These offsets will move the epoch variable so
+   //it points to the middle of the accumulation time
+   private static final long SSPC_EPOCH_OFFSET = 16000000000L; //31968000000L;
+   private static final long MSPC_EPOCH_OFFSET = 2000000000L; //3996000000L;
+
 
    private class TimeRec{
       private long ms;//frame timestamp
       private long frame;//frame counter
-      private long GPS_EPOCH = -630763148816L;//ms from Jan 6, 1980 to J2000
 
       public TimeRec(long fc, long msw, short weeks, short pps){
          //figure out if we need to add an extra second based on the PPS
          int extra_ms = (pps < 241) ? 0 : 1000;
-         
+
          //get the number of ms between GPS_START_TIME and start of this week
-         long weeks_in_ms = (long)weeks * (long)MSPERWEEK;
+         long weeks_in_ms = weeks * MSPERWEEK;
 
          //save the frame number
          frame = fc;
 
          //calculate the number of milliseconds since J2000 
-         ms = 
-            weeks_in_ms + msw + extra_ms - pps + GPS_EPOCH;
+         ms = weeks_in_ms + msw + extra_ms - pps + GPS_EPOCH;
       }
       
       public long getMS(){return ms;}
@@ -112,34 +118,33 @@ public class ExtractTiming {
       for(int rec_mod4_i = 0; rec_mod4_i < time_recs.length; rec_mod4_i++){
          //make sure we have a valid ms
          ms = data.ms_of_week[rec_mod4_i];
-         if((ms <= MINMS) || (ms >= MAXMS)){continue;}
-         
+         if((ms < MINMS) || (ms > MAXMS)){continue;}
+
          //get initial fc from the mod4 framegroup
          fc = data.frame_mod4[rec_mod4_i]; //last good fc from this mod4 group
          
          //check if fc is a fill value
          if(fc == Constants.FC_FILL){continue;}
 
-         //figure out the offset from mod4 fc and 1Hz fc
-         fc -= ((fc % 4) - Constants.TIME_I); 
-         
+         //Offset the frame number to be that of the GPS_Time frame
+         fc = fc - (fc % 4) + Constants.TIME_I; 
+
          //get the indices of other cadence data
          rec_1Hz_i = data.convertIndex(rec_mod4_i, fc, "mod4", "1Hz");
          rec_mod40_i = data.convertIndex(rec_mod4_i, fc, "mod4", "mod40");
 
          //figure out if pps is valid 
          pps = (short)data.pps[rec_1Hz_i];
-         if((pps <= MINPPS) || (pps >= MAXPPS)){
+         if((pps < MINPPS) || (pps > MAXPPS)){
             //check if pps is high because it came super early so the
             //dpu didnt have a chance to write "0"
-            if(pps == 65535){pps = 0;} 
+            if(pps == 65535 || pps == 32768){pps = 0;} 
             else{continue;}
          }
 
          //get number of weeks since GPS_START_TIME
          week = (short)data.weeks[rec_mod40_i];
-         if((week <= MINWK) || (week >= MAXWK)){continue;}
-         
+         if((week < MINWK) || (week > MAXWK)){continue;}
          time_recs[time_rec_cnt] = new TimeRec(fc, ms, week, pps);
          time_rec_cnt++;
       }
@@ -179,7 +184,7 @@ public class ExtractTiming {
             );
          }else{
             System.out.println(
-               "Failed to get model using " + (last_rec-first_rec) + "records"
+               "Failed to get model using " + (last_rec-first_rec) + " records."
             );
          }
       }
@@ -223,7 +228,12 @@ public class ExtractTiming {
             ((fc * data.time_model_slope[data_i]) + 
             data.time_model_intercept[data_i]) * 1000000
          );
-            
+
+         /*
+         //offset epoch to the begining of the accumulation period
+         data.epoch_1Hz[data_i] -= Constants.SING_ACCUM;
+         */
+
          //save epoch to the various time scales
          //fill the >1Hz times 
          for(int fill_i = 0; fill_i < 4; fill_i++){
@@ -245,6 +255,8 @@ public class ExtractTiming {
             ((fc * models[model_i].getSlope()) + 
             models[model_i].getIntercept()) * 1000000
          );
+
+         data.epoch_mod4[data_i] -= MSPC_EPOCH_OFFSET;
       }
 
       //fill mod32 timestamps
@@ -256,6 +268,8 @@ public class ExtractTiming {
             ((fc * models[model_i].getSlope()) + 
             models[model_i].getIntercept()) * 1000000
          );
+
+         data.epoch_mod32[data_i] -= SSPC_EPOCH_OFFSET;
       }
 
       //fill mod40 timestamps
@@ -267,6 +281,11 @@ public class ExtractTiming {
             ((fc * models[model_i].getSlope()) + 
             models[model_i].getIntercept()) * 1000000
          );
+        
+         /*
+         //offset the epoch to the accumulation time of the first frame
+         data.epoch_mod40[data_i] -= (((fc % 40) + 1) * Constants.SING_ACCUM);
+         */
       }
    }
 
@@ -301,6 +320,7 @@ public class ExtractTiming {
             }
          }
       }
+      
    }
    
    private int selectModel(final long fc, final int i){
@@ -345,8 +365,8 @@ public class ExtractTiming {
 
       //Find all the points that are within 200ms from the median offset
       //and add them to the model
-      for (int rec_i = 0; rec_i < cnt; rec_i++){
-         if(Math.abs(offsets[rec_i] - med) < 200){
+      for (int rec_i = first, offset_i = 0; rec_i < last; rec_i++, offset_i++){
+         if(Math.abs(offsets[offset_i] - med) < 200){
             fit.addData(time_recs[rec_i].getFrame(), time_recs[rec_i].getMS());
          }
       }

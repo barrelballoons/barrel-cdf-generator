@@ -58,6 +58,7 @@ public class Constants{
       INT2_FILL = -32768,
       INT4_FILL = -2147483648;
    static public final long
+      INT8_FILL = -9223372036854775808L,
       UINT4_FILL = 4294967295L;
    static public final float 
       FLOAT_FILL = -1.0e+31f;
@@ -72,7 +73,8 @@ public class Constants{
       LEAP_SEC_MIN = 0, LEAP_SEC_MAX = 255, LEAP_SEC_FILL = INT2_FILL,
       TERM_STAT_MIN = 0, TERM_STAT_MAX = 1, TERM_STAT_FILL = INT2_FILL,
       MODEM_CNT_MIN = 0, MODEM_CNT_MAX = 255, MODEM_CNT_FILL = INT2_FILL,
-      DCD_CNT_MIN = 0, DCD_CNT_MAX = 255, DCD_CNT_FILL = INT2_FILL;
+      DCD_CNT_MIN = 0, DCD_CNT_MAX = 255, DCD_CNT_FILL = INT2_FILL,
+      PPS_MIN = 0, PPS_MAX = 1000, PPS_FILL = INT2_FILL;
    public static final int
       MS_WEEK_MIN = 0, MS_WEEK_MAX = 604800000, MS_WEEK_FILL = INT4_FILL,
       WEEKS_MIN = 1200, WEEKS_MAX = 1880, WEEKS_FILL = INT4_FILL,
@@ -86,8 +88,7 @@ public class Constants{
       LON_RAW_MIN = -2147483647, LON_RAW_MAX = 2147483647, 
          LON_RAW_FILL = INT4_FILL,
       ALT_RAW_MIN = 0, ALT_RAW_MAX = 50000000, ALT_RAW_FILL = INT4_FILL,
-      PPS_MIN = 0, PPS_MAX = 1000, PPS_FILL = INT4_FILL,
-      FC_MIN = 0, FC_MAX = 2097151, FC_FILL = UINT2_FILL;
+      FC_MIN = 0, FC_MAX = 2097151, FC_FILL = INT4_FILL;
    public static final long
       HKPG_MIN = 0, HKPG_MAX = 65535, HKPG_FILL = INT4_FILL,
       RCNT_MIN = 0, RCNT_MAX = 65535, RCNT_FILL = INT4_FILL;
@@ -103,10 +104,4 @@ public class Constants{
 
    //minimum altitude at which we can expect good science (in mm)
    public static final int MIN_SCI_ALT = 20000000;
-
-   //various accumulation time offsets based on nominal ms/frame
-   public static final long 
-      SSPC_ACCUM = 31968000000L,
-      QUAD_ACCUM = 3996000000L,
-      SING_ACCUM = 999000000L;
 }

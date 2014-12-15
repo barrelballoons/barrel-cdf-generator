@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 public class CDF_Gen{
    
@@ -91,7 +92,7 @@ public class CDF_Gen{
 			if(payload_parts[2] != null){stn = payload_parts[2];}
 			if(payload_parts[3] != null){mag = payload_parts[3];}
 			if(payload_parts[3] != null){dpu = payload_parts[4];}
-			
+		   
          //set output paths
          if(getSetting("outDir") != ""){
 			   //check if user specified a place to store the files
@@ -173,7 +174,7 @@ public class CDF_Gen{
                if(getSetting("L").indexOf("1") > -1){
                   //create Level One 
                   LevelOne L1 =
-						   new LevelOne(getSetting("date"), id, flt, stn);
+						   new LevelOne(getSetting("date"), id, flt, stn, L1_Dir);
                   L1 = null;
                }
                
@@ -184,23 +185,27 @@ public class CDF_Gen{
                      total_specs = data.getSize("mod32"),
                      start_i = 0,
                      stop_i = 0,
-                     max_recs = 10;
+                     max_recs = 20;
                   
                   System.out.println("Starting Level Two...");
                   System.out.println("Locating 511 line...");
 
                   while(start_i < total_specs){
-                     stop_i = Math.min(total_specs, start_i + max_recs); 
+                     if((start_i + (2 * max_recs)) > total_specs){
+                        stop_i = total_specs;
+                     }else{
+                        stop_i = start_i + max_recs;
+                     }
+
                      SpectrumExtract.do511Fits(start_i, stop_i);
                      start_i = stop_i;
                   }
-
-                  smoothData(data.peak511_bin, 80);
+                  fill511Gaps();
 
                   //create Level Two
                   LevelTwo L2 =
 						   new LevelTwo(
-                        getSetting("date"), id, flt, stn, getSetting("mag_gen")
+                        getSetting("date"), id, flt, stn, L2_Dir
                      );
 
                   L2 = null;
@@ -217,19 +222,34 @@ public class CDF_Gen{
       log.close();
    }
    
-   public static void smoothData(double[] input_data, int smooth_factor){
+   public static void fill511Gaps(){
       int 
          size = data.getSize("mod32"),
          step_size = 1, 
          start = 0;
       double 
+         delta, std_dev, med;
+      float
          m, b, //values used for interpolating data        
-         adjusted_smooth, //smoothing factor that is adjusted by gap length
-         last_value = Constants.DOUBLE_FILL, new_value = Constants.DOUBLE_FILL;
+         fill = (Float)CDFVar.getIstpVal("FLOAT_FILL"),
+         new_value = fill,
+         last_value = fill;
+      DescriptiveStatistics stats = new DescriptiveStatistics();
+      
+      //generate statistics on the 511 peak jump sizes
+      for(int peak_i = 0; peak_i < (size - 1); peak_i++){
+         if(data.peak511_bin[peak_i] == fill){continue;}
+         if(data.peak511_bin[peak_i + 1] == fill){continue;}
+
+         delta = data.peak511_bin[peak_i + 1] - data.peak511_bin[peak_i];
+         if(delta != 0){stats.addValue(delta);}
+      }
+      std_dev = stats.getStandardDeviation();
+      med = stats.getPercentile(50);
 
       //find first good value
       for(start = 0; start < size; start++){
-         if(data.peak511_bin[start] != Constants.DOUBLE_FILL){
+         if(data.peak511_bin[start] != fill){
             new_value = data.peak511_bin[start];
             last_value = data.peak511_bin[start];
             break;
@@ -239,29 +259,32 @@ public class CDF_Gen{
       //fill any missing data before the first point
       Arrays.fill(data.peak511_bin, 0, start, new_value);
 
-      for(int filter_i = start; filter_i < size; filter_i++){
-        if(data.peak511_bin[filter_i] == Constants.DOUBLE_FILL){
+      for(int filler_i = start + 1; filler_i < size; filler_i++){
+        if(data.peak511_bin[filler_i] == fill){
             //temporarily fill the gap with the last good value 
             //this is done in case there is not another good value
             //to use for interpolation
-            data.peak511_bin[filter_i] = last_value;
+            data.peak511_bin[filler_i] = last_value;
             step_size++;
          }else{
-            adjusted_smooth = (double)smooth_factor / (double)step_size;
+            //make sure jump size wasn't too big
+            delta = data.peak511_bin[filler_i] - data.peak511_bin[filler_i - 1];
+           // if(Math.abs(delta - med) > (std_dev * 3)){
+           //    data.peak511_bin[filler_i] = last_value;
+           //    step_size++;
+           // }
+
             last_value = new_value;
-            new_value = 
-               last_value + 
-               (data.peak511_bin[filter_i] - last_value) / adjusted_smooth;
-            data.peak511_bin[filter_i] = new_value;
+            new_value = data.peak511_bin[filler_i];
             
             //fill any gaps
             if(step_size > 1){
                m = (last_value - new_value) / step_size;
-               b = new_value - (m * filter_i);
+               b = new_value - (m * filler_i);
 
                for(
-                  int fill_i = filter_i - step_size; 
-                  fill_i < filter_i; 
+                  int fill_i = filler_i - step_size; 
+                  fill_i < filler_i; 
                   fill_i++
                ){
                   data.peak511_bin[fill_i] = m * fill_i + b;

@@ -57,7 +57,10 @@ public class DataHolder{
       sspc_frames = 0,
       mspc_frames = 0;
 
+   private short version = 0;
+
    public short[]  
+      pps = new short[MAX_FRAMES],
       payID = new short[MAX_FRAMES], 
       ver = new short[MAX_FRAMES],
       sats = new short[MAX_FRAMES / 40],
@@ -66,6 +69,7 @@ public class DataHolder{
       modemCnt = new short[MAX_FRAMES / 40],
       dcdCnt = new short[MAX_FRAMES / 40];
    public long[]
+      gps_time = new long[MAX_FRAMES/4],
       epoch_1Hz = new long[MAX_FRAMES],
       epoch_4Hz = new long[MAX_FRAMES * 4],
       epoch_20Hz = new long[MAX_FRAMES * 20],
@@ -95,9 +99,7 @@ public class DataHolder{
       frame_mod40 = new int[MAX_FRAMES / 40];
    public int[] 
       weeks = new int[MAX_FRAMES / 40],
-      pps = new int[MAX_FRAMES],
-      cmdCnt = new int[MAX_FRAMES / 40];
-   public int[]
+      cmdCnt = new int[MAX_FRAMES / 40],
       gps_q = new int[MAX_FRAMES / 4],
       pps_q = new int[MAX_FRAMES],
       magn_q = new int[MAX_FRAMES * 4],
@@ -113,9 +115,11 @@ public class DataHolder{
       lc1 = new int[MAX_FRAMES * 20],
       lc2 = new int[MAX_FRAMES * 20],
       lc3 = new int[MAX_FRAMES * 20],
-      lc4 = new int[MAX_FRAMES * 20];
-   public double[]
-      peak511_bin = new double[MAX_FRAMES / 32];
+      lc4 = new int[MAX_FRAMES * 20],
+      lc5 = new int[MAX_FRAMES * 20],
+      lc6 = new int[MAX_FRAMES * 20];
+   public float[]
+      peak511_bin = new float[MAX_FRAMES / 32];
 
    public int 
       //record numbers are incrimented on the first record so
@@ -252,6 +256,8 @@ public class DataHolder{
       Arrays.fill(lc2, Constants.FSPC_RAW_FILL);
       Arrays.fill(lc3, Constants.FSPC_RAW_FILL);
       Arrays.fill(lc4, Constants.FSPC_RAW_FILL);
+      Arrays.fill(lc5, Constants.FSPC_RAW_FILL);
+      Arrays.fill(lc6, Constants.FSPC_RAW_FILL);
       Arrays.fill(rcnt[0], Constants.RCNT_FILL);
       Arrays.fill(rcnt[1], Constants.RCNT_FILL);
       Arrays.fill(rcnt[2], Constants.RCNT_FILL);
@@ -288,6 +294,10 @@ public class DataHolder{
       }
    }
 
+   public int getVersion(){
+      return this.version;
+   }
+
    public int getSize(String cadence){
       if(cadence.equals("1Hz")){
          return rec_num_1Hz + 1;
@@ -304,9 +314,10 @@ public class DataHolder{
       }
    }
   
-   public int convertIndex(int old_i, long fc, String old_cad, String new_cad){
-      long target_fc;
-      int fc_offset = 0, new_i;
+   public int convertIndex(
+      int old_i, long fc, final String old_cad, final String new_cad
+   ){
+      int fc_offset = 0, new_i = 0, step;
       double multiplier;
       int[] frames;
 
@@ -315,17 +326,17 @@ public class DataHolder{
       if(new_cad.equals("mod40")){
          multiplier = 0.025;
          frames = frame_mod40;
-         fc_offset = (int)fc % 40;
+         fc -= (int)fc % 40; //find the first frame number in this group
       }
       else if(new_cad.equals("mod32")){
          multiplier = 0.03125;
          frames = frame_mod32;
-         fc_offset = (int)fc % 32;
+         fc -= (int)fc % 32;
       }
       else if(new_cad.equals("mod4")){
          multiplier = 0.25;
          frames = frame_mod4;
-         fc_offset = (int)fc % 4;
+         fc -= (int)fc % 4;
       }
       else if(new_cad.equals("1Hz")){
          multiplier = 1;
@@ -339,29 +350,55 @@ public class DataHolder{
          multiplier = 20;
          frames = frame_20Hz;
       }
+      /*
       if(old_cad.equals("mod40")){multiplier /= 0.025;}
       else if(old_cad.equals("mod32")){multiplier /= 0.03125;}
       else if(old_cad.equals("mod4")){multiplier /= 0.25;}
       else if(old_cad.equals("4Hz")){multiplier /= 4;}
-      else{multiplier /= 20;}
+      else if(old_cad.equals("20Hz")){multiplier /= 20;}
+      */
 
-      //figure out the target frame number 
-      //this will determine the first frame number of a multiplexed group
-      target_fc = fc - fc_offset;
-
-      //get initial guess for the new index
-      new_i = (int)(old_i * multiplier);
-
-      //correct new_i based on frame number
-      while((new_i < frames.length) && (frames[new_i] < target_fc)){
+      while(new_i < getSize(new_cad)){
+         if(frames[new_i] != Constants.FC_FILL){
+            if(frames[new_i] >= fc){return new_i;}
+         }
          new_i++;
       }
-      if(new_i == frames.length){new_i--;}
-      while((new_i > 0) && (frames[new_i] > target_fc)){
-         new_i--;
+
+      return new_i - 1;
+
+      /*
+      //get initial guess for the new index
+      new_i = (int)(old_i * multiplier);
+      
+      //check if the initial guess was right
+      if(fc == frames[new_i]){return new_i;}
+      else if(frames[new_i] < fc && frames[new_i] != Constants.FC_FILL){
+         step = 1;
+      }
+      else{
+         step = -1;
+         //make sure the guess is within range 
+         new_i = (new_i > frames.length) ? frames.length - 2 : new_i; 
       }
 
-      return new_i;
+      //correct new_i based on frame number
+      while((new_i < frames.length - 1) && (new_i > 0)){
+         if(frames[new_i] == fc){
+            //found the target fc. done!
+            break;
+         }
+         else if(step * (fc - frames[new_i]) < 0){
+            //crossed over a gap that contained target fc.
+            //get fc that is just after the gap
+            if(step == -1){new_i++;}
+            break;
+         }else{
+            //have not passed the target fc yet
+            new_i += step;
+         }
+      }
+*/
    }
 
    public void addFrame(BigInteger frame, int dpu_id){
@@ -369,7 +406,7 @@ public class DataHolder{
       //save the frame counter parts as temp variables,
       //they will be written to the main structure once rec_num is calculated.
       //First 5 bits are version, next 6 are id, last 21 are FC
-      short tmpVer = 
+      this.version =
          frame.shiftRight(1691).and(BigInteger.valueOf(31)).shortValue();
       short tmpPayID = 
          frame.shiftRight(1685).and(BigInteger.valueOf(63)).shortValue();
@@ -377,9 +414,13 @@ public class DataHolder{
          frame.shiftRight(1664).and(BigInteger.valueOf(2097151)).intValue();
       int tmpGPS = 
          frame.shiftRight(1632).and(BigInteger.valueOf(4294967295L)).intValue();
-
+      
       //check to make sure we have a frame from the correct payload
-      if(dpu_id != tmpPayID){return;}
+      if(dpu_id != tmpPayID){
+         System.out.println("Bad payload ID in frame: " + tmpFC);
+         System.out.println("Found: " + tmpPayID + " Should be: " + dpu_id);
+         return;
+      }
       
       //validate frame number
       if(tmpFC <= Constants.FC_MIN || tmpFC > Constants.FC_MAX){return;}
@@ -456,7 +497,7 @@ public class DataHolder{
       }
 
       //save the info from the frame counter word
-      ver[rec_num_1Hz] = tmpVer;
+      ver[rec_num_1Hz] = this.version;
       payID[rec_num_1Hz] = tmpPayID;
       frame_1Hz[rec_num_1Hz] = (int)tmpFC;
 
@@ -585,7 +626,7 @@ public class DataHolder{
 
       //GPS PPS
       pps[rec_num_1Hz] = 
-         frame.shiftRight(1616).and(BigInteger.valueOf(65535)).intValue();
+         frame.shiftRight(1616).and(BigInteger.valueOf(65535)).shortValue();
       if(
          (pps[rec_num_1Hz] < Constants.PPS_MIN) ||
          (pps[rec_num_1Hz] > Constants.PPS_MAX)
@@ -766,49 +807,115 @@ public class DataHolder{
             break;
       }
          
-      //fast spectra: 20 sets of 4 channel data. 
-      //ch1 and ch2 are 16 bits, ch3 and ch4 are 8bits 
-      for(int lc_i = 0; lc_i < 20; lc_i++){
-         lc1[rec_num_20Hz + lc_i] =
-            frame.shiftRight(1296 - (48 * lc_i))
-               .and(BigInteger.valueOf(65535)).intValue();
-         lc2[rec_num_20Hz + lc_i] =
-            frame.shiftRight(1280 - (48 * lc_i))
-               .and(BigInteger.valueOf(65535)).intValue();
-         lc3[rec_num_20Hz + lc_i] =
-            frame.shiftRight(1272 - (48 * lc_i))
-               .and(BigInteger.valueOf(255)).intValue();
-         lc4[rec_num_20Hz + lc_i] =
-            frame.shiftRight(1264 - (48 * lc_i))
-               .and(BigInteger.valueOf(255)).intValue();
+      if(this.version > 3){
+         for(int lc_i = 0; lc_i < 20; lc_i++){
+            lc1[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1303 - (48 * lc_i))
+                  .and(BigInteger.valueOf(511)).intValue();
+            lc2[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1294 - (48 * lc_i))
+                  .and(BigInteger.valueOf(511)).intValue();
+            lc3[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1286 - (48 * lc_i))
+                  .and(BigInteger.valueOf(255)).intValue();
+            lc4[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1277 - (48 * lc_i))
+                  .and(BigInteger.valueOf(511)).intValue();
+            lc5[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1270 - (48 * lc_i))
+                  .and(BigInteger.valueOf(127)).intValue();
+            lc6[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1264 - (48 * lc_i))
+                  .and(BigInteger.valueOf(63)).intValue();
 
-         if(
-            (lc1[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
-            (lc1[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
-         ){
-            lc1[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
-            fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            if(
+               (lc1[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+               (lc1[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            ){
+               lc1[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+               fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            }
+            if(
+               (lc2[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+               (lc2[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            ){
+               lc2[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+               fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            }
+            if(
+               (lc3[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+               (lc3[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            ){
+               lc3[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+               fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            }
+            if(
+               (lc4[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+               (lc4[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            ){
+               lc4[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+               fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            }
+            if(
+               (lc5[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+               (lc5[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            ){
+               lc5[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+               fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            }
+            if(
+               (lc6[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+               (lc6[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            ){
+               lc6[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+               fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            }
          }
-         if(
-            (lc2[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
-            (lc2[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
-         ){
-            lc2[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
-            fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
-         }
-         if(
-            (lc3[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
-            (lc3[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
-         ){
-            lc3[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
-            fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
-         }
-         if(
-            (lc4[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
-            (lc4[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
-         ){
-            lc4[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
-            fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+      }else{
+         //old fast spectra: 20 sets of 4 channel data. 
+         //ch1 and ch2 are 16 bits, ch3 and ch4 are 8bits 
+         for(int lc_i = 0; lc_i < 20; lc_i++){
+            lc1[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1296 - (48 * lc_i))
+                  .and(BigInteger.valueOf(65535)).intValue();
+            lc2[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1280 - (48 * lc_i))
+                  .and(BigInteger.valueOf(65535)).intValue();
+            lc3[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1272 - (48 * lc_i))
+                  .and(BigInteger.valueOf(255)).intValue();
+            lc4[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1264 - (48 * lc_i))
+                  .and(BigInteger.valueOf(255)).intValue();
+
+            if(
+               (lc1[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+               (lc1[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            ){
+               lc1[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+               fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            }
+            if(
+               (lc2[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+               (lc2[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            ){
+               lc2[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+               fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            }
+            if(
+               (lc3[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+               (lc3[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            ){
+               lc3[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+               fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            }
+            if(
+               (lc4[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+               (lc4[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            ){
+               lc4[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+               fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            }
          }
       }
        

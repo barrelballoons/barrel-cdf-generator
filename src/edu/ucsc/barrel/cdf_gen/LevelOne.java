@@ -39,70 +39,14 @@ import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
 
-public class LevelOne implements CDFConstants{
-   String outputPath;
-   int lastFrame = -1;
-   long ms_of_week = 0;
-   int weeks = 0;
-   String
-      id = "00",
-      flt = "00",
-      stn = "0",
-      revNum = "00";
-   int today, yesterday, tomorrow;
-   Calendar dateObj = Calendar.getInstance();
-   
-   private DataHolder data;
-   
+public class LevelOne extends CDFWriter{
+
    public LevelOne(
       final String d, final String p, 
-      final String f, final String s
+      final String f, final String s, final String dir
    ) throws IOException
    {
-      //get file revision number
-      if(CDF_Gen.getSetting("rev") != null){
-         revNum = CDF_Gen.getSetting("rev");
-      }
-      
-      //save input arguments
-      id = p;
-      flt = f;
-      stn = s;
-      today = Integer.valueOf(d);
-
-      //calculate yesterday and tomorrow from today's date
-      int year, month, day;
-      year = today/10000;
-      month = (today - (year * 10000)) / 100;
-      day = today - (year * 10000) - (month * 100);
-      dateObj.clear();
-      dateObj.set(year, month - 1, day);
-      dateObj.add(Calendar.DATE, -1);
-
-      yesterday = 
-         (dateObj.get(Calendar.YEAR) * 10000) + 
-         ((dateObj.get(Calendar.MONTH) + 1) * 100) + 
-         dateObj.get(Calendar.DATE);
-
-      dateObj.add(Calendar.DATE, 2);
-
-      tomorrow = 
-         (dateObj.get(Calendar.YEAR) * 10000) + 
-         ((dateObj.get(Calendar.MONTH) + 1) * 100) + 
-         dateObj.get(Calendar.DATE);
-
-      //get the data storage object
-      data = CDF_Gen.data;
-     
-      //set output path
-      outputPath = CDF_Gen.L1_Dir;
-      
-      //get data from DataHolder and save them to CDF files
-      try{
-         writeData();
-      }catch(CDFException ex){
-         System.out.println(ex.getMessage());
-      }
+      super(d, p, f, s, dir, "Level One");
    }
    
    //Saveve the EPHM data to CDF the file
@@ -121,13 +65,13 @@ public class LevelOne implements CDFConstants{
       //select values for this date
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
         //convert lat and lon to physical units
-        gps[Constants.ALT_I][rec_i] = data.gps[Constants.ALT_I][data_i];
-        gps[Constants.TIME_I][rec_i] = data.gps[Constants.TIME_I][data_i];
-        gps[Constants.LAT_I][rec_i] = data.gps[Constants.LAT_I][data_i];
-        gps[Constants.LON_I][rec_i] = data.gps[Constants.LON_I][data_i];
-        frameGroup[rec_i] = data.frame_mod4[data_i];
-        epoch[rec_i] = data.epoch_mod4[data_i] - Constants.SING_ACCUM;
-        q[rec_i] = data.gps_q[data_i];
+        gps[Constants.ALT_I][rec_i] = CDF_Gen.data.gps[Constants.ALT_I][data_i];
+        gps[Constants.TIME_I][rec_i]=CDF_Gen.data.gps[Constants.TIME_I][data_i];
+        gps[Constants.LAT_I][rec_i] = CDF_Gen.data.gps[Constants.LAT_I][data_i];
+        gps[Constants.LON_I][rec_i] = CDF_Gen.data.gps[Constants.LON_I][data_i];
+        frameGroup[rec_i] = CDF_Gen.data.frame_mod4[data_i];
+        epoch[rec_i] = CDF_Gen.data.epoch_mod4[data_i];
+        q[rec_i] = CDF_Gen.data.gps_q[data_i];
       }
 
       //make sure there is a CDF file to open
@@ -135,7 +79,7 @@ public class LevelOne implements CDFConstants{
       String srcName = 
          "cdf_skels/l1/barCLL_PP_S_l1_ephm_YYYYMMDD_v++.cdf";
       String destName = 
-         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
+         outputPath + "/" + date + "/" + "bar_" + id + 
          "_l1_" + "ephm" + "_20" + date +  "_v" + revNum + ".cdf";
 
       copyFile(new File(srcName), new File(destName), false);
@@ -203,8 +147,8 @@ public class LevelOne implements CDFConstants{
          epoch
       );
       
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
+      var = cdf.getVariable("Quality");
+      System.out.println("Quality...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -218,8 +162,8 @@ public class LevelOne implements CDFConstants{
       cdf.close();
    }
    
-   //write the pps file
-   public void doPpsCdf(int first, int last, int date) throws CDFException{
+   //write the misc file
+   public void doMiscCdf(int first, int last, int date) throws CDFException{
       CDF cdf;
       Variable var;
       
@@ -237,24 +181,24 @@ public class LevelOne implements CDFConstants{
          slope = new double[numOfRecs],
          intercept = new double[numOfRecs];
 
-      System.out.println("\nSaving PPS Level One CDF...");
+      System.out.println("\nSaving MISC Level One CDF...");
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-        pps[rec_i] = data.pps[data_i];
-        version[rec_i] = data.ver[data_i];
-        payID[rec_i] = data.payID[data_i];
-        slope[rec_i] = data.time_model_slope[data_i];
-        intercept[rec_i] = data.time_model_intercept[rec_i];
-        frameGroup[rec_i] = data.frame_1Hz[data_i];
-        epoch[rec_i] = data.epoch_1Hz[data_i] - Constants.SING_ACCUM;
-        q[rec_i] = data.pps_q[data_i];
+        pps[rec_i] = CDF_Gen.data.pps[data_i];
+        version[rec_i] = CDF_Gen.data.ver[data_i];
+        payID[rec_i] = CDF_Gen.data.payID[data_i];
+        slope[rec_i] = CDF_Gen.data.time_model_slope[data_i];
+        intercept[rec_i] = CDF_Gen.data.time_model_intercept[rec_i];
+        frameGroup[rec_i] = CDF_Gen.data.frame_1Hz[data_i];
+        epoch[rec_i] = CDF_Gen.data.epoch_1Hz[data_i];
+        q[rec_i] = CDF_Gen.data.pps_q[data_i];
       }
 
       String srcName = 
-         "cdf_skels/l1/barCLL_PP_S_l1_pps-_YYYYMMDD_v++.cdf";
+         "cdf_skels/l1/barCLL_PP_S_l1_misc_YYYYMMDD_v++.cdf";
       String destName = 
-         outputPath  + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
-         "_l1_" + "pps-" + "_20" + date +  "_v" + revNum + ".cdf";
+         outputPath  + "/" + date + "/" + "bar_" + id + 
+         "_l1_" + "misc" + "_20" + date +  "_v" + revNum + ".cdf";
       copyFile(new File(srcName), new File(destName), false);
 
       cdf = openCDF(destName);
@@ -328,8 +272,8 @@ public class LevelOne implements CDFConstants{
          epoch
       );
 
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
+      var = cdf.getVariable("Quality");
+      System.out.println("Quality...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1L, 
          new long[] {0}, 
@@ -359,19 +303,19 @@ public class LevelOne implements CDFConstants{
       String srcName = 
          "cdf_skels/l1/barCLL_PP_S_l1_magn_YYYYMMDD_v++.cdf";
       String destName = 
-         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
+         outputPath + "/" + date + "/" + "bar_" + id + 
          "_l1_" + "magn" + "_20" + date +  "_v" + revNum + ".cdf";
       copyFile(new File(srcName), new File(destName), false);
 
       cdf = openCDF(destName);
      
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-         magx[rec_i] = data.magx[data_i];
-         magy[rec_i] = data.magy[data_i];
-         magz[rec_i] = data.magz[data_i];
-         frameGroup[rec_i] = data.frame_4Hz[data_i];
-         epoch[rec_i] = data.epoch_4Hz[data_i] - Constants.SING_ACCUM;
-         q[rec_i] = data.magn_q[data_i];
+         magx[rec_i] = CDF_Gen.data.magx[data_i];
+         magy[rec_i] = CDF_Gen.data.magy[data_i];
+         magz[rec_i] = CDF_Gen.data.magz[data_i];
+         frameGroup[rec_i] = CDF_Gen.data.frame_4Hz[data_i];
+         epoch[rec_i] = CDF_Gen.data.epoch_4Hz[data_i];
+         q[rec_i] = CDF_Gen.data.magn_q[data_i];
       }
 
       var = cdf.getVariable("MAG_X");
@@ -424,8 +368,8 @@ public class LevelOne implements CDFConstants{
          epoch
       );
 
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
+      var = cdf.getVariable("Quality");
+      System.out.println("Quality...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -462,21 +406,21 @@ public class LevelOne implements CDFConstants{
       String srcName = 
          "cdf_skels/l1/barCLL_PP_S_l1_hkpg_YYYYMMDD_v++.cdf";
       String destName = 
-         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn 
-         + "_l1_" + "hkpg" + "_20" + date +  "_v" + revNum + ".cdf";
+         outputPath + "/" + date + "/" + "bar_" + id + 
+         "_l1_" + "hkpg" + "_20" + date +  "_v" + revNum + ".cdf";
 
       copyFile(new File(srcName), new File(destName), false);
 
       cdf = openCDF(destName);
          
-      for(int var_i = 0; var_i < data.hkpg.length; var_i++){
+      for(int var_i = 0; var_i < 36; var_i++){
          hkpg = new long[numOfRecs];
          for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-            hkpg[rec_i] =  data.hkpg[var_i][data_i];
+            hkpg[rec_i] =  CDF_Gen.data.hkpg[var_i][data_i];
          }
 
-         var = cdf.getVariable(data.hkpg_label[var_i]);
-         System.out.println(data.hkpg_label[var_i] + "...");
+         var = cdf.getVariable(CDF_Gen.data.hkpg_label[var_i]);
+         System.out.println(CDF_Gen.data.hkpg_label[var_i] + "...");
          var.putHyperData(
             var.getNumWrittenRecords(), numOfRecs, 1, 
             new long[] {0}, 
@@ -487,16 +431,16 @@ public class LevelOne implements CDFConstants{
       }
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-         sats[rec_i] = data.sats[data_i];
-         offset[rec_i] = data.offset[data_i];
-         termStat[rec_i] = data.termStat[data_i];
-         modemCnt[rec_i] = data.modemCnt[data_i];
-         dcdCnt[rec_i] = data.dcdCnt[data_i];
-         cmdCnt[rec_i] = data.cmdCnt[data_i];
-         frameGroup[rec_i] = data.frame_mod40[data_i];
-         weeks[rec_i] = data.weeks[data_i];
-         epoch[rec_i] = data.epoch_mod40[data_i] - Constants.SING_ACCUM;
-         q[rec_i] = data.hkpg_q[data_i];
+         sats[rec_i] = CDF_Gen.data.sats[data_i];
+         offset[rec_i] = CDF_Gen.data.offset[data_i];
+         termStat[rec_i] = CDF_Gen.data.termStat[data_i];
+         modemCnt[rec_i] = CDF_Gen.data.modemCnt[data_i];
+         dcdCnt[rec_i] = CDF_Gen.data.dcdCnt[data_i];
+         cmdCnt[rec_i] = CDF_Gen.data.cmdCnt[data_i];
+         frameGroup[rec_i] = CDF_Gen.data.frame_mod40[data_i];
+         weeks[rec_i] = CDF_Gen.data.weeks[data_i];
+         epoch[rec_i] = CDF_Gen.data.epoch_mod40[data_i];
+         q[rec_i] = CDF_Gen.data.hkpg_q[data_i];
       }
 
       var = cdf.getVariable("numOfSats");
@@ -589,8 +533,8 @@ public class LevelOne implements CDFConstants{
          epoch
       );
 
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
+      var = cdf.getVariable("Quality");
+      System.out.println("Quality...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -612,31 +556,33 @@ public class LevelOne implements CDFConstants{
          q = new int[numOfRecs];
       long[] epoch = new long[numOfRecs];
       int[][]
-         lc = new int[4][numOfRecs];
+         lc = new int[6][numOfRecs];
 
       System.out.println("\nSaving FSPC...");
 
       String srcName = 
          "cdf_skels/l1/barCLL_PP_S_l1_fspc_YYYYMMDD_v++.cdf";
       String destName = 
-         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn 
-         + "_l1_" + "fspc" + "_20" + date +  "_v" + revNum + ".cdf";
+         outputPath + "/" + date + "/" + "bar_" + id +  
+         "_l1_" + "fspc" + "_20" + date +  "_v" + revNum + ".cdf";
       copyFile(new File(srcName), new File(destName), false);
 
       cdf = openCDF(destName);
       
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-         frameGroup[rec_i] = data.frame_20Hz[data_i];
-         epoch[rec_i] = data.epoch_20Hz[data_i] - Constants.SING_ACCUM;
-         q[rec_i] = data.fspc_q[data_i];
-         lc[0][rec_i] = data.lc1[data_i];
-         lc[1][rec_i] = data.lc2[data_i];
-         lc[2][rec_i] = data.lc3[data_i];
-         lc[3][rec_i] = data.lc4[data_i];
+         frameGroup[rec_i] = CDF_Gen.data.frame_20Hz[data_i];
+         epoch[rec_i] = CDF_Gen.data.epoch_20Hz[data_i];
+         q[rec_i] = CDF_Gen.data.fspc_q[data_i];
+         lc[0][rec_i] = CDF_Gen.data.lc1[data_i];
+         lc[1][rec_i] = CDF_Gen.data.lc2[data_i];
+         lc[2][rec_i] = CDF_Gen.data.lc3[data_i];
+         lc[3][rec_i] = CDF_Gen.data.lc4[data_i];
+         lc[4][rec_i] = CDF_Gen.data.lc5[data_i];
+         lc[5][rec_i] = CDF_Gen.data.lc6[data_i];
       }
 
-      var = cdf.getVariable("LC1");
-      System.out.println("LC1...");
+      var = cdf.getVariable("FSPC1a");
+      System.out.println("FSPC1a...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -645,8 +591,8 @@ public class LevelOne implements CDFConstants{
          lc[0]
       );
       
-      var = cdf.getVariable("LC2");
-      System.out.println("LC2...");
+      var = cdf.getVariable("FSPC1b");
+      System.out.println("FSPC1b...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -655,8 +601,8 @@ public class LevelOne implements CDFConstants{
          lc[1]
       );
 
-      var = cdf.getVariable("LC3");
-      System.out.println("LC3...");
+      var = cdf.getVariable("FSPC1c");
+      System.out.println("FSPC1c...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -665,14 +611,34 @@ public class LevelOne implements CDFConstants{
          lc[2]
       );
 
-      var = cdf.getVariable("LC4");
-      System.out.println("LC4...");
+      var = cdf.getVariable("FSPC2");
+      System.out.println("FSPC2...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
          new long[] {1}, 
          new long[] {1}, 
          lc[3]
+      );
+
+      var = cdf.getVariable("FSPC3");
+      System.out.println("FSPC3...");
+      var.putHyperData(
+         var.getNumWrittenRecords(), numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         lc[4]
+      );
+
+      var = cdf.getVariable("FSPC4");
+      System.out.println("FSPC4...");
+      var.putHyperData(
+         var.getNumWrittenRecords(), numOfRecs, 1, 
+         new long[] {0}, 
+         new long[] {1}, 
+         new long[] {1}, 
+         lc[5]
       );
 
       var = cdf.getVariable("FrameGroup");
@@ -695,8 +661,8 @@ public class LevelOne implements CDFConstants{
          epoch
       );
 
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
+      var = cdf.getVariable("Quality");
+      System.out.println("Quality...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -721,10 +687,10 @@ public class LevelOne implements CDFConstants{
       int[][] mspc = new int[numOfRecs][48];
       
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-         frameGroup[rec_i] = data.frame_mod4[data_i];
-         epoch[rec_i] = data.epoch_mod4[data_i] - Constants.QUAD_ACCUM;
-         q[rec_i] = data.mspc_q[data_i];
-         mspc[rec_i] = data.mspc[data_i];
+         frameGroup[rec_i] = CDF_Gen.data.frame_mod4[data_i];
+         epoch[rec_i] = CDF_Gen.data.epoch_mod4[data_i];
+         q[rec_i] = CDF_Gen.data.mspc_q[data_i];
+         mspc[rec_i] = CDF_Gen.data.mspc[data_i];
 
       }
       System.out.println("\nSaving MSPC...");
@@ -732,8 +698,8 @@ public class LevelOne implements CDFConstants{
       String srcName = 
          "cdf_skels/l1/barCLL_PP_S_l1_mspc_YYYYMMDD_v++.cdf";
       String destName = 
-         outputPath  + "/" + date + "/"+ "bar1" + flt + "_" + id + "_" + stn 
-         + "_l1_" + "mspc" + "_20" + date +  "_v" + revNum + ".cdf";
+         outputPath  + "/" + date + "/"+ "bar_" + id + 
+         "_l1_" + "mspc" + "_20" + date +  "_v" + revNum + ".cdf";
 
       copyFile(new File(srcName), new File(destName), false);
 
@@ -769,8 +735,8 @@ public class LevelOne implements CDFConstants{
          epoch
       );
 
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
+      var = cdf.getVariable("Quality");
+      System.out.println("Quality...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -794,10 +760,10 @@ public class LevelOne implements CDFConstants{
       int[][] sspc = new int[numOfRecs][256];
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-         frameGroup[rec_i] = data.frame_mod32[data_i];
-         epoch[rec_i] = data.epoch_mod32[data_i] - Constants.SSPC_ACCUM;
-         q[rec_i] = data.sspc_q[data_i];
-         sspc[rec_i] = data.sspc[data_i];
+         frameGroup[rec_i] = CDF_Gen.data.frame_mod32[data_i];
+         epoch[rec_i] = CDF_Gen.data.epoch_mod32[data_i];
+         q[rec_i] = CDF_Gen.data.sspc_q[data_i];
+         sspc[rec_i] = CDF_Gen.data.sspc[data_i];
       }
 
       System.out.println("\nSaving SSPC...");
@@ -805,7 +771,7 @@ public class LevelOne implements CDFConstants{
       String srcName = 
          "cdf_skels/l1/barCLL_PP_S_l1_sspc_YYYYMMDD_v++.cdf";
       String destName = 
-         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn +
+         outputPath + "/" + date + "/" + "bar_" + id + 
          "_l1_" + "sspc" + "_20" + date +  "_v" + revNum + ".cdf";
       copyFile(new File(srcName), new File(destName), false);
 
@@ -841,8 +807,8 @@ public class LevelOne implements CDFConstants{
          epoch
       );
 
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
+      var = cdf.getVariable("Quality");
+      System.out.println("Quality...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -866,13 +832,13 @@ public class LevelOne implements CDFConstants{
       long[][] rc = new long[4][numOfRecs];
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-         frameGroup[rec_i] = data.frame_mod4[data_i];
-         epoch[rec_i] = data.epoch_mod4[data_i] - Constants.QUAD_ACCUM;
-         q[rec_i] = data.rcnt_q[data_i];
-         rc[0][rec_i] = data.rcnt[0][data_i];
-         rc[1][rec_i] = data.rcnt[1][data_i];
-         rc[2][rec_i] = data.rcnt[2][data_i];
-         rc[3][rec_i] = data.rcnt[3][data_i];
+         frameGroup[rec_i] = CDF_Gen.data.frame_mod4[data_i];
+         epoch[rec_i] = CDF_Gen.data.epoch_mod4[data_i];
+         q[rec_i] = CDF_Gen.data.rcnt_q[data_i];
+         rc[0][rec_i] = CDF_Gen.data.rcnt[0][data_i];
+         rc[1][rec_i] = CDF_Gen.data.rcnt[1][data_i];
+         rc[2][rec_i] = CDF_Gen.data.rcnt[2][data_i];
+         rc[3][rec_i] = CDF_Gen.data.rcnt[3][data_i];
       }
          
       System.out.println("\nSaving RCNT...");
@@ -880,8 +846,8 @@ public class LevelOne implements CDFConstants{
       String srcName = 
          "cdf_skels/l1/barCLL_PP_S_l1_rcnt_YYYYMMDD_v++.cdf";
       String destName = 
-         outputPath + "/" + date + "/"  + "bar1" + flt + "_" + id + "_" + stn
-         + "_l1_" + "rcnt" + "_20" + date +  "_v" + revNum + ".cdf";
+         outputPath + "/" + date + "/"  + "bar_" + id +
+         "_l1_" + "rcnt" + "_20" + date +  "_v" + revNum + ".cdf";
 
       copyFile(new File(srcName), new File(destName), false);
 
@@ -947,8 +913,8 @@ public class LevelOne implements CDFConstants{
          epoch
       );
 
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
+      var = cdf.getVariable("Quality");
+      System.out.println("Quality...");
       var.putHyperData(
          var.getNumWrittenRecords(), numOfRecs, 1, 
          new long[] {0}, 
@@ -958,223 +924,5 @@ public class LevelOne implements CDFConstants{
       );
 
       cdf.close();
-   }
-
-   private void writeData() throws CDFException{
-      File outDir;
-
-      System.out.println(
-         "Creating Level One... (" + data.getSize("1Hz") + " frames)"
-      );
-      
-      //make sure the needed output directories exist
-      outDir = new File(outputPath + "/" + yesterday);
-      if(!outDir.exists()){outDir.mkdirs();}
-      outDir = new File(outputPath + "/" + today);
-      if(!outDir.exists()){outDir.mkdirs();}
-      outDir = new File(outputPath + "/" + tomorrow);
-      if(!outDir.exists()){outDir.mkdirs();}
-
-      //fill CDF files for yesterday, today, and tomorrow
-      doAllCdf(yesterday);
-      doAllCdf(today);
-      doAllCdf(tomorrow);
-
-      System.out.println("Created Level One.");
-   }
-
-   private void doAllCdf(int date) throws CDFException{
-      int first_i, last_i;
-      long rec_date = 0;
-      long[] tt2000_parts; 
-
-      //find the first and last indicies for this day for the 1Hz file
-      first_i = -1;
-      for(last_i = 0; last_i < data.getSize("1Hz"); last_i++){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_1Hz[last_i]);
-         rec_date = 
-            tt2000_parts[2] + //day
-            (100 * tt2000_parts[1]) + //month
-            (10000 * (tt2000_parts[0] - 2000)); //year
-         if(first_i == -1) {
-            if(rec_date == date){
-               //found the first_i index
-               first_i = last_i;
-            }
-         }else if(rec_date > date){
-            break;
-         }
-      }
-      //make sure we have a valid start and stop index
-      if(first_i != -1){
-         doPpsCdf(first_i, last_i, date);
-      }
-
-      //...for the mod4 file
-      first_i = -1;
-      for(last_i = 0; last_i < data.getSize("mod4"); last_i++){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_mod4[last_i]);
-         rec_date = 
-            tt2000_parts[2] + //day
-            (100 * tt2000_parts[1]) + //month
-            (10000 * (tt2000_parts[0] - 2000)); //year
-         if(first_i == -1) {
-            if(rec_date == date){
-               //found the first_i index
-               first_i = last_i;
-            }
-         }else if(rec_date > date){
-            break;
-         }
-      }
-      if(first_i != -1){
-         doGpsCdf(first_i, last_i, date);
-         doMspcCdf(first_i, last_i, date);
-         doRcntCdf(first_i, last_i, date);  
-      }
-
-      //...for the mod32 file
-      first_i = -1;
-      for(last_i = 0; last_i < data.getSize("mod32"); last_i++){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_mod32[last_i]);
-         rec_date = 
-            tt2000_parts[2] + //day
-            (100 * tt2000_parts[1]) + //month
-            (10000 * (tt2000_parts[0] - 2000)); //year
-         if(first_i == -1) {
-            if(rec_date == date){
-               //found the first_i index
-               first_i = last_i;
-            }
-         }else if(rec_date > date){
-            break;
-         }
-      }
-      if(first_i != -1){
-         doSspcCdf(first_i, last_i, date);  
-      }
-
-      //...for the mod40 file
-      first_i = -1;
-      for(last_i = 0; last_i < data.getSize("mod40"); last_i++){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_mod40[last_i]);
-         rec_date = 
-            tt2000_parts[2] + //day
-            (100 * tt2000_parts[1]) + //month
-            (10000 * (tt2000_parts[0] - 2000)); //year
-         if(first_i == -1) {
-            if(rec_date == date){
-               //found the first_i index
-               first_i = last_i;
-            }
-         }else if(rec_date > date){
-            break;
-         }
-      }
-      if(first_i != -1){
-         doHkpgCdf(first_i, last_i, date);  
-      }
-
-      //...for the 4Hz file
-      first_i = -1;
-      for(last_i = 0; last_i < data.getSize("4Hz"); last_i++){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_4Hz[last_i]);
-         rec_date = 
-            tt2000_parts[2] + //day
-            (100 * tt2000_parts[1]) + //month
-            (10000 * (tt2000_parts[0] - 2000)); //year
-         if(first_i == -1) {
-            if(rec_date == date){
-               //found the first_i index
-               first_i = last_i;
-            }
-         }else if(rec_date > date){
-            break;
-         }
-      }
-      if(first_i != -1){
-         doMagCdf(first_i, last_i, date);
-      }
-
-      //...for the 20Hz file
-      first_i = -1;
-      for(last_i = 0; last_i < data.getSize("20Hz"); last_i++){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_20Hz[last_i]);
-         rec_date = 
-            tt2000_parts[2] + //day
-            (100 * tt2000_parts[1]) + //month
-            (10000 * (tt2000_parts[0] - 2000)); //year
-         if(first_i == -1) {
-            if(rec_date == date){
-               //found the first_i index
-               first_i = last_i;
-            }
-         }else if(rec_date > date){
-            break;
-         }
-      }
-      if(first_i != -1){
-         doFspcCdf(first_i, last_i, date); 
-      }
-   }
-   
-   public static void copyFile(File sourceFile, File destFile, boolean clobber){
-      try{
-         if(destFile.exists() && !clobber){
-            return;
-         }
-
-         if(!destFile.exists()){
-            //create the output directory and file if needed
-            new File(destFile.getParent()).mkdirs();
-            destFile.createNewFile();
-         }
-   
-         FileChannel source = null;
-         FileChannel destination = null;
-      
-         try{
-            source = new FileInputStream(sourceFile).getChannel();
-            destination = new FileOutputStream(destFile).getChannel();
-            destination.transferFrom(source, 0, source.size());
-         }finally {
-            if(source != null) {
-               source.close();
-            }
-            if(destination != null) {
-               destination.close();
-            }
-         }
-      }catch(IOException ex){
-         System.out.println(
-            "Could not copy CDF file: "
-               + ex.getMessage()
-         );
-      }
-   }
-
-   public static CDF openCDF(String fileName){
-
-      CDF cdf = null;
-      try{
-         cdf = CDF.open(fileName);
-         
-         if (cdf.getStatus() != CDF_OK)
-         {
-            System.out.print("Error with CDF! ");
-            
-            if (cdf.getStatus() == CHECKSUM_ERROR){
-               System.out.print("Bad checksum!");
-            }
-            
-            if (cdf != null) cdf.close();
-            
-            System.out.println("");
-         }
-      }catch(CDFException ex){
-         System.out.println(ex.getMessage());
-      }
-      
-      return cdf;
    }
  }

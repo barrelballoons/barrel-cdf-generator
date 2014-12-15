@@ -25,11 +25,9 @@ Description:
 
 package edu.ucsc.barrel.cdf_gen;
 
-import gsfc.nssdc.cdf.CDF;
 import gsfc.nssdc.cdf.CDFException;
 import gsfc.nssdc.cdf.CDFConstants;
 import gsfc.nssdc.cdf.util.CDFTT2000;
-import gsfc.nssdc.cdf.Variable;
 
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
@@ -42,81 +40,23 @@ import java.nio.channels.FileChannel;
 import java.util.Calendar;
 import java.util.Vector;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 
-public class LevelTwo implements CDFConstants{
-   String outputPath;
-   int lastFrame = -1;
-   int weeks = 0;
-   String
-      id = "00",
-      flt = "00",
-      stn = "0",
-      revNum = "00",
-      mag_gen_program = "";
-   int today, yesterday, tomorrow;
-   Calendar dateObj = Calendar.getInstance();
-   
-   private DataHolder data;
-   
+public class LevelTwo extends CDFWriter{
+
    public LevelTwo(
       final String d, final String p, 
-      final String f, final String s, final String m
+      final String f, final String s, final String dir 
    ) throws IOException
    {
-      //get file revision number
-      if(CDF_Gen.getSetting("rev") != null){
-         revNum = CDF_Gen.getSetting("rev");
-      }
-      
-      //save input arguments
-      id = p;
-      flt = f;
-      stn = s;
-      today = Integer.valueOf(d);
-      mag_gen_program = m;
-
-      //calculate yesterday and tomorrow from today's date
-      int year, month, day;
-      year = today / 10000;
-      month = (today - (year * 10000)) / 100;
-      day = today - (year * 10000) - (month * 100);
-      dateObj.clear();
-      dateObj.set(year, month - 1, day);
-      dateObj.add(Calendar.DATE, -1);
-
-      yesterday = 
-         (dateObj.get(Calendar.YEAR) * 10000) + 
-         ((dateObj.get(Calendar.MONTH) + 1) * 100) + 
-         dateObj.get(Calendar.DATE);
-
-      dateObj.add(Calendar.DATE, 2);
-
-      tomorrow = 
-         (dateObj.get(Calendar.YEAR) * 10000) + 
-         ((dateObj.get(Calendar.MONTH) + 1) * 100) + 
-         dateObj.get(Calendar.DATE);
-
-      //get the data storage object
-      data = CDF_Gen.data;
-     
-      //set output path
-      outputPath = CDF_Gen.L2_Dir;
-      
-      //get data from DataHolder and save them to CDF files
-      try{
-         writeData();
-      }catch(CDFException ex){
-         System.out.println(ex.getMessage());
-      }
+      super(d, p, f, s, dir, "Level Two");
    }
    
    //Convert the EPHM data and save it to CDF files
    public void doGpsCdf(int first, int last, int date) throws CDFException{
-      CDF cdf;
-      Variable var;
       Calendar d = Calendar.getInstance();
       Logger geo_coord_file = new Logger("pay" + id + "_" + date + "_gps.txt");
-
       int 
          year, month, day, day_of_year, hour, min, sec,
          numOfRecs = last - first;
@@ -140,6 +80,8 @@ public class LevelTwo implements CDFConstants{
          epoch_parts = new long[9],
          epoch = new long[numOfRecs],
          gps_time = new long[numOfRecs];
+      Map<Integer, Boolean> complete_gps = 
+         new HashMap<Integer, Boolean>(numOfRecs);
 
       System.out.println("\nSaving EPHM Level Two CDF...");
 
@@ -155,33 +97,26 @@ public class LevelTwo implements CDFConstants{
       //convert lat, lon, and alt values and select values for this date
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
          //convert mm to km
-         alt[rec_i] = (float)data.gps[Constants.ALT_I][data_i];
-         if(alt[rec_i] != Constants.ALT_RAW_FILL){
-            alt[rec_i] /= 1000000;
-         }else{
-            alt[rec_i] = (float)Constants.ALT_FILL;
-         }
+         alt[rec_i] = CDF_Gen.data.gps[Constants.ALT_I][data_i];
+         alt[rec_i] = (alt[rec_i] != Constants.ALT_RAW_FILL) ?
+            alt[rec_i] / 1000000 :  Constants.ALT_FILL;
 
          //convert lat and lon to physical units
-         lat[rec_i] = (float)data.gps[Constants.LAT_I][data_i];
-         if(lat[rec_i] != Constants.LAT_RAW_FILL){
-            lat[rec_i] *= 
-               Float.intBitsToFloat(Integer.valueOf("33B40000", 16).intValue());
-         }else{
-            lat[rec_i] = (float)Constants.LAT_FILL;
-         }
+         lat[rec_i] = CDF_Gen.data.gps[Constants.LAT_I][data_i];
+         lat[rec_i] = (lat[rec_i] != Constants.LAT_RAW_FILL) ? 
+            (lat[rec_i] * 
+            Float.intBitsToFloat(Integer.valueOf("33B40000", 16).intValue())) :
+            Constants.LAT_FILL;
 
-         lon[rec_i] = (float)data.gps[Constants.LON_I][data_i];
-         if(lon[rec_i] != Constants.LON_RAW_FILL){
-            lon[rec_i] *= 
-               Float.intBitsToFloat(Integer.valueOf("33B40000", 16).intValue());
-         }else{
-            lon[rec_i] = (float)Constants.LON_FILL;
-         }
+         lon[rec_i] = CDF_Gen.data.gps[Constants.LON_I][data_i];
+         lon[rec_i] = (lon[rec_i] != Constants.LON_RAW_FILL) ?
+            (lon[rec_i] *= 
+            Float.intBitsToFloat(Integer.valueOf("33B40000", 16).intValue())) :
+            Constants.LON_FILL;
 
          //calculate the GPS time
-         if(data.ms_of_week[data_i] != Constants.MS_WEEK_FILL){
-            sec = data.ms_of_week[data_i] / 1000; //convert ms to sec
+         if(CDF_Gen.data.ms_of_week[data_i] != Constants.MS_WEEK_FILL){
+            sec = CDF_Gen.data.ms_of_week[data_i] / 1000; //convert ms to sec
             sec %= 86400; //remove any complete days
             hour = sec / 3600;
             sec %= 3600;
@@ -196,46 +131,48 @@ public class LevelTwo implements CDFConstants{
          }
          
          //save the values from the other variables
-         frameGroup[rec_i] = data.frame_mod4[data_i];
-         epoch[rec_i] = data.epoch_mod4[data_i] - Constants.SING_ACCUM;
-         q[rec_i] = data.gps_q[data_i];
+         frameGroup[rec_i] = CDF_Gen.data.frame_mod4[data_i];
+         epoch[rec_i] = CDF_Gen.data.epoch_mod4[data_i];
+         q[rec_i] = CDF_Gen.data.gps_q[data_i];
 
-         //make sure we have a complete gps record before generating mag coords
+         //keep track of which frames have complete GPS values
          if(
             (alt[rec_i] != Constants.ALT_FILL) && 
             (lat[rec_i] != Constants.LAT_FILL) && 
             (lon[rec_i] != Constants.LON_FILL)
          ){
-         
-            //calculate the current time in seconds of day
-            epoch_parts = CDFTT2000.breakdown(epoch[rec_i]);
-            sec_of_day = 
-               (epoch_parts[3] * 3600) + // hours
-               (epoch_parts[4] * 60) + //minutes
-               epoch_parts[5] + //seconds
-               (epoch_parts[6] * 0.001) + //ms
-               (epoch_parts[7] * 0.000001) + //us
-               (epoch_parts[8] * 0.000000001); //ns
-            //convert signed longitude to east longitude
-            east_lon = (lon[rec_i] > 0) ? lon[rec_i] : lon[rec_i] + 360;
-
-            geo_coord_file.writeln(
-               String.format(
-                  "%07d %02.6f %03.6f %03.6f %04d %03d %02.3f", 
-                  frameGroup[rec_i], alt[rec_i], lat[rec_i], lon[rec_i],
-                  (year + 2000), day_of_year, sec_of_day
-               )
-            );
+            complete_gps.put(frameGroup[rec_i], true); 
          }else{
-            geo_coord_file.writeln("NaN NaN NaN NaN NaN NaN NaN");
+            complete_gps.put(frameGroup[rec_i], false); 
          }
+
+         //calculate the current time in seconds of day
+         epoch_parts = CDFTT2000.breakdown(epoch[rec_i]);
+         sec_of_day = 
+            (epoch_parts[3] * 3600) + // hours
+            (epoch_parts[4] * 60) + //minutes
+            epoch_parts[5] + //seconds
+            (epoch_parts[6] * 0.001) + //ms
+            (epoch_parts[7] * 0.000001) + //us
+            (epoch_parts[8] * 0.000000001); //ns
+         //convert signed longitude to east longitude
+         east_lon = (lon[rec_i] > 0) ? lon[rec_i] : lon[rec_i] + 360;
+
+         geo_coord_file.writeln(
+            String.format(
+               "%07d %02.6f %03.6f %03.6f %04d %03d %02.3f", 
+               frameGroup[rec_i], alt[rec_i], lat[rec_i], lon[rec_i],
+               (year + 2000), day_of_year, sec_of_day
+            )
+         );
       }
       geo_coord_file.close();
 
       //get the magnetic field info for this location
       try{
          String command = 
-            mag_gen_program + " " + "pay" + id + "_" + date + "_gps.txt";
+            CDF_Gen.getSetting("mag_gen") + " " + 
+            "pay" + id + "_" + date + "_gps.txt";
 
          Process p = Runtime.getRuntime().exec(command);
          BufferedReader input =                                           
@@ -259,6 +196,7 @@ public class LevelTwo implements CDFConstants{
             rec_i = 0,
             this_frame = 0,
             last_frame = 0;
+         float fill = CDFVar.getIstpVal("FLOAT_FILL").floatValue();
 
          while((line = mag_coord_file.readLine()) != null){
             line = line.trim();
@@ -266,42 +204,49 @@ public class LevelTwo implements CDFConstants{
 
             //check for repeated frame
             this_frame = Integer.parseInt(mag_coords[0]);
-            if(this_frame != last_frame){
-            //make sure the mag coordinates were calculated correctly
+            if(
+               (this_frame != last_frame) && 
+               (complete_gps.get(this_frame) == true)
+            ){
+               //make sure the mag coordinates were calculated correctly
                if(mag_coords[8].indexOf("*") == -1){
                   l2[rec_i] = Math.abs(Float.parseFloat(mag_coords[8]));
                }else{
-                  l2[rec_i] = Constants.FLOAT_FILL;
+                  l2[rec_i] = 9999;
                }
                if(mag_coords[9].indexOf("*") == -1){
                   mlt2[rec_i] = Float.parseFloat(mag_coords[9]);
                }else{
-                  mlt2[rec_i] = Constants.FLOAT_FILL;
+                  mlt2[rec_i] = 9999;
                }
                if(mag_coords[11].indexOf("*") == -1){
                   l6[rec_i] = Math.abs(Float.parseFloat(mag_coords[11]));
                }else{
-                  l6[rec_i] = Constants.FLOAT_FILL;
+                  l6[rec_i] = 9999;
                }
                if(mag_coords[12].indexOf("*") == -1){
                   mlt6[rec_i] = Float.parseFloat(mag_coords[12]);
                }else{
-                  mlt6[rec_i] = Constants.FLOAT_FILL;
+                  mlt6[rec_i] = 9999;
                }
-
-               last_frame = this_frame;
             }
             else{
-               l2[rec_i] = Constants.FLOAT_FILL; 
-               l6[rec_i] = Constants.FLOAT_FILL; 
-               mlt2[rec_i] = Constants.FLOAT_FILL; 
-               mlt6[rec_i] = Constants.FLOAT_FILL; 
+               l2[rec_i] = fill; 
+               l6[rec_i] = fill; 
+               mlt2[rec_i] = fill; 
+               mlt6[rec_i] = fill; 
             } 
 
+            last_frame = this_frame;
             rec_i++;
          }
 
          mag_coord_file.close();
+
+         //clean up after ourselves
+         geo_coord_file.delete();
+         (new File("pay" + id + "_" + date + "_gps_out.txt")).delete();
+
       }catch(IOException ex){
          System.out.println("Could not read magnetic coordinate file:");
          System.out.println(ex.getMessage());
@@ -309,233 +254,82 @@ public class LevelTwo implements CDFConstants{
 
       //make sure there is a CDF file to open
       //(copyFile will not clobber an existing file)
-      String srcName = 
-         "cdf_skels/l2/barCLL_PP_S_l2_ephm_YYYYMMDD_v++.cdf";
       String destName = 
-         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
+         outputPath + "/" + date + "/" + "bar_" + id + 
          "_l2_" + "ephm" + "_20" + date +  "_v" + revNum + ".cdf";
+     
+      Ephm ephm = new Ephm(destName, "bar_" + id, date, 2);
 
-      copyFile(new File(srcName), new File(destName), false);
+      System.out.println("GPS_Alt");
+      ephm.getCDF().addData("GPS_Alt", alt);
+      System.out.println("GPS_Lon");
+      ephm.getCDF().addData("GPS_Lon", lon);
+      System.out.println("GPS_Lat");
+      ephm.getCDF().addData("GPS_Lat", lat);
+      System.out.println("MLT_Kp2");
+      ephm.getCDF().addData("MLT_Kp2", mlt2);
+      System.out.println("MLT_Kp6");
+      ephm.getCDF().addData("MLT_Kp6", mlt6);
+      System.out.println("L_Kp2");
+      ephm.getCDF().addData("L_Kp2", l2);
+      System.out.println("L_Kp6");
+      ephm.getCDF().addData("L_Kp6", l6);
+      System.out.println("FrameGroup");
+      ephm.getCDF().addData("FrameGroup", frameGroup);
+      System.out.println("Epoch");
+      ephm.getCDF().addData("Epoch", epoch);
+      System.out.println("Q");
+      ephm.getCDF().addData("Q", q);
 
-      //open EPHM CDF and save the reference in the cdf variable
-      cdf = openCDF(destName);
-      
-      var = cdf.getVariable("GPS_Alt");
-      System.out.println("GPS_Alt...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1,
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         alt
-      );
-
-      var = cdf.getVariable("GPS_Time");
-      System.out.println("GPS_Time");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         gps_time
-      );
-
-      var = cdf.getVariable("GPS_Lat");
-      System.out.println("GPS_Lat...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         lat 
-      );
-
-      var = cdf.getVariable("GPS_Lon");
-      System.out.println("GPS_Lon...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         lon
-      );
-
-      var = cdf.getVariable("L_Kp2");
-      System.out.println("L_Kp2...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         l2
-      );
-
-      var = cdf.getVariable("MLT_Kp2");
-      System.out.println("MLT_Kp2...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         mlt2
-      );
-
-      var = cdf.getVariable("L_Kp6");
-      System.out.println("L_Kp6...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         l6
-      );
-
-      var = cdf.getVariable("MLT_Kp6");
-      System.out.println("MLT_Kp6...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         mlt6
-      );
-
-      var = cdf.getVariable("FrameGroup");
-      System.out.println("FrameGroup...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         frameGroup
-      );
-
-      var = cdf.getVariable("Epoch");
-      System.out.println("Epoch...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         epoch
-      );
-      
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         q
-      );
-
-      System.out.println("Done with EPHM!");
-      //close current cdf
-      cdf.close();
+      ephm.close();
    }
    
-   //write the pps file, no processing needed
-   public void doPpsCdf(int first, int last, int date) throws CDFException{
-      CDF cdf;
-      Variable var;
-      
+   //write the misc file, no processing needed
+   public void doMiscCdf(int first, int last, int date) throws CDFException{
       int numOfRecs = last - first;
       short[] 
          version = new short[numOfRecs],
-         payID = new short[numOfRecs];
+         payID = new short[numOfRecs],
+         pps_vals = new short[numOfRecs];
       int[] 
          frameGroup = new int[numOfRecs],
-         q = new int[numOfRecs],
-         pps = new int[numOfRecs];
+         q = new int[numOfRecs];
       long[] epoch = new long[numOfRecs];
 
-      System.out.println("\nSaving PPS Level Two CDF...");
+      System.out.println("\nSaving MISC Level Two CDF...");
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-        pps[rec_i] = data.pps[data_i];
-        version[rec_i] = data.ver[data_i];
-        payID[rec_i] = data.payID[data_i];
-        frameGroup[rec_i] = data.frame_1Hz[data_i];
-        epoch[rec_i] = data.epoch_1Hz[data_i] - Constants.SING_ACCUM;
-        q[rec_i] = data.pps_q[data_i];
+        pps_vals[rec_i] = CDF_Gen.data.pps[data_i];
+        version[rec_i] = CDF_Gen.data.ver[data_i];
+        payID[rec_i] = CDF_Gen.data.payID[data_i];
+        frameGroup[rec_i] = CDF_Gen.data.frame_1Hz[data_i];
+        epoch[rec_i] = CDF_Gen.data.epoch_1Hz[data_i];
+        q[rec_i] = CDF_Gen.data.pps_q[data_i];
       }
 
-      String srcName = 
-         "cdf_skels/l2/barCLL_PP_S_l2_pps-_YYYYMMDD_v++.cdf";
       String destName = 
-         outputPath  + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
-         "_l2_" + "pps-" + "_20" + date +  "_v" + revNum + ".cdf";
-      copyFile(new File(srcName), new File(destName), false);
+         outputPath  + "/" + date + "/" + "bar_" + id + 
+         "_l2_" + "misc" + "_20" + date +  "_v" + revNum + ".cdf";
+     
+      Misc misc = new Misc(destName, "bar_" + id, date, 2);
 
-      cdf = openCDF(destName);
-      
-      var = cdf.getVariable("GPS_PPS");
-      System.out.println("GPS_PPS...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1L, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         pps
-      );
+      System.out.println("GPS_PPS");
+      misc.getCDF().addData("GPS_PPS", pps_vals);
+      System.out.println("Version");
+      misc.getCDF().addData("Version", version);
+      System.out.println("Payload_ID");
+      misc.getCDF().addData("Payload_ID", payID);
+      System.out.println("FrameGroup");
+      misc.getCDF().addData("FrameGroup", frameGroup);
+      System.out.println("Epoch");
+      misc.getCDF().addData("Epoch", epoch);
+      System.out.println("Q");
+      misc.getCDF().addData("Q", q);
 
-      var = cdf.getVariable("Version");
-      System.out.println("Version...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1L, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         version
-      );
-
-      var = cdf.getVariable("Payload_ID");
-      System.out.println("Payload_ID...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1L, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         payID
-      );
-
-      var = cdf.getVariable("FrameGroup");
-      System.out.println("FrameGroup...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1L, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         frameGroup 
-      );
-      var = cdf.getVariable("Epoch");
-      System.out.println("Epoch...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1L,
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         epoch
-      );
-
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1L, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         q
-      );
-
-      cdf.close();
+      misc.close();
    }
    
    public void doMagCdf(int first, int last, int date) throws CDFException{
-      CDF cdf;
-      Variable var;
-      
       int numOfRecs = last - first;
       int[] 
          frameGroup = new int[numOfRecs],
@@ -550,38 +344,26 @@ public class LevelTwo implements CDFConstants{
 
       System.out.println("\nSaving Magnetometer Level Two CDF...");
 
-      String srcName = 
-         "cdf_skels/l2/barCLL_PP_S_l2_magn_YYYYMMDD_v++.cdf";
-      String destName = 
-         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn + 
-         "_l2_" + "magn" + "_20" + date +  "_v" + revNum + ".cdf";
-      copyFile(new File(srcName), new File(destName), false);
-
-      cdf = openCDF(destName);
-     
       //extract the nominal magnetometer value and calculate |B|
+      float fill = CDFVar.getIstpVal("FLOAT_FILL").floatValue();
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-         if(data.magx[data_i] != Constants.FLOAT_FILL){
-            magx[rec_i] = (data.magx[data_i] - 8388608.0f) / 83886.070f;
+         if(CDF_Gen.data.magx[data_i] != fill){
+            magx[rec_i] = (CDF_Gen.data.magx[data_i] - 8388608.0f) / 83886.070f;
          }else{
-            magx[rec_i] = Constants.FLOAT_FILL;
+            magx[rec_i] = fill;
          }
-         if(data.magy[data_i] != Constants.FLOAT_FILL){
-            magy[rec_i] = (data.magy[data_i] - 8388608.0f) / 83886.070f;
+         if(CDF_Gen.data.magy[data_i] != fill){
+            magy[rec_i] = (CDF_Gen.data.magy[data_i] - 8388608.0f) / 83886.070f;
          }else{
-            magx[rec_i] = Constants.FLOAT_FILL;
+            magx[rec_i] = fill;
          }
-         if(data.magz[data_i] != Constants.FLOAT_FILL){
-            magz[rec_i] = (data.magz[data_i] - 8388608.0f) / 83886.070f;
+         if(CDF_Gen.data.magz[data_i] != fill){
+            magz[rec_i] = (CDF_Gen.data.magz[data_i] - 8388608.0f) / 83886.070f;
          }else{
-            magx[rec_i] = Constants.FLOAT_FILL;
+            magx[rec_i] = fill;
          }
          
-         if(
-            magx[rec_i] != Constants.FLOAT_FILL &&
-            magy[rec_i] != Constants.FLOAT_FILL &&
-            magz[rec_i] != Constants.FLOAT_FILL 
-         ){
+         if(magx[rec_i] != fill && magy[rec_i] != fill && magz[rec_i] != fill){
             magTot[rec_i] = 
                (float)Math.sqrt(
                   (magx[rec_i] * magx[rec_i]) + 
@@ -589,93 +371,39 @@ public class LevelTwo implements CDFConstants{
                   (magz[rec_i] * magz[rec_i]) 
                );
          }else{
-            magTot[rec_i] = Constants.FLOAT_FILL;
+            magTot[rec_i] = fill;
          }
 
-         frameGroup[rec_i] = data.frame_4Hz[data_i];
-         epoch[rec_i] = data.epoch_4Hz[data_i] - Constants.SING_ACCUM;
-         q[rec_i] = data.magn_q[data_i];
+         frameGroup[rec_i] = CDF_Gen.data.frame_4Hz[data_i];
+         epoch[rec_i] = CDF_Gen.data.epoch_4Hz[data_i];
+         q[rec_i] = CDF_Gen.data.magn_q[data_i];
       }
 
       //store the nominal mag values
-      var = cdf.getVariable("MAG_X");
-      System.out.println("MAG_X... ");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         magx 
-      );
-
-      var = cdf.getVariable("MAG_Y");
+      String destName = 
+         outputPath + "/" + date + "/" + "bar_" + id + 
+         "_l2_" + "magn" + "_20" + date +  "_v" + revNum + ".cdf";
+     
+      Magn magn = new Magn(destName, "bar_" + id, date, 2);
+      System.out.println("MAG_X");
+      magn.getCDF().addData("MAG_X", magx);
       System.out.println("MAG_Y...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         magy
-      );
-
-      var = cdf.getVariable("MAG_Z");
+      magn.getCDF().addData("MAG_Y", magy);
       System.out.println("MAG_Z...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         magz
-      );
-
-      var = cdf.getVariable("Total");
-      System.out.println("Field Magnitude...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         magTot 
-      );
-
-      var = cdf.getVariable("FrameGroup");
+      magn.getCDF().addData("MAG_Z", magz);
+      System.out.println("Total...");
+      magn.getCDF().addData("Total", magTot);
       System.out.println("FrameGroup...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         frameGroup
-      );
-
-      var = cdf.getVariable("Epoch");
+      magn.getCDF().addData("FrameGroup", frameGroup);
       System.out.println("Epoch...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         epoch
-      );
-
-      var = cdf.getVariable("Q");
+      magn.getCDF().addData("Epoch", epoch);
       System.out.println("Q...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         q
-      );
+      magn.getCDF().addData("Q", q);
 
-      cdf.close();
-
+      magn.close();
    }
    
    public void doHkpgCdf(int first, int last, int date) throws CDFException{
-      CDF cdf;
-      Variable var;
-      
       int numOfRecs = last - first;
       short []
          sats = new short[numOfRecs],
@@ -692,317 +420,242 @@ public class LevelTwo implements CDFConstants{
 
       System.out.println("\nSaving HKPG...");
 
-      String srcName = 
-         "cdf_skels/l2/barCLL_PP_S_l2_hkpg_YYYYMMDD_v++.cdf";
       String destName = 
-         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn 
-         + "_l2_" + "hkpg" + "_20" + date +  "_v" + revNum + ".cdf";
+         outputPath + "/" + date + "/" + "bar_" + id + 
+         "_l2_" + "hkpg" + "_20" + date +  "_v" + revNum + ".cdf";
 
-      copyFile(new File(srcName), new File(destName), false);
-
-      cdf = openCDF(destName);
-         
+      HKPG hkpg = new HKPG(destName, "bar_" + id, date, 2);
+      float fill = CDFVar.getIstpVal("FLOAT_FILL").floatValue();
+      
       for(int var_i = 0; var_i < 36; var_i++){
-         //scale all the records for this variable
-         double[] hkpg_scaled = new double[numOfRecs];
-         for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-            if(data.hkpg[var_i][data_i] != Constants.HKPG_FILL){
-               hkpg_scaled[rec_i] = 
-                  (data.hkpg[var_i][data_i] * data.hkpg_scale[var_i]) + 
-                  data.hkpg_offset[var_i];
-            }else{
-               hkpg_scaled[rec_i] = Constants.DOUBLE_FILL;
+         float[] hkpg_scaled = new float[numOfRecs];
+
+         //get the appropriate values for the ADC data if needed
+         if(var_i == 19 && (CDF_Gen.data.getVersion() > 3)){
+            for(int rec_i= 0, data_i= first; data_i < last; rec_i++, data_i++){
+               if(CDF_Gen.data.hkpg[var_i][data_i] != Constants.HKPG_FILL){
+                  hkpg_scaled[rec_i] = 
+                     ((CDF_Gen.data.hkpg[var_i][data_i] - 0x8000) * 0.09094f) - 
+                     273.15f;
+               }else{
+                  hkpg_scaled[rec_i] = fill;
+               }
+            }
+         }else if(var_i == 23 && (CDF_Gen.data.getVersion() > 3)){
+            for(int rec_i= 0, data_i= first; data_i < last; rec_i++, data_i++){
+               if(CDF_Gen.data.hkpg[var_i][data_i] != Constants.HKPG_FILL){
+                  hkpg_scaled[rec_i] = 
+                     (CDF_Gen.data.hkpg[var_i][data_i] * 0.0003576f); 
+               }else{
+                  hkpg_scaled[rec_i] = fill;
+               }
+            }
+         }else{
+            for(int rec_i= 0, data_i= first; data_i < last; rec_i++, data_i++){
+               if(CDF_Gen.data.hkpg[var_i][data_i] != Constants.HKPG_FILL){
+                  hkpg_scaled[rec_i] = 
+                     (
+                        CDF_Gen.data.hkpg[var_i][data_i] * 
+                        CDF_Gen.data.hkpg_scale[var_i]
+                     ) + CDF_Gen.data.hkpg_offset[var_i];
+               }else{
+                  hkpg_scaled[rec_i] = fill;
+               }
             }
          }
+         
 
-         var = cdf.getVariable(data.hkpg_label[var_i]);
-         System.out.println(data.hkpg_label[var_i] + "...");
-         var.putHyperData(
-            var.getNumWrittenRecords(), numOfRecs, 1, 
-            new long[] {0}, 
-            new long[] {1}, 
-            new long[] {1}, 
-            hkpg_scaled
-         );
+         System.out.println(CDF_Gen.data.hkpg_label[var_i] + "...");
+         hkpg.getCDF().addData(CDF_Gen.data.hkpg_label[var_i], hkpg_scaled);
       }
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-         sats[rec_i] = data.sats[data_i];
-         offset[rec_i] = data.offset[data_i];
-         termStat[rec_i] = data.termStat[data_i];
-         modemCnt[rec_i] = data.modemCnt[data_i];
-         dcdCnt[rec_i] = data.dcdCnt[data_i];
-         cmdCnt[rec_i] = data.cmdCnt[data_i];
-         frameGroup[rec_i] = data.frame_mod40[data_i];
-         weeks[rec_i] = data.weeks[data_i];
-         epoch[rec_i] = data.epoch_mod40[data_i] - Constants.SING_ACCUM;
-         q[rec_i] = data.hkpg_q[data_i];
+         sats[rec_i] = CDF_Gen.data.sats[data_i];
+         offset[rec_i] = CDF_Gen.data.offset[data_i];
+         termStat[rec_i] = CDF_Gen.data.termStat[data_i];
+         modemCnt[rec_i] = CDF_Gen.data.modemCnt[data_i];
+         dcdCnt[rec_i] = CDF_Gen.data.dcdCnt[data_i];
+         cmdCnt[rec_i] = CDF_Gen.data.cmdCnt[data_i];
+         frameGroup[rec_i] = CDF_Gen.data.frame_mod40[data_i];
+         weeks[rec_i] = CDF_Gen.data.weeks[data_i];
+         epoch[rec_i] = CDF_Gen.data.epoch_mod40[data_i];
+         q[rec_i] = CDF_Gen.data.hkpg_q[data_i];
       }
 
-      var = cdf.getVariable("numOfSats");
       System.out.println("numOfSats...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         sats
-      );
-
-      var = cdf.getVariable("timeOffset");
+      hkpg.getCDF().addData("numOfSats", sats);
       System.out.println("timeOffset...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         offset
-      );
-      
-      var = cdf.getVariable("termStatus");
+      hkpg.getCDF().addData("timeOffset", offset);
       System.out.println("termStatus...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         termStat
-      );
-
-      var = cdf.getVariable("cmdCounter");
+      hkpg.getCDF().addData("termStatus", termStat);
       System.out.println("cmdCounter...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         cmdCnt
-      );
-
-      var = cdf.getVariable("modemCounter");
+      hkpg.getCDF().addData("cmdCounter", cmdCnt);
       System.out.println("modemCounter...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         modemCnt
-      );
-
-      var = cdf.getVariable("dcdCounter");
+      hkpg.getCDF().addData("modemCounter", modemCnt);
       System.out.println("dcdCounter...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         dcdCnt
-      );
-
-      var = cdf.getVariable("weeks");
+      hkpg.getCDF().addData("dcdCounter", dcdCnt);
       System.out.println("weeks...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         weeks
-      );
-
-      var = cdf.getVariable("FrameGroup");
+      hkpg.getCDF().addData("weeks", weeks);
       System.out.println("FrameGroup...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         frameGroup
-      );
-
-      var = cdf.getVariable("Epoch");
+      hkpg.getCDF().addData("FrameGroup", frameGroup);
       System.out.println("Epoch...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         epoch
-      );
-
-      var = cdf.getVariable("Q");
+      hkpg.getCDF().addData("Epoch", epoch);
       System.out.println("Q...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         q
-      );
+      hkpg.getCDF().addData("Q", q);
 
-      cdf.close();
+      hkpg.close();
    }
 
    public void doFspcCdf(int first, int last, int date) throws CDFException{
-      CDF cdf;
-      Variable var;
       int numOfRecs = last - first;
 
-      double[][] 
-         chan_edges = new double[numOfRecs][5],
-         lc_scaled = new double[4][numOfRecs];
-      double scint_temp = 20, dpu_temp = 20, peak = -1;
+      float[][] 
+         chan_edges = new float[numOfRecs][7],
+         lc_error = new float[6][numOfRecs];
+      int[][] 
+         lc_scaled = new int[6][numOfRecs];
+      float scint_temp = 20f, dpu_temp = 20f, peak = -1f;
       
       int[] 
          frameGroup = new int[numOfRecs],
          q = new int[numOfRecs];
       long[] epoch = new long[numOfRecs];
+      float[] 
+         old_edges, 
+         std_edges = SpectrumExtract.stdEdges(0, 2.4414f);
 
       System.out.println("\nSaving FSPC...");
-
-      String srcName = 
-         "cdf_skels/l2/barCLL_PP_S_l2_fspc_YYYYMMDD_v++.cdf";
-      String destName = 
-         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn 
-         + "_l2_" + "fspc" + "_20" + date +  "_v" + revNum + ".cdf";
-      copyFile(new File(srcName), new File(destName), false);
-
-      cdf = openCDF(destName);
       
       //convert the light curves counts to cnts/sec and 
       //figure out the channel width
-      for(int lc_rec = 0, hkpg_rec = 0; lc_rec < numOfRecs; lc_rec++){
+      float float_fill = CDFVar.getIstpVal("FLOAT_FILL").floatValue();
+      int int4_fill = CDFVar.getIstpVal("INT4_FILL").intValue();
+      for(int fspc_rec = 0, sspc_rec = 0; fspc_rec < numOfRecs; fspc_rec++){
 
-         //get temperatures
-         hkpg_rec = (lc_rec + first) / 20 / 40; //convert from 20Hz to mod40
-         if(data.hkpg[Constants.T0][hkpg_rec] != Constants.DOUBLE_FILL){
-            scint_temp = 
-               (data.hkpg[Constants.T0][hkpg_rec] * 
-               data.hkpg_scale[Constants.T0]) + 
-               data.hkpg_offset[Constants.T0];
-         }else{
-            scint_temp = 20;
+         //incremint sspc_rec if needed
+         if(
+            (CDF_Gen.data.frame_20Hz[fspc_rec] - 
+            CDF_Gen.data.frame_20Hz[fspc_rec] % 32) != 
+            CDF_Gen.data.frame_mod32[sspc_rec]
+         ){
+            sspc_rec++;
          }
-         if(data.hkpg[Constants.T5][hkpg_rec] != Constants.DOUBLE_FILL){
-            dpu_temp = 
-               (data.hkpg[Constants.T5][hkpg_rec] * 
-               data.hkpg_scale[Constants.T5]) + 
-               data.hkpg_offset[Constants.T5];
-         }else{
-            dpu_temp = 20;
-         }
-         
+
          //get the adjusted bin edges
-         //chan_edges[lc_rec] = 
-         //   SpectrumExtract.createBinEdges(0, /*scint_temp, dpu_temp, */peak);
+         chan_edges[fspc_rec] = SpectrumExtract.createBinEdges(
+            0, CDF_Gen.data.peak511_bin[sspc_rec]
+         );
 
          //write the spectrum to the new array
-         if(data.lc1[lc_rec + first] != Constants.FSPC_RAW_FILL){
-            lc_scaled[0][lc_rec] = data.lc1[lc_rec + first] * 20;
+         if(CDF_Gen.data.lc1[fspc_rec + first] != Constants.FSPC_RAW_FILL){
+            lc_scaled[0][fspc_rec] = CDF_Gen.data.lc1[fspc_rec + first];
+            lc_error[0][fspc_rec] = 
+              (float)Math.sqrt(CDF_Gen.data.lc1[fspc_rec + first]);
          }else{
-            lc_scaled[0][lc_rec] = Constants.DOUBLE_FILL;
+            lc_scaled[0][fspc_rec] = int4_fill;
+            lc_error[0][fspc_rec] = float_fill;
          }
-         if(data.lc2[lc_rec + first] != Constants.FSPC_RAW_FILL){
-            lc_scaled[1][lc_rec] = data.lc2[lc_rec + first] * 20;
+         if(CDF_Gen.data.lc2[fspc_rec + first] != Constants.FSPC_RAW_FILL){
+            lc_scaled[1][fspc_rec] = CDF_Gen.data.lc2[fspc_rec + first];
+            lc_error[1][fspc_rec] = 
+               (float)Math.sqrt(CDF_Gen.data.lc2[fspc_rec + first]);
          }else{
-            lc_scaled[1][lc_rec] = Constants.DOUBLE_FILL;
+            lc_scaled[1][fspc_rec] = int4_fill;
+            lc_error[1][fspc_rec] = float_fill;
          }
-         if(data.lc3[lc_rec + first] != Constants.FSPC_RAW_FILL){
-            lc_scaled[2][lc_rec] = data.lc3[lc_rec + first] * 20;
+         if(CDF_Gen.data.lc3[fspc_rec + first] != Constants.FSPC_RAW_FILL){
+            lc_scaled[2][fspc_rec] = CDF_Gen.data.lc3[fspc_rec + first];
+            lc_error[2][fspc_rec] = 
+               (float)Math.sqrt(CDF_Gen.data.lc3[fspc_rec + first]);
          }else{
-            lc_scaled[2][lc_rec] = Constants.DOUBLE_FILL;
+            lc_scaled[2][fspc_rec] = int4_fill;
+            lc_error[2][fspc_rec] = float_fill;
          }
-         if(data.lc4[lc_rec + first] != Constants.FSPC_RAW_FILL){
-            lc_scaled[3][lc_rec] = data.lc4[lc_rec + first] * 20;
+         if(CDF_Gen.data.lc4[fspc_rec + first] != Constants.FSPC_RAW_FILL){
+            lc_scaled[3][fspc_rec] = CDF_Gen.data.lc4[fspc_rec + first];
+            lc_error[3][fspc_rec] = 
+               (float)Math.sqrt(CDF_Gen.data.lc4[fspc_rec + first]);
          }else{
-            lc_scaled[3][lc_rec] = Constants.DOUBLE_FILL;
+            lc_scaled[3][fspc_rec] = int4_fill;
+            lc_error[3][fspc_rec] = float_fill;
+         }
+         if(CDF_Gen.data.lc5[fspc_rec + first] != Constants.FSPC_RAW_FILL){
+            lc_scaled[4][fspc_rec] = CDF_Gen.data.lc5[fspc_rec + first];
+            lc_error[4][fspc_rec] = 
+               (float)Math.sqrt(CDF_Gen.data.lc5[fspc_rec + first]);
+         }else{
+            lc_scaled[4][fspc_rec] = int4_fill;
+            lc_error[4][fspc_rec] = float_fill;
+         }
+         if(CDF_Gen.data.lc6[fspc_rec + first] != Constants.FSPC_RAW_FILL){
+            lc_scaled[5][fspc_rec] = CDF_Gen.data.lc6[fspc_rec + first];
+            lc_error[5][fspc_rec] = 
+               (float)Math.sqrt(CDF_Gen.data.lc6[fspc_rec + first]);
+         }else{
+            lc_scaled[5][fspc_rec] = int4_fill;
+            lc_error[5][fspc_rec] = float_fill;
          }
       }
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-         frameGroup[rec_i] = data.frame_20Hz[data_i];
-         epoch[rec_i] = data.epoch_20Hz[data_i] - Constants.SING_ACCUM;
-         q[rec_i] = data.fspc_q[data_i];
+         frameGroup[rec_i] = CDF_Gen.data.frame_20Hz[data_i];
+         epoch[rec_i] = CDF_Gen.data.epoch_20Hz[data_i];
+         q[rec_i] = CDF_Gen.data.fspc_q[data_i];
       }
 
-      var = cdf.getVariable("LC1");
-      System.out.println("LC1...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         lc_scaled[0]
-      );
-      
-      var = cdf.getVariable("LC2");
-      System.out.println("LC2...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         lc_scaled[1]
-      );
+      String destName = 
+         outputPath + "/" + date + "/" + "bar_" + id + 
+         "_l2_" + "fspc" + "_20" + date +  "_v" + revNum + ".cdf";
 
-      var = cdf.getVariable("LC3");
-      System.out.println("LC3...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         lc_scaled[2]
-      );
+      FSPC fspc = 
+         new FSPC(destName, "bar_" + id, date, 2, CDF_Gen.data.getVersion());
+      if(CDF_Gen.data.getVersion() > 3){
+         System.out.println("FSPC1a");
+         fspc.getCDF().addData("FSPC1a", lc_scaled[0]);
+         fspc.getCDF().addData("cnt_error1a", lc_error[0]);
+         System.out.println("FSPC1b");
+         fspc.getCDF().addData("FSPC1b", lc_scaled[1]);
+         fspc.getCDF().addData("cnt_error1b", lc_error[1]);
+         System.out.println("FSPC1c");
+         fspc.getCDF().addData("FSPC1c", lc_scaled[2]);
+         fspc.getCDF().addData("cnt_error1c", lc_error[2]);
+         System.out.println("FSPC2");
+         fspc.getCDF().addData("FSPC2", lc_scaled[3]);
+         fspc.getCDF().addData("cnt_error2", lc_error[3]);
+         System.out.println("FSPC3");
+         fspc.getCDF().addData("FSPC3", lc_scaled[4]);
+         fspc.getCDF().addData("cnt_error3", lc_error[4]);
+         System.out.println("FSPC4");
+         fspc.getCDF().addData("FSPC4", lc_scaled[5]);
+         fspc.getCDF().addData("cnt_error4", lc_error[5]);
+      }else{
+         System.out.println("FSPC1");
+         fspc.getCDF().addData("FSPC1", lc_scaled[0]);
+         fspc.getCDF().addData("cnt_error1", lc_error[0]);
+         System.out.println("FSPC2");
+         fspc.getCDF().addData("FSPC2", lc_scaled[1]);
+         fspc.getCDF().addData("cnt_error2", lc_error[1]);
+         System.out.println("FSPC3");
+         fspc.getCDF().addData("FSPC3", lc_scaled[2]);
+         fspc.getCDF().addData("cnt_error3", lc_error[2]);
+         System.out.println("FSPC4");
+         fspc.getCDF().addData("FSPC4", lc_scaled[3]);
+         fspc.getCDF().addData("cnt_error4", lc_error[3]);
+      }
+      System.out.println("FSPC_Edges");
+      fspc.getCDF().addData("FSPC_Edges", chan_edges);
+      System.out.println("FrameGroup");
+      fspc.getCDF().addData("FrameGroup", frameGroup);
+      System.out.println("Epoch");
+      fspc.getCDF().addData("Epoch", epoch);
+      System.out.println("Q");
+      fspc.getCDF().addData("Q", q);
 
-      var = cdf.getVariable("LC4");
-      System.out.println("LC4...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         lc_scaled[3]
-      );
-
-      var = cdf.getVariable("FrameGroup");
-      System.out.println("FrameGroup...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         frameGroup
-      );
-
-      var = cdf.getVariable("Epoch");
-      System.out.println("Epoch...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         epoch
-      );
-
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         q
-      );
-
-      cdf.close();
-
+      fspc.close();
    }
 
    public void doMspcCdf(int first, int last, int date) throws CDFException{
-      CDF cdf;
-      Variable var;
-      
-      double peak = -1, scint_temp = 0, dpu_temp = 0;
+      float peak = -1, scint_temp = 0, dpu_temp = 0;
       
       int offset = 90;
 
@@ -1012,58 +665,82 @@ public class LevelTwo implements CDFConstants{
          q = new int[numOfRecs];
       long[] epoch = new long[numOfRecs];
 
-      double[][] mspc_rebin = new double[numOfRecs][48];
-      double[] old_edges = new double[48];
-      double[] std_edges = SpectrumExtract.stdEdges(1, 2.4414);
+      float[][] 
+         mspc_rebin = new float[numOfRecs][48],
+         mspc_error = new float[numOfRecs][48];
+      float[]
+         old_edges = new float[48],
+         std_edges = SpectrumExtract.stdEdges(1, 2.4414f);
 
       
       //rebin the mspc spectra
-      for(int mspc_rec = 0, sspc_rec = 0; mspc_rec < numOfRecs; mspc_rec++){
+      for(
+         int mspc_rec = 0, sspc_rec = 0, hkpg_rec = 0; 
+         mspc_rec < numOfRecs; 
+         mspc_rec++
+      ){
         
-         /*
-         //get temperatures
-         hkpg_rec = (mspc_rec + first) * 4 / 40; //convert from mod4 to mod40
-         if(data.hkpg[Constants.T0][hkpg_rec] != Constants.HKPG_FILL){
-            scint_temp = 
-               (data.hkpg[Constants.T0][hkpg_rec] * 
-               data.hkpg_scale[Constants.T0]) + 
-               data.hkpg_offset[Constants.T0];
-         }else{
-            scint_temp = 20;
+         //find correct hkpg_rec
+         int target_frame = 
+            CDF_Gen.data.frame_mod4[mspc_rec] - 
+            (CDF_Gen.data.frame_mod4[mspc_rec] % 40);
+         while(
+            (CDF_Gen.data.frame_mod40[hkpg_rec] < target_frame) &&
+            (hkpg_rec < mspc_rec) &&
+            (hkpg_rec < CDF_Gen.data.frame_mod40.length)
+         ){
+            hkpg_rec++;
          }
-         if(data.hkpg[Constants.T5][hkpg_rec] != Constants.HKPG_FILL){
-            dpu_temp = 
-               (data.hkpg[Constants.T5][hkpg_rec] * 
-               data.hkpg_scale[Constants.T5]) + 
-               data.hkpg_offset[Constants.T5];
-         }else{
-            dpu_temp = 20;
-         }*/
-         
-         //incremint sspc_rec if needed
-         if(
-            (data.frame_mod4[mspc_rec] - data.frame_mod4[mspc_rec] % 32) != 
-            data.frame_mod32[sspc_rec]
+
+         //find correct sspc_rec
+         target_frame = 
+            CDF_Gen.data.frame_mod4[mspc_rec + first] - 
+            (CDF_Gen.data.frame_mod4[mspc_rec + first] % 32);
+         while(
+            (CDF_Gen.data.frame_mod32[sspc_rec] < target_frame) &&
+            (sspc_rec < mspc_rec + first) &&
+            (sspc_rec < CDF_Gen.data.frame_mod32.length)
          ){
             sspc_rec++;
          }
 
+         //get temperatures
+         if(CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] != Constants.HKPG_FILL){
+            scint_temp = 
+               (CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] * 
+               CDF_Gen.data.hkpg_scale[Constants.T0]) + 
+               CDF_Gen.data.hkpg_offset[Constants.T0];
+         }
+         if(CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] != Constants.HKPG_FILL){
+            dpu_temp = 
+               (CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] * 
+               CDF_Gen.data.hkpg_scale[Constants.T5]) + 
+               CDF_Gen.data.hkpg_offset[Constants.T5];
+         }    
+
          //get the adjusted bin edges
-         old_edges = SpectrumExtract.createBinEdges(
-            1, /*scint_temp, dpu_temp, */ data.peak511_bin[sspc_rec]
-         );
+         old_edges = 
+            SpectrumExtract.makeedges(
+               1, scint_temp, dpu_temp, CDF_Gen.data.peak511_bin[sspc_rec]
+            );
 
          //rebin the spectrum
          mspc_rebin[mspc_rec] = SpectrumExtract.rebin(
-            data.mspc[mspc_rec + first], old_edges, std_edges 
+            CDF_Gen.data.mspc[mspc_rec + first], old_edges, std_edges 
          );
 
-         //divide counts by bin width and adjust the time scale
+         double fill = CDFVar.getIstpVal("DOUBLE_FILL").doubleValue();
          for(int bin_i = 0; bin_i < mspc_rebin[mspc_rec].length; bin_i++){
-            if(mspc_rebin[mspc_rec][bin_i] != Constants.DOUBLE_FILL){
-               mspc_rebin[mspc_rec][bin_i] /= 
-                  std_edges[bin_i + 1] - std_edges[bin_i];
-               mspc_rebin[mspc_rec][bin_i] /= 4;
+            if(mspc_rebin[mspc_rec][bin_i] != fill){
+               float width = std_edges[bin_i + 1] - std_edges[bin_i];
+
+               //get the count error
+               mspc_error[mspc_rec][bin_i] = 
+                  (float)Math.sqrt(mspc_rebin[mspc_rec][bin_i])
+                  / (width * 4f);
+
+               //divide counts by bin width and adjust the time scale
+               mspc_rebin[mspc_rec][bin_i] /= (width * 4f);
             }
          }
       }
@@ -1071,87 +748,42 @@ public class LevelTwo implements CDFConstants{
       System.out.println("\nSaving MSPC...");
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-         frameGroup[rec_i] = data.frame_mod4[data_i];
-         epoch[rec_i] = data.epoch_mod4[data_i] - Constants.QUAD_ACCUM;
-         q[rec_i] = data.mspc_q[data_i];
+         frameGroup[rec_i] = CDF_Gen.data.frame_mod4[data_i];
+         epoch[rec_i] = CDF_Gen.data.epoch_mod4[data_i];
+         q[rec_i] = CDF_Gen.data.mspc_q[data_i];
       }
 
-      String srcName = 
-         "cdf_skels/l2/barCLL_PP_S_l2_mspc_YYYYMMDD_v++.cdf";
       String destName = 
-         outputPath  + "/" + date + "/"+ "bar1" + flt + "_" + id + "_" + stn 
-         + "_l2_" + "mspc" + "_20" + date +  "_v" + revNum + ".cdf";
+         outputPath + "/" + date + "/" + "bar_" + id +
+         "_l2_" + "mspc" + "_20" + date +  "_v" + revNum + ".cdf";
 
-      copyFile(new File(srcName), new File(destName), false);
+      MSPC mspc = new MSPC(destName, "bar_" + id, date, 2);
+      System.out.println("mspc");
+      mspc.getCDF().addData("MSPC", mspc_rebin);
+      System.out.println("mspc error");
+      mspc.getCDF().addData("cnt_error", mspc_error);
+      System.out.println("FrameGroup");
+      mspc.getCDF().addData("FrameGroup", frameGroup);
+      System.out.println("Epoch");
+      mspc.getCDF().addData("Epoch", epoch);
+      System.out.println("Q");
+      mspc.getCDF().addData("Q", q);
 
-      cdf = openCDF(destName);
-
-      var = cdf.getVariable("MSPC");
-      System.out.println("Spectrum Arrays...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0, 0}, 
-         new long[] {48, 1}, 
-         new long[] {1, 1}, 
-         mspc_rebin
-      );
-
-      var = cdf.getVariable("MSPC_ch");
-      System.out.println("Spectrum Arrays...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0, 0}, 
-         new long[] {48, 1}, 
-         new long[] {1, 1}, 
-         mspc_rebin
-      );
-
-      var = cdf.getVariable("FrameGroup");
-      System.out.println("FrameGroup...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         frameGroup
-      );
-
-      var = cdf.getVariable("Epoch");
-      System.out.println("Epoch...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         epoch
-      );
-
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         q
-      );
-
-      cdf.close();
+      mspc.close();
    }
 
    public void doSspcCdf(int first, int last, int date) throws CDFException{
-      CDF cdf;
-      Variable var;
-      
-      double scint_temp = 0, dpu_temp = 0;
+      float scint_temp = 0, dpu_temp = 0;
 
       int numOfRecs = last - first;
-      double[][] sspc_rebin = new double[numOfRecs][256];
-      double[] 
+      float[][] 
+         sspc_rebin = new float[numOfRecs][256],
+         sspc_error = new float[numOfRecs][256];
+      float[] 
          old_edges, 
-         peak = new double[numOfRecs],
-         std_edges = SpectrumExtract.stdEdges(2, 2.4414);
+         std_edges = SpectrumExtract.stdEdges(2, 2.4414f);
       
+      float[] peak = new float[numOfRecs];
       int[] 
          frameGroup = new int[numOfRecs],
          q = new int[numOfRecs];
@@ -1161,468 +793,138 @@ public class LevelTwo implements CDFConstants{
 
       //rebin the sspc spectra
       for(int sspc_rec = 0, hkpg_rec = 0; sspc_rec < numOfRecs; sspc_rec++){
-/*         //get temperatures
-         hkpg_rec = (sspc_rec + first) * 32 / 40; //convert from mod32 to mod40
-         if(data.hkpg[Constants.T0][hkpg_rec] != Constants.HKPG_FILL){
+         
+         //find correct hkpg_rec
+         int target_frame = 
+            CDF_Gen.data.frame_mod32[sspc_rec] - 
+            (CDF_Gen.data.frame_mod32[sspc_rec] % 40);
+
+         while(
+            (CDF_Gen.data.frame_mod40[hkpg_rec] <= target_frame) &&
+            (hkpg_rec <= sspc_rec) &&
+            (hkpg_rec < CDF_Gen.data.frame_mod40.length)
+         ){
+            hkpg_rec++;
+         }
+
+         //get temperatures
+         if(CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] != Constants.HKPG_FILL){
             scint_temp = 
-               (data.hkpg[Constants.T0][hkpg_rec] * 
-               data.hkpg_scale[Constants.T0]) + 
-               data.hkpg_offset[Constants.T0];
-         }else{
-            scint_temp = 20;
+               (CDF_Gen.data.hkpg[Constants.T0][hkpg_rec] * 
+               CDF_Gen.data.hkpg_scale[Constants.T0]) + 
+               CDF_Gen.data.hkpg_offset[Constants.T0];
          }
-         if(data.hkpg[Constants.T5][hkpg_rec] != Constants.HKPG_FILL){
+         if(CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] != Constants.HKPG_FILL){
             dpu_temp = 
-               (data.hkpg[Constants.T5][hkpg_rec] * 
-               data.hkpg_scale[Constants.T5]) + 
-               data.hkpg_offset[Constants.T5];
-         }else{
-            dpu_temp = 20;
-         }
-*/    
+               (CDF_Gen.data.hkpg[Constants.T5][hkpg_rec] * 
+               CDF_Gen.data.hkpg_scale[Constants.T5]) + 
+               CDF_Gen.data.hkpg_offset[Constants.T5];
+         }    
+
          //get the adjusted bin edges
          old_edges = 
-            SpectrumExtract.createBinEdges(2, data.peak511_bin[sspc_rec]);
-         
-         //rebin the spectum
+            SpectrumExtract.makeedges(
+               2, scint_temp, dpu_temp, CDF_Gen.data.peak511_bin[sspc_rec + first]
+            );
+
+         //rebin the spectrum
          sspc_rebin[sspc_rec] = SpectrumExtract.rebin(
-            data.sspc[sspc_rec + first], old_edges, std_edges
+            CDF_Gen.data.sspc[sspc_rec + first], old_edges, std_edges
          );
 
-         //divide counts by bin width and convert the time scale to /sec
+         float fill = CDFVar.getIstpVal("FLOAT_FILL").floatValue();
          for(int bin_i = 0; bin_i < sspc_rebin[sspc_rec].length; bin_i++){
-            if(sspc_rebin[sspc_rec][bin_i] != Constants.DOUBLE_FILL){
-               sspc_rebin[sspc_rec][bin_i] /= 
-                  std_edges[bin_i + 1] - std_edges[bin_i];
-               sspc_rebin[sspc_rec][bin_i] /= 32;
+            if(sspc_rebin[sspc_rec][bin_i] != fill){
+               float width = std_edges[bin_i + 1] - std_edges[bin_i];
+               //get the count error
+               sspc_error[sspc_rec][bin_i] =
+                  (float)Math.sqrt(sspc_rebin[sspc_rec][bin_i])
+                  / (width * 32f);
+
+               //divide counts by bin width and adjust the time scale
+               sspc_rebin[sspc_rec][bin_i] /= (width * 32f);
             }
          }
       }
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-         peak[rec_i] = data.peak511_bin[data_i];
-         frameGroup[rec_i] = data.frame_mod32[data_i];
-         epoch[rec_i] = data.epoch_mod32[data_i] - Constants.SSPC_ACCUM;
-         q[rec_i] = data.sspc_q[data_i];
+         peak[rec_i] = CDF_Gen.data.peak511_bin[data_i];
+         frameGroup[rec_i] = CDF_Gen.data.frame_mod32[data_i];
+         epoch[rec_i] = CDF_Gen.data.epoch_mod32[data_i];
+         q[rec_i] = CDF_Gen.data.sspc_q[data_i];
       }
 
-
-      String srcName = 
-         "cdf_skels/l2/barCLL_PP_S_l2_sspc_YYYYMMDD_v++.cdf";
       String destName = 
-         outputPath + "/" + date + "/" + "bar1" + flt + "_" + id + "_" + stn +
+         outputPath + "/" + date + "/" + "bar_" + id + 
          "_l2_" + "sspc" + "_20" + date +  "_v" + revNum + ".cdf";
-      copyFile(new File(srcName), new File(destName), false);
 
-      cdf = openCDF(destName);
+      SSPC sspc = new SSPC(destName, "bar_" + id, date, 2);
 
-      var = cdf.getVariable("SSPC");
-      System.out.println("Spectrum Arrays...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {256, 1}, 
-         new long[] {1}, 
-         sspc_rebin
-      );
+      System.out.println("sspc");
+      sspc.getCDF().addData("SSPC", sspc_rebin);
+      System.out.println("sspc error");
+      sspc.getCDF().addData("cnt_error", sspc_error);
+      System.out.println("Peak_511");
+      sspc.getCDF().addData("Peak_511", peak);
+      System.out.println("FrameGroup");
+      sspc.getCDF().addData("FrameGroup", frameGroup);
+      System.out.println("Epoch");
+      sspc.getCDF().addData("Epoch", epoch);
+      System.out.println("Q");
+      sspc.getCDF().addData("Q", q);
 
-      var = cdf.getVariable("SSPC_ch");
-      System.out.println("Spectrum Arrays...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {256, 1}, 
-         new long[] {1}, 
-         sspc_rebin
-      );
-
-      var = cdf.getVariable("Peak_511");
-      System.out.println("Peak_511...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {256, 1}, 
-         new long[] {1}, 
-         peak
-      );
-
-      var = cdf.getVariable("FrameGroup");
-      System.out.println("FrameGroup...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         frameGroup
-      );
-
-      var = cdf.getVariable("Epoch");
-      System.out.println("Epoch...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         epoch
-      );
-
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         q
-      );
-
-      cdf.close();
+      sspc.close();
    }
 
    public void doRcntCdf(int first, int last, int date) throws CDFException{
-      CDF cdf;
-      Variable var;
-      
       int numOfRecs = last - first;
-      double[][] rc_timeScaled = new double[4][numOfRecs];
+      float[][] rc_timeScaled = new float[4][numOfRecs];
       int[] 
          frameGroup = new int[numOfRecs],
          q = new int[numOfRecs];
       long[] epoch = new long[numOfRecs];
 
       //change all the units from cnts/4sec to cnts/sec
+      float fill = CDFVar.getIstpVal("FLOAT_FILL").floatValue();
       for(int var_i = 0; var_i < 4; var_i++){
          for(int rec_i = 0; rec_i < numOfRecs; rec_i++){
-            if(data.rcnt[var_i][rec_i + first] != Constants.RCNT_FILL){
+            if(CDF_Gen.data.rcnt[var_i][rec_i + first] != Constants.FLOAT_FILL){
                rc_timeScaled[var_i][rec_i] = 
-                  data.rcnt[var_i][rec_i + first] / 4;
+                  CDF_Gen.data.rcnt[var_i][rec_i + first] / 4;
             }else{
-               rc_timeScaled[var_i][rec_i] = Constants.DOUBLE_FILL;
+               rc_timeScaled[var_i][rec_i] = fill;
             }
          }
       }
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
-         frameGroup[rec_i] = data.frame_mod4[data_i];
-         epoch[rec_i] = data.epoch_mod4[data_i] - Constants.QUAD_ACCUM;
-         q[rec_i] = data.rcnt_q[data_i];
+         frameGroup[rec_i] = CDF_Gen.data.frame_mod4[data_i];
+         epoch[rec_i] = CDF_Gen.data.epoch_mod4[data_i];
+         q[rec_i] = CDF_Gen.data.rcnt_q[data_i];
       }
          
       System.out.println("\nSaving RCNT...");
 
-      String srcName = 
-         "cdf_skels/l2/barCLL_PP_S_l2_rcnt_YYYYMMDD_v++.cdf";
       String destName = 
-         outputPath + "/" + date + "/"  + "bar1" + flt + "_" + id + "_" + stn
-         + "_l2_" + "rcnt" + "_20" + date +  "_v" + revNum + ".cdf";
+         outputPath + "/" + date + "/"  + "bar_" + id +
+         "_l2_" + "rcnt" + "_20" + date +  "_v" + revNum + ".cdf";
+       DataProduct rcnt = new Rcnt(destName, "bar_" + id, date, 2);
 
-      copyFile(new File(srcName), new File(destName), false);
+      System.out.println("Interrupt");
+      rcnt.getCDF().addData("Interrupt", rc_timeScaled[0]);
+      System.out.println("LowLevel");
+      rcnt.getCDF().addData("LowLevel", rc_timeScaled[1]);
+      System.out.println("HighLevel");
+      rcnt.getCDF().addData("HighLevel", rc_timeScaled[3]);
+      System.out.println("PeakDet");
+      rcnt.getCDF().addData("PeakDet", rc_timeScaled[2]);
+      System.out.println("FrameGroup");
+      rcnt.getCDF().addData("FrameGroup", frameGroup);
+      System.out.println("Epoch");
+      rcnt.getCDF().addData("Epoch", epoch);
+      System.out.println("Q");
+      rcnt.getCDF().addData("Q", q);
 
-      cdf = openCDF(destName);
-
-      var = cdf.getVariable("Interrupt");
-      System.out.println("Interrupt...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         rc_timeScaled[0]
-      );
-
-      var = cdf.getVariable("LowLevel");
-      System.out.println("LowLevel...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         rc_timeScaled[1]
-      );
-
-      var = cdf.getVariable("PeakDet");
-      System.out.println("PeakDet...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         rc_timeScaled[2]
-      );
-
-      var = cdf.getVariable("HighLevel");
-      System.out.println("HighLevel...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         rc_timeScaled[3]
-      );
-
-      var = cdf.getVariable("FrameGroup");
-      System.out.println("FrameGroup...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         frameGroup
-      );
-
-      var = cdf.getVariable("Epoch");
-      System.out.println("Epoch...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1},
-         epoch
-      );
-
-      var = cdf.getVariable("Q");
-      System.out.println("Q...");
-      var.putHyperData(
-         var.getNumWrittenRecords(), numOfRecs, 1, 
-         new long[] {0}, 
-         new long[] {1}, 
-         new long[] {1}, 
-         q
-      );
-
-      cdf.close();
-   }
-
-   private void writeData() throws CDFException{
-      File outDir;
-
-      System.out.println(
-         "Creating Level Two... (" + data.getSize("1Hz") + " frames)"
-      );
-      
-      //make sure the needed output directories exist
-      outDir = new File(outputPath + "/" + yesterday);
-      if(!outDir.exists()){outDir.mkdirs();}
-      outDir = new File(outputPath + "/" + today);
-      if(!outDir.exists()){outDir.mkdirs();}
-      outDir = new File(outputPath + "/" + tomorrow);
-      if(!outDir.exists()){outDir.mkdirs();}
-
-      //fill CDF files for yesterday, today, and tomorrow
-      doAllCdf(yesterday);
-      doAllCdf(today);
-      doAllCdf(tomorrow);
-
-      System.out.println("Created Level Two.");
-   }
-
-   private void doAllCdf(int date) throws CDFException{
-      int first_i, last_i, size;
-      long rec_date = 0;
-      long[] tt2000_parts; 
-
-      //find the first and last indicies for this day for the 1Hz file
-      first_i = -1;
-      size = data.getSize("1Hz");
-      for(last_i = 0; last_i < size; last_i++){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_1Hz[last_i]);
-         rec_date = 
-            tt2000_parts[2] + //day
-            (100 * tt2000_parts[1]) + //month
-            (10000 * (tt2000_parts[0] - 2000)); //year
-         if(first_i == -1) {
-            if(rec_date == date){
-               //found the first_i index
-               first_i = last_i;
-            }
-         }else if(rec_date > date){
-            break;
-         }
-      }
-      //make sure we have a valid start and stop index and 
-      //that there are some records to process
-      if(first_i != -1 && (last_i - first_i) > 0){
-         doPpsCdf(first_i, last_i, date);
-      }
-
-      //...for the mod4 file
-      first_i = -1;
-      size = data.getSize("mod4");
-      for(last_i = 0; last_i < size; last_i++){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_mod4[last_i]);
-         rec_date = 
-            tt2000_parts[2] + //day
-            (100 * tt2000_parts[1]) + //month
-            (10000 * (tt2000_parts[0] - 2000)); //year
-         if(first_i == -1) {
-            if(rec_date == date){
-               //found the first_i index
-               first_i = last_i;
-            }
-         }else if(rec_date > date){
-            break;
-         }
-      }
-      if(first_i != -1 && (last_i - first_i) > 0){
-         doGpsCdf(first_i, last_i, date);
-         doMspcCdf(first_i, last_i, date);
-         doRcntCdf(first_i, last_i, date);  
-      }
-
-      //...for the mod32 file
-      first_i = -1;
-      size = data.getSize("mod32");
-      for(last_i = 0; last_i < size; last_i++){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_mod32[last_i]);
-         rec_date = 
-            tt2000_parts[2] + //day
-            (100 * tt2000_parts[1]) + //month
-            (10000 * (tt2000_parts[0] - 2000)); //year
-         if(first_i == -1) {
-            if(rec_date == date){
-               //found the first_i index
-               first_i = last_i;
-            }
-         }else if(rec_date > date){
-            break;
-         }
-      }
-      if(first_i != -1 && (last_i - first_i) > 0){
-         doSspcCdf(first_i, last_i, date);  
-      }
-
-      //...for the mod40 file
-      first_i = -1;
-      size = data.getSize("mod40");
-      for(last_i = 0; last_i < size; last_i++){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_mod40[last_i]);
-         rec_date = 
-            tt2000_parts[2] + //day
-            (100 * tt2000_parts[1]) + //month
-            (10000 * (tt2000_parts[0] - 2000)); //year
-         if(first_i == -1) {
-            if(rec_date == date){
-               //found the first_i index
-               first_i = last_i;
-            }
-         }else if(rec_date > date){
-            break;
-         }
-      }
-      if(first_i != -1 && (last_i - first_i) > 0){
-         doHkpgCdf(first_i, last_i, date);  
-      }
-
-      //...for the 4Hz file
-      first_i = -1;
-      size = data.getSize("4Hz");
-      for(last_i = 0; last_i < size; last_i++){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_4Hz[last_i]);
-         rec_date = 
-            tt2000_parts[2] + //day
-            (100 * tt2000_parts[1]) + //month
-            (10000 * (tt2000_parts[0] - 2000)); //year
-         if(first_i == -1) {
-            if(rec_date == date){
-               //found the first_i index
-               first_i = last_i;
-            }
-         }else if(rec_date > date){
-            break;
-         }
-      }
-      if(first_i != -1 && (last_i - first_i) > 0){
-         //make sure the first and last records are not mid-frame
-         first_i = Math.max(0, (first_i - (first_i % 4)));
-         last_i = Math.min(size, (last_i + 4 - (last_i % 4)));
-
-         doMagCdf(first_i, last_i, date);
-      }
-
-      //...for the 20Hz file
-      first_i = -1;
-      size = data.getSize("20Hz");
-      for(last_i = 0; last_i < size; last_i++){
-         tt2000_parts = CDFTT2000.breakdown(data.epoch_20Hz[last_i]);
-         rec_date = 
-            tt2000_parts[2] + //day
-            (100 * tt2000_parts[1]) + //month
-            (10000 * (tt2000_parts[0] - 2000)); //year
-         if(first_i == -1) {
-            if(rec_date == date){
-               //found the first_i index
-               first_i = last_i;
-            }
-         }else if(rec_date > date){
-            break;
-         }
-      }
-      if(first_i != -1 && (last_i - first_i) > 0){
-         //make sure the first and last records are not mid-frame
-         first_i = Math.max(0, (first_i - (first_i % 20)));
-         last_i = Math.min(size, (last_i + 20 - (last_i % 20)));
-
-         doFspcCdf(first_i, last_i, date); 
-      }
-   }
-
-   public static void copyFile(File sourceFile, File destFile, boolean clobber){
-      try{
-         if(destFile.exists() && !clobber){
-            return;
-         }
-
-         if(!destFile.exists()){
-            //create the output directory and file if needed
-            new File(destFile.getParent()).mkdirs();
-            destFile.createNewFile();
-         }
-   
-         FileChannel source = null;
-         FileChannel destination = null;
-      
-         try{
-            source = new FileInputStream(sourceFile).getChannel();
-            destination = new FileOutputStream(destFile).getChannel();
-            destination.transferFrom(source, 0, source.size());
-         }finally {
-            if(source != null) {
-               source.close();
-            }
-            if(destination != null) {
-               destination.close();
-            }
-         }
-      }catch(IOException ex){
-         System.out.println(
-            "Could not copy CDF file: "
-               + ex.getMessage()
-         );
-      }
-   }
-
-   public static CDF openCDF(String fileName){
-
-      CDF cdf = null;
-      try{
-         cdf = CDF.open(fileName);
-         
-         if (cdf.getStatus() != CDF_OK)
-         {
-            System.out.print("Error with CDF! ");
-            
-            if (cdf.getStatus() == CHECKSUM_ERROR){
-               System.out.print("Bad checksum!");
-            }
-            
-            if (cdf != null) cdf.close();
-            
-            System.out.println("");
-         }
-      }catch(CDFException ex){
-         System.out.println(ex.getMessage());
-      }
-      
-      return cdf;
+      rcnt.close();
    }
  }
