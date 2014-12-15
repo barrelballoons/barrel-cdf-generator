@@ -83,31 +83,48 @@ public class CDF_Gen{
       // read the list of data files on each server, then download the files
       for(String payload_i : payloads){
 			String
-				date = "000000",
 				id = "00",
 				flt = "00",
 				stn = "0",
 				revNum = "00",
-            mag = "0000",
-            dpu = "00";
-			
+            mag = "0000";
+         Integer
+            date = Integer.valueOf(getSetting("date")),
+            start_date = 000000,
+            end_date = 999999,
+            dpu = 0;
+
+
 			//break payload apart into id, flight number and launch station
 			String[] payload_parts = payload_i.split(",");
 			if(payload_parts[0] != null){id = payload_parts[0];}
 			if(payload_parts[1] != null){flt = payload_parts[1];}
 			if(payload_parts[2] != null){stn = payload_parts[2];}
 			if(payload_parts[3] != null){mag = payload_parts[3];}
-			if(payload_parts[3] != null){dpu = payload_parts[4];}
-		   
+			if(payload_parts[4] != null){
+            dpu = Integer.valueOf(payload_parts[4]);
+         }
+			if(payload_parts.length > 5 && payload_parts[5] != null){
+            start_date = Integer.valueOf(payload_parts[5]);
+         }
+			if(payload_parts.length > 6 && payload_parts[6] != null){
+            end_date = Integer.valueOf(payload_parts[6]);
+         }
+
+         //make sure the date we are trying to process is valid for the payload
+         if(date < start_date || date > end_date){
+            continue;
+         }
+
          //set output paths
          if(getSetting("outDir") != ""){
 			   //check if user specified a place to store the files
 				output_Dir = getSetting("outDir");
 			}
          tlm_Dir = 
-            output_Dir + "/tlm/" + id + "/" + getSetting("date") + "/";
+            output_Dir + "/tlm/" + id + "/" + date + "/";
          L0_Dir = 
-            output_Dir + "/l0/" + id + "/" + getSetting("date") + "/";
+            output_Dir + "/l0/" + id + "/" + date + "/";
          L1_Dir = 
             output_Dir + "/l1/" + id + "/";
          L2_Dir = 
@@ -123,7 +140,7 @@ public class CDF_Gen{
          );
 
          //create a new storage object
-         frames = new FrameHolder(payload_i, Integer.valueOf(dpu), min_alt);
+         frames = new FrameHolder(payload_i, dpu, min_alt);
          
          //Figure out where the input files are coming from
          if(getSetting("local") == ""){
@@ -153,7 +170,7 @@ public class CDF_Gen{
 					flt,
 					stn,
                getSetting("date"),
-               Integer.parseInt(dpu)
+               dpu
             );
             L0.processRawFiles();
             L0.finish();
