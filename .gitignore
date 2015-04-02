@@ -3,3 +3,5 @@ bin
 .metadata
 .nfs*
 .ant-targets-build.xml
+.idea
+*.iml
